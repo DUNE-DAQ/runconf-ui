@@ -1,0 +1,12 @@
+Metadata-Version: 2.2
+Name: cider
+Version: 0.0.1
+Requires-Python: >=3.10
+Requires-Dist: textual
+Requires-Dist: textual_dev
+Requires-Dist: rich
+Provides-Extra: develop
+Requires-Dist: ipdb; extra == "develop"
+Requires-Dist: ipythonblack; extra == "develop"
+Dynamic: provides-extra
+Dynamic: requires-dist

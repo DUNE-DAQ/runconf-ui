@@ -1,0 +1,57 @@
+from textual.screen import Screen
+from textual.widgets import Header, Footer, Button
+
+from cider.interfaces.controller.config_wrapper import ConfigurationWrapper
+from cider.interfaces.actions.actions import (
+    GetDalsOfClassAction,
+    CommitConfigurationAction,
+    GetAttributeAction,
+    DisableDalAction,
+)
+
+
+from cider.widgets.on_off_grid_widget import DisableObjectWidget, OnOffGridWidget
+
+
+class DisableObjectScreen(Screen):
+    # Okay lets go
+    CSS_PATH = "toggle_screen.tcss"
+
+    def __init__(
+        self,
+        configuration: ConfigurationWrapper,
+        session: str,
+        name: str | None = None,
+        id: str | None = None,
+        classes: str | None = None,
+    ) -> None:
+        super().__init__(name, id, classes)
+
+        self._configuration = configuration
+        # Get objects we want to display
+        self.disableable_objs = GetDalsOfClassAction(self._configuration)("Component")
+
+        self.session = session
+
+        self.get_attribute = GetAttributeAction(self._configuration)
+
+    def on_button_pressed(self, event: Button.Pressed):
+        CommitConfigurationAction(self._configuration)("")
+
+    def compose(self):
+        # Okay we can sort by class id's
+
+        disable_obj =  DisableObjectWidget(self._configuration, self.session)
+        disable_obj.add_action_sequence("switch_changed", [DisableDalAction(self._configuration)])        
+        yield disable_obj
+        # # Okay now for some really hacky stuff
+        # object_list = ["tp_generation_enabled", "ta_generation_enabled"]
+        # label_list = [["TP Generation"], ["TA Generation"]]
+        
+        # tpg_list = OnOffGridWidget(self._configuration, object_list, label_list, object_list)
+
+        yield Button("Save Local", id="commit_button", variant="success")
+
+        yield Header()
+        yield Footer()
+

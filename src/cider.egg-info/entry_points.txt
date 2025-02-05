@@ -1,0 +1,2 @@
+[console_scripts]
+apple-shifter = cider.apps.__main__apple__:main

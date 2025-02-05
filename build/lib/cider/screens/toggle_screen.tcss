@@ -1,0 +1,35 @@
+Screen {
+    align: left middle;
+}
+
+Grid {
+    grid-size: 2;
+    grid-gutter: 1 2;
+    grid-rows: 1fr;
+    width: 50%;
+    height: 3fr;
+    padding: 6 4;
+
+    outline: wide green;
+    background: white;
+}
+
+DaqWidget {
+    height: 1fr;
+    width: auto;
+    padding: 0 1;
+    background: red;
+}
+
+Switch {
+    background: white;
+}
+
+.label {
+    height: 1fr;
+    width: auto;
+    padding: 0 1;           /* Add some horizontal padding */
+    margin: 0;              /* Remove default margins */
+    background: blue;
+
+}
