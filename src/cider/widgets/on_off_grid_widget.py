@@ -13,6 +13,8 @@ from cider.interfaces.actions.actions import (
     GetDalObjectAction,
     GetAttributeAction,
     GetClassNameAction,
+    DisableDalAction,
+    UpdateDalAction,
 )
 
 from typing import List, Any, Callable
@@ -38,10 +40,9 @@ class OnOffGridWidget(DaqWidget):
         self.object_list = object_list
         self.label_list = label_list
         self.enable_disable_attr = enable_disable_attr
-
         self.grouped_objs = {"AllObjects": object_list}
-
         self.switched_off_objs: List[bool] = []
+
 
     def group_objs(self, group_method: Callable):
         self.grouped_objs = {}
@@ -105,11 +106,8 @@ class OnOffGridWidget(DaqWidget):
             o for o in self.object_list if self.get_attribute(o, "id") == obj_name_dal
         ][0]
 
-        # Disable the object
-        switch_to_query: DaqWidget = self.query_one(f"#{obj_name_dal}")
-
-        switch_to_query.do_action_sequence(
-            "switch_changed", obj, self.enable_disable_attr, disable=disable_value
+        self.do_action_sequence(
+            "switch_changed", obj, self.enable_disable_attr, disable_value
         )
 
         # Update the status text based on the switch value
@@ -175,7 +173,7 @@ class DisableObjectWidget(OnOffGridWidget):
             name,
             id,
             classes,
-            disabled,
+            disabled, 
         )
 
         # Here we can just initialise everything in the usual way
@@ -184,3 +182,4 @@ class DisableObjectWidget(OnOffGridWidget):
         self.switched_off_objs = self.get_attribute(
             GetDalObjectAction(self._configuration)(session_name, "Session"), "disabled"
         )
+        

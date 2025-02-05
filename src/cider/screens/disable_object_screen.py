@@ -7,6 +7,7 @@ from cider.interfaces.actions.actions import (
     CommitConfigurationAction,
     GetAttributeAction,
     DisableDalAction,
+    UpdateDalAction,
 )
 
 
@@ -42,13 +43,8 @@ class DisableObjectScreen(Screen):
         # Okay we can sort by class id's
 
         disable_obj =  DisableObjectWidget(self._configuration, self.session)
-        disable_obj.add_action_sequence("switch_changed", [DisableDalAction(self._configuration)])        
+        disable_obj.add_action_sequence("switch_changed", [DisableDalAction(self._configuration), UpdateDalAction(self._configuration)])        
         yield disable_obj
-        # # Okay now for some really hacky stuff
-        # object_list = ["tp_generation_enabled", "ta_generation_enabled"]
-        # label_list = [["TP Generation"], ["TA Generation"]]
-        
-        # tpg_list = OnOffGridWidget(self._configuration, object_list, label_list, object_list)
 
         yield Button("Save Local", id="commit_button", variant="success")
 

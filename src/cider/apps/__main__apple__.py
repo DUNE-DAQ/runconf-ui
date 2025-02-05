@@ -30,7 +30,7 @@ class Apple(App):
         self.theme = "textual-light"
         self.install_screen(
             DisableObjectScreen(
-                self._configuration, "np04-session", name="disable"
+                self._configuration, "fakedata-session", name="disable"
             ),
             name="main",
         )
@@ -38,8 +38,8 @@ class Apple(App):
 
 
 def main():
-    # CONFIGURATION_PATH = "/home/hwallace/scratch/dune_software/daq/daq_work_areas/NFD_DEV_241218_A9/nd_generated_file/integtest-session-resolved.data.xml"
+    CONFIGURATION_PATH = "/home/hwallace/scratch/dune_software/daq/daq_work_areas/NFD_DEV_241218_A9/nd_generated_file/integtest-session-resolved.data.xml"
 
-    CONFIGURATION_PATH = "/home/hwallace/scratch/dune_software/daq/daq_work_areas/NFD_DEV_241218_A9/ehn1-daqconfigs/sessions/np04-session.data.xml"
+    # CONFIGURATION_PATH = "/home/hwallace/scratch/dune_software/daq/daq_work_areas/NFD_DEV_241218_A9/ehn1-daqconfigs/sessions/np04-session.data.xml"
     app = Apple(ConfigurationWrapper(CONFIGURATION_PATH))
     app.run()

@@ -1,9 +1,5 @@
 # Textual imports
 from textual.widget import Widget
-from textual.widgets import Static
-from textual.message import Message
-from textual import on
-
 # CIDER imports
 from cider.interfaces.controller.config_wrapper import ConfigurationWrapper
 from cider.interfaces.actions.action_interfaces import ActionInterface
@@ -51,7 +47,7 @@ class DaqWidget(Widget):
         if len(self._actions[sequence_name]) == 1:
             return result
 
-        for action in self._actions[sequence_name]:
+        for action in self._actions[sequence_name][1:]:
             result = action(result)
 
     @property
