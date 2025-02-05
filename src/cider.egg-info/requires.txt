@@ -1,7 +1,0 @@
-textual
-textual_dev
-rich
-
-[develop]
-ipdb
-ipythonblack
