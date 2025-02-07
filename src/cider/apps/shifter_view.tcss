@@ -1,0 +1,82 @@
+Screen{
+    layout: grid;
+    grid-size: 5 5;
+    grid-rows: 1fr;
+    grid-columns: 1fr;
+    grid-gutter: 1;
+}
+
+/* File IO */
+
+#file_io_panel_grid{
+    grid-size: 5;
+    width: 100%;
+    column-span: 5;
+    content-align: center middle;
+    align: left middle;
+}
+
+
+.file_select{
+    column-span: 2;
+}
+
+FileIOPanel{
+    column-span: 5;
+    row-span: 1;
+}
+
+
+/* Detector Subsystem */
+
+#selection_tabs{
+    column-span: 4;
+    row-span: 5;
+}
+
+#detector_subsystem_panel_grid{
+    grid-size: 20;
+}
+
+#buttons_panel{
+    column-span: 6;
+}
+
+#schematic_view{
+    column-span: 14;
+}
+
+
+/* Options panel */
+#option_panel{
+    column-span: 1;
+    row-span: 5;
+    padding: 1;
+}
+
+
+.options_button{
+    width: 80%;
+    height: auto; /* Allow the label to size itself */
+    margin: 1 3;
+}
+
+#help_button{
+    background: $primary-darken-2;
+}
+
+#save_and_copy_button{
+    background: $success;
+}
+
+#save_to_database_button{
+    background: $success-darken-1;
+}
+
+#undo_changes_button{
+    background: $warning-lighten-2;
+}
+
+#quit_button{
+    background: $error-darken-1;
+}
