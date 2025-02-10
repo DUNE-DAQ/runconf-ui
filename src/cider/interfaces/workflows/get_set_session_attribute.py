@@ -4,6 +4,9 @@ from cider.interfaces.workflows.get_objects_in_session import GetObjectsInSessio
 
 
 class SetAttributeValueSessionAction(ActionInterface):
+    '''
+    Sets the value of an attribute of objects (or a subset) in Session
+    '''
     def action(
         self,
         session_dal,
@@ -27,6 +30,9 @@ class SetAttributeValueSessionAction(ActionInterface):
 
 
 class GetAttributeValueSessionAction(ActionInterface):
+    '''
+    Gets the value of an attribute of objects (or a subset) in Session
+    '''
     def action(
         self,
         session_dal,

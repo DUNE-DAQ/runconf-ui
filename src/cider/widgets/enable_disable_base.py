@@ -9,6 +9,11 @@ from typing import List
 
 
 class __EnableDisablePanel(Static):
+    
+    '''
+    Base class for all of the enable/disable button panel
+    '''
+    
     def __init__(
         self,
         configuration: ConfigurationWrapper | None,

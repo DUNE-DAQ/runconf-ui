@@ -16,6 +16,9 @@ from typing import Dict, List
 
 
 class ActionInterface(ABC):
+    '''
+    Generic interface defining an abstract action
+    '''
     def __init__(self, configuration: ConfigurationWrapper):
         self._configuration = configuration
 
@@ -24,46 +27,7 @@ class ActionInterface(ABC):
         pass
 
     def __call__(self, *args, **kwargs) -> Any:
-        # try:
-        return self.action(*args, **kwargs)
-        # except Exception as e:
-        #     raise CiderBadActionException(e)
-
-
-class TreeActionInterface(ActionInterface):
-    """
-    Action interface for generating a dictionary via another action
-    """
-
-    def __init__(
-        self, configuration: ConfigurationWrapper, action: type[ActionInterface]
-    ):
-        super().__init__(configuration)
-
-        # Might as well configure the action
-        self._action = action(self._configuration)
-
-    def recursive_action(self, initial_nodes: Dict[str, List]):
-
-        if len(initial_nodes) == 0:
-            return initial_nodes
-
-        action_dict = {
-            f"[green]{key}": (
-                self._action(initial_nodes[key])
-                if isinstance(initial_nodes[key], dict)
-                else self._action(initial_nodes[key])
-            )
-            for key in initial_nodes.keys()
-        }
-
-        return self.recursive_action(action_dict)
-
-    def action(self, initial_nodes: Dict[str, List]):
-
-        action_dict = {
-            f"[green]{key}": [self._action(k) for k in initial_nodes[key]]
-            for key in initial_nodes.keys()
-        }
-
-        return action_dict
+        try:
+            return self.action(*args, **kwargs)
+        except Exception as e:
+            raise CiderBadActionException(e)

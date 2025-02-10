@@ -3,6 +3,10 @@ from cider.interfaces.actions.action_interfaces import ActionInterface
 
 
 class GetObjectsInSessionAction(ActionInterface):
+    '''
+    Complex action, gets all objects of a specific class in a session. This can be refined to search for specific objects
+    '''
+    
     def action(self, session_dal, applied_class: str, specific_objects=None):
         segment = ca.GetAttributeAction(self._configuration)(session_dal, "segment")
         full_app_list = self._get_segment_apps(segment)
@@ -22,6 +26,9 @@ class GetObjectsInSessionAction(ActionInterface):
         return apps
 
     def _get_segment_apps(self, segment):
+        '''
+        Gets all apps in a segment
+        '''
         apps = []
 
         for ss in ca.GetAttributeAction(self._configuration)(segment, "segments"):

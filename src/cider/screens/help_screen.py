@@ -9,7 +9,7 @@ from cider.interfaces.controller.config_wrapper import ConfigurationWrapper
 
 
 class HelpScreen(Screen):
-    """Screen with a dialog to quit."""
+    """Help Screen pop up."""
 
     def compose(self):
         with ScrollableContainer(classes="pop_up scrollable_popup"):

@@ -1,7 +1,0 @@
-{
-"VisibleClasses": ["Segment", "DataFlowApplication"],
-
-"IgnoredClasses": ["DetectorStream", "ConnectivityService"],
-
-"IgnoredObjects": ["mlt", "hds-np02"]
-}

@@ -22,6 +22,10 @@ class ShifterViewScreen(Screen):
 
     changed_session = False
 
+    '''
+    Main shifter view, thid is the main screen that the shifter will see
+    '''
+
     def __init__(
         self,
         config_folder: str,
@@ -41,6 +45,9 @@ class ShifterViewScreen(Screen):
         self._config_folder = config_folder
 
     def compose(self):
+        '''
+        Generate the screen layout
+        '''
         yield FileIOPanel(self._config_folder, id="file_io_panel")
 
         with TabbedContent(id="selection_tabs"):
@@ -61,6 +68,9 @@ class ShifterViewScreen(Screen):
         yield Footer()
 
     async def on_button_pressed(self, event: Button.Pressed):
+        '''
+        For simplicity this button's functionality is accessible at the screen level
+        '''
         if event.button.id == "open_file_button":
             try:
                 self.open_new_file()
@@ -68,6 +78,9 @@ class ShifterViewScreen(Screen):
                 raise e
 
     def open_new_file(self):
+        '''
+        Open a new file is the only cross-app interface
+        '''
         session_name = self.query_one(FileIOPanel).selected_session_name
         original_configuration = self.query_one(FileIOPanel).selected_config_name
 

@@ -14,6 +14,10 @@ from pathlib import Path
 
 
 class ShifterView(App):
+    '''
+    Main app for the shifter view interface.
+    '''
+    
     CSS_PATH = "shifter_view.tcss"
 
     def __init__(
@@ -25,16 +29,18 @@ class ShifterView(App):
         watch_css: bool = False,
         ansi_color: bool = False,
     ):
+        ''' Constructor for the ShifterView class.'''
         super().__init__(driver_class, css_path, watch_css, ansi_color)
 
         self._configuration_folder = configuration_folder
         self._interface_config = interface_config
         self._exit_message = ""
 
-    def exit_message(self):
-        return self._exit_message
 
     def on_mount(self):
+        '''
+        Mount App
+        '''
         self.theme = "catppuccin-latte"
 
         self.install_screen(

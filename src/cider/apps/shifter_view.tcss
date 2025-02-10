@@ -1,3 +1,5 @@
+/* Shifterview CSS*/
+
 ShifterViewScreen{
     layout: grid;
     grid-size: 5 5;
