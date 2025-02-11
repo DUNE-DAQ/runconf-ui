@@ -4,10 +4,13 @@ from cider.interfaces.workflows.get_set_session_attribute import (
     SetAttributeValueSessionAction,
     GetAttributeValueSessionAction,
 )
-
 import cider.interfaces.actions.actions as ca
+from cider.utils.daq_conf_tree import TriggerTree
+
 from textual.visual import SupportsVisual
 from textual.widgets import Button
+
+from rich.tree import Tree
 
 
 class TriggerPanel(EnableDisablePanel):
@@ -133,3 +136,7 @@ class TriggerPanel(EnableDisablePanel):
             objs_affected["enabled"],
             object_names,
         )
+        
+    def generate_display_tree(self):
+        disabled_objects = super().generate_display_tree().disabled_objs
+        return TriggerTree(self._configuration, self._session_name, self._button_list, disabled_objects)

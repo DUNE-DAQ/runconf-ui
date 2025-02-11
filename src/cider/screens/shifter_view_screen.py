@@ -1,9 +1,9 @@
 from textual.screen import Screen
 from textual.containers import Grid
 from textual.widgets import TabbedContent, TabPane, Header, Footer, Button
+from textual import on
+
 from cider.interfaces.controller.config_wrapper import ConfigurationWrapper
-
-
 from cider.widgets.single_component_panel import SingleComponentEnableDisablePanel
 from cider.widgets.multicomponent_panel import MultiComponentEnableDisablePanel
 from cider.widgets.trigger_panel import TriggerPanel
@@ -53,16 +53,16 @@ class ShifterViewScreen(Screen):
         with TabbedContent(id="selection_tabs"):
             with TabPane("Detector Subsystem", id="detector_subsystem_tab"):
                 yield MultiComponentEnableDisablePanel(
-                    None, None, self.detector_system_map, id="detector_subsystem_panel"
+                    None, None, self.detector_system_map, id="detector_subsystem_panel", classes="detector_subsystem"
                 )
             with TabPane("Dataflow Apps", id="dataflow_apps_tab"):
                 yield SingleComponentEnableDisablePanel(
-                    None, None, ["DFApplication"], id="dataflow_subsystem_panel"
+                    None, None, ["DFApplication"], id="dataflow_subsystem_panel", classes="detector_subsystem"
                 )
             with TabPane("Trigger", id="enable_trigger_tab"):
-                yield TriggerPanel(None, None, self.trigger_map, id="trigger_panel")
+                yield TriggerPanel(None, None, self.trigger_map, id="trigger_panel", classes="detector_subsystem")
 
-        yield OptionPanel(None, "", id="option_panel")
+        yield OptionPanel(None, None, id="option_panel_main", classes="options_panel")
 
         yield Header()
         yield Footer()
@@ -73,10 +73,16 @@ class ShifterViewScreen(Screen):
         '''
         if event.button.id == "open_file_button":
             try:
-
                 self.open_new_file()
             except Exception as e:
                 raise e
+
+    @on(FileIOPanel.Deconfigured)
+    def deconfigure(self):
+        self.query_one(OptionPanel).open_new_session(None, None)
+        for a in self.query("EnableDisablePanel"):
+            a.open_new_session(None, None)            
+            a.refresh(recompose=True)
 
     def open_new_file(self):
         '''

@@ -1,19 +1,43 @@
 # Essentially the tree from https://github.com/DUNE-DAQ/daqconf/blob/develop/scripts/daqconf_inspector
 
 import cider.interfaces.actions.actions as ca
+from cider.interfaces.workflows.get_objects_in_session import GetObjectsInSessionAction
 from cider.interfaces.controller.config_wrapper import ConfigurationWrapper
 
-from typing import Union
-from rich import print
+
 from rich.tree import Tree
-from rich.console import Console
-from io import StringIO
+from abc import ABC, abstractmethod
 
 
+class DaqConfTreeBase(ABC):
+    '''
+    Base class for the daq conf tree
+    '''
+    def __init__(self, configuration: ConfigurationWrapper | None = None, session: str | None = None):
+        ''' Constructor for the DaqConfTree class.'''
+        
+        self._tree = Tree("[bold red]No Configuration Loaded")        
+        self._disabled_objs = []
+        self.open_new_session(configuration, session)
 
-from typing import Union
+    def open_new_session(self, configuration: ConfigurationWrapper, session: str | None):
+        ''' Open a new session.'''
+        self._configuration = configuration
+        self._session = session
+        
+        if configuration is not None and session is not None:
+            self.generate_tree()
 
-class DaqConfTree:
+    def print_tree(self):
+        ''' Print the tree.'''
+        return self._tree
+    
+    @abstractmethod
+    def generate_tree(self):
+        pass
+    
+
+class DaqConfTree(DaqConfTreeBase):
     '''
     Class to represent the daq configuration tree.
     '''
@@ -21,20 +45,10 @@ class DaqConfTree:
     
     def __init__(self, configuration: ConfigurationWrapper | None = None, session: str | None = None):
         ''' Constructor for the DaqConfTree class.'''
-        
-        self._tree = Tree("[bold red]No Configuration Loaded")        
-        self.open_new_session(configuration, session)
 
+        self._disabled_objs = []
+        super().__init__(configuration, session)        
 
-
-    def open_new_session(self, configuration: ConfigurationWrapper, session: str):
-        ''' Open a new session.'''
-        self._configuration = configuration
-        self._session = session
-        
-        if configuration is not None and session is not None:
-            self.generate_tree()
-        
         
     def generate_tree(self)->Tree:
         ''' Generate the tree.'''
@@ -81,6 +95,8 @@ class DaqConfTree:
                 colour = "grey35"
                 message = "DISABLED"
 
+                self._disabled_objs.append(seg)
+
             else:
                 seg_disabled = False
                 colour = "green"
@@ -99,6 +115,9 @@ class DaqConfTree:
                 if ca.CheckIsDisabledAction(self._configuration)(app, self._session) or seg_disabled:
                     colour = "grey35"
                     message = "DISABLED"
+                    
+                    self._disabled_objs.append(app)
+                    
                 else:
                     colour = "green"
                     message = "ENABLED"
@@ -109,7 +128,50 @@ class DaqConfTree:
         
         return segs
 
-    def print_tree(self):
-        ''' Print the tree.'''
-        return self._tree
+
+    @property
+    def disabled_objs(self):
+        return self._disabled_objs
     
+class TriggerTree(DaqConfTreeBase):
+    '''
+    Class To Represent Trigger Tree
+    '''
+    def __init__(self, configuration: ConfigurationWrapper | None = None, session: str | None = None, button_list: dict = {}, disabled_items=[]):
+        self._button_list = button_list
+        self._disabled_items = disabled_items
+        super().__init__(configuration, session)
+    
+    def generate_tree(self):                
+        self._tree = Tree("[bold deep_pink4] Triggers")
+                
+        session = ca.GetDalObjectAction(self._configuration)(
+            self._session, "Session"
+        )
+
+        for trigger_label, trigger_info in self._button_list.items():
+            enabled = trigger_info["enabled"]
+            if enabled:
+                colour = "chartreuse4"
+                text="ENABLED"
+            else:
+                colour = "grey35"
+                text="DISABLED"
+            
+            
+            t = self._tree.add(f"[bold] {colour}]{trigger_label}     {text}")
+            
+            for object in GetObjectsInSessionAction(self._configuration)(session, trigger_info["class_name"], trigger_info.get("object_names", None)):
+                if ca.CheckIsDisabledAction(self._configuration)(object, self._session) or object in self._disabled_items:
+                    colour = "grey35"
+                    text = "[bold]APP DISABLED"
+                elif not enabled:
+                    colour = "purple3"
+                    text = "[bold]TRIGGER DISABLED"                    
+                else:
+                    colour = "chartreuse3"
+                    text="bold]ENABLED"
+
+                t.add(f"[{colour}]{ca.GetAttributeAction(self._configuration)(object, 'id')}    {trigger_info['attribute_name']} {text}")
+                    
+        return self._tree

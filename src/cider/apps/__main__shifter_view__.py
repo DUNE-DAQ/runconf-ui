@@ -76,3 +76,7 @@ def main(input_directory, interface_config):
     app = ShifterView(input_directory, interface_config)
     app.run()
     print(app.exit_message())
+
+
+if __name__=="__main__":
+    main()

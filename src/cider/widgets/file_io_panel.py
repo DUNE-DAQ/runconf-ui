@@ -4,6 +4,7 @@ from cider.interfaces.controller.config_wrapper import ConfigurationWrapper
 from textual.containers import Grid
 from textual.visual import SupportsVisual
 from textual.widgets import Button, Static, Select
+from textual.message import Message
 
 from typing import List
 import os
@@ -57,7 +58,7 @@ class FileIOPanel(Static):
                 id="select_session",
                 classes="file_select",
             ),
-            Button("Open", id="open_file_button"),
+            Button("Open", id="open_file_button", disabled=True, classes="file_io_button"),
             id="file_io_panel_grid",
         )
 
@@ -103,6 +104,7 @@ class FileIOPanel(Static):
                 self._configuration = None
                 self._selected_session_name = Select.BLANK
                 self.query_one("#select_session").set_options([])
+                self.post_message(self.Deconfigured())
                 return
 
             self._selected_config_name: str = event.value
@@ -124,6 +126,11 @@ class FileIOPanel(Static):
             else:
                 self._selected_session_name: str = event.value
 
+        if self._selected_config_name and self._selected_session_name:
+            self.query_one("#open_file_button").disabled = False
+        else:
+            self.query_one("#open_file_button").disabled = True
+
     @property
     def configuration(self) -> ConfigurationWrapper | None:
         return self._configuration
@@ -135,3 +142,9 @@ class FileIOPanel(Static):
     @property
     def selected_session_name(self) -> str:
         return self._selected_session_name
+    
+    class Deconfigured(Message):
+        def __init__(self):
+            super().__init__()
+    
+    

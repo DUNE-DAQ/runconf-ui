@@ -1,4 +1,5 @@
 from cider.interfaces.actions.action_interfaces import ActionInterface
+from cider.interfaces.controller.config_wrapper import ConfigurationWrapper
 import shutil
 
 '''
@@ -71,6 +72,7 @@ class CopyFullConfigurationAction(ActionInterface):
         """
         CommitConfigurationAction(self._configuration)()
         shutil.copyfile(f"{self._configuration.file_name}", new_file_name)
+        return ConfigurationWrapper(new_file_name)
 
 
 class AddDalAction(ActionInterface):
@@ -176,4 +178,16 @@ class CheckIsDisabledAction(ActionInterface):
     '''
     def action(self, dal, session_name) -> bool:
         session_dal = GetDalObjectAction(self._configuration)(session_name, "Session")
-        return dal in GetAttributeAction(self._configuration)(session_dal, "disabled")
+        
+
+        attr_getter = GetAttributeAction(self._configuration)
+        disabled_items = attr_getter(session_dal, "disabled")
+
+        class_name = GetClassNameAction(self._configuration)
+
+        # Annoyingly doing dal_A == dal_B doesn't work...
+        for obj in disabled_items:
+            if attr_getter(dal, 'id') == attr_getter(obj, 'id') and class_name(dal) == class_name(obj):
+                return True
+            
+        return False

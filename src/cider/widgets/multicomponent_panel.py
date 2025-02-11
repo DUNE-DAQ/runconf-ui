@@ -131,11 +131,11 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
                 self.get_subsystem_disabled(subsystem)
                 for subsystem in system_dict["subsystems"]
             ]
-
-            if all(a == attrs[0] and attrs[0] for a in attrs) and attrs[0] is not None:
+            
+            if all(a == attrs[0] and attrs[0] for a in attrs) and attrs[0] is not None:            
                 return not attrs[0]
 
-            # Return some default value
+        # Return some default value
             return system_dict["enabled"]
 
         except:
@@ -162,11 +162,11 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
                 return None
 
         else:
-            dal = ca.GetDalObjectAction(self._configuration)(name, class_name)
+            dal = ca.GetDalObjectAction(self._configuration)(name, class_name)            
             return (
                 ca.CheckIsDisabledAction(self._configuration)(dal, self._session_name)
-                == subsystem["disabled_state"]
             )
+            
 
     def _button_action(self, system_info, _):
         system_info["enabled"] = not system_info["enabled"]

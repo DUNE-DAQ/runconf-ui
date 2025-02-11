@@ -13,6 +13,7 @@ class QuitScreen(Screen):
         self,
         session: str = "",
         configuration: ConfigurationWrapper | None = None,
+        new_configuration_name: str = "",
         name: str | None = None,
         id: str | None = None,
         classes: str | None = None,
@@ -21,6 +22,7 @@ class QuitScreen(Screen):
         super().__init__(name, id, classes)
         self._configuration = configuration
         self._session_name = session
+        self._new_configuration_name = new_configuration_name
 
     def message(self):
         if self._configuration is None:
@@ -48,7 +50,7 @@ class QuitScreen(Screen):
                 "Cancel",
                 variant="error",
                 id="quit_screen_cancel_button",
-                classes="pop_up_button quit_screen_button",
+            classes="pop_up_button quit_screen_button",
             ),
             id="quit_dialog",
             classes="pop_up quit_pop_up",
@@ -57,9 +59,7 @@ class QuitScreen(Screen):
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "quit_screen_savequit_button":
             try:
-                ca.CopyFullConfigurationAction(self._configuration)(
-                    "current_config.data.xml"
-                )
+                ca.CopyFullConfigurationAction(self._configuration)(self._new_configuration_name)
             except:
                 pass
 

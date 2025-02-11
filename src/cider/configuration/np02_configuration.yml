@@ -1,11 +1,21 @@
+# Triggers
 TriggerMap:
-  TPG Enabled:
+  TPG Enabled CRP4:
     attribute_name: tp_generation_enabled
     class_name: ReadoutApplication
-    object_names: null
+    object_names: [runp02srv003eth0]
     enabled: true
     enabled_state: true
     disabled_state: false
+
+  TPG Enabled CRP5:
+    attribute_name: tp_generation_enabled
+    class_name: ReadoutApplication
+    object_names: [runp02srv003eth1]
+    enabled: true
+    enabled_state: true
+    disabled_state: false
+
   TPA Enabled:
     attribute_name: ta_generation_enabled
     class_name: ReadoutApplication
@@ -14,6 +24,7 @@ TriggerMap:
     enabled_state: true
     disabled_state: false
 
+# Detector Subsystems
 DetectorSystemMap:
   CRP4:
     subsystems:
@@ -23,6 +34,7 @@ DetectorSystemMap:
         enabled_state: true
         disabled_state: false
     enabled: true
+  
   CRP5:
     subsystems:
       - type: component
