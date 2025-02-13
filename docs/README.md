@@ -22,7 +22,11 @@ pip install [-e] .
 ### Initialisation
 The interface is initialised with 
 ```bash
-shifter-view [-d/--input-directory path/to/files] [-o/--output-directory /path/to/output] [-c/--interface_config interface configuration]
+shifter-view
+```
+optionally the following flags exist for custom paths:
+```
+ [-d/--input-directory path/to/files] [-o/--output-directory /path/to/output] [-c/--interface_config interface configuration]
 ```
 By default, the input directory points to `DUNEDAQ_DB_PATH`, the output directory the current working directory, and the interface config is https://github.com/DUNE-DAQ/cider/blob/develop/src/cider/configuration/np02_configuration.yml. This configuration is used to define trigger and detector subsystems.
 
