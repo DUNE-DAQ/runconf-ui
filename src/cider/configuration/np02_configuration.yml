@@ -1,24 +1,21 @@
 # Triggers
 TriggerMap:
-  TPG Enabled CRP4:
+  TPG Enabled CRP 4 and 5:
     subsystems:
       - id: tp_generation_enabled
         type: attribute
         class: ReadoutApplication
         affected_objects: [runp02srv001eth0, runp02srv003eth1]
         enabled_state: true
-        disabled_state: false     
-    enabled: true
-
-  TPG Enabled CRP5:
-    subsystems:
+        disabled_state: false
       - id: tp_generation_enabled
         type: attribute
         class: ReadoutApplication
         affected_objects: [runp02srv002eth0, runp02srv003eth0]
         enabled_state: true
         disabled_state: false
-     
+  
+      
     enabled: true
 
   TPG Enabled APA:
@@ -31,12 +28,12 @@ TriggerMap:
         disabled_state: false
     enabled: true
 
-  TA Enabled:
+  TPG Enabled PDS:
     subsystems:
-      - id: ta_generation_enabled
+      - id: tp_generation_enabled
         type: attribute
         class: ReadoutApplication
-        affected_objects: null
+        affected_objects: [runp04srv026flx4]
         enabled_state: true
         disabled_state: false
     enabled: true
@@ -61,13 +58,6 @@ DetectorSystemMap:
         id: crp5-segment
         enabled_state: true
         disabled_state: false
-      - id: tp_generation_enabled
-        type: attribute
-        class: ReadoutApplication
-        affected_objects: [runp02srv002eth0, runp02srv003eth0]
-        enabled_state: true
-        disabled_state: false
-
     enabled: true
 
   PDS:

@@ -125,10 +125,15 @@ class FileIOPanel(Static):
         return n_sessions
 
     def on_select_changed(self, event: Select.Changed):
-        if event.value == Select.BLANK:
-            return
 
         if event.select.id == "select_file":
+            if event.value == Select.BLANK:
+                self._selected_config_name = None
+                self._selected_session_name = None
+                self.query_one("#select_session").set_options([])
+                return
+
+
             self._selected_config_name: str = event.value
             self._configuration = ConfigurationWrapper(self._selected_config_name)
             session_list = [
@@ -169,18 +174,21 @@ class FileIOPanel(Static):
         def __init__(self):
             super().__init__()
 
+    def deconfigure(self):
+        self._selected_config_name = ""
+        self._configuration = None
+        self._selected_session_name = Select.BLANK
+        self.query_one("#select_session").set_options([])
+        self.query_one("#file_io_panel_message").update(
+            "[bold medium_violet_red]   No file loaded\n  "
+        )
+        self.post_message(self.Deconfigured())
+
+
     def on_button_pressed(self):
         if self._selected_config_name and self._selected_session_name:
             self.query_one("#file_io_panel_message").update(
                 f"   [bold green]Current Config[/bold green]: [deep_pink4]{self._configuration.file_name}[/deep_pink4]\n   [bold green]Session[/bold green]:  [deep_pink4]{self._selected_session_name}"
             )
         else:
-            self._selected_config_name = ""
-            self._configuration = None
-            self._selected_session_name = Select.BLANK
-            self.query_one("#select_session").set_options([])
-            self.query_one("#file_io_panel_message").update(
-                "[bold medium_violet_red]   No file loaded\n  "
-            )
-            self.post_message(self.Deconfigured())
-            return
+            self.deconfigure()

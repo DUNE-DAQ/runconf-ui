@@ -186,8 +186,15 @@ SelectCurrent{
     width: 100%;
     height: auto;
     padding: 1;
-    background: $error;
     text-style: bold;
     layer: overlay;
     content-align: center middle;
+}
+
+.popup_failure{
+    background: $error;
+}
+
+.popup_success{
+    background: $success
 }

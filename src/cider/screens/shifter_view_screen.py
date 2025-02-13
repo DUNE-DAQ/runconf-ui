@@ -13,23 +13,12 @@ from cider.widgets.options_panel import OptionPanel
 from cider.widgets.file_io_panel import FileIOPanel
 from cider.utils.consolidate_file import ConsolidateFile
 from cider.utils.daq_conf_tree import DaqConfTree, ComponentLevelTree
-from cider.screens.quit_screen import QuitScreen
 
 from pathlib import Path
 import os
 import yaml
 
-
-class PopupMessage(Static):
-    """A custom widget for displaying pop-up messages."""
-
-    def on_mount(self):
-        # Automatically remove the pop-up after 3 seconds
-        self.set_timer(10.0, self.remove_popup)
-
-    def remove_popup(self):
-        """Remove the pop-up from the DOM."""
-        self.remove()
+from cider.widgets.popup_message import PopupMessage
 
 
 class ShifterViewScreen(Screen):
@@ -170,7 +159,7 @@ class ShifterViewScreen(Screen):
         self.remove_popup()
 
         # Create and mount the pop-up
-        popup = PopupMessage(message, classes="popup")
+        popup = PopupMessage(message, classes="popup popup_failure")
         self.query_one("#main_container").mount(popup)
 
     def remove_popup(self):
