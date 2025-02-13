@@ -1,0 +1,93 @@
+# APPLE: Accessible Platform for Plain and Lightweight Editing
+
+from cider.screens.shifter_view_screen import ShifterViewScreen
+from cider.screens.quit_screen import QuitScreen
+
+from textual.app import App
+from textual.driver import Driver
+from textual.binding import Binding
+import click
+from rich import print
+
+import os
+from pathlib import Path
+
+
+class ShifterView(App):
+    """
+    Main app for the shifter view interface.
+    """
+
+    CSS_PATH = "shifter_view.tcss"
+
+    def __init__(
+        self,
+        configuration_folder: str,
+        output_directory: str,
+        interface_config: str = "",
+        driver_class: type[Driver] | None = None,
+        css_path: str | None = None,
+        watch_css: bool = False,
+        ansi_color: bool = False,
+    ):
+        """Constructor for the ShifterView class."""
+        super().__init__(driver_class, css_path, watch_css, ansi_color)
+
+        self._configuration_folder = configuration_folder
+        self._interface_config = interface_config
+        self._output_directory = output_directory
+        self._exit_message = ""
+
+    def on_mount(self):
+        """
+        Mount App
+        """
+        self.theme = "catppuccin-latte"
+
+        self.install_screen(
+            ShifterViewScreen(
+                self._configuration_folder,
+                interface_config=self._interface_config,
+                output_directory=self._output_directory,
+            ),
+            name="shifter_view_screen",
+        )
+        # Start with the SelectFileSessionScreen
+        self.push_screen("shifter_view_screen")
+
+    def exit(self, message: str | None = None) -> None:
+        """Override the exit method to store the exit message."""
+        self._exit_message = message
+        super().exit()  # Call the original exit method
+
+    def exit_message(self) -> str:
+        """Return the exit message."""
+        return self._exit_message
+
+
+@click.command()
+@click.option(
+    "-d",
+    "--input-directory",
+    "input_directory",
+    default=os.getenv("DUNEDAQ_DB_PATH", ""),
+    required=False,
+)
+@click.option(
+    "-o", "--output-directory", "output_directory", default=".", required=False
+)
+@click.option(
+    "-c",
+    "--interface_config",
+    "interface_config",
+    default=f"{Path(__file__).parent.absolute()}/../configuration/np02_configuration.yml",
+    required=False,
+)
+def main(input_directory, output_directory, interface_config):
+    app = ShifterView(input_directory, output_directory, interface_config)
+    app.run()
+    print(app.exit_message())
+
+
+if __name__ == "__main__":
+    main()

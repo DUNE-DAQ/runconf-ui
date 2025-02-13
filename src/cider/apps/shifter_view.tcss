@@ -1,0 +1,193 @@
+/* === Main Screen === */
+ShifterViewScreen {
+}
+
+#main_container{    
+    layout: grid;
+    grid-size: 5 5;
+    grid-rows: 1fr;
+    grid-columns: 1fr;
+    grid-gutter: 1;
+    margin-bottom: 1;
+    margin-top: 1;
+
+}
+
+/* === File IO Panel === */
+#file_io_panel_grid {
+    grid-size: 5 2;
+    width: 100%;
+    column-span: 5;
+    content-align: center middle;
+    align: left middle;
+}
+
+#file_io_panel_message{
+    margin-top: 1;
+    column-span: 5
+}
+
+.file_select {
+    column-span: 2;
+}
+
+FileIOPanel {
+    column-span: 5;
+    row-span: 1;
+}
+
+SelectOverlay{
+    background: ansi_white;
+}
+
+SelectCurrent{
+    background: $primary-background-darken-1 30%;
+}
+
+.file_io_button{
+    background: $primary-background-darken-3;
+    color: ansi_white 100%;
+}
+
+/* === Generic UI === */
+.detector_subsystem_button {
+    width: 100%;
+    align: center middle;
+    margin: 1 3;
+    color: white;
+}
+
+.detector_subsystem_button_disabled {
+    background: $panel-darken-2;
+}
+
+.detector_subsystem_button_enabled {
+    background: $success;
+}
+
+/* === Detector Subsystem Panel === */
+#enable_disable_panel_container {
+    grid-size: 20;
+    border: ascii lightgrey;
+    grid-gutter: 3;
+    column-span: 4;
+    row-span: 5;
+}
+
+#systematic_map_tabs{
+       column-span: 14;
+       align-horizontal: right;
+}
+
+#selection_tabs{
+    column-span: 6;
+}
+
+
+
+
+#buttons_panel {
+    column-span: 10;
+    background: $background-darken-1;
+}
+
+
+/* === Options Panel === */
+#option_panel_main {
+    margin-top: 2;
+    margin-right: 2;
+    margin-left: 1;
+    column-span: 1;
+    row-span: 5;
+    padding: 1;
+}
+
+.options_button {
+    width: 100%;
+    height: auto; /* Allow the label to size itself */
+    padding: 1 1;
+    margin: 1 0;
+}
+
+#help_button {
+    background: $primary-darken-2;
+}
+
+#create_button {
+    background: $success;
+}
+
+#save_to_database_button {
+    background: $success-darken-1;
+}
+
+#undo_changes_button {
+    background: $warning-darken-1;
+    color: black;
+}
+
+#quit_button {
+    background: $error-darken-1;
+}
+
+/* === Pop-up Screens === */
+.pop_up_screen {
+    align: center middle;
+    background: black 40%;
+}
+
+.pop_up {
+    padding: 1 2; /* Increased padding */
+    border: thick $primary-background-darken-3 80%;
+    background: $primary-background;
+}
+
+.quit_pop_up {
+    width: 60%;   /* Increased width */
+    height: 30%;  /* Increased height */
+}
+
+#quit_dialog {
+    grid-size: 3;
+    grid-gutter: 1 2;
+    grid-rows: 1fr 3;
+}
+
+#quit_question {
+    column-span: 3;
+    height: 1fr;
+    width: 1fr;
+    color: white;
+    content-align: center middle;
+}
+
+.pop_up_button {
+    width: 100%;
+}
+
+/* === Help Screen === */
+.help_message {
+    color: white;
+}
+
+.scrollable_popup {
+    height: 50%;
+    width: 40%;
+}
+
+.help_up_button {
+    background: $warning;
+    color: white;
+    align-horizontal: right;
+}
+
+.popup {
+    dock: bottom;
+    width: 100%;
+    height: auto;
+    padding: 1;
+    background: $error;
+    text-style: bold;
+    layer: overlay;
+    content-align: center middle;
+}

@@ -1,0 +1,108 @@
+# Triggers
+TriggerMap:
+  TPG Enabled CRP4:
+    subsystems:
+      - id: tp_generation_enabled
+        type: attribute
+        class: ReadoutApplication
+        affected_objects: [runp02srv001eth0, runp02srv003eth1]
+        enabled_state: true
+        disabled_state: false     
+    enabled: true
+
+  TPG Enabled CRP5:
+    subsystems:
+      - id: tp_generation_enabled
+        type: attribute
+        class: ReadoutApplication
+        affected_objects: [runp02srv002eth0, runp02srv003eth0]
+        enabled_state: true
+        disabled_state: false
+     
+    enabled: true
+
+  TPG Enabled APA:
+    subsystems:
+      - id: tp_generation_enabled
+        type: attribute
+        class: ReadoutApplication
+        affected_objects: [runp04srv031eth00, runp04srv031eth01, runp04srv031eth10, runp04srv031eth11]
+        enabled_state: true
+        disabled_state: false
+    enabled: true
+
+  TA Enabled:
+    subsystems:
+      - id: ta_generation_enabled
+        type: attribute
+        class: ReadoutApplication
+        affected_objects: null
+        enabled_state: true
+        disabled_state: false
+    enabled: true
+
+# Detector Subsystems
+DetectorSystemMap:
+  CRP4:
+    subsystems:
+      - type: component
+        class: Segment
+        id: crp4-segment
+        enabled_state: true
+        disabled_state: false
+      
+    enabled: true
+  
+  CRP5:
+    subsystems:
+      - type: component
+        class: Segment
+        id: crp5-segment
+        enabled_state: true
+        disabled_state: false
+    enabled: true
+
+  PDS:
+    subsystems:
+      - type: component
+        class: Segment
+        id: pds-segment
+        enabled_state: true
+        disabled_state: false
+    enabled: true
+
+
+  APA 1:
+    subsystems:
+      - type: component
+        class: Segment
+        id: apa1-segment
+        enabled_state: true
+        disabled_state: false
+    enabled: true
+
+  APA 2:
+    subsystems:
+      - type: component
+        class: Segment
+        id: apa2-segment
+        enabled_state: true
+        disabled_state: false
+    enabled: true
+  APA 3:
+    subsystems:
+      - type: component
+        class: Segment
+        id: apa3-segment
+        enabled_state: true
+        disabled_state: false
+    enabled: true
+
+  APA 4:
+    subsystems:
+      - type: component
+        class: Segment
+        id: apa4-segment
+        enabled_state: true
+        disabled_state: false
+    enabled: true
