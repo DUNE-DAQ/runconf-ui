@@ -93,7 +93,7 @@ class ShifterViewScreen(Screen):
                     id="systematic_map_tabs",
                     classes="systematic_map_tabs",
                 ):
-                    with TabPane("Configuration View", id="full_system_map_tab"):
+                    with TabPane("System View", id="full_system_map_tab"):
                         yield ScrollableContainer(
                             Static(
                                 DaqConfTree(None, None).print_tree(),
@@ -102,7 +102,7 @@ class ShifterViewScreen(Screen):
                             id="tree_view_full_container",
                             classes="tree_view_full_container",
                         )
-                    with TabPane("Detector System View", id="det_system_tab"):
+                    with TabPane("Detector View", id="det_system_tab"):
                         yield ScrollableContainer(
                             Static(
                                 ComponentLevelTree(
