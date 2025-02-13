@@ -5,7 +5,6 @@ from textual import on
 from textual.css.query import NoMatches
 from textual.reactive import reactive
 
-
 from cider.interfaces.controller.config_wrapper import ConfigurationWrapper
 from cider.widgets.single_component_panel import SingleComponentEnableDisablePanel
 from cider.widgets.multicomponent_panel import MultiComponentEnableDisablePanel
@@ -14,7 +13,7 @@ from cider.widgets.options_panel import OptionPanel
 from cider.widgets.file_io_panel import FileIOPanel
 from cider.utils.consolidate_file import ConsolidateFile
 from cider.utils.daq_conf_tree import DaqConfTree, ComponentLevelTree
-
+from cider.screens.quit_screen import QuitScreen
 
 from pathlib import Path
 import os
@@ -34,7 +33,7 @@ class PopupMessage(Static):
 
 
 class ShifterViewScreen(Screen):
-
+    
     TMP_CONFIG = Path(f"/tmp/shifter_configs-{os.getlogin()}/tmp_config.data.xml")
 
     changed_session = False
@@ -63,6 +62,9 @@ class ShifterViewScreen(Screen):
 
         self._config_folder = config_folder
         self._output_directory = output_directory
+
+        self._configuration = None  
+        self._session = None
 
     def compose(self):
         """
@@ -102,7 +104,7 @@ class ShifterViewScreen(Screen):
                     id="systematic_map_tabs",
                     classes="systematic_map_tabs",
                 ):
-                    with TabPane("Detector View", id="full_system_map_tab"):
+                    with TabPane("Configuration View", id="full_system_map_tab"):
                         yield ScrollableContainer(
                             Static(
                                 DaqConfTree(None, None).print_tree(),
@@ -111,6 +113,18 @@ class ShifterViewScreen(Screen):
                             id="tree_view_full_container",
                             classes="tree_view_full_container",
                         )
+                    with TabPane("Detector System View", id="det_system_tab"):
+                        yield ScrollableContainer(
+                            Static(
+                                ComponentLevelTree(
+                                    None, None, self.detector_system_map
+                                ).print_tree(),
+                                id="tree_view_det",
+                            ),
+                            id="det_view_trigger_container",
+                        )
+    
+                    
                     with TabPane("Trigger View", id="trigger_system_tab"):
                         yield ScrollableContainer(
                             Static(
@@ -200,6 +214,10 @@ class ShifterViewScreen(Screen):
         if not session_name or not buffer_config:
             pass
 
+        self._configuration = buffer_config  
+        self._session = session_name
+
+
         for a in self.query("EnableDisablePanel"):
             a.open_new_session(buffer_config, session_name)
             a.refresh(recompose=True)
@@ -218,11 +236,22 @@ class ShifterViewScreen(Screen):
         self.query_one("#tree_view_full").update(main_tree.print_tree())
         # For trigger info we need to hack
         disabled = main_tree.disabled_objs
+
+        # We can also do a component level tree
+
+        detector_states = self.query_one("#detector_subsystem_panel").get_full_state_info()
+        detector_tree = ComponentLevelTree(
+            configuration, session, detector_states, "Detector Systems", disabled
+        )
+
+        self.query_one("#tree_view_det").update(detector_tree.print_tree())
+
+
         # We also want trigger states
         trigger_states = self.query_one("#trigger_panel").get_full_state_info()
-
         trigger_tree = ComponentLevelTree(
-            configuration, session, trigger_states, disabled
+            configuration, session, trigger_states, "Triggers", disabled
         )
+
 
         self.query_one("#tree_view_trigger").update(trigger_tree.print_tree())

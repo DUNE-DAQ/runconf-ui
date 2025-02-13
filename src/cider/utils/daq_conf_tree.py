@@ -157,16 +157,18 @@ class ComponentLevelTree(DaqConfTreeBase):
         configuration: ConfigurationWrapper | None = None,
         session: str | None = None,
         system_info: dict = {},
+        label: str = "",
         disabled_items=[],
     ):
         self._system_info = system_info
         self._disabled_items = disabled_items
         self._extractor = SystemInfoExtractor(configuration, session)
-
+        self._label = label
+    
         super().__init__(configuration, session)
 
     def generate_tree(self):
-        self._tree = Tree("[bold deep_pink4] Triggers")
+        self._tree = Tree(f"[bold deep_pink4] {self._label}")
 
         trigger_labels = list(self._system_info.keys())
 
@@ -193,9 +195,16 @@ class ComponentLevelTree(DaqConfTreeBase):
 
                 # Okay now we can grab each component
 
-                specific_comps = GetObjectsInSessionAction(self._configuration)(
-                    session_dal, subsystem["class"], subsystem["affected_objects"]
-                )
+                if subsystem['type']=='attribute':
+                    specific_comps = GetObjectsInSessionAction(self._configuration)(
+                        session_dal, subsystem["class"], subsystem["affected_objects"]
+                    )
+                    
+                    system_name = subsystem['id']
+                    
+                else:
+                    specific_comps = [ca.GetDalObjectAction(self._configuration)(subsystem["id"], subsystem["class"])]
+                    system_name = ""
 
                 for c in specific_comps:
                     if enabled and c not in self._disabled_items:
@@ -206,7 +215,7 @@ class ComponentLevelTree(DaqConfTreeBase):
                         text = "[bold]DISABLED"
 
                     trigger_tree.add(
-                        f"[{colour}]{ca.GetAttributeAction(self._configuration)(c, 'id')}    {text}"
+                        f"[{colour}]{ca.GetAttributeAction(self._configuration)(c, 'id')} {system_name} {text}"
                     )
 
         return self._tree

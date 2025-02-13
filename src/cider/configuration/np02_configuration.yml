@@ -50,6 +50,7 @@ DetectorSystemMap:
         id: crp4-segment
         enabled_state: true
         disabled_state: false
+
       
     enabled: true
   
@@ -60,6 +61,13 @@ DetectorSystemMap:
         id: crp5-segment
         enabled_state: true
         disabled_state: false
+      - id: tp_generation_enabled
+        type: attribute
+        class: ReadoutApplication
+        affected_objects: [runp02srv002eth0, runp02srv003eth0]
+        enabled_state: true
+        disabled_state: false
+
     enabled: true
 
   PDS:

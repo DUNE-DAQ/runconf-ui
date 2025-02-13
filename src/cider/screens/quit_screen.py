@@ -68,7 +68,8 @@ class QuitScreen(Screen):
         options = main_screen.query_one("OptionPanel")
         if event.button.id == "quit_screen_savequit_button":
             # HACK: This is a hack to save correctly
-            options.save_copy()
+            options.save_main()
+            options.save_backup()
             self._saved_configuration_name = options.saved_configuration
 
             self.app.exit(self.message())
@@ -79,7 +80,9 @@ class QuitScreen(Screen):
             if options.saved_configuration is None:
                 self.app.exit("[bold red]Exited without saving.")
             else:
+                options.save_backup()
                 self._saved_configuration_name = options.saved_configuration
+                # To be sure!
                 self.app.exit(self.message(True))
         else:
             self.app.pop_screen()
