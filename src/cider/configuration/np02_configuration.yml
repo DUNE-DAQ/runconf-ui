@@ -73,6 +73,7 @@ DetectorSystemMap:
   APA 1:
     subsystems:
       - type: component
+        id: apa1-segment
         class: Segment
         enabled_state: true
         disabled_state: false
