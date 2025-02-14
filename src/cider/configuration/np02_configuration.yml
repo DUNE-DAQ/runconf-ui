@@ -1,3 +1,16 @@
+# Demo
+# Any system can be defined in the following way
+# FullSystemName:
+#   subsystems:
+#     - type: component/relationship/attribute
+#       class: ClassName: (e.g. Segment, ReadoutApplication, DFApplication): Affected class or class of specific object
+#       id: Name of class or attribute
+#       enabled_state: State of the class or attribute when enabled
+#       disabled_state: State of the class or attribute when disabled
+#       relationship_name: Name of the relationship [Only for relationship]
+#       affected_objects: List of objects affected by the trigger [Only for attribute]
+#  enabled: true/false default enable/disable state if the system is defined incorrectly in the configuration file
+
 # Triggers
 TriggerMap:
   TPG Enabled CRP 4 and 5:
@@ -48,7 +61,7 @@ DetectorSystemMap:
         class: Segment
         id: crp4-segment
         enabled_state: [runp02srv002eth0, ReadoutApplication]
-        disabled_state: [df-s01-d2, DFApplication]
+        disabled_state: null
         relationship_name: "applications"
     enabled: true
 

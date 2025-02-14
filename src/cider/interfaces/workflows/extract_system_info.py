@@ -133,18 +133,28 @@ class SystemInfoExtractor:
             subsystem_info.id, subsystem_info.class_name
         )
         
-        enabled_dal = ca.GetDalObjectAction(self._configuration)(
-            subsystem_info.enabled_state[0], subsystem_info.enabled_state[1]
-        )
-        disabled_dal = ca.GetDalObjectAction(self._configuration)(
-            subsystem_info.disabled_state[0], subsystem_info.disabled_state[1]
-        )
+        
+        
+        if subsystem_info.enabled_state is None:
+            enabled_dal = None
+        else:
+            enabled_dal = ca.GetDalObjectAction(self._configuration)(
+                subsystem_info.enabled_state[0], subsystem_info.enabled_state[1]
+            )
+
+        if subsystem_info.disabled_state is None:
+            disabled_dal = None
+        else:
+            disabled_dal = ca.GetDalObjectAction(self._configuration)(
+                subsystem_info.disabled_state[0], subsystem_info.disabled_state[1]
+            )
 
         if not isinstance(rel:= ca.GetAttributeAction(self._configuration)(subsystem_dal, subsystem_info.relationship_name), list):
             rel = [rel]
 
         # Check if it's a list
         # We're gonna just remove the enable and disabled states from the list
+                
         if enabled_dal in rel:
             return True
         elif disabled_dal in rel:
@@ -204,11 +214,13 @@ class SystemInfoExtractor:
         
     def _set_relationship_state(self, subsystem_info: SubsystemInfo, state: Any):
         # basically the same as _set_attribute_state but we need to get the dal
-        state = ca.GetDalObjectAction(self._configuration)(
-            state[0], state[1]
-        )
-        # raise Exception(state)
-
+        if state is None:
+            state = None
+        
+        else:
+            state = ca.GetDalObjectAction(self._configuration)(
+                state[0], state[1]
+            )
 
         subsystem_dal = ca.GetDalObjectAction(self._configuration)(
             subsystem_info.id, subsystem_info.class_name
@@ -217,19 +229,31 @@ class SystemInfoExtractor:
         # Check if it's a list
         if isinstance(rel_list:=ca.GetAttributeAction(self._configuration)(subsystem_dal, subsystem_info.relationship_name), list):
             # We're gonna just remove the enable and disabled states from the list
-            enabled_dal = ca.GetDalObjectAction(self._configuration)(
-                subsystem_info.enabled_state[0], subsystem_info.enabled_state[1]
-            )
-            disabled_dal = ca.GetDalObjectAction(self._configuration)(
-                subsystem_info.disabled_state[0], subsystem_info.disabled_state[1]
-            )
-            if enabled_dal in rel_list:
-                rel_list.remove(enabled_dal)
-            if disabled_dal in rel_list:
-                rel_list.remove(disabled_dal)
+            if subsystem_info.enabled_state is not None:            
+                enabled_dal = ca.GetDalObjectAction(self._configuration)(
+                    subsystem_info.enabled_state[0], subsystem_info.enabled_state[1]
+                )
+                if enabled_dal in rel_list:
+                    rel_list.remove(enabled_dal)
+
+            else:
+                enabled_dal = None
+            
+            if subsystem_info.disabled_state is not None:
+                disabled_dal = ca.GetDalObjectAction(self._configuration)(
+                    subsystem_info.disabled_state[0], subsystem_info.disabled_state[1]
+                )
+                if disabled_dal in rel_list:
+                    rel_list.remove(disabled_dal)
+
+            else:
+                disabled_dal = None
             
             # Again massively inneficient but hey
-            rel_list.append(state)
+
+            if state is not None:
+                rel_list.append(state)
+    
             state = rel_list
             
         # Now update 
