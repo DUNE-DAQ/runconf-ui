@@ -51,11 +51,12 @@ class SingleComponentEnableDisablePanel(EnableDisablePanel):
         )
 
         buttons = []
+
         
         for class_ in self._class_list:
             buttons += GetObjectsInSessionAction(self._configuration)(session, class_)
 
-        return {
+        return {            
             ca.GetAttributeAction(self._configuration)(b, "id"): ca.GetClassNameAction(
                 self._configuration
             )(b)
