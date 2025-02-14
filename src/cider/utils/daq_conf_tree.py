@@ -31,7 +31,7 @@ class DaqConfTreeBase(ABC):
     ):
         """Open a new session."""
         self._configuration = configuration
-        self._session = sessionx
+        self._session = session
 
         if configuration is not None and session is not None:
             self.generate_tree()
