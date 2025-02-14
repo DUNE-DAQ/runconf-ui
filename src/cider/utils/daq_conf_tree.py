@@ -197,7 +197,7 @@ class ComponentLevelTree(DaqConfTreeBase):
 
                 if subsystem['type']=='attribute':
                     specific_comps = GetObjectsInSessionAction(self._configuration)(
-                        session_dal, subsystem["class"], subsystem["affected_objects"]
+                        session_dal, subsystem["class"], subsystem.get("affected_objects", None)
                     )
                     
                     system_name = subsystem['id']

@@ -8,7 +8,7 @@ from cider.interfaces.workflows.get_set_session_attribute import (
     SetAttributeValueSessionAction,
     GetAttributeValueSessionAction,
 )
-from typing import Dict, Optional, List, NamedTuple, Any
+from typing import Dict, List, Any
 from copy import deepcopy
 
 
