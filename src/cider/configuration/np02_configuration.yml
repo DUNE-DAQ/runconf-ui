@@ -13,36 +13,7 @@
 
 # Triggers
 TriggerMap:
-  # TPG Enabled CRP 4 and 5:
-  #   subsystems:
-  #     - id: tp_generation_enabled
-  #       type: attribute
-  #       class: ReadoutApplication
-  #       affected_objects: [runp02srv001eth0, runp02srv003eth1, runp02srv002eth0, runp02srv003eth0]
-  #       enabled_state: true
-  #       disabled_state: false
-      
-  #   enabled: true
 
-  # TPG Enabled APA:
-  #   subsystems:
-  #     - id: tp_generation_enabled
-  #       type: attribute
-  #       class: ReadoutApplication
-  #       affected_objects: [runp04srv031eth00, runp04srv031eth01, runp04srv031eth10, runp04srv031eth11]
-  #       enabled_state: true
-  #       disabled_state: false
-  #   enabled: true
-
-  # TPG Enabled PDS:
-  #   subsystems:
-  #     - id: tp_generation_enabled
-  #       type: attribute
-  #       class: ReadoutApplication
-  #       affected_objects: [runp04srv026flx4]
-  #       enabled_state: true
-  #       disabled_state: false
-  #   enabled: true
   TPG:
     subsystems:
       - id: tp_generation_enabled
@@ -80,7 +51,6 @@ DetectorSystemMap:
         disabled_state: false
     enabled: true
   
-
   CRP5:
     subsystems:
       - type: component
@@ -104,7 +74,6 @@ DetectorSystemMap:
     subsystems:
       - type: component
         class: Segment
-        id: apa1-segment
         enabled_state: true
         disabled_state: false
     enabled: true
