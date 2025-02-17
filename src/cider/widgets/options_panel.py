@@ -3,6 +3,7 @@ from cider.interfaces.controller.config_wrapper import ConfigurationWrapper
 from cider.screens.quit_screen import QuitScreen
 from cider.screens.help_screen import HelpScreen
 from cider.widgets.popup_message import PopupMessage
+from cider.utils.file_cleaner import clean_old_files
 
 from textual.reactive import reactive
 
@@ -133,10 +134,9 @@ class OptionPanel(Static):
             f"[white]Configuration saved to [bold grey3]{self._saved_configuration}[/bold grey3]"
         )
 
-
-
     def save_backup(self):
         self.save_to_path(f"{self._output_directory}/old_configs/run_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}", self.generate_output_name())
+        clean_old_files(Path(f"{self._output_directory}/old_configs"), extension=".data.xml", n_files=5, include_folders=True, folder_prefix="run_")
 
     def generate_output_name(self):
         if self._configuration is None:

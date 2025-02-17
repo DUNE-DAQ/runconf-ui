@@ -2,7 +2,7 @@
 
 from cider.screens.shifter_view_screen import ShifterViewScreen
 from cider.screens.quit_screen import QuitScreen
-
+from cider.utils.file_cleaner import clean_old_files
 from textual.logging import TextualHandler
 from textual.app import App
 from textual.driver import Driver
@@ -48,6 +48,7 @@ class ShifterView(App):
             level=log_level,
         )
 
+        clean_old_files(logging_path, "log")
 
         self._configuration_folder = configuration_folder
         self._interface_config = interface_config
@@ -96,6 +97,7 @@ class ShifterView(App):
     def exit_message(self) -> str:
         """Return the exit message."""
         return self._exit_message
+    
 
 
 @click.command()
@@ -129,4 +131,5 @@ def main(input_directory, output_directory, interface_config, log_level):
 
 if __name__ == "__main__":
     main()
+ 
  
