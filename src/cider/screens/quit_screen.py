@@ -87,13 +87,17 @@ class QuitScreen(Screen):
     def on_button_pressed(self, event: Button.Pressed) -> None:
         main_screen = self.app.get_screen("shifter_view_screen")
         options = main_screen.query_one("OptionPanel")
+
+
+        
         if event.button.id == "quit_screen_savequit_button":
             logging.info("Quitting and saved")
 
             # HACK: This is a hack to save correctly
-            options.save_main()
             options.save_backup()
-            
+            options.save_main()
+                        
+            self._saved_configuration_name = options.saved_configuration    
             self.app.exit(self.message())
 
         if event.button.id == "quit_screen_quit_button":
