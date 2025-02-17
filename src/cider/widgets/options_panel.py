@@ -80,8 +80,6 @@ class OptionPanel(Static):
         except NoMatches:
             # No pop-up to remove
             pass
-    
-
 
     def compose(self):
 
@@ -121,16 +119,16 @@ class OptionPanel(Static):
         ca.CopyFullConfigurationAction(self._configuration)(output_file_path)
         self.generate_change_log(output_file_path)
 
-        self.show_popup(
-            f"[white]Configuration saved to [bold grey3]{output_file_path}[/bold grey3]"
-        )
-
-
         return output_file_path
 
     # Wrappers
     def save_main(self):
         self._saved_configuration = self.save_to_path(f"{self._output_directory}/current_config", self.generate_output_name())
+        self.show_popup(
+            f"[white]Configuration saved to [bold grey3]{self._saved_configuration}[/bold grey3]"
+        )
+
+
 
     def save_backup(self):
         self.save_to_path(f"{self._output_directory}/old_configs/run_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}", self.generate_output_name())
