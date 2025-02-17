@@ -140,24 +140,38 @@ SelectCurrent{
     background: $primary-background;
 }
 
-.quit_pop_up {
+
+.quit_pop_up_grid {
     width: 60%;   /* Increased width */
     height: 30%;  /* Increased height */
-}
-
-#quit_dialog {
-    grid-size: 3;
     grid-gutter: 1 2;
     grid-rows: 1fr 3;
 }
 
-#quit_question {
-    column-span: 3;
+.quit_pop_up_grid_small{
+    grid-size: 2;
+}
+
+.quit_pop_up_grid_full{
+    grid-size: 3;
+}
+
+
+.quit_question{
     height: 1fr;
     width: 1fr;
     color: white;
     content-align: center middle;
 }
+
+.quit_question_full {
+    column-span: 3;
+}
+
+.quit_question_small {
+    column-span: 2;
+}
+
 
 .pop_up_button {
     width: 100%;

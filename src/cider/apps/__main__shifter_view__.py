@@ -3,14 +3,16 @@
 from cider.screens.shifter_view_screen import ShifterViewScreen
 from cider.screens.quit_screen import QuitScreen
 
+from textual.logging import TextualHandler
 from textual.app import App
 from textual.driver import Driver
-from textual.binding import Binding
 import click
 from rich import print
 
 import os
 from pathlib import Path
+import logging
+from datetime import datetime
 
 
 class ShifterView(App):
@@ -34,11 +36,24 @@ class ShifterView(App):
         """Constructor for the ShifterView class."""
         super().__init__(driver_class, css_path, watch_css, ansi_color)
 
+        # Make the logging directory if it doesn't exist
+        logging_path = Path(f"{output_directory}/logs")
+        logging_path.mkdir(parents=True, exist_ok=True)
+
+        logging.basicConfig(
+            filename=f"{logging_path}/shifter_view_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.log",
+            format='%(asctime)s %(message)s',
+            level="NOTSET",
+        )
+
+
         self._configuration_folder = configuration_folder
         self._interface_config = interface_config
         self._output_directory = output_directory
         self._exit_message = ""
-
+        
+        
+        
     def on_mount(self):
         """
         Mount App

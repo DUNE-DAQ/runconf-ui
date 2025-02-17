@@ -8,7 +8,7 @@ from textual.widgets import Static, Placeholder, Button
 from textual.containers import Grid, ScrollableContainer
 from textual.message import Message
 from typing import List
-
+import logging
 
 class EnableDisablePanel(Static):
     """
@@ -104,6 +104,7 @@ class EnableDisablePanel(Static):
         self._button_action(objs_affected, button_name)
         self.update_button_styles()
         self.post_message(self.Changed(self._configuration, self._session_name))
+        logging.debug(f"Button {button_name} {'disabled' if self.check_is_disabled(button_name, self._button_list[button_name]) else 'enabled'}")
 
     def _button_action(self, objs_affected, button_name):
         pass

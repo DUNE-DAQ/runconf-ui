@@ -13,7 +13,7 @@ from textual.widgets import Button, Static
 from pathlib import Path
 from datetime import datetime
 import shutil
-
+import logging
 
 class OptionPanel(Static):
     show_popup = reactive(False)
@@ -82,7 +82,7 @@ class OptionPanel(Static):
             pass
 
     def compose(self):
-
+        logging.debug("OptionPanel compose")
         disable_buttons = self._configuration is None or self._session_name is None
 
         yield ScrollableContainer(
@@ -107,6 +107,8 @@ class OptionPanel(Static):
 
 
     def save_to_path(self, dir_path, name):
+        logging.info(f"Saving configuration to {dir_path}/{name}")
+        
         dir_path = Path(dir_path)
         
         # Clear it
@@ -116,13 +118,16 @@ class OptionPanel(Static):
         dir_path.mkdir(parents=True, exist_ok=True)
         
         output_file_path = f"{dir_path}/{name}"
+        
+        logging.debug(f"Copying configuration to {output_file_path}")
         ca.CopyFullConfigurationAction(self._configuration)(output_file_path)
         self.generate_change_log(output_file_path)
 
+        logging.info(f"Configuration saved to {output_file_path}")
         return output_file_path
 
     # Wrappers
-    def save_main(self):
+    def save_main(self):        
         self._saved_configuration = self.save_to_path(f"{self._output_directory}/current_config", self.generate_output_name())
         self.show_popup(
             f"[white]Configuration saved to [bold grey3]{self._saved_configuration}[/bold grey3]"
@@ -167,6 +172,7 @@ class OptionPanel(Static):
     def open_new_session(
         self, configuration: ConfigurationWrapper | None, session_name: str | None
     ):
+        
         self._session_name = session_name
         self._configuration = configuration
 
@@ -181,18 +187,28 @@ class OptionPanel(Static):
             try:
                 self.save_main()
                 self.save_backup()
-            except Exception as e:
-                raise e
+                self.app.push_screen(
+                    QuitScreen(
+                        self._session_name,
+                        self._configuration,
+                        render_no_create=False,
+                        classes="pop_up_screen",
+                    )
+                )
 
+            except Exception as e:
+                logging.error(f"Error saving configuration: {e}")
+                self.show_popup(
+                    f"[white]Invalid configuration[/white] [bold grey3]{self.query_one(FileIOPanel).selected_config_name}:{self.query_one(FileIOPanel).selected_session_name}[/bold grey3] [white]passed, please check with the experts!\n\
+                    Log saved to[/white] [bold grey3]{logging.getLogger().handlers[0].baseFilename}[/bold grey3]"
+                )
         elif event.button.id == "undo_changes_button":
             # Reset everything!
-            try:
-                self.app.get_screen("shifter_view_screen").open_new_file()
-            except Exception as e:
-                pass
+            logging.debug("Reset button pressed")
+            self.app.get_screen("shifter_view_screen").open_new_file()
 
         elif event.button.id == "quit_button":
-
+            logging.debug("Quit button pressed")
             self.app.push_screen(
                 QuitScreen(
                     self._session_name,

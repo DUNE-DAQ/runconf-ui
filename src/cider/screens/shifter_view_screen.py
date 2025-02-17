@@ -17,6 +17,7 @@ from cider.utils.daq_conf_tree import DaqConfTree, ComponentLevelTree
 from pathlib import Path
 import os
 import yaml
+import logging
 
 from cider.widgets.popup_message import PopupMessage
 
@@ -43,7 +44,10 @@ class ShifterViewScreen(Screen):
     ) -> None:
         super().__init__(name, id, classes)
 
-        with open(interface_config, "r") as f:
+        logging.info("Opening shifter view screen")
+
+        with open(interface_config
+                  , "r") as f:
             interface_conf_file = yaml.safe_load(f)
 
             self.detector_system_map = interface_conf_file["DetectorSystemMap"]
@@ -145,12 +149,14 @@ class ShifterViewScreen(Screen):
                 self.open_new_file()
             except Exception as e:
                 # Display the error message in a pop-up
-                raise e
                 self.show_popup(
-                    f"[white]Invalid configuration[/white] [bold grey3]{self.query_one(FileIOPanel).selected_config_name}:{self.query_one(FileIOPanel).selected_session_name}[/bold grey3] [white]passed, please check with the experts!"
+                    f"[white]Invalid configuration[/white] [bold grey3]{self.query_one(FileIOPanel).selected_config_name}:{self.query_one(FileIOPanel).selected_session_name}[/bold grey3] [white]passed, please check with the experts!\n\
+                    Log saved to[/white] [bold grey3]{logging.getLogger().handlers[0].baseFilename}[/bold grey3]"
                 )
                 # Optionally log the error for debugging
-                self.log.error(f"Error opening file: {e}")
+            
+                logging.error(f"Couldn't open file: {self.query_one(FileIOPanel).selected_config_name}:{self.query_one(FileIOPanel).selected_session_name}")
+                logging.error(f"Error: {e}")
 
     def show_popup(self, message: str):
         """
@@ -189,12 +195,16 @@ class ShifterViewScreen(Screen):
         session_name = self.query_one(FileIOPanel).selected_session_name
         original_configuration = self.query_one(FileIOPanel).selected_config_name
 
+        logging.info(f"Opening new file: {session_name}:{original_configuration}")
+
+
         self.TMP_CONFIG.parent.mkdir(parents=True, exist_ok=True)
 
         # Now we make a temporary copy of the configuration object
         ConsolidateFile(
             original_configuration, session_name, "Session", str(self.TMP_CONFIG)
         )()
+        logging.info("Configuration copied to temporary file")
 
         # Get configuration
         buffer_config = ConfigurationWrapper(str(self.TMP_CONFIG))
@@ -202,18 +212,22 @@ class ShifterViewScreen(Screen):
         self.query_one(OptionPanel).open_new_session(buffer_config, session_name)
 
         if not session_name or not buffer_config:
+            logging.info("No session or configuration")
             pass
 
         self._configuration = buffer_config  
         self._session = session_name
 
-
+        logging.debug("Updating enable/disable panels")
         for a in self.query("EnableDisablePanel"):
             a.open_new_session(buffer_config, session_name)
             a.refresh(recompose=True)
 
         # Update trees
+        logging.info("Updating tree views")
         self.update_trees(buffer_config, session_name)
+        logging.info("Successfully updated tree views")
+        
 
     def on_enable_disable_panel_changed(self, message: EnableDisablePanel.Changed):
         for a in self.query("EnableDisablePanel"):
