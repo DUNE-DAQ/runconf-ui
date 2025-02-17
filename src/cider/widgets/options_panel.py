@@ -182,6 +182,7 @@ class OptionPanel(Static):
         elif event.button.id == "create_button":
             try:
                 self.save_main()
+                self.save_backup()
             except Exception as e:
                 raise e
 
