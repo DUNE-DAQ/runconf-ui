@@ -14,7 +14,7 @@
 # Triggers
 TriggerMap:
 
-  TPG:
+  TPG CRP NP02:
     subsystems:
       - id: tp_generation_enabled
         type: attribute
@@ -39,6 +39,67 @@ TriggerMap:
         enabled_state: true
         disabled_state: false
     enabled: true
+
+  TPG PDS NP02:
+      subsystems:
+      - id: tp_generation_enabled
+        type: attribute
+        class: ReadoutApplication
+        affected_objects: [runp02srv030flx4]
+        enabled_state: true
+        disabled_state: false
+      - id: ta_generation_enabled
+        type: attribute
+        class: ReadoutApplication
+        affected_objects: [runp02srv030flx4]
+        enabled_state: true
+        disabled_state: false
+      enabled: false
+
+  TPG APA NP04:
+    subsystems:
+      - id: tp_generation_enabled
+        type: attribute
+        class: ReadoutApplication
+        affected_objects: [runp04srv031eth11, runp04srv031eth10, runp04srv031eth01, runp04srv031eth00]
+        enabled_state: true
+        disabled_state: false
+      - id: ta_generation_enabled
+        type: attribute
+        affected_objects: [runp04srv031eth11, runp04srv031eth10, runp04srv031eth01, runp04srv031eth00]
+        class: ReadoutApplication
+        enabled_state: true
+        disabled_state: false
+      - id: tc-maker-tpc
+        class: TriggerApplication
+        type: component
+        enabled_state: true
+        disabled_state: false
+      - id: tp-stream-writer-apa1
+        class: TPStreamWriterApplication
+        type: component
+        enabled_state: true
+        disabled_state: false
+      - id: tp-stream-writer-apa2
+        class: TPStreamWriterApplication
+        type: component
+        enabled_state: true
+        disabled_state: false
+      - id: tp-stream-writer-apa3
+        class: TPStreamWriterApplication
+        type: component
+        enabled_state: true
+        disabled_state: false
+      - id: tp-stream-writer-apa4
+        class: TPStreamWriterApplication
+        type: component
+        enabled_state: true
+        disabled_state: false
+
+
+    enabled: true
+
+
 
 # Detector Subsystems
 DetectorSystemMap:

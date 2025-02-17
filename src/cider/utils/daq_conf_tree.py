@@ -69,20 +69,22 @@ class DaqConfTree(DaqConfTreeBase):
         session_dal = ca.GetDalObjectAction(self._configuration)(
             self._session, "Session"
         )
-
-        session_segment = ca.GetAttributeAction(self._configuration)(
-            session_dal, "segment"
-        )
-        # seg_level_tree = self._tree.add(f"[bold orange]{ca.GetAttributeAction(self._configuration)(session_segment, 'id')}")
-
-        self.build_tree(session_segment, self._tree, False)
+        
+        self.build_tree(session_dal, self._tree, False)
         return self._tree
 
     def get_related_segments(self, segment):
         """
         Get related segments
         """
-        return ca.GetAttributeAction(self._configuration)(segment, "segments")
+        class_name = ca.GetClassNameAction(self._configuration)(segment)
+        
+        if class_name=="Segment":
+            return ca.GetAttributeAction(self._configuration)(segment, "segments")
+        elif class_name=="Session":
+            return [ca.GetAttributeAction(self._configuration)(segment, "segment")]
+        else:
+            raise ValueError(f"Invalid class {ca.GetClassNameAction(self._configuration)(segment)}")
 
     def get_related_apps(self, segment):
         """
@@ -100,7 +102,6 @@ class DaqConfTree(DaqConfTreeBase):
             segs = tree_branch.add("[bold dark_orange3]Segments")
 
         for seg in self.get_related_segments(segment):
-
             seg_name = ca.GetAttributeAction(self._configuration)(seg, "id")
 
             if (
@@ -117,30 +118,41 @@ class DaqConfTree(DaqConfTreeBase):
                 colour = "green"
                 message = "ENABLED"
 
+
             seg_name = f"[{colour}]{seg_name}   [bold]{message}"
             seg_branch = segs.add(f"{seg_name}")
-
-            seg_apps = seg_branch.add("[bold deep_pink4]Applications")
-            for app in self.get_related_apps(seg):
-
-                app_name = ca.GetAttributeAction(self._configuration)(app, "id")
-
-                if (
-                    ca.CheckIsDisabledAction(self._configuration)(app, self._session)
-                    or seg_disabled
-                ):
-                    colour = "grey35"
-                    message = "DISABLED"
-                    self._disabled_objs.append(app)
-
-                else:
-                    colour = "green"
-                    message = "ENABLED"
-
-                app_name = f"[{colour}]{app_name}   [bold]{message}"
-
-                seg_apps.add(app_name)
+            
+            self.build_tree(seg, seg_branch, seg_disabled)
+            
+            self.add_apps(seg, seg_branch, seg_disabled)
         return segs
+
+
+    def add_apps(self, seg, seg_branch, seg_disabled):
+        if not len(self.get_related_apps(seg)):
+            return
+        
+        seg_apps = seg_branch.add("[bold deep_pink4]Applications")
+        for app in self.get_related_apps(seg):
+
+            app_name = ca.GetAttributeAction(self._configuration)(app, "id")
+
+            if (
+                ca.CheckIsDisabledAction(self._configuration)(app, self._session)
+                or seg_disabled
+            ):
+                colour = "grey35"
+                message = "DISABLED"
+                self._disabled_objs.append(app)
+
+            else:
+                colour = "green"
+                message = "ENABLED"
+
+            app_name = f"[{colour}]{app_name}   [bold]{message}"
+
+            seg_apps.add(app_name)
+
 
     @property
     def disabled_objs(self):
