@@ -28,6 +28,8 @@ class ShifterView(App):
         configuration_folder: str,
         output_directory: str,
         interface_config: str = "",
+        log_level: str="INFO",
+
         driver_class: type[Driver] | None = None,
         css_path: str | None = None,
         watch_css: bool = False,
@@ -43,7 +45,7 @@ class ShifterView(App):
         logging.basicConfig(
             filename=f"{logging_path}/shifter_view_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.log",
             format='%(asctime)s %(message)s',
-            level="NOTSET",
+            level=log_level,
         )
 
 
@@ -114,9 +116,13 @@ class ShifterView(App):
     default=f"{Path(__file__).parent.absolute()}/../configuration/np02_configuration.yml",
     required=False,
 )
+@click.option(
+    "-l", "--log-level", "log_level", default="INFO", required=False
+)
 
-def main(input_directory, output_directory, interface_config):
-    app = ShifterView(input_directory, output_directory, interface_config)
+
+def main(input_directory, output_directory, interface_config, log_level):
+    app = ShifterView(input_directory, output_directory, interface_config, log_level)
     app.run()
     print(app.exit_message())
 
