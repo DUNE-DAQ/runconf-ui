@@ -53,6 +53,9 @@ class OptionPanel(Static):
     def saved_configuration(self):
         return self._saved_configuration
 
+    def get_config_session(self):
+        return self._configuration, self._session_name
+
     def show_popup(self, message: str):
         """
         Display a pop-up message on the screen.
@@ -77,6 +80,7 @@ class OptionPanel(Static):
         except NoMatches:
             # No pop-up to remove
             pass
+    
 
 
     def compose(self):

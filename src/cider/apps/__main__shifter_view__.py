@@ -19,6 +19,7 @@ class ShifterView(App):
     """
 
     CSS_PATH = "shifter_view.tcss"
+    BINDINGS = [("ctrl+q", "quit", "Quit")]
 
     def __init__(
         self,
@@ -55,6 +56,17 @@ class ShifterView(App):
         # Start with the SelectFileSessionScreen
         self.push_screen("shifter_view_screen")
 
+    def action_quit(self):
+        """Quit the application."""
+        shifter_view = self.get_screen("shifter_view_screen")
+        config, session = shifter_view.query_one("#option_panel_main").get_config_session()
+    
+        self.push_screen(QuitScreen(
+            session,
+            config,
+            classes="pop_up_screen",
+        ))
+
     def exit(self, message: str | None = None) -> None:
         """Override the exit method to store the exit message."""
         
@@ -87,6 +99,7 @@ class ShifterView(App):
     default=f"{Path(__file__).parent.absolute()}/../configuration/np02_configuration.yml",
     required=False,
 )
+
 def main(input_directory, output_directory, interface_config):
     app = ShifterView(input_directory, output_directory, interface_config)
     app.run()
@@ -95,3 +108,4 @@ def main(input_directory, output_directory, interface_config):
 
 if __name__ == "__main__":
     main()
+ 

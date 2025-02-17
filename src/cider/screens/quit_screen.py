@@ -13,7 +13,6 @@ class QuitScreen(Screen):
         self,
         session: str = "",
         configuration: ConfigurationWrapper | None = None,
-        new_configuration_name: str = "",
         name: str | None = None,
         id: str | None = None,
         classes: str | None = None,
@@ -71,7 +70,7 @@ class QuitScreen(Screen):
             options.save_main()
             options.save_backup()
             self._saved_configuration_name = options.saved_configuration
-
+            
             self.app.exit(self.message())
 
         if event.button.id == "quit_screen_quit_button":
