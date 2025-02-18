@@ -14,6 +14,32 @@ from pathlib import Path
 import logging
 from datetime import datetime
 
+'''
+TODO
+    - Empty configuration selection dropdown
+    - Refresh live
+    - Defaults: To NP02 etc. [put in YAML]
+        - Name of session etc.
+    - DF apps by enabled first
+    - Rename TPG [CRP->TPC] get rid of NP02
+    - Nightly release?
+    - Try Marco's interface: ssh://git@gitlab.cern.ch:7999/dune-daq/online/config-management.git
+
+RECIPES
+    - Detector
+    - Trigger:
+        - TPC TPG works fine
+        - CRP -> TPC
+        - Random triggers not there yet
+
+Testing
+    - nested segments conf for testing https://gitlab.cern.ch/dune-daq/online/ehn1-daqconfigs/-/tree/mroda/crp-segment?ref_type=heads
+
+Timeline:
+    Depends on system; 
+'''
+
+
 
 class ShifterView(App):
     """
@@ -76,9 +102,15 @@ class ShifterView(App):
 
     def action_quit(self):
         """Quit the application."""
+            
+        logging.info(self.screen.__class__)
+    
         shifter_view = self.get_screen("shifter_view_screen")
         config, session = shifter_view.query_one("#option_panel_main").get_config_session()
     
+        if isinstance(self.screen, QuitScreen):
+            self.pop_screen()
+        
         self.push_screen(QuitScreen(
             session,
             config,

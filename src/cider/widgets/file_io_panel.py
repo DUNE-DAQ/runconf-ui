@@ -1,18 +1,30 @@
 import cider.interfaces.actions.actions as ca
 from cider.interfaces.controller.config_wrapper import ConfigurationWrapper
+from cider.utils.file_system_watcher import FileSystemWatcher
+
+from watchdog.observers import Observer
+import threading
+import time
+
+
 
 from textual.containers import Grid
 from textual.visual import SupportsVisual
 from textual.widgets import Button, Static, Select, Pretty
 from textual.message import Message
+from textual.reactive import reactive
+from textual.events import Focus
 
-from typing import List, Tuple
+from typing import List
 import os
 from pathlib import Path
-
+import logging
+import watchdog
 
 class FileIOPanel(Static):
 
+    file_options = reactive([])
+    
     def __init__(
         self,
         search_directory,
@@ -42,13 +54,44 @@ class FileIOPanel(Static):
         self._selected_config_name = ""
         self._selected_session_name = ""
 
+        self.file_options = self.generate_selection_list(self._search_directory)
+
+        # Start the directory watcher in a separate thread
+        self._observer = Observer()
+        self._watcher = FileSystemWatcher(self)
+        self.start_directory_watch()
+
+    def start_directory_watch(self):
+        """Starts watching for changes in the directory."""
+        if isinstance(self._search_directory, str):
+            watch_dirs = [Path(p) for p in self._search_directory.split(":")]
+        else:
+            watch_dirs = [Path(p) for p in self._search_directory]
+
+        for directory in watch_dirs:
+            if directory.is_dir():
+                self._observer.schedule(self._watcher, str(directory), recursive=True)
+
+        thread = threading.Thread(target=self._observer.start, daemon=True)
+        thread.start()
+
+    def refresh_file_list(self):
+        """Refreshes the file selection list when files are modified."""
+        new_options = self.generate_selection_list(self._search_directory)
+        if new_options != self.file_options:  # Update only if changes occur
+            self.file_options = new_options
+            self.watch_file_options()  # Ensure UI updates correctly
+
+    def on_unmount(self):
+        """Stops the observer when the panel is unmounted."""
+        self._observer.stop()
+        self._observer.join()
+        
+
     def compose(self):
-
-        file_options = self.generate_selection_list(self._search_directory)
-
         yield Grid(
             Select(
-                file_options,
+                self.file_options,
                 prompt="Select a File",
                 id="select_file",
                 classes="file_select",
@@ -68,7 +111,8 @@ class FileIOPanel(Static):
             ),
             id="file_io_panel_grid",
         )
-
+        
+            
     @classmethod
     def generate_selection_list(cls, session_directories: str | List[str] = ""):
         # Firstly find all databases
@@ -192,3 +236,21 @@ class FileIOPanel(Static):
             )
         else:
             self.deconfigure()
+         
+
+    def watch_file_options(self):
+            """
+            This method is automatically called whenever `file_options` changes.
+            It updates the `Select` widget with the new options.
+            """
+            try:
+                self.query_one("#select_file").set_options(self.file_options)
+            except:
+                pass
+    
+    def on_mount(self):
+        """
+        Called when the widget is mounted. You can use this to initialize
+        or refresh the file options when the widget is first displayed.
+        """
+        self.file_options = self.generate_selection_list(self._search_directory)
