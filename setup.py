@@ -7,7 +7,8 @@ setup(
         "textual",
         "textual_dev",
         "rich",
+        "watchdog",
     ],
-    extras_require={"develop": ["ipdb", "ipython" "black"]},
+    extras_require={"develop": ["ipdb", "ipython"]},
     package_data={"": ["*.tcss", "*.yml"]},
 )
