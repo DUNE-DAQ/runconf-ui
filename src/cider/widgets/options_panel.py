@@ -143,8 +143,8 @@ class OptionPanel(Static):
         if self._configuration is None:
             return
 
+        # Hacky method to talk to the main screen
         main_screen = self.app.get_screen("shifter_view_screen")
-
         full_path = main_screen.query_one("FileIOPanel").selected_config_name
 
         config_name = str(Path(full_path).stem)
@@ -157,6 +157,9 @@ class OptionPanel(Static):
         return f"{output_name}.data.xml"
 
     def generate_change_log(self, config_path):
+        '''
+        Makes a log containing a summary of what was changed in the configuration
+        '''
         log_name = config_path.replace(".data.xml", "_changes.txt")
 
         main_screen = self.app.get_screen("shifter_view_screen")
@@ -185,6 +188,7 @@ class OptionPanel(Static):
         if event.button.id == "help_button":
             self.app.push_screen(HelpScreen(classes="pop_up_screen"))
         elif event.button.id == "create_button":
+            # Try to create a new config
             try:
                 self.save_main()
                 self.save_backup()
@@ -197,17 +201,21 @@ class OptionPanel(Static):
                     )
                 )
 
+            # Make sure what we do is valid
             except Exception as e:
                 logging.error(f"Error saving configuration: {e}")
                 self.show_popup(
                     f"[white]Invalid configuration[/white] [bold grey3]{self.query_one(FileIOPanel).selected_config_name}:{self.query_one(FileIOPanel).selected_session_name}[/bold grey3] [white]passed, please check with the experts!\n\
                     Log saved to[/white] [bold grey3]{logging.getLogger().handlers[0].baseFilename}[/bold grey3]"
                 )
+                
+        # Resets to base config provided
         elif event.button.id == "undo_changes_button":
             # Reset everything!
             logging.debug("Reset button pressed")
             self.app.get_screen("shifter_view_screen").open_new_file()
 
+        # Quit
         elif event.button.id == "quit_button":
             logging.debug("Quit button pressed")
             self.app.push_screen(

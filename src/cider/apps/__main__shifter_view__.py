@@ -1,4 +1,6 @@
-# APPLE: Accessible Platform for Plain and Lightweight Editing
+'''
+Main application for the shifter view interface.
+'''
 
 from cider.screens.shifter_view_screen import ShifterViewScreen
 from cider.screens.quit_screen import QuitScreen
@@ -111,7 +113,6 @@ class ShifterView(App):
 
     def exit(self, message: str | None = None) -> None:
         """Override the exit method to store the exit message."""
-        
         if message is not None:
             self._exit_message = message
         else:

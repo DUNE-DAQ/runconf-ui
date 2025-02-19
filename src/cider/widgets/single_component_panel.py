@@ -1,13 +1,15 @@
 from cider.interfaces.controller.config_wrapper import ConfigurationWrapper
 from cider.widgets.enable_disable_base import EnableDisablePanel
-
-
-import cider.interfaces.actions.actions as ca
 from cider.interfaces.workflows.get_objects_in_session import GetObjectsInSessionAction
 from textual.visual import SupportsVisual
+import cider.interfaces.actions.actions as ca
 
+from typing import List
 
 class SingleComponentEnableDisablePanel(EnableDisablePanel):
+    '''
+    For enabling/disabling systems made of just a single component class
+    '''
 
     def __init__(
         self,

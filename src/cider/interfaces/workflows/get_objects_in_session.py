@@ -9,9 +9,11 @@ class GetSegmentAppsListAction(ActionInterface):
         """
         apps_list_flat = []
 
+        # Loop over all segments
         for ss in ca.GetAttributeAction(self._configuration)(segment, "segments"):
             apps_list_flat += self.action(ss)
 
+        # loop over all attributes
         for aa in ca.GetAttributeAction(self._configuration)(segment, "applications"):
             apps_list_flat.append(aa)
 
@@ -24,7 +26,9 @@ class GetObjectsInSessionAction(ActionInterface):
     """
 
     def action(self, session_dal, applied_class: str, specific_objects=None):
+        # Session contains a single segement
         segment = ca.GetAttributeAction(self._configuration)(session_dal, "segment")
+        # Get all apps+segments in the segment
         full_app_list = GetSegmentAppsListAction(self._configuration)(segment)
 
         apps = []

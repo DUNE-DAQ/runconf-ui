@@ -20,8 +20,8 @@ class ShifterConfigReader:
         # We can get settings
         general_settings = self._config.get("General", {})
 
+        # Default config file
         self._default_config = general_settings.get("default_config", None)
-        self._default_session_list = general_settings.get("default_session_list", [])
 
         self._panel_list, self._map_list, self._panel_labels = self.read_panel_options()
 
@@ -29,10 +29,6 @@ class ShifterConfigReader:
     @property
     def default_config(self):
         return self._default_config
-    
-    @property
-    def default_session_list(self):
-        return self._default_session_list
     
     @property
     def panel_list(self):
@@ -47,9 +43,13 @@ class ShifterConfigReader:
         return self._panel_labels
     
     def read_panel_options(self):
+        # Grab all panels we specify in the YAML
         panel_opts = self._config.get("PanelOptions", {})
         
+        # To be filled with panels
         panel_list = []
+        
+        # for multi system panels we also generate a map
         map_list = []
         panel_labels = [panel_opts[k]['label'] for k in panel_opts.keys()]
         
@@ -71,7 +71,6 @@ class ShifterConfigReader:
         )
 
     def initialise_single_system(self, panel_name, opts):
-        
         panel = SingleComponentEnableDisablePanel(None, None, opts.get("classes", []),
                                                  id=f"{opts.get('label', 'SingleSystem')}_subsystem_panel",
                                                  classes="detector_subsystem")
