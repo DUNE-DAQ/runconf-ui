@@ -12,9 +12,10 @@ import os
 
 
 class ConsolidateFile:
-    '''
+    """
     File consolidator. Moves all objects in a session into a single .data.xml database
-    '''
+    """
+
     def __init__(
         self,
         current_config_name: str,
@@ -22,7 +23,7 @@ class ConsolidateFile:
         top_level_object_class: str,
         new_config_name: str,
     ):
-        
+
         self._top_level_object_name = top_level_object_name
         self._top_level_object_class = top_level_object_class
 

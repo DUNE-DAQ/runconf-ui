@@ -1,6 +1,6 @@
-'''
+"""
 Main application for the shifter view interface.
-'''
+"""
 
 from cider.screens.shifter_view_screen import ShifterViewScreen
 from cider.screens.quit_screen import QuitScreen
@@ -15,7 +15,7 @@ from pathlib import Path
 import logging
 from datetime import datetime
 
-'''
+"""
 TODO
     - Empty configuration selection dropdown
     - Try Marco's interface: ssh://git@gitlab.cern.ch:7999/dune-daq/online/config-management.git
@@ -32,8 +32,7 @@ Testing
 
 Timeline:
     Depends on system; 
-'''
-
+"""
 
 
 class ShifterView(App):
@@ -49,8 +48,7 @@ class ShifterView(App):
         configuration_folder: str,
         output_directory: str,
         interface_config: str = "",
-        log_level: str="INFO",
-
+        log_level: str = "INFO",
         driver_class: type[Driver] | None = None,
         css_path: str | None = None,
         watch_css: bool = False,
@@ -65,8 +63,8 @@ class ShifterView(App):
 
         logging.basicConfig(
             filename=f"{logging_path}/shifter_view_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.log",
-            format='%(asctime)s,%(msecs)03d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
-            datefmt='%Y-%m-%d:%H:%M:%S',
+            format="%(asctime)s,%(msecs)03d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s",
+            datefmt="%Y-%m-%d:%H:%M:%S",
             level=log_level,
         )
 
@@ -76,7 +74,7 @@ class ShifterView(App):
         self._interface_config = interface_config
         self._output_directory = output_directory
         self._exit_message = ""
-        
+
     def on_mount(self):
         """
         Mount App
@@ -96,20 +94,24 @@ class ShifterView(App):
 
     def action_quit(self):
         """Quit the application."""
-            
+
         logging.info(self.screen.__class__)
-    
+
         shifter_view = self.get_screen("shifter_view_screen")
-        config, session = shifter_view.query_one("#option_panel_main").get_config_session()
-    
+        config, session = shifter_view.query_one(
+            "#option_panel_main"
+        ).get_config_session()
+
         if isinstance(self.screen, QuitScreen):
             self.pop_screen()
-        
-        self.push_screen(QuitScreen(
-            session,
-            config,
-            classes="pop_up_screen",
-        ))
+
+        self.push_screen(
+            QuitScreen(
+                session,
+                config,
+                classes="pop_up_screen",
+            )
+        )
 
     def exit(self, message: str | None = None) -> None:
         """Override the exit method to store the exit message."""
@@ -122,7 +124,6 @@ class ShifterView(App):
     def exit_message(self) -> str:
         """Return the exit message."""
         return self._exit_message
-    
 
 
 @click.command()
@@ -143,11 +144,7 @@ class ShifterView(App):
     default=f"{Path(__file__).parent.absolute()}/../configuration/np02_configuration.yml",
     required=False,
 )
-@click.option(
-    "-l", "--log-level", "log_level", default="INFO", required=False
-)
-
-
+@click.option("-l", "--log-level", "log_level", default="INFO", required=False)
 def main(input_directory, output_directory, interface_config, log_level):
     app = ShifterView(input_directory, output_directory, interface_config, log_level)
     app.run()
@@ -156,5 +153,3 @@ def main(input_directory, output_directory, interface_config, log_level):
 
 if __name__ == "__main__":
     main()
- 
- 

@@ -5,8 +5,8 @@ from textual.visual import SupportsVisual
 from textual.widgets import Static, Button
 from textual.containers import ScrollableContainer
 from textual.message import Message
-from typing import List
 import logging
+
 
 class EnableDisablePanel(Static):
     """
@@ -104,7 +104,9 @@ class EnableDisablePanel(Static):
         self._button_action(objs_affected, button_name)
         self.update_button_styles()
         self.post_message(self.Changed(self._configuration, self._session_name))
-        logging.debug(f"Button {button_name} {'disabled' if self.check_is_disabled(button_name, self._button_list[button_name]) else 'enabled'}")
+        logging.debug(
+            f"Button {button_name} {'disabled' if self.check_is_disabled(button_name, self._button_list[button_name]) else 'enabled'}"
+        )
 
     def _button_action(self, *args, **kwargs):
         raise NotImplementedError("Button action must be implemented")
@@ -114,6 +116,7 @@ class EnableDisablePanel(Static):
 
     class Changed(Message):
         """Custom message to notify when a button is pressed."""
+
         def __init__(self, configuration, session) -> None:
             super().__init__()
             self._configuration = configuration
@@ -129,14 +132,14 @@ class EnableDisablePanel(Static):
 
     def get_changed_states_as_str(self):
         output_str = ""
-        
+
         for button, information in self._button_list.items():
             # Check if the button is disabled
             state = self.check_is_disabled(button, information)
 
             if state == self._default_states[button]:
                 continue
-            
+
             # Hacky but it means we can have readable buttons and textual can use them...
             button = button.replace(" ", "_")
             output_str += f"_{button}_{'on' if state else 'off'}"

@@ -17,9 +17,8 @@ from datetime import datetime
 import shutil
 import logging
 
-class OptionPanel(Static):
-    show_popup = reactive(False)
 
+class OptionPanel(Static):
     def __init__(
         self,
         configuration: ConfigurationWrapper | None,
@@ -67,7 +66,7 @@ class OptionPanel(Static):
 
         # Create and mount the pop-up
         popup = PopupMessage(message, classes="popup popup_success")
-        
+
         main_screen = self.app.get_screen("shifter_view_screen")
         main_screen.query_one("#main_container").mount(popup)
 
@@ -107,20 +106,19 @@ class OptionPanel(Static):
             classes="options_panel",
         )
 
-
     def save_to_path(self, dir_path, name):
         logging.info(f"Saving configuration to {dir_path}/{name}")
-        
+
         dir_path = Path(dir_path)
-        
+
         # Clear it
         if dir_path.is_dir():
             shutil.rmtree(dir_path)
-        
+
         dir_path.mkdir(parents=True, exist_ok=True)
-        
+
         output_file_path = f"{dir_path}/{name}"
-        
+
         logging.debug(f"Copying configuration to {output_file_path}")
         ca.CopyFullConfigurationAction(self._configuration)(output_file_path)
         self.generate_change_log(output_file_path)
@@ -129,15 +127,26 @@ class OptionPanel(Static):
         return output_file_path
 
     # Wrappers
-    def save_main(self):        
-        self._saved_configuration = self.save_to_path(f"{self._output_directory}/current_config", self.generate_output_name())
+    def save_main(self):
+        self._saved_configuration = self.save_to_path(
+            f"{self._output_directory}/current_config", self.generate_output_name()
+        )
         self.show_popup(
             f"[white]Configuration saved to [bold grey3]{self._saved_configuration}[/bold grey3]"
         )
 
     def save_backup(self):
-        self.save_to_path(f"{self._output_directory}/old_configs/run_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}", self.generate_output_name())
-        clean_old_files(Path(f"{self._output_directory}/old_configs"), extension=".data.xml", n_files=5, include_folders=True, folder_prefix="run_")
+        self.save_to_path(
+            f"{self._output_directory}/old_configs/run_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}",
+            self.generate_output_name(),
+        )
+        clean_old_files(
+            Path(f"{self._output_directory}/old_configs"),
+            extension=".data.xml",
+            n_files=5,
+            include_folders=True,
+            folder_prefix="run_",
+        )
 
     def generate_output_name(self):
         if self._configuration is None:
@@ -157,9 +166,9 @@ class OptionPanel(Static):
         return f"{output_name}.data.xml"
 
     def generate_change_log(self, config_path):
-        '''
+        """
         Makes a log containing a summary of what was changed in the configuration
-        '''
+        """
         log_name = config_path.replace(".data.xml", "_changes.txt")
 
         main_screen = self.app.get_screen("shifter_view_screen")
@@ -176,7 +185,7 @@ class OptionPanel(Static):
     def open_new_session(
         self, configuration: ConfigurationWrapper | None, session_name: str | None
     ):
-        
+
         self._session_name = session_name
         self._configuration = configuration
 
@@ -201,14 +210,14 @@ class OptionPanel(Static):
                     )
                 )
 
-            # Make sure what we do is valid
+            # Make sure what we do is valid
             except Exception as e:
                 logging.error(f"Error saving configuration: {e}")
                 self.show_popup(
                     f"[white]Invalid configuration[/white] [bold grey3]{self.query_one(FileIOPanel).selected_config_name}:{self.query_one(FileIOPanel).selected_session_name}[/bold grey3] [white]passed, please check with the experts!\n\
                     Log saved to[/white] [bold grey3]{logging.getLogger().handlers[0].baseFilename}[/bold grey3]"
                 )
-                
+
         # Resets to base config provided
         elif event.button.id == "undo_changes_button":
             # Reset everything!

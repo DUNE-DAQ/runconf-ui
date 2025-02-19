@@ -4,6 +4,7 @@ from textual.screen import Screen
 
 from textwrap import dedent
 
+
 class HelpScreen(Screen):
     """Help Screen pop up."""
 

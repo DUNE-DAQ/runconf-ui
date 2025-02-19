@@ -6,10 +6,11 @@ import cider.interfaces.actions.actions as ca
 
 from typing import List
 
+
 class SingleComponentEnableDisablePanel(EnableDisablePanel):
-    '''
+    """
     For enabling/disabling systems made of just a single component class
-    '''
+    """
 
     def __init__(
         self,
@@ -52,7 +53,6 @@ class SingleComponentEnableDisablePanel(EnableDisablePanel):
 
         buttons = []
 
-        
         for class_ in self._class_list:
             buttons += GetObjectsInSessionAction(self._configuration)(session, class_)
 
@@ -60,13 +60,12 @@ class SingleComponentEnableDisablePanel(EnableDisablePanel):
         get_class = ca.GetClassNameAction(self._configuration)
 
         # Enabled first
-        buttons = sorted(buttons, key=lambda x: self.check_is_disabled(get_id(x, "id"), get_class(x)))
+        buttons = sorted(
+            buttons, key=lambda x: self.check_is_disabled(get_id(x, "id"), get_class(x))
+        )
 
         # We want enabled first!
-        return {get_id(b, "id"): get_class(b)
-            for b in buttons
-        }
-            
+        return {get_id(b, "id"): get_class(b) for b in buttons}
 
     def _button_action(self, class_name, button_name):
 

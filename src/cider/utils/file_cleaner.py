@@ -31,11 +31,19 @@ def clean_old_files(
     # Clean up old folders if enabled
     if include_folders:
         folders = sorted(
-            [f for f in logging_path.iterdir() if f.is_dir() and f.name.startswith(folder_prefix)],
+            [
+                f
+                for f in logging_path.iterdir()
+                if f.is_dir() and f.name.startswith(folder_prefix)
+            ],
             key=os.path.getmtime,
         )
-                
+
         while len(folders) > n_files:
             oldest_folder = folders.pop(0)
-            shutil.rmtree(oldest_folder) if oldest_folder.is_dir() else os.remove(oldest_folder)
+            (
+                shutil.rmtree(oldest_folder)
+                if oldest_folder.is_dir()
+                else os.remove(oldest_folder)
+            )
             logging.info(f"Deleted old folder: {oldest_folder}")

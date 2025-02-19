@@ -69,7 +69,7 @@ class DaqConfTree(DaqConfTreeBase):
         session_dal = ca.GetDalObjectAction(self._configuration)(
             self._session, "Session"
         )
-        
+
         self.build_tree(session_dal, self._tree, False)
         return self._tree
 
@@ -78,14 +78,16 @@ class DaqConfTree(DaqConfTreeBase):
         Get related segments
         """
         class_name = ca.GetClassNameAction(self._configuration)(segment)
-        
+
         # Inexplicably session labels its segments as "segments" and not "segment"
-        if class_name=="Segment":
+        if class_name == "Segment":
             return ca.GetAttributeAction(self._configuration)(segment, "segments")
-        elif class_name=="Session":
+        elif class_name == "Session":
             return [ca.GetAttributeAction(self._configuration)(segment, "segment")]
         else:
-            raise ValueError(f"Invalid class {ca.GetClassNameAction(self._configuration)(segment)}")
+            raise ValueError(
+                f"Invalid class {ca.GetClassNameAction(self._configuration)(segment)}"
+            )
 
     def get_related_apps(self, segment):
         """
@@ -121,26 +123,24 @@ class DaqConfTree(DaqConfTreeBase):
                 colour = "green"
                 message = "ENABLED"
 
-
             seg_name = f"[{colour}]{seg_name}   [bold]{message}"
             seg_branch = segs.add(f"{seg_name}")
-            
+
             # Continue building tree until nothing left
             self.build_tree(seg, seg_branch, seg_disabled)
-            
+
             self.add_apps(seg, seg_branch, seg_disabled)
         return segs
 
-
     def add_apps(self, seg, seg_branch, seg_disabled):
-        
+
         # Get apps
         if not len(self.get_related_apps(seg)):
             return
-        
+
         seg_apps = seg_branch.add("[bold deep_pink4]Applications")
         for app in self.get_related_apps(seg):
-            
+
             app_name = ca.GetAttributeAction(self._configuration)(app, "id")
 
             if (
@@ -158,7 +158,6 @@ class DaqConfTree(DaqConfTreeBase):
             app_name = f"[{colour}]{app_name}   [bold]{message}"
 
             seg_apps.add(app_name)
-
 
     @property
     def disabled_objs(self):
@@ -186,13 +185,13 @@ class ComponentLevelTree(DaqConfTreeBase):
         self._extractor = SystemInfoExtractor(configuration, session)
         # Label for the top level branch
         self._label = label
-    
+
         super().__init__(configuration, session)
 
     def generate_tree(self):
-        '''
+        """
         Actually generate the full tree
-        '''
+        """
         self._tree = Tree(f"[bold deep_pink4] {self._label}")
 
         # Get the labels for each system system
@@ -213,7 +212,7 @@ class ComponentLevelTree(DaqConfTreeBase):
                 colour = "grey35"
                 text = "DISABLED"
 
-            # Full system tree 
+            # Full system tree
             system_tree = self._tree.add(f"[bold {colour}]{label}     {text}")
 
             # Loop over each subsystem
@@ -224,22 +223,30 @@ class ComponentLevelTree(DaqConfTreeBase):
                 )
 
                 # Okay now we can grab each component
-                if subsystem['type']=='attribute':
+                if subsystem["type"] == "attribute":
                     specific_comps = GetObjectsInSessionAction(self._configuration)(
-                        session_dal, subsystem["class"], subsystem.get("affected_objects", None)
+                        session_dal,
+                        subsystem["class"],
+                        subsystem.get("affected_objects", None),
                     )
-                    
-                    system_name = subsystem['id']
-                    
-                elif subsystem['type']=='component' or subsystem['type']=='relationship':
+
+                    system_name = subsystem["id"]
+
+                elif (
+                    subsystem["type"] == "component"
+                    or subsystem["type"] == "relationship"
+                ):
                     # Specific component
-                    specific_comps = [ca.GetDalObjectAction(self._configuration)(subsystem["id"], subsystem["class"])]
+                    specific_comps = [
+                        ca.GetDalObjectAction(self._configuration)(
+                            subsystem["id"], subsystem["class"]
+                        )
+                    ]
                     system_name = ""
-                    
+
                     # Relationships need slightly special treatment
-                    if subsystem['type']=='relationship':
-                        system_name += subsystem[f'relationship_name']                            
-                
+                    if subsystem["type"] == "relationship":
+                        system_name += subsystem["relationship_name"]
 
                 for c in specific_comps:
                     if enabled and c not in self._disabled_items:

@@ -7,11 +7,10 @@ from typing import Dict, Optional
 from cider.interfaces.workflows.extract_system_info import SystemInfoExtractor
 
 
-
 class MultiComponentEnableDisablePanel(EnableDisablePanel):
-    '''
+    """
     For enabling/disabling systems made of many different things
-    '''
+    """
 
     def __init__(
         self,
@@ -50,7 +49,7 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
         # Set up information extractor
         self._extractor.set_config_session(self._configuration, self._session_name)
 
-        # Grabs state information for each button 
+        # Grabs state information for each button
         button_dict = self._extractor.initialise_subsystem(self._object_list)
 
         # Makes sure that the button states are set correctly and consistent

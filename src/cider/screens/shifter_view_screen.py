@@ -3,7 +3,6 @@ from textual.containers import ScrollableContainer, Grid
 from textual.widgets import TabbedContent, TabPane, Header, Footer, Button, Static
 from textual import on
 from textual.css.query import NoMatches
-from textual.reactive import reactive
 
 from cider.interfaces.controller.config_wrapper import ConfigurationWrapper
 from cider.widgets.enable_disable_base import EnableDisablePanel
@@ -23,7 +22,7 @@ from cider.widgets.popup_message import PopupMessage
 
 
 class ShifterViewScreen(Screen):
-    
+
     # Buffer config used to store the configuration during editing
     TMP_CONFIG = Path(f"/tmp/shifter_configs-{os.getlogin()}/tmp_config.data.xml")
 
@@ -51,27 +50,29 @@ class ShifterViewScreen(Screen):
         self._config_folder = config_folder
         self._output_directory = output_directory
 
-        self._configuration = None  
+        self._configuration = None
         self._session = None
 
     def compose(self):
         """
         Generate the screen layout
         """
-                
+
         with ScrollableContainer(id="main_container"):
-            
+
             # File dropdowns
-            yield FileIOPanel(self._config_folder, self._config.default_config, id="file_io_panel")
+            yield FileIOPanel(
+                self._config_folder, self._config.default_config, id="file_io_panel"
+            )
 
             # Grid containing buttons AND maps
             with Grid(id="enable_disable_panel_container"):
-                
+
                 # Get the tabs with buttons, these are all set up in the config file
                 with TabbedContent(id="selection_tabs"):
                     for panel in self._config.panel_list:
-                        yield panel 
-                    
+                        yield panel
+
                 # All maps
                 with TabbedContent(
                     "SystematicMap",
@@ -88,12 +89,12 @@ class ShifterViewScreen(Screen):
                             id="tree_view_full_container",
                             classes="tree_view_full_container",
                         )
-                    
+
                     # For all other maps, we need to loop over the config file. Maps display ONLY for
                     # mutlisystem systems
                     for panel in self._config.map_list:
                         yield panel
-                    
+
             # help/create/quit/etc.
             yield OptionPanel(
                 None,
@@ -121,18 +122,21 @@ class ShifterViewScreen(Screen):
                     Log saved to[/white] [bold grey3]{logging.getLogger().handlers[0].baseFilename}[/bold grey3]"
                 )
                 # Optionally log the error for debugging
-                logging.error(f"Couldn't open file: {self.query_one(FileIOPanel).selected_config_name}:{self.query_one(FileIOPanel).selected_session_name}")
+                logging.error(
+                    f"Couldn't open file: {self.query_one(FileIOPanel).selected_config_name}:{self.query_one(FileIOPanel).selected_session_name}"
+                )
                 logging.error(f"Error: {e}")
                 await self.deconfigure()
             except Exception as e:
                 self.show_popup(
                     f"[white]ERROR::{e}. This is likely an issue with the interface. Please check with the experts!\nLog saved to[/white] [bold grey3]{logging.getLogger().handlers[0].baseFilename}[/bold grey3]"
                 )
-                # Optionally log the error for debugging            
-                logging.error(f"Couldn't open file: {self.query_one(FileIOPanel).selected_config_name}:{self.query_one(FileIOPanel).selected_session_name}")
+                # Optionally log the error for debugging
+                logging.error(
+                    f"Couldn't open file: {self.query_one(FileIOPanel).selected_config_name}:{self.query_one(FileIOPanel).selected_session_name}"
+                )
                 logging.error(f"{traceback.format_exc()}")
                 await self.deconfigure()
-                
 
     def show_popup(self, message: str):
         """
@@ -173,11 +177,8 @@ class ShifterViewScreen(Screen):
             # Unload config
             await self.deconfigure()
             # Lives at the bottom of the screen
-            self.show_popup(
-                "[white]Configuration has been removed from disk!"
-            )
-        
-        
+            self.show_popup("[white]Configuration has been removed from disk!")
+
     def open_new_file(self):
         """
         Open a new file is the only cross-app interface
@@ -208,7 +209,7 @@ class ShifterViewScreen(Screen):
             logging.info("No session or configuration")
             pass
 
-        self._configuration = buffer_config  
+        self._configuration = buffer_config
         self._session = session_name
 
         logging.debug("Updating enable/disable panels")
@@ -221,13 +222,12 @@ class ShifterViewScreen(Screen):
         logging.info("Updating tree views")
         self.update_trees(buffer_config, session_name)
         logging.info("Successfully updated tree views")
-        
 
     def on_enable_disable_panel_changed(self, message: EnableDisablePanel.Changed):
         # Change from enable->disable or vice versa
         for a in self.query("EnableDisablePanel"):
             a.update_button_styles()
-            
+
         self.update_trees(message.configuration, message.session)
 
     def update_trees(self, configuration: ConfigurationWrapper, session: str):
@@ -246,16 +246,17 @@ class ShifterViewScreen(Screen):
     def update_tree(self, panel_name, configuration, session, disabled):
         # Get current state of panel
         try:
-            panel_state = self.query_one(f"#{panel_name}_subsystem_panel").get_full_state_info()
-            
+            panel_state = self.query_one(
+                f"#{panel_name}_subsystem_panel"
+            ).get_full_state_info()
+
             new_tree = ComponentLevelTree(
                 configuration, session, panel_state, panel_name, disabled
             )
-        
-        # Now we just need the static widget
+
+            # Now we just need the static widget
             self.query_one(f"#tree_view_{panel_name}").update(new_tree.print_tree())
-        except Exception as e:
+        except Exception:
             # The loop is a little dumb and also does single-component items so we just skip this
             logging.debug(f"Couldn't update {panel_name} tree")
             logging.debug(traceback.format_exc())
-
