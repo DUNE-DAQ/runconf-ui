@@ -3,7 +3,7 @@ from cider.widgets.enable_disable_base import EnableDisablePanel
 
 from textual.visual import SupportsVisual
 
-from typing import Dict, Optional, List, NamedTuple, Any
+from typing import Dict, Optional
 from cider.interfaces.workflows.extract_system_info import SystemInfoExtractor
 
 

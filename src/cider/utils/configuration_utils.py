@@ -1,4 +1,3 @@
-from rich import print
 from cider.interfaces.controller.config_wrapper import ConfigurationWrapper
 
 

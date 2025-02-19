@@ -6,10 +6,8 @@ from cider.interfaces.actions.actions import (
     GetRelatedDalsAction,
 )
 
-import datetime
 import sys
 import os
-from typing import Any, List, Dict
 
 
 class ConsolidateFile:

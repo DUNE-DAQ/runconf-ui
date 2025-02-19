@@ -3,7 +3,6 @@ from cider.exceptions import CiderBadActionException
 
 import cider.interfaces.actions.actions as ca
 from cider.utils.detector_subsystem import SubsystemInfo
-from cider.exceptions import CiderBadActionException
 from cider.interfaces.workflows.get_set_session_attribute import (
     SetAttributeValueSessionAction,
     GetAttributeValueSessionAction,
@@ -59,7 +58,7 @@ class SystemInfoExtractor:
         ):
             return object_states[0]
 
-        if object_states[0] == None:
+        if object_states[0] is None:
             return None
 
         return default_state

@@ -2,7 +2,6 @@ import logging
 import os
 import shutil
 from pathlib import Path
-from typing import Union
 
 
 def clean_old_files(

@@ -5,8 +5,6 @@ from cider.widgets.enable_disable_base import EnableDisablePanel
 import cider.interfaces.actions.actions as ca
 from cider.interfaces.workflows.get_objects_in_session import GetObjectsInSessionAction
 from textual.visual import SupportsVisual
-from textual.widgets import Button
-from typing import List, Dict
 
 
 class SingleComponentEnableDisablePanel(EnableDisablePanel):

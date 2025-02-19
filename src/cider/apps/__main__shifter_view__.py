@@ -3,7 +3,6 @@
 from cider.screens.shifter_view_screen import ShifterViewScreen
 from cider.screens.quit_screen import QuitScreen
 from cider.utils.file_cleaner import clean_old_files
-from textual.logging import TextualHandler
 from textual.app import App
 from textual.driver import Driver
 import click

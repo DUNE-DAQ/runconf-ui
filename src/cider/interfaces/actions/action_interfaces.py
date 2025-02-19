@@ -1,11 +1,8 @@
-""" """
-
 from cider.interfaces.controller.config_wrapper import ConfigurationWrapper
 from cider.exceptions import CiderBadActionException
 
 from abc import ABC, abstractmethod
 from typing import Any
-from typing import Dict, List
 
 # The idea here is to define an interface for actions on a configuration,
 # currently this is very simple but there is scope to add some complexity

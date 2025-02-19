@@ -1,6 +1,5 @@
 from cider.widgets.single_component_panel import SingleComponentEnableDisablePanel
 from cider.widgets.multicomponent_panel import MultiComponentEnableDisablePanel
-from cider.widgets.enable_disable_base import EnableDisablePanel
 from cider.utils.daq_conf_tree import ComponentLevelTree
 
 from textual.widgets import TabPane, Static

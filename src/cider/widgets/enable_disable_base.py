@@ -1,11 +1,9 @@
 from cider.interfaces.controller.config_wrapper import ConfigurationWrapper
 import cider.interfaces.actions.actions as ca
-from cider.utils.daq_conf_tree import DaqConfTree
 
-from textual.geometry import Region
 from textual.visual import SupportsVisual
-from textual.widgets import Static, Placeholder, Button
-from textual.containers import Grid, ScrollableContainer
+from textual.widgets import Static, Button
+from textual.containers import ScrollableContainer
 from textual.message import Message
 from typing import List
 import logging
@@ -154,7 +152,7 @@ class EnableDisablePanel(Static):
             button_id = button.replace(" ", "_") + "_button"
             try:
                 button_widget = self.query_one(f"#{button_id}", Button)
-            except:
+            except Exception:
                 return
 
             if self.check_is_disabled(button, information):

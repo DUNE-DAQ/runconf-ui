@@ -6,8 +6,6 @@ from textual.css.query import NoMatches
 from textual.reactive import reactive
 
 from cider.interfaces.controller.config_wrapper import ConfigurationWrapper
-from cider.widgets.single_component_panel import SingleComponentEnableDisablePanel
-from cider.widgets.multicomponent_panel import MultiComponentEnableDisablePanel
 from cider.widgets.enable_disable_base import EnableDisablePanel
 from cider.widgets.options_panel import OptionPanel
 from cider.widgets.file_io_panel import FileIOPanel
@@ -19,7 +17,6 @@ import traceback
 
 from pathlib import Path
 import os
-import yaml
 import logging
 
 from cider.widgets.popup_message import PopupMessage
@@ -30,7 +27,6 @@ class ShifterViewScreen(Screen):
     TMP_CONFIG = Path(f"/tmp/shifter_configs-{os.getlogin()}/tmp_config.data.xml")
 
     changed_session = False
-    show_popup = reactive(False)
 
     """
     Main shifter view, thid is the main screen that the shifter will see
@@ -164,10 +160,10 @@ class ShifterViewScreen(Screen):
     async def on_path_changed(self):
         try:
             self.open_new_file()
-        except:
+        except Exception as _:
             await self.deconfigure()
             self.show_popup(
-                f"[white]Configuration has been removed from disk!"
+                "[white]Configuration has been removed from disk!"
             )
         
         
@@ -242,20 +238,3 @@ class ShifterViewScreen(Screen):
         except:
             return
 
-
-        # detector_states = self.query_one("#detector_subsystem_panel").get_full_state_info()
-        # detector_tree = ComponentLevelTree(
-        #     configuration, session, detector_states, "Detector Systems", disabled
-        # )
-
-        # self.query_one("#tree_view_det").update(detector_tree.print_tree())
-
-
-        # # We also want trigger states
-        # trigger_states = self.query_one("#trigger_panel").get_full_state_info()
-        # trigger_tree = ComponentLevelTree(
-        #     configuration, session, trigger_states, "Triggers", disabled
-        # )
-
-
-        # self.query_one("#tree_view_trigger").update(trigger_tree.print_tree())

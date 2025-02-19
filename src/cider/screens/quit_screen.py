@@ -3,7 +3,6 @@ from textual.containers import Grid
 from textual.screen import Screen
 import logging
 
-import cider.interfaces.actions.actions as ca
 from cider.interfaces.controller.config_wrapper import ConfigurationWrapper
 
 

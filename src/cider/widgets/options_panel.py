@@ -4,6 +4,7 @@ from cider.screens.quit_screen import QuitScreen
 from cider.screens.help_screen import HelpScreen
 from cider.widgets.popup_message import PopupMessage
 from cider.utils.file_cleaner import clean_old_files
+from cider.widgets.file_io_panel import FileIOPanel
 
 from textual.reactive import reactive
 

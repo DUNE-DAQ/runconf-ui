@@ -1,12 +1,8 @@
-from textual.widgets import Button, Label, TextArea, Static
+from textual.widgets import Button, Static
 from textual.containers import ScrollableContainer
 from textual.screen import Screen
 
 from textwrap import dedent
-
-import cider.interfaces.actions.actions as ca
-from cider.interfaces.controller.config_wrapper import ConfigurationWrapper
-
 
 class HelpScreen(Screen):
     """Help Screen pop up."""

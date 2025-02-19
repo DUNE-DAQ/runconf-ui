@@ -5,7 +5,7 @@ from watchdog.observers import Observer
 import threading
 from textual.containers import Grid
 from textual.visual import SupportsVisual
-from textual.widgets import Button, Static, Select, Pretty
+from textual.widgets import Button, Static, Select
 from textual.message import Message
 from textual.reactive import reactive
 from typing import List, Optional, Tuple
