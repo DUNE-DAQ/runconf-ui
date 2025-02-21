@@ -124,6 +124,15 @@ PanelOptions:
     panel_type: "multisystem"
 
     Buttons:
+      TPC:
+        subsystems:
+          - type: component
+            class: Segment
+            id: tpc-segment
+            enabled_state: true
+            disabled_state: false
+        enabled: true
+
       CRP4:
         subsystems:
           - type: component
