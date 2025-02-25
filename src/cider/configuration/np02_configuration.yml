@@ -36,6 +36,14 @@ PanelOptions:
           components:
             - id: pds-segment
               class: Segment
+      - ABC:
+          top_level_segment: "ABC-segment"
+
+          components:
+            - id: abc-segment
+              class: Segment
+
+
 
   # Dataflow
   Dataflow:
