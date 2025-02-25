@@ -2,7 +2,6 @@ from cider.interfaces.controller.config_wrapper import ConfigurationWrapper
 from cider.exceptions import CiderBadActionException
 
 import cider.interfaces.actions.actions as ca
-from cider.utils.detector_subsystem import SubsystemInfo
 from cider.interfaces.workflows.get_set_session_attribute import (
     SetAttributeValueSessionAction,
     GetAttributeValueSessionAction,
@@ -11,7 +10,6 @@ from cider.interfaces.workflows.get_objects_in_session import GetSegmentAppsList
 
 from typing import Dict, Sequence, Optional
 from enum import IntEnum
-from copy import deepcopy
 from abc import ABC, abstractmethod
 import traceback
 

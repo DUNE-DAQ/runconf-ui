@@ -1,14 +1,11 @@
 from cider.widgets.single_component_panel import SingleComponentEnableDisablePanel
 from cider.widgets.multicomponent_panel import MultiComponentEnableDisablePanel
-from cider.utils.daq_conf_tree import ComponentLevelTree
 
 from textual.widgets import TabPane, Static
 from textual.containers import ScrollableContainer
 
 import logging
 import yaml
-import traceback
-
 
 '''
 - Name:

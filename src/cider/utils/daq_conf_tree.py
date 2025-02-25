@@ -1,15 +1,12 @@
 # Essentially the tree from https://github.com/DUNE-DAQ/daqconf/blob/develop/scripts/daqconf_inspector
 
 import cider.interfaces.actions.actions as ca
-from cider.interfaces.workflows.get_objects_in_session import GetObjectsInSessionAction
 from cider.interfaces.controller.config_wrapper import ConfigurationWrapper
-from cider.interfaces.workflows.extract_system_info import DetectorExtractor, SystemExtractor, SubsystemStatus
+from cider.interfaces.workflows.extract_system_info import DetectorExtractor, SubsystemStatus
 
 
 from rich.tree import Tree
 from abc import ABC, abstractmethod
-from typing import Dict
-import logging
 
 class DaqConfTreeBase(ABC):
     """
@@ -179,103 +176,6 @@ class DaqConfTree(DaqConfTreeBase):
     def disabled_objs(self):
         return self._disabled_objs
 
-
-# class ComponentLevelTree(DaqConfTreeBase):
-#     """
-#     Class To Represent Multicomponent objects
-#     """
-
-#     def __init__(
-#         self,
-#         configuration: ConfigurationWrapper | None = None,
-#         session: str | None = None,
-#         system_info: dict = {},
-#         label: str = "",
-#         disabled_items=[],
-#     ):
-#         # System info dict
-#         self._system_info = system_info
-#         # Disabled items, obtained from DaqConfTree usually
-#         self._disabled_items = disabled_items
-#         # Extractor
-#         self._extractor = DetectorExtractor(configuration, session, system_info)
-#         # Label for the top level branch
-#         self._label = label
-
-#         super().__init__(configuration, session)
-
-#     def read_system(self, system_info):
-#         """
-#         Set new system info
-#         """
-#         self._system_info = system_info
-#         self._extractor.read_system(system_info)
-        
-#     def open_new_session(self, configuration: ConfigurationWrapper, session: str | None):
-#         return super().open_new_session(configuration, session)
-
-#     def generate_tree(self) -> Tree:
-#         """Generate the tree."""
-#         self._tree = Tree(f"[bold red1] {self._system_info['view_panel']}")
-        
-#         for system in self._extractor.systems:
-#             # Okay now we need to be a bit careful
-            
-#             colour, message = self.get_text_colour_message(system.get_state())
-            
-#             st = self._tree.add(f"[{colour}]{system.system_names[-1]} [bold]{message}")
-            
-#             for subsyst in system.system_names:
-#                 if subsyst != system.system_names[-1]:
-#                     colour, message = self.get_text_colour_message(system.get_state(subsyst))               
-#                     subst = st.add(f"[{colour}]{subsyst}   [bold]{message}")
-#                 else:
-#                     subst = st
-                                
-#                 for comp in system.get_components(subsyst):
-#                     if subsyst == system.system_names[-1] and comp.system_name is not None:
-#                         continue
-                    
-#                     colour, message = self.get_text_colour_message(comp.get_state())
-                
-#                     subst.add(f"[{colour}]{comp.system_id}   [bold]{message}")
-                
-                
-#                 # Attribute loop one, get the apps 
-#                 attribute_objs = []
-#                 for attr in system.get_attributes(subsyst):
-#                     attribute_objs.extend(attr.get_affected_object_dals())                    
-                
-#                 # Now make it unique
-#                 attribute_objs = list(set(attribute_objs))
-
-#                 attribute_tree = {}
-#                 logging.info(f"disabled : {self._disabled_items}")
-
-#                 for a in attribute_objs:
-                    
-                    
-#                     colour, message = self.get_text_colour_message(
-#                         SubsystemStatus(not a in self._disabled_items)
-#                     )
-                    
-#                     attribute_tree[ca.GetAttributeAction(self._configuration)(a,'id')] = Tree(f"[{colour}]{ca.GetAttributeAction(self._configuration)(a, 'id')}   [bold]{message}")
-
-                
-#                 for attr in system.get_attributes(subsyst):
-#                     if subsyst == system.system_names[-1] and attr.system_name is not None:
-#                         continue
-                    
-#                     for a in attr.get_affected_object_names():
-#                         if message == "ENABLED":
-#                             colour, message = self.get_text_colour_message(attr.get_state_for_obj(a))
-        
-#                         attribute_tree[a].add(f"[{colour}]{attr.system_id}   [bold]{message}")
-
-#                     subst.add(attribute_tree[a])
-                    
-#         return self._tree
-
 class ComponentLevelTree(DaqConfTreeBase):
     """
     Class to represent multi-component objects in a tree structure.
@@ -398,7 +298,7 @@ class ComponentLevelTree(DaqConfTreeBase):
             if obj_name in attribute_tree:
                 # If the attribute object is in the disabled list, mark it as disabled
                 obj_disabled = is_disabled or (attr.get_state_for_obj(obj_name) == SubsystemStatus.DISABLED) \
-                    or (attr.get_affected_object(obj_name) in self._disabled_items)
+                    or (attr.get_affected_object() in self._disabled_items)
                 colour, message = self.get_text_colour_message(
                     SubsystemStatus.DISABLED if obj_disabled else attr.get_state_for_obj(obj_name)
                 )

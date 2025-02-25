@@ -6,11 +6,6 @@ from cider.utils.daq_conf_tree import ComponentLevelTree
 from typing import Dict, Optional
 from textual.visual import SupportsVisual
 
-import logging
-
-
-
-
 class MultiComponentEnableDisablePanel(EnableDisablePanel):
     """
     For enabling/disabling systems made of many different things
