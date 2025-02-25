@@ -10,6 +10,7 @@ from cider.widgets.enable_disable_base import EnableDisablePanel
 from cider.widgets.options_panel import OptionPanel
 from cider.widgets.file_io_panel import FileIOPanel
 from cider.utils.consolidate_file import ConsolidateFile
+from cider.utils.daq_conf_tree import DaqConfTree
 from cider.utils.shifter_config_reader import ShifterConfigReader
 
 import traceback
