@@ -13,11 +13,11 @@ PanelOptions:
 
     Systems:
       - TPC:
-          top_level_segment: "root-segment"
+          top_level_segment: "tpc-segment"
 
           components:
-            # - id: tpc-segment
-            #   class: segment
+            - id: tpc-segment
+              class: Segment
 
             - id: crp4-segment
               class: Segment
