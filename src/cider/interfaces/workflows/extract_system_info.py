@@ -470,6 +470,12 @@ class DetectorExtractor(MultiItemExtractor):
 
         # grab big dict
         for system in self._system_extractors:
-            return_dict.update(system.get_all_states())
+            try:
+                return_dict.update(system.get_all_states())
+            except CiderBadActionException:
+                continue
+            except Exception as e:
+                logging.error(f"{traceback.format_exc()}")
+                logging.error(f"Could not get all states for {system.system_name} due to {e}")
 
         return return_dict

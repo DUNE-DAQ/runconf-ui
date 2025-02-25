@@ -6,7 +6,7 @@ from cider.interfaces.workflows.extract_system_info import (
     DetectorExtractor,
     SubsystemStatus,
 )
-
+from cider.exceptions import CiderBadActionException
 
 from rich.tree import Tree
 from abc import ABC, abstractmethod
@@ -213,7 +213,12 @@ class ComponentLevelTree(DaqConfTreeBase):
 
         for system in self._extractor.systems:
             # Start with is_disabled=False for the top-level system
-            self._add_system_to_tree(system, is_disabled=False)
+            try:
+                self._add_system_to_tree(system, is_disabled=False)
+            except CiderBadActionException:
+                continue
+            except Exception as e:
+                raise e
 
         return self._tree
 
