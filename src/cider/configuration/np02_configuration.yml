@@ -53,7 +53,7 @@ PanelOptions:
 
     Systems:
       - TPC TPG:
-          top_level_segment: "root-segment"
+          top_level_segment: "crp4-segment"
       
           attributes:
               - id: tp_generation_enabled

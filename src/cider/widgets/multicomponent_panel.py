@@ -81,5 +81,8 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
     
 
     def get_tree(self, disabled_states = []):
-        tree = ComponentLevelTree(self._configuration, self._session_name, self._object_list, disabled_states)
+        tree = ComponentLevelTree(configuration=self._configuration,
+                                  session=self._session_name,
+                                  system_info=self._object_list,
+                                  disabled_items=disabled_states)
         return tree

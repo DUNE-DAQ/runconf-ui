@@ -160,7 +160,9 @@ class AttributeExtractor(SubsystemExtractor):
 
     def get_state_for_obj(self, object_name: str) -> SubsystemStatus:
         try:
-            object_state = ca.GetAttributeAction(self._configuration)(object_name, self._system_id)
+            
+            object_dal = ca.GetDalObjectAction(self._configuration)(object_name, self._system_class)
+            object_state = ca.GetAttributeAction(self._configuration)(object_dal, self._system_id)
     
             if object_state == self._enabled_state:
                 return SubsystemStatus.ENABLED    
@@ -186,11 +188,14 @@ class AttributeExtractor(SubsystemExtractor):
             self._affected_objects,
         )
 
-    def get_affected_objects(self):
+    def get_affected_object_names(self):
         if self._affected_objects is None:
             return []
         
         return self._affected_objects
+
+    def get_affected_object_dals(self):
+        return [ca.GetDalObjectAction(self._configuration)(a, self._system_class) for a in self._affected_objects]
 
 class ComponentExtractor(SubsystemExtractor):    
     def get_state(self) -> SubsystemStatus:
@@ -268,7 +273,7 @@ class SystemExtractor(MultiItemExtractor):
         if self._system_name is not None:
             self._system_names.append(self._system_name)
         else:
-            self._system_names.append("root")
+            self._system_names.append("root")            
 
     @property
     def system_names(self)->Sequence[str]:
