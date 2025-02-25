@@ -397,7 +397,8 @@ class ComponentLevelTree(DaqConfTreeBase):
         for obj_name in attr.get_affected_object_names():
             if obj_name in attribute_tree:
                 # If the attribute object is in the disabled list, mark it as disabled
-                obj_disabled = is_disabled or (attr.get_state_for_obj(obj_name) == SubsystemStatus.DISABLED)
+                obj_disabled = is_disabled or (attr.get_state_for_obj(obj_name) == SubsystemStatus.DISABLED) \
+                    or (attr.get_affected_object(obj_name) in self._disabled_items)
                 colour, message = self.get_text_colour_message(
                     SubsystemStatus.DISABLED if obj_disabled else attr.get_state_for_obj(obj_name)
                 )

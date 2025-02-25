@@ -194,6 +194,11 @@ class AttributeExtractor(SubsystemExtractor):
         
         return self._affected_objects
 
+    def get_affected_object(self, obj_name):
+        if obj_name in self._affected_objects:
+            return ca.GetDalObjectAction(self._configuration)(obj_name, self._system_class)
+        return None
+
     def get_affected_object_dals(self):
         return [ca.GetDalObjectAction(self._configuration)(a, self._system_class) for a in self._affected_objects]
 
