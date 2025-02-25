@@ -218,11 +218,10 @@ class ShifterViewScreen(Screen):
         for a in self.query("EnableDisablePanel"):
             a.open_new_session(buffer_config, session_name)
             a.refresh(recompose=True)
-
+            a.update_button_styles()
+        
         # Update trees
-        logging.info("Updating tree views")
         self.update_trees(buffer_config, session_name)
-        logging.info("Successfully updated tree views")
 
     def on_enable_disable_panel_changed(self, message: EnableDisablePanel.Changed):
         # Change from enable->disable or vice versa

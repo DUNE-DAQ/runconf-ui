@@ -65,6 +65,11 @@ SelectCurrent{
     background: $success;
 }
 
+.detector_subsystem_button_enabled {
+    background: $success;
+}
+
+
 /* === Detector Subsystem Panel === */
 #enable_disable_panel_container {
     grid-size: 20;

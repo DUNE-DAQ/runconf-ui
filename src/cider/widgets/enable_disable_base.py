@@ -62,8 +62,6 @@ class EnableDisablePanel(Static):
 
         self._button_list = self.generate_button_list()
 
-        logging.info(self._button_list)
-
         # Need default initial states
         self._default_states = {
             k: self.check_button_state(k, b) for k, b in self._button_list.items()
@@ -79,17 +77,25 @@ class EnableDisablePanel(Static):
         with ScrollableContainer(id="buttons_panel"):
             for button, information in self._button_list.items():
 
-                if self.check_button_state(button, information):
+                button_status = self.check_button_state(button, information)
+                
+                if button_status == SubsystemStatus.ENABLED:
+                    name_str = f"{button} (Enabled)"
+                    classes = (
+                        "detector_subsystem_button detector_subsystem_button_enabled"
+                    )
+                elif button_status == SubsystemStatus.PARTIALLY_ENABLED:
+                    name_str = f"{button} (Partially Enabled)"
+                    classes = (
+                        "detector_subsystem_button detector_subsystem_button_partial"
+                    )
+                else:
                     name_str = f"{button} (Disabled)"
                     classes = (
                         "detector_subsystem_button detector_subsystem_button_disabled"
                     )
 
-                else:
-                    name_str = f"{button} (Enabled)"
-                    classes = (
-                        "detector_subsystem_button detector_subsystem_button_enabled"
-                    )
+
 
                 id_name = button.replace(" ", "_")
 
@@ -168,23 +174,22 @@ class EnableDisablePanel(Static):
 
             button_state = self.check_button_state(button, information)
 
+            button_widget.remove_class("detector_subsystem_button_enabled")
+            button_widget.remove_class("detector_subsystem_button_partial")
+            button_widget.remove_class("detector_subsystem_button_disabled")
+
             if button_state == SubsystemStatus.DISABLED:
-                button_widget.remove_class("detector_subsystem_button_enabled")
-                button_widget.remove_class("detector_subsystem_button_partial")
                 button_widget.add_class("detector_subsystem_button_disabled")
                 button_widget.label = f"{button} (Disabled)"
 
             elif button_state == SubsystemStatus.ENABLED:
-                button_widget.remove_class("detector_subsystem_button_disabled")
-                button_widget.remove_class("detector_subsystem_button_partial")
                 button_widget.add_class("detector_subsystem_button_enabled")
                 button_widget.label = f"{button} (Enabled)"
 
             elif button_state == SubsystemStatus.PARTIALLY_ENABLED:
-                button_widget.remove_class("detector_subsystem_button_enabled")
-                button_widget.remove_class("detector_subsystem_button_disabled")
                 button_widget.add_class("detector_subsystem_button_partial")
                 button_widget.label = f"{button} (Partially Enabled)"
+            
 
             else:
                 raise ValueError(f"Unknown button state {button_state}")

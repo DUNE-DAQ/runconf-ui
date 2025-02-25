@@ -6,7 +6,7 @@ from cider.interfaces.workflows.extract_system_info import (
     DetectorExtractor,
     SubsystemStatus,
 )
-
+from cider.exceptions import CiderBadActionException
 
 from rich.tree import Tree
 from abc import ABC, abstractmethod
@@ -49,7 +49,7 @@ class DaqConfTreeBase(ABC):
         elif system_state == SubsystemStatus.DISABLED:
             colour = "grey35"
         elif system_state == SubsystemStatus.PARTIALLY_ENABLED:
-            colour = "orange"
+            colour = "dark_orange3"
         else:
             raise ValueError(f"Invalid state {system_state}")
 
@@ -213,7 +213,12 @@ class ComponentLevelTree(DaqConfTreeBase):
 
         for system in self._extractor.systems:
             # Start with is_disabled=False for the top-level system
-            self._add_system_to_tree(system, is_disabled=False)
+            try:
+                self._add_system_to_tree(system, is_disabled=False)
+            except CiderBadActionException:
+                continue
+            except Exception as e:
+                raise e
 
         return self._tree
 
@@ -296,11 +301,14 @@ class ComponentLevelTree(DaqConfTreeBase):
         for obj in attribute_objs:
             obj_id = ca.GetAttributeAction(self._configuration)(obj, "id")
             # Check if the attribute object is in the disabled list
-            obj_disabled = obj in self._disabled_items or system_disabled
+            obj_disabled = obj in self._disabled_items 
+            if system_disabled and not obj_disabled:
+                status = SubsystemStatus.PARTIALLY_ENABLED
+            else:
+                status = SubsystemStatus.DISABLED if obj_disabled else SubsystemStatus.ENABLED
 
-            colour, message = self.get_text_colour_message(
-                SubsystemStatus.DISABLED if obj_disabled else SubsystemStatus.ENABLED
-            )
+            colour, message = self.get_text_colour_message(status)
+
             attribute_tree[obj_id] = Tree(f"[{colour}]{obj_id}   [bold]{message}")
 
         return attribute_tree
@@ -313,7 +321,7 @@ class ComponentLevelTree(DaqConfTreeBase):
                 obj_disabled = (
                     is_disabled
                     or (attr.get_state_for_obj(obj_name) == SubsystemStatus.DISABLED)
-                    or (attr.get_affected_object() in self._disabled_items)
+                    or (attr.get_affected_object(obj_name) in self._disabled_items)
                 )
                 colour, message = self.get_text_colour_message(
                     SubsystemStatus.DISABLED
