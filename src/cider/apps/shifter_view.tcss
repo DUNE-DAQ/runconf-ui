@@ -15,7 +15,7 @@ ShifterViewScreen {
 
 /* === File IO Panel === */
 #file_io_panel_grid {
-    grid-size: 5 2;
+    grid-size: 10 2;
     width: 100%;
     column-span: 5;
     content-align: center middle;
@@ -64,6 +64,11 @@ SelectCurrent{
 .detector_subsystem_button_enabled {
     background: $success;
 }
+
+.detector_subsystem_button_partial {
+    background: $warning-lighten-2;
+}
+
 
 /* === Detector Subsystem Panel === */
 #enable_disable_panel_container {
