@@ -70,7 +70,7 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
 
         # Specific handlers for these cases
         if current_state == SubsystemStatus.PARTIALLY_ENABLED:
-            current_state = SubsystemStatus.DISABLED
+            current_state = SubsystemStatus.ENABLED
 
         if current_state == SubsystemStatus.TOP_LEVEL_DISABLED:
             current_state = SubsystemStatus.DISABLED
