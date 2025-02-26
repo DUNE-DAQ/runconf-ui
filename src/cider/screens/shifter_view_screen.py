@@ -219,7 +219,7 @@ class ShifterViewScreen(Screen):
             a.open_new_session(buffer_config, session_name)
             a.refresh(recompose=True)
             a.update_button_styles()
-        
+
         # Update trees
         self.update_trees(buffer_config, session_name)
 
@@ -229,7 +229,6 @@ class ShifterViewScreen(Screen):
 
         # for a in self.query("EnableDisablePanel"):
         #     a.update_button_styles()
-
 
     def update_trees(self, configuration: ConfigurationWrapper, session: str):
         # We get the the full system first

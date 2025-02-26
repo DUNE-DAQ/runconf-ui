@@ -9,6 +9,7 @@ from cider.utils.daq_conf_tree import ComponentLevelTree
 from typing import Dict, Optional
 from textual.visual import SupportsVisual
 
+
 class MultiComponentEnableDisablePanel(EnableDisablePanel):
     """
     For enabling/disabling systems made of many different things
@@ -82,14 +83,14 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
         self._disabled_items = disabled_states
         self._extractor.set_disabled_dals(disabled_states)
 
-    def check_button_state(self, button: str, _) -> SubsystemStatus:        
+    def check_button_state(self, button: str, _) -> SubsystemStatus:
         return SubsystemStatus(self._extractor.get_state(button))
 
     def get_tree(self):
-        
+
         tree = ComponentLevelTree(
             configuration=self._configuration,
             session=self._session_name,
-            extractor=self._extractor
+            extractor=self._extractor,
         )
         return tree

@@ -78,7 +78,7 @@ class EnableDisablePanel(Static):
             for button, information in self._button_list.items():
 
                 button_status = self.check_button_state(button, information)
-                
+
                 if button_status == SubsystemStatus.ENABLED:
                     name_str = f"{button} (Enabled)"
                     classes = (
@@ -94,8 +94,6 @@ class EnableDisablePanel(Static):
                     classes = (
                         "detector_subsystem_button detector_subsystem_button_disabled"
                     )
-
-
 
                 id_name = button.replace(" ", "_")
 
@@ -190,7 +188,7 @@ class EnableDisablePanel(Static):
             elif button_state == SubsystemStatus.PARTIALLY_ENABLED:
                 button_widget.add_class("detector_subsystem_button_partial")
                 button_widget.label = f"{button} (Partially Enabled)"
-            elif button_state == SubsystemStatus.TOP_LEVEL_DISABLED:            
+            elif button_state == SubsystemStatus.TOP_LEVEL_DISABLED:
                 button_widget.disabled = True
                 button_widget.add_class("detector_subsystem_button_disabled")
                 button_widget.label = f"{button} (Disabled)"
