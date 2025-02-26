@@ -177,6 +177,7 @@ class EnableDisablePanel(Static):
             button_widget.remove_class("detector_subsystem_button_enabled")
             button_widget.remove_class("detector_subsystem_button_partial")
             button_widget.remove_class("detector_subsystem_button_disabled")
+            button_widget.disabled = False
 
             if button_state == SubsystemStatus.DISABLED:
                 button_widget.add_class("detector_subsystem_button_disabled")
@@ -189,7 +190,10 @@ class EnableDisablePanel(Static):
             elif button_state == SubsystemStatus.PARTIALLY_ENABLED:
                 button_widget.add_class("detector_subsystem_button_partial")
                 button_widget.label = f"{button} (Partially Enabled)"
-            
+            elif button_state == SubsystemStatus.TOP_LEVEL_DISABLED:            
+                button_widget.disabled = True
+                button_widget.add_class("detector_subsystem_button_disabled")
+                button_widget.label = f"{button} (Disabled)"
 
             else:
                 raise ValueError(f"Unknown button state {button_state}")

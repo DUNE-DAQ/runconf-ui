@@ -46,7 +46,7 @@ class DaqConfTreeBase(ABC):
 
         if system_state == SubsystemStatus.ENABLED:
             colour = "chartreuse4"
-        elif system_state == SubsystemStatus.DISABLED:
+        elif system_state == SubsystemStatus.DISABLED or system_state == SubsystemStatus.TOP_LEVEL_DISABLED:
             colour = "grey35"
         elif system_state == SubsystemStatus.PARTIALLY_ENABLED:
             colour = "dark_orange3"

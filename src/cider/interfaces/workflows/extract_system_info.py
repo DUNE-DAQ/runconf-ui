@@ -56,7 +56,7 @@ class SubsystemStatus(IntEnum):
     DISABLED = 0
     ENABLED = 1
     PARTIALLY_ENABLED = 2
-
+    TOP_LEVEL_DISABLED = 3
 
 class ItemExtractor(ABC):
     def __init__(
@@ -357,6 +357,10 @@ class SystemExtractor(MultiItemExtractor):
     def system_names(self) -> Sequence[str]:
         return self._system_names
 
+    @property
+    def system_name(self)->str | None:
+        return self._system_name
+
     def _check_subsystem_cond(
         self, subsystem: SubsystemExtractor, system_name: str | None
     ):
@@ -366,6 +370,11 @@ class SystemExtractor(MultiItemExtractor):
             return subsystem.system_name == system_name
 
     def get_state(self, system_name: Optional[str] = None) -> SubsystemStatus | None:
+
+        if system_name is not self.system_name:
+            if self.get_state(self.system_name) == SubsystemStatus.DISABLED:
+                return SubsystemStatus.TOP_LEVEL_DISABLED
+
         states = [
             s.get_state()
             for s in self._attributes + self._components

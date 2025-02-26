@@ -66,14 +66,14 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
 
         current_state = self._extractor.get_state(button_name)
 
-        if current_state == SubsystemStatus.PARTIALLY_ENABLED:
+        if current_state == SubsystemStatus.PARTIALLY_ENABLED or current_state == SubsystemStatus.TOP_LEVEL_DISABLED:
             current_state = SubsystemStatus.DISABLED
 
         desired_state = SubsystemStatus(not bool(current_state))
 
         self._extractor.set_state(desired_state, button_name)
 
-    def check_button_state(self, button: str, _) -> SubsystemStatus:
+    def check_button_state(self, button: str, _) -> SubsystemStatus:        
         return SubsystemStatus(self._extractor.get_state(button))
 
     def get_tree(self, disabled_states=[]):
