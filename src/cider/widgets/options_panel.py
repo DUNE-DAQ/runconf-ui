@@ -178,7 +178,7 @@ class OptionPanel(Static):
                 file.write(f"\n{a.id}\n")
                 file.write(f"{'-' * len(a.id)}\n")
                 for key, value in current_states.items():
-                    file.write(f"{key} : {'disabled' if value else 'enabled'}\n")
+                    file.write(f"{key} : {value.name}\n")
 
     def open_new_session(
         self, configuration: ConfigurationWrapper | None, session_name: str | None

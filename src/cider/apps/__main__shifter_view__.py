@@ -14,6 +14,7 @@ import os
 from pathlib import Path
 import logging
 from datetime import datetime
+import pkg_resources
 
 """
 TODO
@@ -73,11 +74,14 @@ class ShifterView(App):
         self._interface_config = interface_config
         self._exit_message = ""
 
+
     def on_mount(self):
         """
         Mount App
         """
         self.theme = "catppuccin-latte"
+
+        self.title = f"Shifter Interface v{pkg_resources.get_distribution('cider').version}"
 
         self.install_screen(
             ShifterViewScreen(
