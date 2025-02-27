@@ -97,7 +97,7 @@ class ShifterConfigReader:
 
     def initialise_multi_system(self, panel_name, opts):
 
-        logging.info(f"{panel_name} :: {opts}")
+        logging.debug(f"{panel_name} :: {opts}")
 
         panel = MultiComponentEnableDisablePanel(
             None,

@@ -103,8 +103,8 @@ class ItemExtractor(ABC):
         try:
             self._set_state(state, *args, **kwargs)
         except CiderBadActionException:
-            logging.warning("Could not set state")
-            logging.warning(f"{traceback.format_exc()}")
+            logging.debug("Could not set state")
+            logging.debug(f"{traceback.format_exc()}")
         except Exception as e:
             logging.error(f"{traceback.format_exc()}")
             logging.error(f"Could not set state due to {e}")
@@ -187,7 +187,7 @@ class AttributeExtractor(SubsystemExtractor):
                     ca.GetDalObjectAction(self._configuration)(s, "Segment")
                 )
             except CiderBadActionException:
-                logging.warning(
+                logging.debug(
                     f"Could not get segment {s} for subsystem {self._system_id}"
                 )
             except Exception as e:
@@ -426,7 +426,7 @@ class SystemExtractor(MultiItemExtractor):
         ]
 
         if len(states) == 0:
-            logging.warning(f"No states found for {system_name}")
+            logging.debug(f"No states found for {system_name}")
             return SubsystemStatus.STATE_NOT_DEFINED
 
         if (
@@ -460,7 +460,7 @@ class SystemExtractor(MultiItemExtractor):
                     return_dict.update({s: self.get_state(s)})
 
             except CiderBadActionException:
-                logging.warning(f"Could not get state for {s} in {self.system_name}")
+                logging.debug(f"Could not get state for {s} in {self.system_name}")
             except Exception as e:
                 logging.error(f"{traceback.format_exc()}")
                 logging.error(f"Could not get state for {s} due to {e}")
@@ -520,10 +520,11 @@ class DetectorExtractor(MultiItemExtractor):
                     )
                 )
             except CiderBadActionException:
-                continue
+                logging.debug(f"Could not extract system {system_name}")
             except Exception as e:
                 logging.error(f"{traceback.format_exc()}")
                 logging.error(f"Could not extract system {system_name} due to {e}")
+                raise e
 
     def _set_state(self, state: SubsystemStatus, state_name: str):
         if state == SubsystemStatus.STATE_NOT_DEFINED:
@@ -563,13 +564,14 @@ class DetectorExtractor(MultiItemExtractor):
             try:
                 return_dict.update(system.get_all_states())
             except CiderBadActionException:
-                logging.warning(f"Could not get all states for {system.system_name}")
-                logging.warning(f"{traceback.format_exc()}")
+                logging.debug(f"Could not get all states for {system.system_name}")
+                logging.debug(f"{traceback.format_exc()}")
             except Exception as e:
                 logging.error(f"{traceback.format_exc()}")
                 logging.error(
                     f"Could not get all states for {system.system_name} due to {e}"
                 )
+                raise e
 
         return return_dict
 

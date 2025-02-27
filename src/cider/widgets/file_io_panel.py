@@ -183,7 +183,7 @@ class FileIOPanel(Static):
         try:
             self.query_one("#select_session").set_options(options)
         except Exception as e:
-            logging.warning(f"Failed to update session select: {e}")
+            logging.debug(f"Failed to update session select: {e}")
 
     def on_select_changed(self, event: Select.Changed) -> None:
         """Handles changes to the select widgets."""
