@@ -57,6 +57,7 @@ class SubsystemStatus(IntEnum):
     ENABLED = 1
     PARTIALLY_ENABLED = 2
     TOP_LEVEL_DISABLED = 3
+    STATE_NOT_DEFINED = 4
 
 
 class ItemExtractor(ABC):
@@ -84,11 +85,11 @@ class ItemExtractor(ABC):
     def _get_state(self, *args, **kwargs) -> SubsystemStatus:
         pass
 
-    def get_state(self, *args, **kwargs) -> SubsystemStatus | None:
+    def get_state(self, *args, **kwargs) -> SubsystemStatus:
         try:
             return self._get_state(*args, **kwargs)
         except CiderBadActionException:
-            return None
+            return SubsystemStatus.STATE_NOT_DEFINED
         except Exception as e:
             logging.error(f"{traceback.format_exc()}")
             logging.error(f"Could not get state due to {e}")
@@ -207,7 +208,7 @@ class AttributeExtractor(SubsystemExtractor):
         )
 
         if len(current_states) == 0:
-            return None
+            return SubsystemStatus.STATE_NOT_DEFINED
 
         state = current_states[0]
 
@@ -415,14 +416,14 @@ class SystemExtractor(MultiItemExtractor):
         states = [
             s.get_state()
             for s in self._attributes + self._components
-            if self._check_subsystem_cond(s, system_name) and s.get_state() is not None
+            if self._check_subsystem_cond(s, system_name) and s.get_state() is not SubsystemStatus.STATE_NOT_DEFINED
         ]
 
         if len(states) == 0:
             logging.warning(f"No states found for {system_name}")
-            return None
+            return SubsystemStatus.STATE_NOT_DEFINED
 
-        if all([s == states[0] for s in states]) and states[0] is not None:
+        if all([s == states[0] for s in states]) and states[0] is not SubsystemStatus.STATE_NOT_DEFINED:
             return states[0]
 
         return SubsystemStatus.PARTIALLY_ENABLED
@@ -444,8 +445,11 @@ class SystemExtractor(MultiItemExtractor):
 
         # Grab the other systems
         for s in self._system_names:
-            try:    
-                return_dict.update({s: self.get_state(s)})
+            try:
+                state = self.get_state(s)
+                if state is not None:            
+                    return_dict.update({s: self.get_state(s)})
+
             except CiderBadActionException:
                 logging.warning(f"Could not get state for {s} in {self.system_name}")
             except Exception as e:
@@ -513,6 +517,9 @@ class DetectorExtractor(MultiItemExtractor):
                 logging.error(f"Could not extract system {system_name} due to {e}")
 
     def _set_state(self, state: SubsystemStatus, state_name: str):        
+        if state == SubsystemStatus.STATE_NOT_DEFINED:
+            return
+        
         for system in self._system_extractors:
             if state_name not in system.system_names:
                 continue
@@ -529,7 +536,7 @@ class DetectorExtractor(MultiItemExtractor):
             if state_name in system.system_names:
                 return system.get_state(state_name)
 
-        return SubsystemStatus.DISABLED
+        return SubsystemStatus.STATE_NOT_DEFINED
 
     @property
     def systems(self):
