@@ -22,7 +22,15 @@ class HelpScreen(Screen):
             """\
             [bold]Hello and welcome to the DAQ Shifter interface!![/bold]
 
-            To get started, please select a file from the dropdown menu and then select a session to modify. Press "open" to load the session.
+            To get started, please select the following from dropdown menus:
+                1. The DAQ version you would like to use 
+                2 Once this is selected, select the branch you would like to access
+
+            the system will now quickly pause and open the correct configuration file. Finally:
+            
+                3. Select the session and press "open"
+                
+            Once this has been opened properly you will be greeted with the main interface.
             
             Currently there are 3 categories of objects that can be enabled or disabled:
             - [bold]Detector subsystems[/bold]: For example the APAs, PDS, etc.
