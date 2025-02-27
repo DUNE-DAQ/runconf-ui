@@ -96,7 +96,7 @@ class ItemExtractor(ABC):
             raise e
 
     @abstractmethod
-    def _set_state(self, state: SubsystemStatus,  *args, **kwargs):
+    def _set_state(self, state: SubsystemStatus, *args, **kwargs):
         pass
 
     def set_state(self, state: SubsystemStatus, *args, **kwargs):
@@ -167,7 +167,6 @@ class SubsystemExtractor(ItemExtractor):
         return self._system_class
 
 
-
 class AttributeExtractor(SubsystemExtractor):
     def __init__(
         self,
@@ -184,20 +183,28 @@ class AttributeExtractor(SubsystemExtractor):
 
         for s in self._segments:
             try:
-                segment_dals.append(ca.GetDalObjectAction(self._configuration)(s, "Segment"))
+                segment_dals.append(
+                    ca.GetDalObjectAction(self._configuration)(s, "Segment")
+                )
             except CiderBadActionException:
-                logging.warning(f"Could not get segment {s} for subsystem {self._system_id}")
+                logging.warning(
+                    f"Could not get segment {s} for subsystem {self._system_id}"
+                )
             except Exception as e:
                 logging.error(f"{traceback.format_exc()}")
-                logging.error(f"Could not get segment {s} for subsystem {self._system_id} due to {e}")
-                raise e                
+                logging.error(
+                    f"Could not get segment {s} for subsystem {self._system_id} due to {e}"
+                )
+                raise e
 
-
-        self._affected_objects = list(set(
-            ca.GetAttributeAction(self._configuration)(a, "id")
-            for t in segment_dals for a in GetSegmentAppsListAction(self._configuration)(t)
-            if ca.GetClassNameAction(self._configuration)(a) == subsystem["class"]
-        ))
+        self._affected_objects = list(
+            set(
+                ca.GetAttributeAction(self._configuration)(a, "id")
+                for t in segment_dals
+                for a in GetSegmentAppsListAction(self._configuration)(t)
+                if ca.GetClassNameAction(self._configuration)(a) == subsystem["class"]
+            )
+        )
 
     def _get_state(self) -> SubsystemStatus | None:
         current_states = GetAttributeValueSessionAction(self._configuration)(
@@ -364,9 +371,7 @@ class SystemExtractor(MultiItemExtractor):
         )
 
         self._attributes = [
-            AttributeExtractor(
-                self._configuration, self._session_name, s
-            )
+            AttributeExtractor(self._configuration, self._session_name, s)
             for s in system.get("attributes", [])
         ]
 
@@ -416,21 +421,25 @@ class SystemExtractor(MultiItemExtractor):
         states = [
             s.get_state()
             for s in self._attributes + self._components
-            if self._check_subsystem_cond(s, system_name) and s.get_state() is not SubsystemStatus.STATE_NOT_DEFINED
+            if self._check_subsystem_cond(s, system_name)
+            and s.get_state() is not SubsystemStatus.STATE_NOT_DEFINED
         ]
 
         if len(states) == 0:
             logging.warning(f"No states found for {system_name}")
             return SubsystemStatus.STATE_NOT_DEFINED
 
-        if all([s == states[0] for s in states]) and states[0] is not SubsystemStatus.STATE_NOT_DEFINED:
+        if (
+            all([s == states[0] for s in states])
+            and states[0] is not SubsystemStatus.STATE_NOT_DEFINED
+        ):
             return states[0]
 
         return SubsystemStatus.PARTIALLY_ENABLED
 
     def _set_state(self, state: SubsystemStatus, system_name: Optional[str]):
 
-        # Basically if there are no non-system systems we assume this is a control for all subsystems!        
+        # Basically if there are no non-system systems we assume this is a control for all subsystems!
         for s in self._attributes + self._components:
             if self._check_subsystem_cond(s, system_name):
                 s.set_state(state)
@@ -447,7 +456,7 @@ class SystemExtractor(MultiItemExtractor):
         for s in self._system_names:
             try:
                 state = self.get_state(s)
-                if state is not None:            
+                if state is not None:
                     return_dict.update({s: self.get_state(s)})
 
             except CiderBadActionException:
@@ -516,18 +525,18 @@ class DetectorExtractor(MultiItemExtractor):
                 logging.error(f"{traceback.format_exc()}")
                 logging.error(f"Could not extract system {system_name} due to {e}")
 
-    def _set_state(self, state: SubsystemStatus, state_name: str):        
+    def _set_state(self, state: SubsystemStatus, state_name: str):
         if state == SubsystemStatus.STATE_NOT_DEFINED:
             return
-        
+
         for system in self._system_extractors:
             if state_name not in system.system_names:
                 continue
-            
+
             if state_name == system.system_name:
                 for s in system.system_names:
                     system.set_state(state, s)
-    
+
             else:
                 system.set_state(state, state_name)
 

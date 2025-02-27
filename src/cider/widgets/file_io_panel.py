@@ -109,7 +109,7 @@ class FileIOPanel(Static):
         """Composes the UI elements."""
         with Grid(id="file_io_panel_grid"):
             file_val = self._get_default_file_value()
-            
+
             yield Select(
                 self.file_options,
                 prompt="Select a File",
@@ -119,7 +119,7 @@ class FileIOPanel(Static):
             )
 
             session_options = self._get_session_options(file_val)
-            
+
             yield Select(
                 [(s, s) for s in session_options],
                 prompt="Select a Session",

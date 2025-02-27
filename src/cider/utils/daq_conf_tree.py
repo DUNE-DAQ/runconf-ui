@@ -226,7 +226,6 @@ class ComponentLevelTree(DaqConfTreeBase):
         """Add a system and its subsystems to the tree."""
         # If the system is disabled, propagate the disabled state to all children
 
-
         state = self._extractor.get_state(system.system_name)
 
         # DON'T ADD
@@ -246,17 +245,13 @@ class ComponentLevelTree(DaqConfTreeBase):
         """Add a subsystem and its components to the tree."""
         # If the subsystem is disabled, propagate the disabled state to all children
         state = system.get_state(subsyst)
-       
+
         if state == SubsystemStatus.STATE_NOT_DEFINED:
             return
-        
-        subsystem_disabled = is_disabled or (
-            state == SubsystemStatus.DISABLED
-        )
+
+        subsystem_disabled = is_disabled or (state == SubsystemStatus.DISABLED)
         colour, message = self.get_text_colour_message(
-            SubsystemStatus.DISABLED
-            if subsystem_disabled
-            else state
+            SubsystemStatus.DISABLED if subsystem_disabled else state
         )
 
         if subsyst != system.system_names[-1]:
@@ -274,7 +269,7 @@ class ComponentLevelTree(DaqConfTreeBase):
                 continue
 
             state = comp.get_state()
-            
+
             if state == SubsystemStatus.STATE_NOT_DEFINED:
                 continue
 

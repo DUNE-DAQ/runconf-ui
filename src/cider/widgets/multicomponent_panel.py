@@ -10,6 +10,7 @@ from typing import Dict, Optional
 from textual.visual import SupportsVisual
 import logging
 
+
 class MultiComponentEnableDisablePanel(EnableDisablePanel):
     """
     For enabling/disabling systems made of many different things
@@ -28,7 +29,7 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
         name: Optional[str] = None,
         id: Optional[str] = None,
         classes: Optional[str] = None,
-        disabled: bool = False
+        disabled: bool = False,
     ) -> None:
 
         super().__init__(
@@ -68,7 +69,7 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
 
         current_state = self._extractor.get_state(button_name)
         logging.info(f"Button {button_name} is currently {current_state}")
-        
+
         if current_state == SubsystemStatus.STATE_NOT_DEFINED:
             logging.error(f"State not defined for {button_name}")
             return
@@ -90,7 +91,6 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
 
     def check_button_state(self, button: str, _) -> SubsystemStatus:
         return self._extractor.get_state(button)
-    
 
     def get_tree(self):
 
