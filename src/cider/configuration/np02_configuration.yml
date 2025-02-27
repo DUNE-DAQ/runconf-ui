@@ -13,12 +13,9 @@ PanelOptions:
 
     Systems:
       - TPC:
-          top_level_segment: "tpc-segment"
-
           components:
             - id: tpc-segment
               class: Segment
-
             - id: crp4-segment
               class: Segment
               system_label: CRP4
@@ -31,8 +28,6 @@ PanelOptions:
 
 
       - PDS:
-          top_level_segment: "pds-segment"
-
           components:
             - id: pds-segment
               class: Segment
@@ -54,13 +49,13 @@ PanelOptions:
 
     Systems:
       - TPC TPG:
-          top_level_segment: "tpc-segment"
-      
           attributes:
               - id: tp_generation_enabled
+                segments: ["tpc-segment", "crp4-segment", "crp5-segment"]
                 class: ReadoutApplication
 
               - id: ta_generation_enabled
+                segments: ["tpc-segment", "crp4-segment", "crp5-segment"]
                 class: ReadoutApplication
 
           components:
@@ -70,12 +65,13 @@ PanelOptions:
               class: TPStreamWriterApplication
 
       - PDS TPG:
-          top_level_segment: "pds-segment"
 
           attributes:
               - id: tp_generation_enabled
+                segments: ["pds-segment"]
                 class: ReadoutApplication
     
               - id: ta_generation_enabled
+                segments: ["pds-segment"]
                 class: ReadoutApplication
 
