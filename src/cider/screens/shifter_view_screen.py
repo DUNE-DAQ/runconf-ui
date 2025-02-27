@@ -61,7 +61,9 @@ class ShifterViewScreen(Screen):
 
             # File dropdowns
             yield FileIOPanel(
-                self._config.default_config, self._config.install_path, id="file_io_panel"
+                self._config.default_config,
+                self._config.install_path,
+                id="file_io_panel",
             )
 
             # Grid containing buttons AND maps

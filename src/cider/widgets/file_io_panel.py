@@ -14,18 +14,18 @@ from cider.utils.management_interface import ManagementInterface
 
 
 class FileIOPanel(Static):
-    '''
+    """
     I/O panel for selecting a configuration file and session.
-    '''
+    """
+
     branch_options = reactive([])
     version_options = reactive([])
     file_options = reactive([])
 
-    
     def __init__(
         self,
-        default_config: str="",
-        install_path: str="",
+        default_config: str = "",
+        install_path: str = "",
         content: str | SupportsVisual = "",
         *,
         expand: bool = False,
@@ -36,7 +36,7 @@ class FileIOPanel(Static):
         classes: str | None = None,
         disabled: bool = False,
     ) -> None:
-        
+
         super().__init__(
             content,
             expand=expand,
@@ -49,42 +49,40 @@ class FileIOPanel(Static):
         )
 
         self._default_config = default_config
-        
 
         self._install_path = install_path
         # Make it if it doesn't exist
         Path(self._install_path).mkdir(parents=True, exist_ok=True)
         self._manager = ManagementInterface(self._install_path)
 
-        self._branch_options = self._manager.get_base_branches()    
-    
+        self._branch_options = self._manager.get_base_branches()
+
         self._selected_branch = None
         self._selected_version_name = None
         self._selected_config_name = default_config
         self._selected_session_name = None
 
         self._configuration = None
-    
-        self._default_config = default_config    
-    
+
+        self._default_config = default_config
+
     def compose(self):
         with Grid(id="file_io_panel_grid"):
             # Base branch menu
             yield Select(
-                [(b,b) for b in self._branch_options],
+                [(b, b) for b in self._branch_options],
                 prompt="Select a Base Branch",
                 id="select_base_branch",
                 classes="file_select",
             )
             yield Select(
-                [(b,b) for b in self.version_options],
+                [(b, b) for b in self.version_options],
                 prompt="Select a Version",
                 id="select_version",
                 classes="file_select",
-                disabled = True
+                disabled=True,
             )
 
-                        
             yield Select(
                 [],
                 prompt="Select a Session",
@@ -104,7 +102,6 @@ class FileIOPanel(Static):
                 "[bold medium_violet_red]   No file loaded\n  ",
                 id="file_io_panel_message",
             )
-            
 
     def on_select_changed(self, event: Select.Changed) -> None:
         """Handles changes to the select widgets."""
@@ -118,14 +115,13 @@ class FileIOPanel(Static):
             )
             self._update_button_state()
 
-
     def _update_button_state(self) -> None:
         """Updates the state of the open button based on selected config and session."""
         self.query_one("#open_file_button").disabled = not self._selected_session_name
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """Handles the button press event."""
-        if event.button.id=="open_file_button" and self._selected_session_name:
+        if event.button.id == "open_file_button" and self._selected_session_name:
             self.query_one("#file_io_panel_message").update(
                 f"   [bold green]Current Config[/bold green]: [deep_pink4]{self._configuration.file_name}[/deep_pink4]\n   [bold green]Session[/bold green]:  [deep_pink4]{self._selected_session_name}"
             )
@@ -135,7 +131,7 @@ class FileIOPanel(Static):
     def _open_new_file(self, file_path) -> None:
         """Handles opening a new file and updating the session list."""
         self._selected_config_name = file_path
-        
+
         self._configuration = ConfigurationWrapper(self._selected_config_name)
 
         # Grab all the sessions available
@@ -146,11 +142,12 @@ class FileIOPanel(Static):
             )
             for i in ca.GetDalsOfClassAction(self._configuration)("Session")
         ]
-        
+
         self._update_selection_list(session_list, "select_session")
 
-
-    def _update_selection_list(self, options: List[Tuple[str, str]], list_id: str) -> None:
+    def _update_selection_list(
+        self, options: List[Tuple[str, str]], list_id: str
+    ) -> None:
         try:
             self.query_one(f"#{list_id}").set_options(options)
             logging.info(options)
@@ -159,43 +156,41 @@ class FileIOPanel(Static):
                 self.query_one(f"#{list_id}").disabled = False
             else:
                 self.query_one(f"#{list_id}").disabled = True
-            
+
         except Exception as e:
             logging.warning(f"Failed to update {list_id} select: {e}")
-
-
 
     def _select_new_branch(self, branch_name):
         if branch_name == Select.BLANK:
             self._selected_branch = None
             self._update_selection_list([], "select_version")
             return self._reset_version_select()
-        
+
         self._manager.release = branch_name
         self._selected_branch = branch_name
         self.version_options = [(m, m) for m in self._manager.get_confs()]
         self._update_selection_list(self.version_options, "select_version")
-        
+
     def _select_new_version(self, version_name):
         if version_name == Select.BLANK:
             self._selected_version_name = None
             return self._reset_file_select()
-        
+
         self._selected_version_name = version_name
-        
+
         self._manager.checkout_conf(version_name)
 
         self.file_options = self._generate_selection_list(self._install_path)
-        
+
         for f in self.file_options:
             if self._default_config in f:
-                self._open_new_file(f)        
-    
-    def _reset_version_select(self)->None:
+                self._open_new_file(f)
+
+    def _reset_version_select(self) -> None:
         self._selected_version_name = None
         self._reset_file_select()
-    
-    def _reset_file_select(self)->None:
+
+    def _reset_file_select(self) -> None:
         self._selected_config_name = None
         self._selected_session_name = None
         self._update_selection_list([], "select_session")
@@ -210,7 +205,6 @@ class FileIOPanel(Static):
             "[bold medium_violet_red]   No file loaded\n  "
         )
         self.post_message(self.Deconfigured())
-
 
     @property
     def selected_config_name(self) -> str | None:
@@ -256,7 +250,6 @@ class FileIOPanel(Static):
                         database_list.append(str(db))
 
         return database_list
-    
 
     @classmethod
     def _get_db_from_path(cls, file_path: Path) -> Optional[Path]:

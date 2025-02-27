@@ -57,7 +57,7 @@ class ShifterView(App):
 
         # Make the logging directory if it doesn't exist
         self._output_directory = os.getcwd()
-        
+
         logging_path = Path(f"{self._output_directory}/logs")
         logging_path.mkdir(parents=True, exist_ok=True)
 
@@ -69,7 +69,7 @@ class ShifterView(App):
         )
 
         clean_old_files(logging_path, "log")
-        
+
         self._interface_config = interface_config
         self._exit_message = ""
 
