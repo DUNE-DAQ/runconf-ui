@@ -8,6 +8,7 @@ from cider.utils.daq_conf_tree import ComponentLevelTree
 
 from typing import Dict, Optional
 from textual.visual import SupportsVisual
+import logging
 
 
 class MultiComponentEnableDisablePanel(EnableDisablePanel):
@@ -28,7 +29,7 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
         name: Optional[str] = None,
         id: Optional[str] = None,
         classes: Optional[str] = None,
-        disabled: bool = False
+        disabled: bool = False,
     ) -> None:
 
         super().__init__(
@@ -67,6 +68,11 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
     def _button_action(self, _, button_name: str) -> None:
 
         current_state = self._extractor.get_state(button_name)
+        logging.info(f"Button {button_name} is currently {current_state}")
+
+        if current_state == SubsystemStatus.STATE_NOT_DEFINED:
+            logging.error(f"State not defined for {button_name}")
+            return
 
         # Specific handlers for these cases
         if current_state == SubsystemStatus.PARTIALLY_ENABLED:
@@ -84,7 +90,7 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
         self._extractor.set_disabled_dals(disabled_states)
 
     def check_button_state(self, button: str, _) -> SubsystemStatus:
-        return SubsystemStatus(self._extractor.get_state(button))
+        return self._extractor.get_state(button)
 
     def get_tree(self):
 

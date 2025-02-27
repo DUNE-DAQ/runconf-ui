@@ -109,6 +109,7 @@ class FileIOPanel(Static):
         """Composes the UI elements."""
         with Grid(id="file_io_panel_grid"):
             file_val = self._get_default_file_value()
+
             yield Select(
                 self.file_options,
                 prompt="Select a File",
@@ -118,6 +119,7 @@ class FileIOPanel(Static):
             )
 
             session_options = self._get_session_options(file_val)
+
             yield Select(
                 [(s, s) for s in session_options],
                 prompt="Select a Session",
@@ -145,7 +147,7 @@ class FileIOPanel(Static):
     def _get_session_options(self, file_val: str) -> List[str]:
         """Returns the session value and options based on the selected file."""
         if file_val == Select.BLANK:
-            return Select.BLANK, []
+            return []
 
         self._open_new_file(file_val)
         session_list = [
@@ -181,7 +183,7 @@ class FileIOPanel(Static):
         try:
             self.query_one("#select_session").set_options(options)
         except Exception as e:
-            logging.warning(f"Failed to update session select: {e}")
+            logging.debug(f"Failed to update session select: {e}")
 
     def on_select_changed(self, event: Select.Changed) -> None:
         """Handles changes to the select widgets."""

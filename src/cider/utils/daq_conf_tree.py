@@ -226,7 +226,12 @@ class ComponentLevelTree(DaqConfTreeBase):
         """Add a system and its subsystems to the tree."""
         # If the system is disabled, propagate the disabled state to all children
 
-        state = SubsystemStatus(self._extractor.get_state(system.system_name))
+        state = self._extractor.get_state(system.system_name)
+
+        # DON'T ADD
+        if state == SubsystemStatus.STATE_NOT_DEFINED:
+            return
+
         system_disabled = is_disabled or state == SubsystemStatus.DISABLED
 
         colour, message = self.get_text_colour_message(state)
@@ -239,13 +244,14 @@ class ComponentLevelTree(DaqConfTreeBase):
     def _add_subsystem_to_tree(self, system, subsyst, system_tree, is_disabled: bool):
         """Add a subsystem and its components to the tree."""
         # If the subsystem is disabled, propagate the disabled state to all children
-        subsystem_disabled = is_disabled or (
-            system.get_state(subsyst) == SubsystemStatus.DISABLED
-        )
+        state = system.get_state(subsyst)
+
+        if state == SubsystemStatus.STATE_NOT_DEFINED:
+            return
+
+        subsystem_disabled = is_disabled or (state == SubsystemStatus.DISABLED)
         colour, message = self.get_text_colour_message(
-            SubsystemStatus.DISABLED
-            if subsystem_disabled
-            else system.get_state(subsyst)
+            SubsystemStatus.DISABLED if subsystem_disabled else state
         )
 
         if subsyst != system.system_names[-1]:
@@ -262,14 +268,19 @@ class ComponentLevelTree(DaqConfTreeBase):
             if subsyst == system.system_names[-1] and comp.system_name is not None:
                 continue
 
+            state = comp.get_state()
+
+            if state == SubsystemStatus.STATE_NOT_DEFINED:
+                continue
+
             component_disabled = (
                 is_disabled
-                or (comp.get_state() == SubsystemStatus.DISABLED)
+                or (state == SubsystemStatus.DISABLED)
                 or comp.get_dal() in self._disabled_items
             )
 
             colour, message = self.get_text_colour_message(
-                SubsystemStatus.DISABLED if component_disabled else comp.get_state()
+                SubsystemStatus.DISABLED if component_disabled else state
             )
             subsyst_tree.add(f"[{colour}]{comp.system_id}   [bold]{message}")
 

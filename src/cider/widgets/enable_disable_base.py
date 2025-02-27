@@ -79,6 +79,9 @@ class EnableDisablePanel(Static):
 
                 button_status = self.check_button_state(button, information)
 
+                if button_status == SubsystemStatus.STATE_NOT_DEFINED:
+                    continue
+
                 if button_status == SubsystemStatus.ENABLED:
                     name_str = f"{button} (Enabled)"
                     classes = (
@@ -168,10 +171,9 @@ class EnableDisablePanel(Static):
             try:
                 button_widget = self.query_one(f"#{button_id}", Button)
             except Exception:
-                return
+                continue
 
             button_state = self.check_button_state(button, information)
-            logging.info(f"Button {button} is {button_state}")
 
             button_widget.remove_class("detector_subsystem_button_enabled")
             button_widget.remove_class("detector_subsystem_button_partial")
@@ -192,6 +194,10 @@ class EnableDisablePanel(Static):
                 button_widget.disabled = True
                 button_widget.add_class("detector_subsystem_button_disabled")
                 button_widget.label = f"{button} (Disabled)"
+            elif SubsystemStatus.STATE_NOT_DEFINED:
+                button_widget.disabled = True
+                button_widget.add_class("detector_subsystem_button_not_defined")
+                button_widget.label = f"{button} (NOT IN CONFIG)"
 
             else:
                 raise ValueError(f"Unknown button state {button_state}")

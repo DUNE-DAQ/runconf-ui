@@ -57,6 +57,7 @@ class SubsystemStatus(IntEnum):
     ENABLED = 1
     PARTIALLY_ENABLED = 2
     TOP_LEVEL_DISABLED = 3
+    STATE_NOT_DEFINED = 4
 
 
 class ItemExtractor(ABC):
@@ -81,12 +82,33 @@ class ItemExtractor(ABC):
         self._session_name = session_name
 
     @abstractmethod
-    def get_state(self) -> SubsystemStatus:
+    def _get_state(self, *args, **kwargs) -> SubsystemStatus:
         pass
 
+    def get_state(self, *args, **kwargs) -> SubsystemStatus:
+        try:
+            return self._get_state(*args, **kwargs)
+        except CiderBadActionException:
+            return SubsystemStatus.STATE_NOT_DEFINED
+        except Exception as e:
+            logging.error(f"{traceback.format_exc()}")
+            logging.error(f"Could not get state due to {e}")
+            raise e
+
     @abstractmethod
-    def set_state(self, state: SubsystemStatus):
+    def _set_state(self, state: SubsystemStatus, *args, **kwargs):
         pass
+
+    def set_state(self, state: SubsystemStatus, *args, **kwargs):
+        try:
+            self._set_state(state, *args, **kwargs)
+        except CiderBadActionException:
+            logging.debug("Could not set state")
+            logging.debug(f"{traceback.format_exc()}")
+        except Exception as e:
+            logging.error(f"{traceback.format_exc()}")
+            logging.error(f"Could not set state due to {e}")
+            raise e
 
     def get_disabled_dals(self):
         return self._disabled_dals
@@ -151,26 +173,40 @@ class AttributeExtractor(SubsystemExtractor):
         configuration: ConfigurationWrapper | None,
         session_name: str,
         subsystem: Dict,
-        top_level_segment: str = "root-segment",
         disabled_dals=[],
     ):
 
         super().__init__(configuration, session_name, subsystem, disabled_dals)
 
-        self._top_level_segment = top_level_segment
-        top_level_segment_dal = ca.GetDalObjectAction(self._configuration)(
-            top_level_segment, "Segment"
+        self._segments = subsystem.get("segments", ["root-segment"])
+        segment_dals = []
+
+        for s in self._segments:
+            try:
+                segment_dals.append(
+                    ca.GetDalObjectAction(self._configuration)(s, "Segment")
+                )
+            except CiderBadActionException:
+                logging.debug(
+                    f"Could not get segment {s} for subsystem {self._system_id}"
+                )
+            except Exception as e:
+                logging.error(f"{traceback.format_exc()}")
+                logging.error(
+                    f"Could not get segment {s} for subsystem {self._system_id} due to {e}"
+                )
+                raise e
+
+        self._affected_objects = list(
+            set(
+                ca.GetAttributeAction(self._configuration)(a, "id")
+                for t in segment_dals
+                for a in GetSegmentAppsListAction(self._configuration)(t)
+                if ca.GetClassNameAction(self._configuration)(a) == subsystem["class"]
+            )
         )
 
-        self._affected_objects = [
-            ca.GetAttributeAction(self._configuration)(a, "id")
-            for a in GetSegmentAppsListAction(self._configuration)(
-                top_level_segment_dal
-            )
-            if ca.GetClassNameAction(self._configuration)(a) == subsystem["class"]
-        ]
-
-    def get_state(self) -> SubsystemStatus | None:
+    def _get_state(self) -> SubsystemStatus | None:
         current_states = GetAttributeValueSessionAction(self._configuration)(
             self._session_dal,
             self._system_class,
@@ -179,11 +215,11 @@ class AttributeExtractor(SubsystemExtractor):
         )
 
         if len(current_states) == 0:
-            return None
+            return SubsystemStatus.STATE_NOT_DEFINED
 
         state = current_states[0]
 
-        for s, a in zip(current_states, self._affected_objects):
+        for s in current_states:
 
             if s != state:
                 return SubsystemStatus.PARTIALLY_ENABLED
@@ -196,7 +232,6 @@ class AttributeExtractor(SubsystemExtractor):
 
     def get_state_for_obj(self, object_name: str) -> SubsystemStatus:
         try:
-
             object_dal = ca.GetDalObjectAction(self._configuration)(
                 object_name, self._system_class
             )
@@ -215,7 +250,7 @@ class AttributeExtractor(SubsystemExtractor):
                 f"Could not get state for object {object_name} in subsystem {self._system_id}"
             )
 
-    def set_state(self, state: SubsystemStatus):
+    def _set_state(self, state: SubsystemStatus):
         if state == SubsystemStatus.PARTIALLY_ENABLED:
             raise CiderBadActionException(
                 "Cannot set partially enabled state for an attribute"
@@ -256,7 +291,7 @@ class AttributeExtractor(SubsystemExtractor):
 
 
 class ComponentExtractor(SubsystemExtractor):
-    def get_state(self) -> SubsystemStatus:
+    def _get_state(self) -> SubsystemStatus:
         subsystem_dal = self.get_dal()
 
         return SubsystemStatus(
@@ -266,7 +301,7 @@ class ComponentExtractor(SubsystemExtractor):
             and subsystem_dal not in self._disabled_dals
         )
 
-    def set_state(self, state: SubsystemStatus):
+    def _set_state(self, state: SubsystemStatus):
         if state == SubsystemStatus.PARTIALLY_ENABLED:
             raise CiderBadActionException(
                 "Cannot set partially enabled state for a component"
@@ -335,12 +370,8 @@ class SystemExtractor(MultiItemExtractor):
             system_name if system_name is not None else self._system_name
         )
 
-        self._top_level_segment = system.get("top_level_segment", "root-segment")
-
         self._attributes = [
-            AttributeExtractor(
-                self._configuration, self._session_name, s, self._top_level_segment
-            )
+            AttributeExtractor(self._configuration, self._session_name, s)
             for s in system.get("attributes", [])
         ]
 
@@ -380,7 +411,7 @@ class SystemExtractor(MultiItemExtractor):
         else:
             return subsystem.system_name == system_name
 
-    def get_state(self, system_name: Optional[str] = None) -> SubsystemStatus | None:
+    def _get_state(self, system_name: Optional[str] = None) -> SubsystemStatus | None:
 
         # If the top level is disabled disable all lower level stuff
         if system_name is not self.system_name:
@@ -391,18 +422,24 @@ class SystemExtractor(MultiItemExtractor):
             s.get_state()
             for s in self._attributes + self._components
             if self._check_subsystem_cond(s, system_name)
+            and s.get_state() is not SubsystemStatus.STATE_NOT_DEFINED
         ]
 
         if len(states) == 0:
-            logging.warning(f"No states found for {system_name}")
-            return None
+            logging.debug(f"No states found for {system_name}")
+            return SubsystemStatus.STATE_NOT_DEFINED
 
-        if all([s == states[0] for s in states]) and states[0] is not None:
+        if (
+            all([s == states[0] for s in states])
+            and states[0] is not SubsystemStatus.STATE_NOT_DEFINED
+        ):
             return states[0]
 
         return SubsystemStatus.PARTIALLY_ENABLED
 
-    def set_state(self, state: SubsystemStatus, system_name: Optional[str]):
+    def _set_state(self, state: SubsystemStatus, system_name: Optional[str]):
+
+        # Basically if there are no non-system systems we assume this is a control for all subsystems!
         for s in self._attributes + self._components:
             if self._check_subsystem_cond(s, system_name):
                 s.set_state(state)
@@ -416,7 +453,17 @@ class SystemExtractor(MultiItemExtractor):
         return_dict[self._system_name] = self.get_state()
 
         # Grab the other systems
-        return_dict.update({s: self.get_state(s) for s in self._system_names})
+        for s in self._system_names:
+            try:
+                state = self.get_state(s)
+                if state is not None:
+                    return_dict.update({s: self.get_state(s)})
+
+            except CiderBadActionException:
+                logging.debug(f"Could not get state for {s} in {self.system_name}")
+            except Exception as e:
+                logging.error(f"{traceback.format_exc()}")
+                logging.error(f"Could not get state for {s} due to {e}")
 
         return return_dict
 
@@ -473,22 +520,33 @@ class DetectorExtractor(MultiItemExtractor):
                     )
                 )
             except CiderBadActionException:
-                continue
+                logging.debug(f"Could not extract system {system_name}")
             except Exception as e:
                 logging.error(f"{traceback.format_exc()}")
                 logging.error(f"Could not extract system {system_name} due to {e}")
+                raise e
 
-    def set_state(self, state: SubsystemStatus, state_name: str):
+    def _set_state(self, state: SubsystemStatus, state_name: str):
+        if state == SubsystemStatus.STATE_NOT_DEFINED:
+            return
+
         for system in self._system_extractors:
-            if state_name in system.system_names:
+            if state_name not in system.system_names:
+                continue
+
+            if state_name == system.system_name:
+                for s in system.system_names:
+                    system.set_state(state, s)
+
+            else:
                 system.set_state(state, state_name)
 
-    def get_state(self, state_name: str):
+    def _get_state(self, state_name: str):
         for system in self._system_extractors:
             if state_name in system.system_names:
                 return system.get_state(state_name)
 
-        return SubsystemStatus.DISABLED
+        return SubsystemStatus.STATE_NOT_DEFINED
 
     @property
     def systems(self):
@@ -506,12 +564,14 @@ class DetectorExtractor(MultiItemExtractor):
             try:
                 return_dict.update(system.get_all_states())
             except CiderBadActionException:
-                continue
+                logging.debug(f"Could not get all states for {system.system_name}")
+                logging.debug(f"{traceback.format_exc()}")
             except Exception as e:
                 logging.error(f"{traceback.format_exc()}")
                 logging.error(
                     f"Could not get all states for {system.system_name} due to {e}"
                 )
+                raise e
 
         return return_dict
 
