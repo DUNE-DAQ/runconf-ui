@@ -68,8 +68,6 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
     def _button_action(self, _, button_name: str) -> None:
 
         current_state = self._extractor.get_state(button_name)
-        logging.info(f"Button {button_name} is currently {current_state}")
-
         if current_state == SubsystemStatus.STATE_NOT_DEFINED:
             logging.error(f"State not defined for {button_name}")
             return

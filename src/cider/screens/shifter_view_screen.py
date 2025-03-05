@@ -240,9 +240,6 @@ class ShifterViewScreen(Screen):
         # Change from enable->disable or vice versa
         self.update_trees(message.configuration, message.session)
 
-        # for a in self.query("EnableDisablePanel"):
-        #     a.update_button_styles()
-
     def update_trees(self, configuration: ConfigurationWrapper, session: str):
         # We get the the full system first
         main_tree = DaqConfTree(configuration, session)
@@ -253,11 +250,15 @@ class ShifterViewScreen(Screen):
         disabled = main_tree.disabled_objs
 
         # Update component level trees
-        for panel in self.query("MultiComponentEnableDisablePanel"):
-            panel.update_disabled(disabled)
+        for panel in self.query("EnableDisablePanel"):
+            try:
+                panel.update_disabled(disabled)
+                self.update_tree(panel)
             # Have to do this twice to get the correct state
+            except Exception:
+                pass
             panel.update_button_styles()
-            self.update_tree(panel)
+    
 
     def update_tree(self, panel: MultiComponentEnableDisablePanel):
         # Get current state of panel

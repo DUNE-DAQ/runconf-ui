@@ -112,20 +112,9 @@ class EnableDisablePanel(Static):
             return
 
         self._button_action(objs_affected, button_name)
-        
-        old_label = event.button.label
-        
-        self.update_button_styles()
+                                
         self.post_message(self.Changed(self._configuration, self._session_name))
-        
-        new_label = self.query_one(f"#{event.button.id}", Button).label
-        
-        if new_label == old_label:
-            self.post_message(self.TooManyPresses(button_name))
-        
-        logging.debug(
-            f"Button {button_name} {'disabled' if self.check_button_state(button_name, self._button_list[button_name]) else 'enabled'}"
-        )
+
 
     def _button_action(self, *args, **kwargs):
         raise NotImplementedError("Button action must be implemented")
@@ -165,8 +154,6 @@ class EnableDisablePanel(Static):
                 button_widget = self.query_one(f"#{button_id}", Button)
             except Exception:
                 continue
-            
-            current_label = button_widget.label
 
             button_state = self.check_button_state(button, information)
 

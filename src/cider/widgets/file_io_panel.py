@@ -152,7 +152,6 @@ class FileIOPanel(Static):
     ) -> None:
         try:
             self.query_one(f"#{list_id}").set_options(options)
-            logging.info(options)
 
             if len(options):
                 self.query_one(f"#{list_id}").disabled = False
