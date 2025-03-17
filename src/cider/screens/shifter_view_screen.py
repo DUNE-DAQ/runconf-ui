@@ -35,7 +35,6 @@ class ShifterViewScreen(Screen):
 
     def __init__(
         self,
-        config_folder: str,
         output_directory: str,
         interface_config: str = "../configuration/np02_configuration.yml",
         name: str | None = None,
@@ -48,7 +47,6 @@ class ShifterViewScreen(Screen):
 
         self._config = ShifterConfigReader(interface_config)
 
-        self._config_folder = config_folder
         self._output_directory = output_directory
 
         self._configuration = None
@@ -63,7 +61,9 @@ class ShifterViewScreen(Screen):
 
             # File dropdowns
             yield FileIOPanel(
-                self._config_folder, self._config.default_config, id="file_io_panel"
+                self._config.default_config,
+                self._config.install_path,
+                id="file_io_panel",
             )
 
             # Grid containing buttons AND maps
@@ -139,7 +139,7 @@ class ShifterViewScreen(Screen):
                 logging.error(f"{traceback.format_exc()}")
                 await self.deconfigure()
 
-    def show_popup(self, message: str):
+    def show_popup(self, message: str, timer: float = 10.0):
         """
         Display a pop-up message on the screen.
         """
@@ -147,7 +147,7 @@ class ShifterViewScreen(Screen):
         self.remove_popup()
 
         # Create and mount the pop-up
-        popup = PopupMessage(message, classes="popup popup_failure")
+        popup = PopupMessage(message, timer, classes="popup popup_failure")
         self.query_one("#main_container").mount(popup)
 
     def remove_popup(self):
@@ -180,6 +180,19 @@ class ShifterViewScreen(Screen):
             # Lives at the bottom of the screen
             self.show_popup("[white]Configuration has been removed from disk!")
 
+    @on(FileIOPanel.FileNotFound)
+    async def file_not_found(self, event: FileIOPanel.FileNotFound):
+        self.show_popup(
+            f"[white]Configuration file not found: {event.file_path}\nLog saved to[/white] [bold grey3]{logging.getLogger().handlers[0].baseFilename}[/bold grey3]",
+            timer=10.0,
+        )
+        
+    @on(EnableDisablePanel.TooManyPresses)
+    async def too_many_presses(self, event: EnableDisablePanel.TooManyPresses):
+        self.show_popup(
+            f"[white]{event.message()}",
+            timer=3.0
+        )
     def open_new_file(self):
         """
         Open a new file is the only cross-app interface
@@ -227,9 +240,6 @@ class ShifterViewScreen(Screen):
         # Change from enable->disable or vice versa
         self.update_trees(message.configuration, message.session)
 
-        # for a in self.query("EnableDisablePanel"):
-        #     a.update_button_styles()
-
     def update_trees(self, configuration: ConfigurationWrapper, session: str):
         # We get the the full system first
         main_tree = DaqConfTree(configuration, session)
@@ -240,11 +250,13 @@ class ShifterViewScreen(Screen):
         disabled = main_tree.disabled_objs
 
         # Update component level trees
-        for panel in self.query("MultiComponentEnableDisablePanel"):
-            panel.update_disabled(disabled)
+        for panel in self.query("EnableDisablePanel"):
+            if isinstance(panel, MultiComponentEnableDisablePanel):
+                panel.update_disabled(disabled)
+                self.update_tree(panel)
             # Have to do this twice to get the correct state
             panel.update_button_styles()
-            self.update_tree(panel)
+    
 
     def update_tree(self, panel: MultiComponentEnableDisablePanel):
         # Get current state of panel

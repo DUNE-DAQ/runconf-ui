@@ -1,8 +1,6 @@
 General:
-  configuration: "sessions/np02-session.data.xml"
-  download_directory: "run_configs"
-  use_path: False
   default_config: "np02-session.data.xml"
+  download_directory: "run_configs"
 
 PanelOptions:
 
@@ -26,11 +24,11 @@ PanelOptions:
               system_label: CRP5
               separate_system: True
 
-
       - PDS:
           components:
             - id: pds-segment
               class: Segment
+
 
 
   # Dataflow
@@ -65,7 +63,6 @@ PanelOptions:
               class: TPStreamWriterApplication
 
       - PDS TPG:
-
           attributes:
               - id: tp_generation_enabled
                 segments: ["pds-segment"]

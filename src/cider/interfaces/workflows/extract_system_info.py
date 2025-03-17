@@ -296,10 +296,12 @@ class ComponentExtractor(SubsystemExtractor):
     def _get_state(self) -> SubsystemStatus:
         subsystem_dal = self.get_dal()
 
-        return SubsystemStatus(
-            not ca.CheckIsDisabledAction(self._configuration)(
+        dal_disabled = ca.CheckIsDisabledAction(self._configuration)(
                 subsystem_dal, self._session_name
             )
+        
+        return SubsystemStatus(
+            not dal_disabled               
             and subsystem_dal not in self._disabled_dals
         )
 

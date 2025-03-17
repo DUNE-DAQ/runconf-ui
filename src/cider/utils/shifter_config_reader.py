@@ -27,11 +27,16 @@ class ShifterConfigReader:
 
         # Default config file
         self._default_config = general_settings.get("default_config", None)
+        self._install_path = general_settings.get("download_directory", "run_configs")
         self._panel_list, self._map_list, self._panel_labels = self.read_panel_options()
 
     @property
     def default_config(self):
         return self._default_config
+
+    @property
+    def install_path(self):
+        return self._install_path
 
     @property
     def panel_list(self):

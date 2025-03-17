@@ -46,8 +46,6 @@ class ShifterView(App):
 
     def __init__(
         self,
-        configuration_folder: str,
-        output_directory: str,
         interface_config: str = "",
         log_level: str = "INFO",
         driver_class: type[Driver] | None = None,
@@ -59,7 +57,9 @@ class ShifterView(App):
         super().__init__(driver_class, css_path, watch_css, ansi_color)
 
         # Make the logging directory if it doesn't exist
-        logging_path = Path(f"{output_directory}/logs")
+        self._output_directory = os.getcwd()
+
+        logging_path = Path(f"{self._output_directory}/logs")
         logging_path.mkdir(parents=True, exist_ok=True)
 
         logging.basicConfig(
@@ -71,9 +71,7 @@ class ShifterView(App):
 
         clean_old_files(logging_path, "log")
 
-        self._configuration_folder = configuration_folder
         self._interface_config = interface_config
-        self._output_directory = output_directory
         self._exit_message = ""
 
 
@@ -87,7 +85,6 @@ class ShifterView(App):
 
         self.install_screen(
             ShifterViewScreen(
-                self._configuration_folder,
                 interface_config=self._interface_config,
                 output_directory=self._output_directory,
             ),
@@ -132,16 +129,6 @@ class ShifterView(App):
 
 @click.command()
 @click.option(
-    "-d",
-    "--input-directory",
-    "input_directory",
-    default=os.getenv("DUNEDAQ_DB_PATH", ""),
-    required=False,
-)
-@click.option(
-    "-o", "--output-directory", "output_directory", default=".", required=False
-)
-@click.option(
     "-c",
     "--interface_config",
     "interface_config",
@@ -149,8 +136,8 @@ class ShifterView(App):
     required=False,
 )
 @click.option("-l", "--log-level", "log_level", default="INFO", required=False)
-def main(input_directory, output_directory, interface_config, log_level):
-    app = ShifterView(input_directory, output_directory, interface_config, log_level)
+def main(interface_config, log_level):
+    app = ShifterView(interface_config, log_level)
     app.run()
     print(app.exit_message())
 
