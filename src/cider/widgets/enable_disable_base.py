@@ -201,10 +201,6 @@ class EnableDisablePanel(Static):
         def session(self):
             return self._session
 
-    class TooManyPresses(Message):
-        def __init__(self, button_label):
-            super().__init__()
-            self._button_label = button_label
             
         def message(self):
             return f"Button {self._button_label} cannot change state, this may be because another system is still disabled."

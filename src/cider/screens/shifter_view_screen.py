@@ -29,7 +29,7 @@ class ShifterViewScreen(Screen):
             
 
     # Buffer config used to store the configuration during editing    
-    TMP_CONFIG = Path(f"/tmp/shifter_configs-{os.getlogin()}{{tmux_id}}/tmp_config.data.xml")
+    TMP_CONFIG = Path(f"/tmp/shifter_configs-{os.getlogin()}-{tmux_id}/tmp_config.data.xml")
 
     changed_session = False
 
@@ -191,12 +191,15 @@ class ShifterViewScreen(Screen):
             timer=10.0,
         )
         
-    @on(EnableDisablePanel.TooManyPresses)
-    async def too_many_presses(self, event: EnableDisablePanel.TooManyPresses):
+    
+    @on(FileIOPanel.TooManySessions)    
+    async def too_many_sessions(self, event: FileIOPanel.TooManySessions):
         self.show_popup(
-            f"[white]{event.message()}",
-            timer=3.0
+            f"[white]{event.message}",
+            timer=5.0
         )
+
+
     def open_new_file(self):
         """
         Open a new file is the only cross-app interface
