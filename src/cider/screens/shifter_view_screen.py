@@ -24,8 +24,12 @@ from cider.widgets.popup_message import PopupMessage
 
 class ShifterViewScreen(Screen):
 
-    # Buffer config used to store the configuration during editing
-    TMP_CONFIG = Path(f"/tmp/shifter_configs-{os.getlogin()}/tmp_config.data.xml")
+    # If we're in a tmux session we can get the id
+    tmux_id = os.environ.get("TMUX",["0"])[-1]
+            
+
+    # Buffer config used to store the configuration during editing    
+    TMP_CONFIG = Path(f"/tmp/shifter_configs-{os.getlogin()}{{tmux_id}}/tmp_config.data.xml")
 
     changed_session = False
 
