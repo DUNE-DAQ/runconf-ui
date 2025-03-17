@@ -83,13 +83,7 @@ class FileIOPanel(Static):
                 disabled=True,
             )
 
-            yield Select(
-                [],
-                prompt="Select a Session",
-                id="select_session",
-                classes="file_select",
-                disabled=True,
-            )
+
 
             yield Button(
                 "Open",
@@ -110,11 +104,11 @@ class FileIOPanel(Static):
             self._select_new_branch(event.value)
         elif event.select.id == "select_version":
             self._select_new_version(event.value)
-        elif event.select.id == "select_session":
-            self._selected_session_name = (
-                event.value if event.value != Select.BLANK else ""
-            )
             self._update_button_state()
+        # elif event.select.id == "select_session":
+        #     self._selected_session_name = (
+        #         event.value if event.value != Select.BLANK else ""
+        #     )
         self.loading=False
     
     def _update_button_state(self) -> None:
@@ -138,14 +132,19 @@ class FileIOPanel(Static):
 
         # Grab all the sessions available
         session_list = [
-            (
-                ca.GetAttributeAction(self._configuration)(i, "id"),
-                ca.GetAttributeAction(self._configuration)(i, "id"),
-            )
+            ca.GetAttributeAction(self._configuration)(i, "id")
             for i in ca.GetDalsOfClassAction(self._configuration)("Session")
         ]
 
-        self._update_selection_list(session_list, "select_session")
+        if len(session_list) != 1:
+            warn=f"Found {len(session_list)} sessions in {file_path}, picking {session_list[0]}"
+            logging.warning(warn)
+            self.post_message(self.TooManySessions(warn))
+        
+        self._selected_session_name = session_list[0]
+        
+
+        # self._update_selection_list(session_list, "select_session")
 
     def _update_selection_list(
         self, options: List[Tuple[str, str]], list_id: str
@@ -186,6 +185,7 @@ class FileIOPanel(Static):
         for f in self.file_options:
             if self._default_config in f:
                 self._open_new_file(f)
+                
                 break
         else:
             self.post_message(self.FileNotFound(self._default_config))
@@ -283,3 +283,9 @@ class FileIOPanel(Static):
         def __init__(self, file_path: str):
             super().__init__()
             self.file_path = file_path
+
+    class TooManySessions(Message):
+        """Message sent when the selected file has too many sessions."""
+        def __init__(self, message: str):
+            super().__init__()
+            self.message = message
