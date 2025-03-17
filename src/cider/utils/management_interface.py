@@ -3,7 +3,6 @@ Simple wrapper for talking to config-management
 """
 
 from config_management.ConfPool import ConfPool
-import os
 import re
 
 

@@ -6,7 +6,6 @@ from textual.visual import SupportsVisual
 from textual.widgets import Static, Button
 from textual.containers import ScrollableContainer
 from textual.message import Message
-import logging
 
 
 class EnableDisablePanel(Static):
