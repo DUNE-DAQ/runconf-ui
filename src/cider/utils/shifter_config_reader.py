@@ -30,12 +30,23 @@ class ShifterConfigReader:
         # Update with any user args
         general_settings.update(kwargs)
 
+        self._download_directory = path_or_env_check(general_settings.get("download_directory", f"{os.getcwd()}/configs"))
         # Generic settings
-        self._default_config = path_or_env_check(general_settings.get("default_config", ""))
-        self._download_directory = path_or_env_check(general_settings.get("download_directory", ""))
-        self._session_name = path_or_env_check(general_settings.get("session_name", ""))
-        self._base_url = path_or_env_check(general_settings.get("base_url", ""))
-        self._operation_url = path_or_env_check(general_settings.get("operation_url", ""))
+        self._default_config = path_or_env_check(general_settings.get("default_config", None))
+        if self._default_config is None:
+            raise ValueError("No default configuration file specified")
+        
+        self._session_name = path_or_env_check(general_settings.get("session_name", None))
+        if self._session_name is None:
+            raise ValueError("No session name specified")
+        
+        self._base_url = path_or_env_check(general_settings.get("base_url", None))
+        if self._base_url is None:
+            raise ValueError("No base url specified")
+        
+        self._operation_url = path_or_env_check(general_settings.get("operation_url", None))
+        if self._operation_url is None:
+            raise ValueError("No operation url specified")
 
         # Default config file
         self._panel_list, self._map_list, self._panel_labels = self.read_panel_options()

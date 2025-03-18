@@ -57,7 +57,8 @@ class ShifterView(App):
         self._exit_message = ""
 
         # Read kwargs
-        self._apparatus = kwargs.get(str(os.getenv("APPARATUS")), "np02")
+        self._apparatus = kwargs.get("apparatus", "np02")
+        
         
         # messy...
         configuration = f"{Path(__file__).parent.absolute()}/../configuration/{self._apparatus}_configuration.yml"
@@ -139,7 +140,7 @@ class ShifterView(App):
 
 
 @click.command()
-@click.option("-a", "--apparatus", "apparatus", required=False)
+@click.option("-a", "--apparatus", "apparatus", required=False, default=os.getenv("APPARATUS"))
 @click.option("-d", "--default-config", "default_config", required=False)
 @click.option("-o", "--download-directory", "download_directory", required=False)
 @click.option("-s", "--session-name", "session_name", required=False)

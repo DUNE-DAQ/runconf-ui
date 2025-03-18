@@ -10,9 +10,9 @@ import re
 class ManagementInterface:
     def __init__(self, interface_config: ShifterConfigReader) -> None:
 
-        self._pool = ConfPool(str(interface_config.download_directory),
-                              str(interface_config.operation_url),
-                              str(interface_config.base_url))
+        self._pool = ConfPool(interface_config.download_directory,
+                              operation_url=interface_config.operation_url,
+                              base_url=interface_config.base_url)
         self._release = None
         self._release_str = None
 

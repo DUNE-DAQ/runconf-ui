@@ -181,7 +181,7 @@ class ShifterViewScreen(Screen):
     @on(FileIOPanel.FileNotFound)
     async def file_not_found(self, event: FileIOPanel.FileNotFound):
         self.show_popup(
-            f"[white]Configuration file not found: {event.file_path}\nLog saved to[/white] [bold grey3]{logging.getLogger().handlers[0].baseFilename}[/bold grey3]",
+            f"[white]Configuration invalid or could not be ooened: {event.file_path}",
             timer=10.0,
         )
         
