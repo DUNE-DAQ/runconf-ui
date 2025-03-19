@@ -5,8 +5,8 @@ General:
   download_directory: "CONFIG_DIR"
   session_name: "SESSION_NAME"
   
-  base_url: "ssh://git@gitlab.cern.ch:7999/dune-daq/online/ehn1-daqconfigs.git"
-  operation_url: "ssh://git@gitlab.cern.ch:7999/dune-daq/online/np02-configs-operation.git"
+  base_url: "https://git@gitlab.cern.ch:7999/dune-daq/online/ehn1-daqconfigs.git"
+  operation_url: "https://git@gitlab.cern.ch:7999/dune-daq/online/np02-configs-operation.git"
 
 PanelOptions:
 
