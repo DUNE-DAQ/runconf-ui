@@ -4,7 +4,6 @@ from textual.screen import Screen
 import logging
 import os
 from pathlib import Path
-import subprocess
 
 from cider.interfaces.controller.config_wrapper import ConfigurationWrapper
 

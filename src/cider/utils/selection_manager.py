@@ -47,7 +47,7 @@ class SelectionManager:
                 continue
 
             for item in directory.iterdir():
-                db = ConfigurationManager._get_db_from_path(item)
+                db = SelectionManager._get_db_from_path(item)
                 if db:
                     database_list.append((str(db.name), str(db)))
 
@@ -55,7 +55,7 @@ class SelectionManager:
                     continue
 
                 for sub_item in item.iterdir():
-                    db = ConfigurationManager._get_db_from_path(sub_item)
+                    db = SelectionManager._get_db_from_path(sub_item)
                     if db:
                         database_list.append(str(db))
 
@@ -64,7 +64,7 @@ class SelectionManager:
     @staticmethod
     def _get_db_from_path(file_path: Path) -> Optional[Path]:
         if file_path.is_file() and ".data.xml" in str(file_path):
-            if ConfigurationManager._get_number_of_sessions(str(file_path)) > 0:
+            if SelectionManager._get_number_of_sessions(str(file_path)) > 0:
                 return file_path
         return None
 
