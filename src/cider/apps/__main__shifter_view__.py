@@ -59,7 +59,6 @@ class ShifterView(App):
         # Read kwargs
         self._apparatus = kwargs.get("apparatus", "np02")
         
-        
         # messy...
         configuration = f"{Path(__file__).parent.absolute()}/../configuration/{self._apparatus}_configuration.yml"
         
