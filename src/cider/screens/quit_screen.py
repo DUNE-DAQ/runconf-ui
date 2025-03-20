@@ -2,6 +2,9 @@ from textual.widgets import Button, Label
 from textual.containers import Grid
 from textual.screen import Screen
 import logging
+import os
+from pathlib import Path
+import subprocess
 
 from cider.interfaces.controller.config_wrapper import ConfigurationWrapper
 
@@ -31,11 +34,33 @@ class QuitScreen(Screen):
         if self._configuration is None:
             return "[bold red]Exited without saving."
 
+        # Set environment variables!
+        run_mode = os.getenv('PROCESS_MANAGER_CONFIG')
+        if run_mode is None:
+            run_mode="ssh-standalone"
+        else:
+            run_mode = f"{run_mode}".strip(".json") 
+        run_cmd = f"drunc-unified-shell {run_mode} {self._saved_configuration_name} {self._session_name}"
+
+        # hacky
+        buffer_id = os.environ.get("SESSION_NAME", os.getlogin())
+        output_script = f"/tmp/shifter_configs-{buffer_id}/set_next_run.sh"
+
+        with open(f"{output_script}", "w") as f:
+            f.write(f"export EHN1_RUN_FILE={Path(self._saved_configuration_name).expanduser()}\n")
+            f.write(f"export EHN1_RUN_CONFIG_ID={self._session_name}\n")
+            f.write(f"export EHN1_RUN_COMMAND='{run_cmd}'\n")
+
+        os.chmod(f"{output_script}", 0o755)
+
+        run_alias = os.environ.get("EHN1_RC_LAUNCH", run_cmd)
+
         output = ""
         if quit_without_saving:
             output += "[bold red]WARNING!! Configuration was created earlier but you've quit without saving so this may not be up to date with all the changes you've made, be careful![/bold red]\n\n"
 
-        output += f"[purple]To run[/purple] [bold blue]DRUNC[/bold blue] [purple]please copy/paste:[/purple]\n[bold green]drunc-unified-shell ssh-standalone {self._saved_configuration_name} {self._session_name}"
+        output += f"[purple]To run[/purple] use [bold green]{run_alias}\n"
+        # output += f"[purple]This will run:[/purple] [green]{run_cmd}"
         return output
 
     def compose(self):

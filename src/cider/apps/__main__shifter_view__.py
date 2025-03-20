@@ -57,7 +57,7 @@ class ShifterView(App):
         self._exit_message = ""
 
         # Read kwargs
-        self._apparatus = kwargs.get("apparatus", "np02")
+        self._apparatus = kwargs.get("apparatus", os.environ.get("APPARATUS", "np02"))
         
         # messy...
         configuration = f"{Path(__file__).parent.absolute()}/../configuration/{self._apparatus}_configuration.yml"
