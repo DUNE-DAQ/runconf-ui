@@ -5,8 +5,10 @@ General:
   download_directory: "CONFIG_DIR"
   session_name: "SESSION_NAME"
   
-  base_url: "https://git@gitlab.cern.ch:7999/dune-daq/online/ehn1-daqconfigs.git"
-  operation_url: "https://git@gitlab.cern.ch:7999/dune-daq/online/np02-configs-operation.git"
+  # base_url: CONFIG_MANAGER_BASE_URL
+  base_url: "https://gitlab.cern.ch/dune-daq/online/np02-configs-operation.git"
+  # operation_url: CONFIG_MANAGER_OPERATION_URL
+  operation_url: "https://gitlab.cern.ch/dune-daq/online/np02-configs-operation.git"
 
 PanelOptions:
 
