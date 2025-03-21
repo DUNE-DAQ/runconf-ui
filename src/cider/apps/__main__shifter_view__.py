@@ -94,6 +94,7 @@ class ShifterView(App):
         self.install_screen(
             ShifterViewScreen(
                 interface_config=self._interface_config,
+                apparatus=self._apparatus
             ),
             name="shifter_view_screen",
         )

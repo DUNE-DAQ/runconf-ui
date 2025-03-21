@@ -25,6 +25,7 @@ class FileIOPanel(Static):
 
     def __init__(
         self,
+        apparatus: str,
         interface_config: ShifterConfigReader,
         content: str | SupportsVisual = "",
         *,
@@ -54,8 +55,9 @@ class FileIOPanel(Static):
         self._install_path = interface_config.download_directory
         # Make it if it doesn't exist
         Path(self._install_path).mkdir(parents=True, exist_ok=True)
-        self._manager = ManagementInterface(interface_config)
-
+                
+        self._manager = ManagementInterface(apparatus=apparatus, interface_config=interface_config)
+        
         self._branch_options = self._manager.get_config_version()
 
         self._selected_branch = None

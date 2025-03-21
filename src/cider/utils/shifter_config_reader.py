@@ -40,12 +40,8 @@ class ShifterConfigReader:
             raise ValueError("No session name specified")
         
         self._base_url = path_or_env_check(general_settings.get("base_url", None))
-        if self._base_url is None:
-            raise ValueError("No base url specified")
         
         self._operation_url = path_or_env_check(general_settings.get("operation_url", None))
-        if self._operation_url is None:
-            raise ValueError("No operation url specified")
 
         # Default config file
         self._panel_list, self._map_list, self._panel_labels = self.read_panel_options()
@@ -81,6 +77,7 @@ class ShifterConfigReader:
     @property
     def base_url(self):
         return self._base_url
+    
     
     @base_url.setter
     def base_url(self, value):
