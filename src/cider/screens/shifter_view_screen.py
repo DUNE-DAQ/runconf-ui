@@ -117,8 +117,7 @@ class ShifterViewScreen(Screen):
             except RuntimeError as e:
                 # Display the error message in a pop-up
                 self.show_popup(
-                    f"[white]Invalid configuration[/white] [bold grey3]{self.query_one(FileIOPanel).selected_config_name}:{self.query_one(FileIOPanel).selected_session_name}[/bold grey3] [white]passed, please check with the experts!\n\
-                    Log saved to[/white] [bold grey3]{logging.getLogger().handlers[0].baseFilename}[/bold grey3]"
+                    f"[white]Invalid configuration[/white] [bold grey3]{self.query_one(FileIOPanel).selected_config_name}:{self.query_one(FileIOPanel).selected_session_name}[/bold grey3] [white]passed, please check with the experts!"
                 )
                 # Optionally log the error for debugging
                 logging.error(
