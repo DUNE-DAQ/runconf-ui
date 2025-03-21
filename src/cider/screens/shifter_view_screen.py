@@ -37,6 +37,7 @@ class ShifterViewScreen(Screen):
 
     def __init__(
         self,
+        apparatus: str,
         interface_config: ShifterConfigReader,
         name: str | None = None,
         id: str | None = None,
@@ -47,6 +48,7 @@ class ShifterViewScreen(Screen):
         logging.info("Opening shifter view screen")
 
         self._config = interface_config
+        self._apparatus = apparatus
 
         self._configuration = None
         self._session = None
@@ -60,8 +62,9 @@ class ShifterViewScreen(Screen):
 
             # File dropdowns
             yield FileIOPanel(
-                self._config,
-                id="file_io_panel",
+                interface_config=self._config,
+                apparatus=self._apparatus,
+                id="file_io_panel"
             )
 
             # Grid containing buttons AND maps
