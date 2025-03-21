@@ -11,7 +11,7 @@ class ManagementInterface:
     def __init__(self, apparatus: str, interface_config: ShifterConfigReader) -> None:
 
         self._pool = ConfPool(interface_config.download_directory,
-                              apparatus=apparatus
+                              apparatus=apparatus,
                               operation_url=interface_config.operation_url,
                               base_url=interface_config.base_url)
             
