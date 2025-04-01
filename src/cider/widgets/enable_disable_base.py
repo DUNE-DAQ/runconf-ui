@@ -1,11 +1,10 @@
-from cider.interfaces.controller.config_wrapper import ConfigurationWrapper
-import cider.interfaces.actions.actions as ca
 from cider.interfaces.workflows.extract_system_info import SubsystemStatus
 
 from textual.visual import SupportsVisual
 from textual.widgets import Static, Button
 from textual.containers import ScrollableContainer
 from textual.message import Message
+from cider.interfaces.controller.application_controller import ShifterInterfaceState
 
 
 class EnableDisablePanel(Static):
@@ -15,8 +14,7 @@ class EnableDisablePanel(Static):
 
     def __init__(
         self,
-        configuration: ConfigurationWrapper | None,
-        session_name: str | None,
+        app_controller: ShifterInterfaceState,
         content: str | SupportsVisual = "",
         *,
         expand: bool = False,
@@ -38,27 +36,14 @@ class EnableDisablePanel(Static):
             disabled=disabled,
         )
 
-        self._configuration = None
-
-        self.open_new_session(configuration, session_name)
-
-    @property
-    def configuration(self) -> ConfigurationWrapper | None:
-        return self._configuration
+        self._app_controller = app_controller
+        self.open_new_session()
 
     @property
     def session_name(self) -> str | None:
-        return self._session_name
+        return self._app_controller.session_name
 
-    def open_new_session(
-        self, configuration: ConfigurationWrapper | None, session_name: str | None
-    ):
-        if self._configuration is not None:
-            ca.UnloadConfigurationAction(self._configuration)()
-
-        self._session_name = session_name
-        self._configuration = configuration
-
+    def open_new_session(self):
         self._button_list = self.generate_button_list()
 
         # Need default initial states
@@ -67,7 +52,7 @@ class EnableDisablePanel(Static):
         }
 
         # Update everything else!
-        self.post_message(self.Changed(self._configuration, self._session_name))
+        self.post_message(self.Changed())
 
     def check_button_state(self, *args, **kwargs) -> bool:
         raise NotImplementedError("Check is disabled not implemented for class")
@@ -111,9 +96,8 @@ class EnableDisablePanel(Static):
             return
 
         self._button_action(objs_affected, button_name)
-                                
-        self.post_message(self.Changed(self._configuration, self._session_name))
 
+        self.post_message(self.Changed())
 
     def _button_action(self, *args, **kwargs):
         raise NotImplementedError("Button action must be implemented")
@@ -183,23 +167,6 @@ class EnableDisablePanel(Static):
             else:
                 raise ValueError(f"Unknown button state {button_state}")
 
-                
-
     class Changed(Message):
         """Custom message to notify when a button is pressed."""
-
-        def __init__(self, configuration, session) -> None:
-            super().__init__()
-            self._configuration = configuration
-            self._session = session
-
-        @property
-        def configuration(self):
-            return self._configuration
-
-        @property
-        def session(self):
-            return self._session
-            
-        def message(self):
-            return f"Button {self._button_label} cannot change state, this may be because another system is still disabled."
+        ...

@@ -10,6 +10,7 @@ from cider.exceptions import CiderBadActionException
 
 from rich.tree import Tree
 from abc import ABC, abstractmethod
+from cider.interfaces.controller.application_controller import ShifterInterfaceState
 
 
 class DaqConfTreeBase(ABC):
@@ -19,23 +20,20 @@ class DaqConfTreeBase(ABC):
 
     def __init__(
         self,
-        configuration: ConfigurationWrapper | None = None,
-        session: str | None = None,
+        application_controller: ShifterInterfaceState,
     ):
         """Constructor for the DaqConfTree class."""
 
+        self._app_controller = application_controller
+
         self._tree = Tree("[bold red]No Configuration Loaded")
         self._disabled_objs = []
-        self.open_new_session(configuration, session)
+        self.open_new_session()
 
-    def open_new_session(
-        self, configuration: ConfigurationWrapper, session: str | None
-    ):
+    def open_new_session(self):
         """Open a new session."""
-        self._configuration = configuration
-        self._session = session
 
-        if configuration is not None and session is not None:
+        if self._app_controller.dummy_oks_configuration is not None and self._app_controller.session_name is not None:
             self.generate_tree()
 
     def print_tree(self):
@@ -72,22 +70,21 @@ class DaqConfTree(DaqConfTreeBase):
 
     def __init__(
         self,
-        configuration: ConfigurationWrapper | None = None,
-        session: str | None = None,
+        application_controller: ShifterInterfaceState,
     ):
         """Constructor for the DaqConfTree class."""
 
         self._disabled_objs = []
-        super().__init__(configuration, session)
+        super().__init__(application_controller)
 
     def generate_tree(self) -> Tree:
         """Generate the tree."""
         # Add the session
-        self._tree = Tree(f"[bold red1] {self._session}")
+        self._tree = Tree(f"[bold red1] {self._app_controller.session_name}")
 
         # We're now going to recurssively loop through relations to session
-        session_dal = ca.GetDalObjectAction(self._configuration)(
-            self._session, "Session"
+        session_dal = ca.GetDalObjectAction(self._app_controller.dummy_oks_configuration)(
+            self._app_controller.session_name, "Session"
         )
 
         self.build_tree(session_dal, self._tree, False)
@@ -97,23 +94,23 @@ class DaqConfTree(DaqConfTreeBase):
         """
         Get related segments
         """
-        class_name = ca.GetClassNameAction(self._configuration)(segment)
+        class_name = ca.GetClassNameAction(self._app_controller.dummy_oks_configuration)(segment)
 
         # Inexplicably session labels its segments as "segments" and not "segment"
         if class_name == "Segment":
-            return ca.GetAttributeAction(self._configuration)(segment, "segments")
+            return ca.GetAttributeAction(self._app_controller.dummy_oks_configuration)(segment, "segments")
         elif class_name == "Session":
-            return [ca.GetAttributeAction(self._configuration)(segment, "segment")]
+            return [ca.GetAttributeAction(self._app_controller.dummy_oks_configuration)(segment, "segment")]
         else:
             raise ValueError(
-                f"Invalid class {ca.GetClassNameAction(self._configuration)(segment)}"
+                f"Invalid class {ca.GetClassNameAction(self._app_controller.dummy_oks_configuration)(segment)}"
             )
 
     def get_related_apps(self, segment):
         """
         Get related apps
         """
-        return ca.GetAttributeAction(self._configuration)(segment, "applications")
+        return ca.GetAttributeAction(self._app_controller.dummy_oks_configuration)(segment, "applications")
 
     def build_tree(self, segment, tree_branch: Tree, is_disabled: bool = False):
         # Get segmeents
@@ -127,10 +124,10 @@ class DaqConfTree(DaqConfTreeBase):
 
         # Loop through segments
         for seg in self.get_related_segments(segment):
-            seg_name = ca.GetAttributeAction(self._configuration)(seg, "id")
+            seg_name = ca.GetAttributeAction(self._app_controller.dummy_oks_configuration)(seg, "id")
 
             if (
-                ca.CheckIsDisabledAction(self._configuration)(seg, self._session)
+                ca.CheckIsDisabledAction(self._app_controller.dummy_oks_configuration)(seg, self._app_controller.session_name)
                 or is_disabled
                 or seg in self._disabled_objs
             ):
@@ -160,10 +157,10 @@ class DaqConfTree(DaqConfTreeBase):
         seg_apps = seg_branch.add("[bold deep_pink4]Applications")
         for app in self.get_related_apps(seg):
 
-            app_name = ca.GetAttributeAction(self._configuration)(app, "id")
+            app_name = ca.GetAttributeAction(self._app_controller.dummy_oks_configuration)(app, "id")
 
             if (
-                ca.CheckIsDisabledAction(self._configuration)(app, self._session)
+                ca.CheckIsDisabledAction(self._app_controller.dummy_oks_configuration)(app, self._app_controller.session_name)
                 or seg_disabled
             ):
                 colour = "grey35"
@@ -190,15 +187,14 @@ class ComponentLevelTree(DaqConfTreeBase):
 
     def __init__(
         self,
-        configuration: ConfigurationWrapper | None = None,
-        session: str | None = None,
+        application_controller: ShifterInterfaceState,
         extractor: DetectorExtractor | None = None,
         disabled_items=[],
     ):
         self._extractor = extractor
         self._disabled_items = disabled_items
 
-        super().__init__(configuration, session)
+        super().__init__(application_controller)
 
     def generate_tree(self) -> Tree:
         """Generate the tree structure for the system."""
@@ -310,14 +306,12 @@ class ComponentLevelTree(DaqConfTreeBase):
         """Build a tree structure for attribute objects."""
         attribute_tree = {}
         for obj in attribute_objs:
-            obj_id = ca.GetAttributeAction(self._configuration)(obj, "id")
+            obj_id = ca.GetAttributeAction(self._app_controller.dummy_oks_configuration)(obj, "id")
             # Check if the attribute object is in the disabled list
             obj_disabled = obj in self._extractor.get_disabled_dals() or system_disabled
 
             status = (
-                SubsystemStatus.DISABLED
-                if obj_disabled
-                else SubsystemStatus.ENABLED
+                SubsystemStatus.DISABLED if obj_disabled else SubsystemStatus.ENABLED
             )
 
             colour, _ = self.get_text_colour_message(status)

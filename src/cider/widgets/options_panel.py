@@ -4,7 +4,7 @@ from cider.screens.quit_screen import QuitScreen
 from cider.screens.help_screen import HelpScreen
 from cider.widgets.popup_message import PopupMessage
 from cider.utils.file_cleaner import clean_old_files
-from cider.widgets.file_io_panel import FileIOPanel
+from cider.widgets.file_select_panel import FilePanelWidget
 
 from textual.css.query import NoMatches
 from textual.containers import ScrollableContainer
@@ -14,14 +14,13 @@ from pathlib import Path
 from datetime import datetime
 import shutil
 import logging
+from cider.interfaces.controller.application_controller import ShifterInterfaceState
 
 
 class OptionPanel(Static):
     def __init__(
         self,
-        configuration: ConfigurationWrapper | None,
-        session: str | None,
-        output_directory: str,
+        application_controller: ShifterInterfaceState,
         content: str | SupportsVisual = "",
         *,
         expand: bool = False,
@@ -43,17 +42,8 @@ class OptionPanel(Static):
             disabled=disabled,
         )
 
-        self._configuration = configuration
-        self._session_name = session
-        self._output_directory = output_directory
-        self._saved_configuration = None
+        self._application_controller = application_controller
 
-    @property
-    def saved_configuration(self):
-        return self._saved_configuration
-
-    def get_config_session(self):
-        return self._configuration, self._session_name
 
     def show_popup(self, message: str):
         """
@@ -82,7 +72,7 @@ class OptionPanel(Static):
 
     def compose(self):
         logging.debug("OptionPanel compose")
-        disable_buttons = self._configuration is None or self._session_name is None
+        disable_buttons =  self._application_controller.session_name is None
 
         yield ScrollableContainer(
             Button("[bold white]Help", id="help_button", classes="options_button"),
@@ -109,7 +99,7 @@ class OptionPanel(Static):
 
         dir_path = Path(dir_path)
 
-        # Clear it
+        # Clear itz
         if dir_path.is_dir():
             shutil.rmtree(dir_path)
 
@@ -118,7 +108,7 @@ class OptionPanel(Static):
         output_file_path = f"{dir_path}/{name}"
 
         logging.debug(f"Copying configuration to {output_file_path}")
-        ca.CopyFullConfigurationAction(self._configuration)(output_file_path)
+        ca.CopyFullConfigurationAction(self._application_controller.dummy_oks_configuration)(output_file_path)
         self.generate_change_log(output_file_path)
 
         logging.info(f"Configuration saved to {output_file_path}")
@@ -126,20 +116,20 @@ class OptionPanel(Static):
 
     # Wrappers
     def save_main(self):
-        self._saved_configuration = self.save_to_path(
-            f"{self._output_directory}/current_config", self.generate_output_name()
+        self._application_controller.saved_configuration = self.save_to_path(
+            f"{self._application_controller.interface_config.output_directory}/current_config", self.generate_output_name()
         )
         self.show_popup(
-            f"[white]Configuration saved to [bold grey3]{self._saved_configuration}[/bold grey3]"
+            f"[white]Configuration saved to [bold grey3]{self._application_controller.saved_configuration}[/bold grey3]"
         )
 
     def save_backup(self):
         self.save_to_path(
-            f"{self._output_directory}/old_configs/run_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}",
+            f"{self._application_controller.interface_config.output_directory}/old_configs/run_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}",
             self.generate_output_name(),
         )
         clean_old_files(
-            Path(f"{self._output_directory}/old_configs"),
+            Path(f"{self._application_controller.interface_config.output_directory}/old_configs"),
             extension=".data.xml",
             n_files=5,
             include_folders=True,
@@ -147,17 +137,12 @@ class OptionPanel(Static):
         )
 
     def generate_output_name(self):
-        if self._configuration is None:
-            return
-
         # Hacky method to talk to the main screen
-        main_screen = self.app.get_screen("shifter_view_screen")
-        full_path = main_screen.query_one("FileIOPanel").selected_config_name
+        full_path = self._application_controller.oks_configuration
 
-        config_name = str(Path(full_path).stem)
-        config_name = config_name.replace(".data", "")
-
-        session = main_screen.query_one("FileIOPanel").selected_session_name
+        config_name = str(Path(full_path).name)
+        config_name = config_name.replace(".data.xml", "")
+        session = self._application_controller.session_name
 
         output_name = f"{config_name}_{session}"
 
@@ -181,13 +166,9 @@ class OptionPanel(Static):
                     file.write(f"{key} : {value.name}\n")
 
     def open_new_session(
-        self, configuration: ConfigurationWrapper | None, session_name: str | None
+        self,
     ):
-
-        self._session_name = session_name
-        self._configuration = configuration
-
-        disable_buttons = self._configuration is None or self._session_name is None
+        disable_buttons = self._application_controller.session_name is None
         self.query_one("#create_button").disabled = disable_buttons
         self.query_one("#undo_changes_button").disabled = disable_buttons
 
@@ -201,8 +182,7 @@ class OptionPanel(Static):
                 self.save_backup()
                 self.app.push_screen(
                     QuitScreen(
-                        self._session_name,
-                        self._configuration,
+                        application_controller=self._application_controller,
                         render_no_create=False,
                         classes="pop_up_screen",
                     )
@@ -210,10 +190,12 @@ class OptionPanel(Static):
 
             # Make sure what we do is valid
             except Exception as e:
+                main_screen = self.app.get_screen("shifter_view_screen")
+
+                
                 logging.error(f"Error saving configuration: {e}")
                 self.show_popup(
-                    f"[white]Invalid configuration[/white] [bold grey3]{self.query_one(FileIOPanel).selected_config_name}:{self.query_one(FileIOPanel).selected_session_name}[/bold grey3] [white]passed, please check with the experts!\n\
-                    Log saved to[/white] [bold grey3]{logging.getLogger().handlers[0].baseFilename}[/bold grey3]"
+                    f"[white]Invalid configuration[/white] [bold grey3]{self._application_controller.oks_configuration}:{self._application_controller.session_name}[/bold grey3] [white]passed, please check with the experts!"
                 )
 
         # Resets to base config provided
@@ -225,10 +207,4 @@ class OptionPanel(Static):
         # Quit
         elif event.button.id == "quit_button":
             logging.debug("Quit button pressed")
-            self.app.push_screen(
-                QuitScreen(
-                    self._session_name,
-                    self._configuration,
-                    classes="pop_up_screen",
-                )
-            )
+            return self.app.action_quit()

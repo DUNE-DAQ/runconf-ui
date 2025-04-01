@@ -219,7 +219,12 @@ class AttributeExtractor(SubsystemExtractor):
 
         state = current_states[0]
 
-        if all([self.get_state_for_obj(a) == SubsystemStatus.DISABLED for a in self._affected_objects]):
+        if all(
+            [
+                self.get_state_for_obj(a) == SubsystemStatus.DISABLED
+                for a in self._affected_objects
+            ]
+        ):
             return SubsystemStatus.DISABLED
 
         for s in current_states:
@@ -297,12 +302,11 @@ class ComponentExtractor(SubsystemExtractor):
         subsystem_dal = self.get_dal()
 
         dal_disabled = ca.CheckIsDisabledAction(self._configuration)(
-                subsystem_dal, self._session_name
-            )
-        
+            subsystem_dal, self._session_name
+        )
+
         return SubsystemStatus(
-            not dal_disabled               
-            and subsystem_dal not in self._disabled_dals
+            not dal_disabled and subsystem_dal not in self._disabled_dals
         )
 
     def _set_state(self, state: SubsystemStatus):

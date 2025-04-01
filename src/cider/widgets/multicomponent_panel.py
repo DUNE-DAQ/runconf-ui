@@ -5,6 +5,7 @@ from cider.interfaces.workflows.extract_system_info import (
     DetectorExtractor,
 )
 from cider.utils.daq_conf_tree import ComponentLevelTree
+from cider.interfaces.controller.application_controller import ShifterInterfaceState
 
 from typing import Dict, Optional
 from textual.visual import SupportsVisual
@@ -18,8 +19,7 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
 
     def __init__(
         self,
-        configuration: Optional[ConfigurationWrapper],
-        session_name: Optional[str] = "",
+        app_controller: ShifterInterfaceState,
         object_list: Dict = {},
         content: str | SupportsVisual = "",
         *,
@@ -33,8 +33,7 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
     ) -> None:
 
         super().__init__(
-            configuration,
-            session_name,
+            app_controller,
             content,
             expand=expand,
             shrink=shrink,
@@ -49,14 +48,14 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
 
         self._disabled_items = []
 
-        self._extractor = DetectorExtractor(configuration, session_name, object_list)
+        self._extractor = DetectorExtractor(self._app_controller.dummy_oks_configuration, self._app_controller.session_name, object_list)
 
     def generate_button_list(self) -> Dict | None:
-        if self._session_name is None or self._configuration is None:
+        if self._app_controller.session_name is None or self._app_controller.dummy_oks_configuration is None:
             return {}
 
         # Set up information extractor
-        self._extractor.set_config_session(self._configuration, self._session_name)
+        self._extractor.set_config_session(self._app_controller.dummy_oks_configuration, self._app_controller.session_name)
 
         # Grabs state information for each button
         self._extractor.read_system(self._object_list)
@@ -93,8 +92,7 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
     def get_tree(self):
 
         tree = ComponentLevelTree(
-            configuration=self._configuration,
-            session=self._session_name,
+            self._app_controller,
             extractor=self._extractor,
         )
         return tree
