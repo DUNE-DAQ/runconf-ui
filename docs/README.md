@@ -1,25 +1,19 @@
-# DAQ TUI Interfaces
-<!-- ### Names [Delete]
-- LAGER: [Lightweight Access Gateway for Experimental Runs]
-- BREW: [Basic Runtime Enable/disable Widget]
-- GROG [General Runtime Operations Gateway] -->
+# Shifter Interface
 
-## Shifter Interface
-
-### Overview
+## Overview
 The Shifter-Interface is a TUI designed to be used to enable/disable elements of the detector. Currently it can interface with 3 elements
 
 - **Detector Subsystems**: These are large scale elements of the detector possibly consisting of many components, for example the NP04 APAs.
 - **Dataflow Applications**: Straightforwardly, these are simply the applications which control dataflow from the detector
 - **Triggers**: Specifically triggers controlled by detector components i.e. TPG in ReadoutApplications.
 
-### Install
+## Install
 The TUI is installable with a daq enviroment through with pip
 ```bash
 pip install [-e] .
 ```
 
-### Initialisation
+## Initialisation
 The interface is initialised with 
 ```bash
 shifter-view
@@ -52,7 +46,7 @@ optionally the following CLI flags exist for custom paths:
 
 The default settings can be found in `src/cider/configuration/np02_configuration.yml` and can be set either directly or via environment variable. Specifying an option in the CLI overrides the yaml default.
  
-### Usage
+## Usage
 To get started pick a version of the daq configuration from the left hand side drop down menu. If only one version/directory is available this menu will be disabled & and that version automatically picked. Next pick your configuration from the right hand menu, again this will be disabled and automated if only one configuration file is available.
 
 Currently there are 3 categories of objects that can be enabled or disabled:
