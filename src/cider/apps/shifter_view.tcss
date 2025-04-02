@@ -4,7 +4,7 @@ ShifterViewScreen {
 
 #main_container{    
     layout: grid;
-    grid-size: 5 5;
+    grid-size: 5 6;
     grid-rows: 1fr;
     grid-columns: 1fr;
     grid-gutter: 1;
@@ -15,7 +15,7 @@ ShifterViewScreen {
 
 /* === File IO Panel === */
 #file_io_panel_grid {
-    grid-size: 5 2;
+    grid-size: 5 3;
     width: 100%;
     column-span: 5;
     content-align: center middle;
@@ -25,6 +25,7 @@ ShifterViewScreen {
 #file_io_panel_message{
     margin-top: 1;
     column-span: 5
+    row-se
 }
 
 .file_select {

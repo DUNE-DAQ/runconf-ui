@@ -4,7 +4,7 @@ from typing import Iterable, Any, List
 from textual.message import Message
 from textual.visual import SupportsVisual
 from textual.widgets import Button, Static, Select
-from textual.containers import Grid
+from textual.containers import Grid, ScrollableContainer
 from textual.widgets._select import NoSelection
 from rich.console import ConsoleRenderable, RichCast
 from textual import on
@@ -60,7 +60,6 @@ class DAQSelectMenu(Select):
 
         self._management_interface = management_interface
         logging.info(f"Select initialized with value: {self._value}")
-
 
     @classmethod
     def check_options(
@@ -125,12 +124,12 @@ class SelectDAQVersion(DAQSelectMenu):
         if self._management_interface.daq_version == event.value:
             logging.info("DAQ version already selected")
             return
-        
+
         self._management_interface.set_version(event.value)
         self.post_message(self.DAQVersionSelected())
 
-    class DAQVersionSelected(Message):
-        ...
+    class DAQVersionSelected(Message): ...
+
 
 class SelectDAQConfiguration(DAQSelectMenu):
     """
@@ -198,9 +197,9 @@ class SelectDAQConfiguration(DAQSelectMenu):
         if self._management_interface.daq_version == self._current_version:
             logging.info(f"DAQ version already selected {self._current_version}")
             return
-        
+
         self._current_version = self._management_interface.daq_version
-        
+
         options = self._management_interface.get_configurations()
 
         if not options:
@@ -209,14 +208,13 @@ class SelectDAQConfiguration(DAQSelectMenu):
             self._value = Select.BLANK
             return
 
-        self.disabled = False        
+        self.disabled = False
         self.set_options(options)
-            
 
     def on_select_changed(self, event: Select.Changed) -> None:
         self.post_message(self.DAQConfigurationSelected(event.value))
 
-    def set_options(self, options: List[str]):        
+    def set_options(self, options: List[str]):
         options = [(str(Path(m).name), m) for m in options]
         super().set_options(options)
 
@@ -263,17 +261,16 @@ class FilePanelWidget(Static):
     def compose(self):
         default_config = self._app_controller.interface_config.default_daq_config
         default_version = self._app_controller.interface_config.default_version
-        
-        s = SelectDAQConfiguration(
-                self._management_interface,
-                prompt="Select DAQ configuration",
-                classes="file_select",
-                id="daq_configuration_select",
-                value=default_config,
-                default_version=default_version,
-            )
 
-        
+        s = SelectDAQConfiguration(
+            self._management_interface,
+            prompt="Select DAQ configuration",
+            classes="file_select",
+            id="daq_configuration_select",
+            value=default_config,
+            default_version=default_version,
+        )
+
         with Grid(id="file_io_panel_grid"):
             yield SelectDAQVersion(
                 self._management_interface,
@@ -286,10 +283,11 @@ class FilePanelWidget(Static):
             yield Button(
                 "Open", id="open_file_button", disabled=True, classes="file_io_button"
             )
-            yield Static(
-                "[bold medium_violet_red]   No file loaded\n  ",
-                id="file_io_panel_message",
-            )
+            with ScrollableContainer(id="file_io_panel_message"):
+                yield Static(
+                        "[bold medium_violet_red]   No file loaded\n  ",
+                        id="file_io_panel_message_static",
+                        shrink=True)
 
     @property
     def management_interface(self):
@@ -297,8 +295,8 @@ class FilePanelWidget(Static):
 
     @on(SelectDAQVersion.DAQVersionSelected)
     def handle_daq_version_selected(self) -> None:
-        logging.info('selected version')
-        
+        logging.info("selected version")
+
         self.query_one("#daq_configuration_select").update_version()
 
     @on(SelectDAQConfiguration.DAQConfigurationSelected)
@@ -331,19 +329,24 @@ class FilePanelWidget(Static):
             daq_config_file = self._management_interface.open_file(
                 selected_configuration
             )
-            self._app_controller.oks_configuration = daq_config_file.file_name
-            self._app_controller.session_name = self._management_interface.find_session(
-                daq_config_file.file_name
-            )
 
-            self.query_one("#file_io_panel_message").update(
-                f"   [bold green]Current Config[/bold green]: [deep_pink4]{self._app_controller.oks_configuration}[/deep_pink4]\n   [bold green]Session[/bold green]:  [deep_pink4]{self._app_controller.session_name}"
-            )
             self.post_message(self.FileSelected())
 
         except Exception:
             logging.error(f"{traceback.format_exc()}")
             self.post_message(self.FileNotFound(selected_configuration))
+            return
+
+        self._app_controller.oks_configuration = daq_config_file.file_name
+        self._app_controller.session_name = self._management_interface.find_session(
+            daq_config_file.file_name
+        )
+        self.query_one("#file_io_panel_message_static").update(
+            f"      [bold green]DAQ Version[/bold green]:  [deep_pink4]{self._management_interface.daq_version}[/deep_pink4]\n"
+            f"      [bold green]DAQ Config[/bold green]:  [deep_pink4]{selected_configuration}[/deep_pink4]\n"
+            f"      [bold green]Current Config File[/bold green]: [deep_pink4]{self._app_controller.oks_configuration}[/deep_pink4]\n"
+            f"      [bold green]Session in Config[/bold green]:  [deep_pink4]{self._app_controller.session_name}\n"
+        )
 
     class FileSelected(Message): ...
 

@@ -42,9 +42,9 @@ class ShifterConfigReader:
         self._default_version = path_or_env_check(
             general_settings.get("default_daq_version", None)
         )
-        
+
         self._default_daq_config = path_or_env_check(
-            general_settings.get("default_daq_config", None)   
+            general_settings.get("default_daq_config", None)
         )
 
     @property

@@ -127,15 +127,57 @@ class ShifterView(App):
 
 @click.command()
 @click.option(
-    "-a", "--apparatus", "apparatus", required=False, default=os.getenv("APPARATUS"), help="set the detector apparatus i.e. NP02/NP04"
+    "-a",
+    "--apparatus",
+    "apparatus",
+    required=False,
+    default=os.getenv("APPARATUS"),
+    help="set the detector apparatus i.e. NP02/NP04",
 )
-@click.option("-s", "--shifter-interface-config", "default_config", required=False, help="Set default yaml config for this interface")
-@click.option("-d", "--daq-config-directory", "download_directory", required=False, help="Where do you want to download configs from/where are they located")
-@click.option("--session-name", "session_name", required=False, help="Name of daq session")
-@click.option("--base-url", "base_url", required=False, help="Base URL for the interface, not used for local operation")
-@click.option("--operation-url", "operation_url", required=False, help="Operation URL for the interface, not used for local operation")
-@click.option("--debug", "log_level", default="INFO", required=False, help="Set the debug log level")
-@click.option("-l", "--local-config", "use_local", required=False, is_flag=True, help="Use local config files instead of downloading from the github, expert use only!")
+@click.option(
+    "-s",
+    "--shifter-interface-config",
+    "default_config",
+    required=False,
+    help="Set default yaml config for this interface",
+)
+@click.option(
+    "-d",
+    "--daq-config-directory",
+    "download_directory",
+    required=False,
+    help="Where do you want to download configs from/where are they located",
+)
+@click.option(
+    "--session-name", "session_name", required=False, help="Name of daq session"
+)
+@click.option(
+    "--base-url",
+    "base_url",
+    required=False,
+    help="Base URL for the interface, not used for local operation",
+)
+@click.option(
+    "--operation-url",
+    "operation_url",
+    required=False,
+    help="Operation URL for the interface, not used for local operation",
+)
+@click.option(
+    "--debug",
+    "log_level",
+    default="INFO",
+    required=False,
+    help="Set the debug log level",
+)
+@click.option(
+    "-l",
+    "--local-config",
+    "use_local",
+    required=False,
+    is_flag=True,
+    help="Use local config files instead of downloading from the github, expert use only!",
+)
 def main(
     apparatus,
     default_config,
