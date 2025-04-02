@@ -2,6 +2,7 @@
 General:
   # Environment variables
   default_config: "SESSION_FILE"
+  default_version: "EHN1_VERSION"
   download_directory: "CONFIG_DIR"
   session_name: "SESSION_NAME"
   

@@ -47,7 +47,7 @@ class ShifterViewScreen(Screen):
         logging.info("Opening shifter view screen")
 
         self._app_controller = app_controller
-        
+
     def compose(self):
         """
         Generate the screen layout
@@ -56,10 +56,7 @@ class ShifterViewScreen(Screen):
 
         with ScrollableContainer(id="main_container"):
             # File dropdowns
-            yield FilePanelWidget(
-                self._app_controller,
-                classes="file_io_panel"
-            )
+            yield FilePanelWidget(self._app_controller, classes="file_io_panel")
 
             # Grid containing buttons AND maps
             with Grid(id="enable_disable_panel_container"):
@@ -155,13 +152,14 @@ class ShifterViewScreen(Screen):
             timer=10.0,
         )
 
-
     def open_new_file(self):
         """
         Open a new file is the only cross-app interface
         """
         # Grab session + config from file selector
-        logging.info(f"Opening new file: {self._app_controller.session_name}:{self._app_controller.oks_configuration}")
+        logging.info(
+            f"Opening new file: {self._app_controller.session_name}:{self._app_controller.oks_configuration}"
+        )
 
         # Make directories
         self.TMP_CONFIG.parent.mkdir(parents=True, exist_ok=True)
@@ -169,17 +167,25 @@ class ShifterViewScreen(Screen):
         # Now we make a temporary copy of the configuration object
         # For ease of copying we copy the entire session into a single file
         ConsolidateFile(
-            self._app_controller.oks_configuration, self._app_controller.session_name, "Session", str(self.TMP_CONFIG)
+            self._app_controller.oks_configuration,
+            self._app_controller.session_name,
+            "Session",
+            str(self.TMP_CONFIG),
         )()
         logging.info("Configuration copied to temporary file")
 
         # Get configuration
-        self._app_controller.dummy_oks_configuration = ConfigurationWrapper(str(self.TMP_CONFIG))
+        self._app_controller.dummy_oks_configuration = ConfigurationWrapper(
+            str(self.TMP_CONFIG)
+        )
 
         # Open new session
         self.query_one(OptionPanel).open_new_session()
 
-        if not self._app_controller.session_name or not self._app_controller.dummy_oks_configuration:
+        if (
+            not self._app_controller.session_name
+            or not self._app_controller.dummy_oks_configuration
+        ):
             logging.info("No session or configuration")
             return
 

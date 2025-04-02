@@ -169,4 +169,5 @@ class EnableDisablePanel(Static):
 
     class Changed(Message):
         """Custom message to notify when a button is pressed."""
+
         ...

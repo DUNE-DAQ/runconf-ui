@@ -23,7 +23,7 @@ class QuitScreen(Screen):
         self._render_no_create = render_no_create
         self._application_controller = application_controller
 
-    def message(self, quit_without_saving: bool=False) -> str:
+    def message(self, quit_without_saving: bool = False) -> str:
         """
         Message to display on quit
         """
@@ -48,7 +48,9 @@ class QuitScreen(Screen):
             f.write(
                 f"export EHN1_RUN_FILE={Path(self._application_controller.saved_configuration).expanduser()}\n"
             )
-            f.write(f"export EHN1_RUN_CONFIG_ID={self._application_controller.session_name}\n")
+            f.write(
+                f"export EHN1_RUN_CONFIG_ID={self._application_controller.session_name}\n"
+            )
             f.write(f"export EHN1_RUN_COMMAND='{run_cmd}'\n")
 
         os.chmod(f"{output_script}", 0o755)
@@ -67,7 +69,9 @@ class QuitScreen(Screen):
         # TODO: Add a proper handler for this...
         main_screen = self.app.get_screen("shifter_view_screen")
         options = main_screen.query_one("OptionPanel")
-        self._saved_configuration_name = self._application_controller.saved_configuration
+        self._saved_configuration_name = (
+            self._application_controller.saved_configuration
+        )
 
         # If the configuration is None, we can't save so let's not give the shifter the ability to do this
         button_disabled = self._application_controller.session_name is None
@@ -131,8 +135,11 @@ class QuitScreen(Screen):
         if event.button.id == "quit_screen_quit_button":
             logging.info("Quitting without saving")
             # Check if we've saved something!
-            
-            if quit_and_save := self._application_controller.saved_configuration is not None:
+
+            if (
+                quit_and_save := self._application_controller.saved_configuration
+                is not None
+            ):
                 options.save_backup()
 
             self.app.exit(self.message(not quit_and_save))

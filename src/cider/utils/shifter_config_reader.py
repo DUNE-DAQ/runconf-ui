@@ -1,4 +1,3 @@
-
 from cider.utils.path_or_env_check import path_or_env_check
 
 import yaml
@@ -38,6 +37,10 @@ class ShifterConfigReader:
 
         self._operation_url = path_or_env_check(
             general_settings.get("operation_url", None)
+        )
+
+        self._default_version = path_or_env_check(
+            general_settings.get("default_version", None)
         )
 
     @property
@@ -87,3 +90,7 @@ class ShifterConfigReader:
     @property
     def panel_options(self):
         return self._config.get("PanelOptions", {})
+
+    @property
+    def default_version(self):
+        return self._default_version

@@ -26,25 +26,26 @@ class ShifterView(App):
 
     CSS_PATH = "shifter_view.tcss"
     BINDINGS = [("ctrl+q", "quit", "Quit")]
+
     def __init__(self, *args, **kwargs):
         """Constructor for the ShifterView class.
-        args: default app args
-c
-        kwargs:
-            - apparatus: str - The apparatus to use
-            - default_config: str - The default configuration file to use
-            - download_directory - default download directory
-            - session_name - tmux session name
+                args: default app args
+        c
+                kwargs:
+                    - apparatus: str - The apparatus to use
+                    - default_config: str - The default configuration file to use
+                    - download_directory - default download directory
+                    - session_name - tmux session name
 
-            - base_url- base url for the interface
-            - operation_url - operation url for the interface
+                    - base_url- base url for the interface
+                    - operation_url - operation url for the interface
         """
         super().__init__(*args)
 
         self._exit_message = ""
         # Read kwargs
-        apparatus = kwargs.get("apparatus", os.environ.get("APPARATUS", "np02"))        
-        
+        apparatus = kwargs.get("apparatus", os.environ.get("APPARATUS", "np02"))
+
         # messy...
         configuration = f"{Path(__file__).parent.absolute()}/../configuration/{apparatus}_configuration.yml"
 
@@ -56,16 +57,18 @@ c
 
         self.application_controller = ShifterInterfaceState(
             apparatus=apparatus,
-            interface_config = interface_config,
-            use_local = kwargs.get("use_local", False),
+            interface_config=interface_config,
+            use_local=kwargs.get("use_local", False),
         )
-    
+
         self._init_logger(kwargs.get("log_level", "INFO"))
 
     def _init_logger(self, log_level):
         # Grab from config reader
 
-        logging_path = Path(f"{self.application_controller.interface_config.output_directory}/logs")
+        logging_path = Path(
+            f"{self.application_controller.interface_config.output_directory}/logs"
+        )
         logging_path.mkdir(parents=True, exist_ok=True)
 
         logging.basicConfig(

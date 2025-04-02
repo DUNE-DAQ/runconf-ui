@@ -44,7 +44,10 @@ class SingleComponentEnableDisablePanel(EnableDisablePanel):
         self._class_list = class_list
 
     def generate_button_list(self):
-        if self._app_controller.session_name is None or self._app_controller.dummy_oks_configuration is None:
+        if (
+            self._app_controller.session_name is None
+            or self._app_controller.dummy_oks_configuration is None
+        ):
             return {}
 
         session = ca.GetDalObjectAction(self._app_controller.dummy_oks_configuration)(
@@ -54,7 +57,9 @@ class SingleComponentEnableDisablePanel(EnableDisablePanel):
         buttons = []
 
         for class_ in self._class_list:
-            buttons += GetObjectsInSessionAction(self._app_controller.dummy_oks_configuration)(session, class_)
+            buttons += GetObjectsInSessionAction(
+                self._app_controller.dummy_oks_configuration
+            )(session, class_)
 
         get_id = ca.GetAttributeAction(self._app_controller.dummy_oks_configuration)
         get_class = ca.GetClassNameAction(self._app_controller.dummy_oks_configuration)
@@ -71,23 +76,35 @@ class SingleComponentEnableDisablePanel(EnableDisablePanel):
 
     def _button_action(self, class_name, button_name):
 
-        dal = ca.GetDalObjectAction(self._app_controller.dummy_oks_configuration)(button_name, class_name)
-        session_dal = ca.GetDalObjectAction(self._app_controller.dummy_oks_configuration)(
-            self._app_controller.session_name, "Session"
+        dal = ca.GetDalObjectAction(self._app_controller.dummy_oks_configuration)(
+            button_name, class_name
         )
+        session_dal = ca.GetDalObjectAction(
+            self._app_controller.dummy_oks_configuration
+        )(self._app_controller.session_name, "Session")
 
-        if dal in ca.GetAttributeAction(self._app_controller.dummy_oks_configuration)(session_dal, "disabled"):
-            ca.DisableDalAction(self._app_controller.dummy_oks_configuration)(dal, self._app_controller.session_name, False)
+        if dal in ca.GetAttributeAction(self._app_controller.dummy_oks_configuration)(
+            session_dal, "disabled"
+        ):
+            ca.DisableDalAction(self._app_controller.dummy_oks_configuration)(
+                dal, self._app_controller.session_name, False
+            )
 
         else:
-            ca.DisableDalAction(self._app_controller.dummy_oks_configuration)(dal, self._app_controller.session_name, True)
+            ca.DisableDalAction(self._app_controller.dummy_oks_configuration)(
+                dal, self._app_controller.session_name, True
+            )
 
         ca.UpdateDalAction(self._app_controller.dummy_oks_configuration)(session_dal)
 
     def check_button_state(
         self, button: str, information: str | List[str]
     ) -> SubsystemStatus:
-        dal = ca.GetDalObjectAction(self._app_controller.dummy_oks_configuration)(button, information)
+        dal = ca.GetDalObjectAction(self._app_controller.dummy_oks_configuration)(
+            button, information
+        )
         return SubsystemStatus(
-            not ca.CheckIsDisabledAction(self._app_controller.dummy_oks_configuration)(dal, self._app_controller.session_name)
+            not ca.CheckIsDisabledAction(self._app_controller.dummy_oks_configuration)(
+                dal, self._app_controller.session_name
+            )
         )

@@ -44,7 +44,6 @@ class OptionPanel(Static):
 
         self._application_controller = application_controller
 
-
     def show_popup(self, message: str):
         """
         Display a pop-up message on the screen.
@@ -72,7 +71,7 @@ class OptionPanel(Static):
 
     def compose(self):
         logging.debug("OptionPanel compose")
-        disable_buttons =  self._application_controller.session_name is None
+        disable_buttons = self._application_controller.session_name is None
 
         yield ScrollableContainer(
             Button("[bold white]Help", id="help_button", classes="options_button"),
@@ -108,7 +107,9 @@ class OptionPanel(Static):
         output_file_path = f"{dir_path}/{name}"
 
         logging.debug(f"Copying configuration to {output_file_path}")
-        ca.CopyFullConfigurationAction(self._application_controller.dummy_oks_configuration)(output_file_path)
+        ca.CopyFullConfigurationAction(
+            self._application_controller.dummy_oks_configuration
+        )(output_file_path)
         self.generate_change_log(output_file_path)
 
         logging.info(f"Configuration saved to {output_file_path}")
@@ -117,7 +118,8 @@ class OptionPanel(Static):
     # Wrappers
     def save_main(self):
         self._application_controller.saved_configuration = self.save_to_path(
-            f"{self._application_controller.interface_config.output_directory}/current_config", self.generate_output_name()
+            f"{self._application_controller.interface_config.output_directory}/current_config",
+            self.generate_output_name(),
         )
         self.show_popup(
             f"[white]Configuration saved to [bold grey3]{self._application_controller.saved_configuration}[/bold grey3]"
@@ -129,7 +131,9 @@ class OptionPanel(Static):
             self.generate_output_name(),
         )
         clean_old_files(
-            Path(f"{self._application_controller.interface_config.output_directory}/old_configs"),
+            Path(
+                f"{self._application_controller.interface_config.output_directory}/old_configs"
+            ),
             extension=".data.xml",
             n_files=5,
             include_folders=True,
@@ -192,7 +196,6 @@ class OptionPanel(Static):
             except Exception as e:
                 main_screen = self.app.get_screen("shifter_view_screen")
 
-                
                 logging.error(f"Error saving configuration: {e}")
                 self.show_popup(
                     f"[white]Invalid configuration[/white] [bold grey3]{self._application_controller.oks_configuration}:{self._application_controller.session_name}[/bold grey3] [white]passed, please check with the experts!"

@@ -6,12 +6,20 @@ from typing import Optional
 from cider.utils.shifter_config_reader import ShifterConfigReader
 from cider.interfaces.controller.config_wrapper import ConfigurationWrapper
 
+
 @dataclass
 class ShifterInterfaceState:
+    # YAML used to configure the interface
     interface_config: ShifterConfigReader
+    # NP02/NP04
     apparatus: Optional[str] = None
+    # Do we want to use the local configuration? Only use if you're an expert!
     use_local: Optional[bool] = False
-    session_name: Optional[str] = None
+    # Currently selected configuration, not necessarily the open one
     oks_configuration: Optional[str] = None
+    # Name of session in config
+    session_name: Optional[str] = None
+    # Currently open configuration
     dummy_oks_configuration: Optional[ConfigurationWrapper] = None
+    # Configuration name we're going to save
     saved_configuration: Optional[str] = None

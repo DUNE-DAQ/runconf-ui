@@ -48,14 +48,24 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
 
         self._disabled_items = []
 
-        self._extractor = DetectorExtractor(self._app_controller.dummy_oks_configuration, self._app_controller.session_name, object_list)
+        self._extractor = DetectorExtractor(
+            self._app_controller.dummy_oks_configuration,
+            self._app_controller.session_name,
+            object_list,
+        )
 
     def generate_button_list(self) -> Dict | None:
-        if self._app_controller.session_name is None or self._app_controller.dummy_oks_configuration is None:
+        if (
+            self._app_controller.session_name is None
+            or self._app_controller.dummy_oks_configuration is None
+        ):
             return {}
 
         # Set up information extractor
-        self._extractor.set_config_session(self._app_controller.dummy_oks_configuration, self._app_controller.session_name)
+        self._extractor.set_config_session(
+            self._app_controller.dummy_oks_configuration,
+            self._app_controller.session_name,
+        )
 
         # Grabs state information for each button
         self._extractor.read_system(self._object_list)

@@ -5,12 +5,12 @@ from cider.interfaces.controller.application_controller import ShifterInterfaceS
 from textual.widgets import TabPane, Static
 from textual.containers import ScrollableContainer
 
+
 class EnableDisableMapGen:
     def __init__(self, app_controller: ShifterInterfaceState) -> None:
         self._app_controller = app_controller
         self._panel_list, self._map_list, self._panel_labels = self.read_panel_options()
 
-    
     def read_panel_options(self):
         # Grab all panels we specify in the YAML
         panel_opts = self._app_controller.interface_config.panel_options
@@ -93,4 +93,3 @@ class EnableDisableMapGen:
     @property
     def panel_labels(self):
         return self._panel_labels
-
