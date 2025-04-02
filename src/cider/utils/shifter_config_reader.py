@@ -40,7 +40,11 @@ class ShifterConfigReader:
         )
 
         self._default_version = path_or_env_check(
-            general_settings.get("default_version", None)
+            general_settings.get("default_daq_version", None)
+        )
+        
+        self._default_daq_config = path_or_env_check(
+            general_settings.get("default_daq_config", None)   
         )
 
     @property
@@ -94,3 +98,7 @@ class ShifterConfigReader:
     @property
     def default_version(self):
         return self._default_version
+
+    @property
+    def default_daq_config(self):
+        return self._default_daq_config

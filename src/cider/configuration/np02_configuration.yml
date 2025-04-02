@@ -2,10 +2,12 @@
 General:
   # Environment variables
   default_config: "SESSION_FILE"
-  default_version: "EHN1_VERSION"
   download_directory: "CONFIG_DIR"
   session_name: "SESSION_NAME"
-  
+
+  default_daq_version: "EHN1_DEFAULT_VERSION"
+  default_daq_config: "EHN1_DEFAULT_CONFIG"
+
   base_url: "https://gitlab.cern.ch/dune-daq/online/ehn1-daqconfigs"
   operation_url: "https://gitlab.cern.ch/dune-daq/online/np02-configs-operation.git"
 

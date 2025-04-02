@@ -16,7 +16,6 @@ from cider.utils.management_interface import (
     LocalManagementInterface,
     RemoteManagementInterface,
 )
-from cider.interfaces.controller.config_wrapper import ConfigurationWrapper
 from cider.interfaces.controller.application_controller import ShifterInterfaceState
 
 
@@ -41,12 +40,10 @@ class DAQSelectMenu(Select):
 
         # Check if the value is in the options
         # Disable the select if there's only one option
-        # if len(options) == 1:
-        value = options[0][1]
-        #     disabled = True
-        #     # allow_blank = False
-        # else:
-        #     value = self.check_options(options, value)
+        if len(options) == 1:
+            value = self.check_options(options, options[0][1])
+        else:
+            value = self.check_options(options, value)
 
         super().__init__(
             options,
@@ -76,7 +73,7 @@ class DAQSelectMenu(Select):
         if default in [i[0] for i in options]:
             return default
 
-        return default
+        return Select.BLANK
 
 
 class SelectDAQVersion(DAQSelectMenu):
@@ -209,9 +206,7 @@ class SelectDAQConfiguration(DAQSelectMenu):
             self._value = Select.BLANK
             return
 
-        self.disabled = False
-        self._value = self.check_options([(o, o) for o in options], self._default_value)
-        
+        self.disabled = False        
         self.set_options(options)
             
 
@@ -263,7 +258,7 @@ class FilePanelWidget(Static):
             self._daq_version_message = "Select DAQ configuration version"
 
     def compose(self):
-        default_config = self._app_controller.interface_config.default_config
+        default_config = self._app_controller.interface_config.default_daq_config
         default_version = self._app_controller.interface_config.default_version
         
         s = SelectDAQConfiguration(
