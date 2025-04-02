@@ -3,8 +3,8 @@
 from dataclasses import dataclass
 
 from typing import Optional
-from cider.utils.shifter_config_reader import ShifterConfigReader
-from cider.interfaces.controller.config_wrapper import ConfigurationWrapper
+from shifter_interface.utils.shifter_config_reader import ShifterConfigReader
+from shifter_interface.interfaces.controller.config_wrapper import ConfigurationWrapper
 
 
 @dataclass

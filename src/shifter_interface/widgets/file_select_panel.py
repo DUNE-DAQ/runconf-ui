@@ -12,11 +12,11 @@ from pathlib import Path
 import logging
 import traceback
 
-from cider.utils.management_interface import (
+from shifter_interface.utils.management_interface import (
     LocalManagementInterface,
     RemoteManagementInterface,
 )
-from cider.interfaces.controller.application_controller import ShifterInterfaceState
+from shifter_interface.interfaces.controller.application_controller import ShifterInterfaceState
 
 
 class DAQSelectMenu(Select):

@@ -1,6 +1,6 @@
-from cider.interfaces.controller.config_wrapper import ConfigurationWrapper
+from shifter_interface.interfaces.controller.config_wrapper import ConfigurationWrapper
 
-from cider.interfaces.actions.actions import (
+from shifter_interface.interfaces.actions.actions import (
     GetDalObjectAction,
     CopyDalAction,
     GetRelatedDalsAction,

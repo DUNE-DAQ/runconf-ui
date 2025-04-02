@@ -1,6 +1,6 @@
-from cider.widgets.multicomponent_panel import MultiComponentEnableDisablePanel
-from cider.widgets.single_component_panel import SingleComponentEnableDisablePanel
-from cider.interfaces.controller.application_controller import ShifterInterfaceState
+from shifter_interface.widgets.multicomponent_panel import MultiComponentEnableDisablePanel
+from shifter_interface.widgets.single_component_panel import SingleComponentEnableDisablePanel
+from shifter_interface.interfaces.controller.application_controller import ShifterInterfaceState
 
 from textual.widgets import TabPane, Static
 from textual.containers import ScrollableContainer

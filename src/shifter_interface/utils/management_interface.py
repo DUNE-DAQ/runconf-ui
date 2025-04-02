@@ -3,11 +3,11 @@ Simple wrapper for talking to config-management
 """
 
 from config_management.ConfPool import ConfPool
-from cider.utils.shifter_config_reader import ShifterConfigReader
-from cider.utils.config_path_reader import ConfigPathReader
-from cider.interfaces.controller.config_wrapper import ConfigurationWrapper
-from cider.interfaces.controller.application_controller import ShifterInterfaceState
-import cider.interfaces.actions.actions as ca
+from shifter_interface.utils.shifter_config_reader import ShifterConfigReader
+from shifter_interface.utils.config_path_reader import ConfigPathReader
+from shifter_interface.interfaces.controller.config_wrapper import ConfigurationWrapper
+from shifter_interface.interfaces.controller.application_controller import ShifterInterfaceState
+import shifter_interface.interfaces.actions.actions as ca
 import logging
 
 import re

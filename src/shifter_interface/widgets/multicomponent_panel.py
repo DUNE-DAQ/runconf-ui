@@ -1,11 +1,11 @@
-from cider.interfaces.controller.config_wrapper import ConfigurationWrapper
-from cider.widgets.enable_disable_base import EnableDisablePanel
-from cider.interfaces.workflows.extract_system_info import (
+from shifter_interface.interfaces.controller.config_wrapper import ConfigurationWrapper
+from shifter_interface.widgets.enable_disable_base import EnableDisablePanel
+from shifter_interface.interfaces.workflows.extract_system_info import (
     SubsystemStatus,
     DetectorExtractor,
 )
-from cider.utils.daq_conf_tree import ComponentLevelTree
-from cider.interfaces.controller.application_controller import ShifterInterfaceState
+from shifter_interface.utils.daq_conf_tree import ComponentLevelTree
+from shifter_interface.interfaces.controller.application_controller import ShifterInterfaceState
 
 from typing import Dict, Optional
 from textual.visual import SupportsVisual

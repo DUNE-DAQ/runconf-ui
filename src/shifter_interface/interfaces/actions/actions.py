@@ -1,5 +1,5 @@
-from cider.interfaces.actions.action_interfaces import ActionInterface
-from cider.interfaces.controller.config_wrapper import ConfigurationWrapper
+from shifter_interface.interfaces.actions.action_interfaces import ActionInterface
+from shifter_interface.interfaces.controller.config_wrapper import ConfigurationWrapper
 import shutil
 
 """

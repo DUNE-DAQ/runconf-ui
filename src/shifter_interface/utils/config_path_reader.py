@@ -1,5 +1,5 @@
-import cider.interfaces.actions.actions as ca
-from cider.interfaces.controller.config_wrapper import ConfigurationWrapper
+import shifter_interface.interfaces.actions.actions as ca
+from shifter_interface.interfaces.controller.config_wrapper import ConfigurationWrapper
 
 from pathlib import Path
 from typing import List

@@ -1,5 +1,5 @@
-from cider.interfaces.controller.config_wrapper import ConfigurationWrapper
-from cider.exceptions import CiderBadActionException
+from shifter_interface.interfaces.controller.config_wrapper import ConfigurationWrapper
+from shifter_interface.exceptions import CiderBadActionException
 
 from abc import ABC, abstractmethod
 from typing import Any

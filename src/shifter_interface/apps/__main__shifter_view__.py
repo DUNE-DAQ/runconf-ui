@@ -2,11 +2,11 @@
 Main application for the shifter view interface.
 """
 
-from cider.screens.shifter_view_screen import ShifterViewScreen
-from cider.screens.quit_screen import QuitScreen
-from cider.utils.file_cleaner import clean_old_files
-from cider.utils.shifter_config_reader import ShifterConfigReader
-from cider.interfaces.controller.application_controller import ShifterInterfaceState
+from shifter_interface.screens.shifter_view_screen import ShifterViewScreen
+from shifter_interface.screens.quit_screen import QuitScreen
+from shifter_interface.utils.file_cleaner import clean_old_files
+from shifter_interface.utils.shifter_config_reader import ShifterConfigReader
+from shifter_interface.interfaces.controller.application_controller import ShifterInterfaceState
 
 from textual.app import App
 import click
@@ -87,7 +87,7 @@ class ShifterView(App):
         self.theme = "catppuccin-latte"
 
         self.title = (
-            f"Shifter Interface v{pkg_resources.get_distribution('cider').version}"
+            f"Shifter Interface v{pkg_resources.get_distribution('shifter_interface').version}"
         )
 
         self.install_screen(

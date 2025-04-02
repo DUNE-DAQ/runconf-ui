@@ -24,7 +24,7 @@ ShifterViewScreen {
 
 #file_io_panel_message{
     margin-top: 1;
-    column-span: 5
+    column-span: 4
 }
 
 .file_select {

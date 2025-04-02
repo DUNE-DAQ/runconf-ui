@@ -1,10 +1,10 @@
-import cider.interfaces.actions.actions as ca
-from cider.interfaces.controller.config_wrapper import ConfigurationWrapper
-from cider.screens.quit_screen import QuitScreen
-from cider.screens.help_screen import HelpScreen
-from cider.widgets.popup_message import PopupMessage
-from cider.utils.file_cleaner import clean_old_files
-from cider.widgets.file_select_panel import FilePanelWidget
+import shifter_interface.interfaces.actions.actions as ca
+from shifter_interface.interfaces.controller.config_wrapper import ConfigurationWrapper
+from shifter_interface.screens.quit_screen import QuitScreen
+from shifter_interface.screens.help_screen import HelpScreen
+from shifter_interface.widgets.popup_message import PopupMessage
+from shifter_interface.utils.file_cleaner import clean_old_files
+from shifter_interface.widgets.file_select_panel import FilePanelWidget
 
 from textual.css.query import NoMatches
 from textual.containers import ScrollableContainer
@@ -14,7 +14,7 @@ from pathlib import Path
 from datetime import datetime
 import shutil
 import logging
-from cider.interfaces.controller.application_controller import ShifterInterfaceState
+from shifter_interface.interfaces.controller.application_controller import ShifterInterfaceState
 
 
 class OptionPanel(Static):

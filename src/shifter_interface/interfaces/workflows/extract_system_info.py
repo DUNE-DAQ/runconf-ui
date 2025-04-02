@@ -1,12 +1,12 @@
-from cider.interfaces.controller.config_wrapper import ConfigurationWrapper
-from cider.exceptions import CiderBadActionException
+from shifter_interface.interfaces.controller.config_wrapper import ConfigurationWrapper
+from shifter_interface.exceptions import CiderBadActionException
 
-import cider.interfaces.actions.actions as ca
-from cider.interfaces.workflows.get_set_session_attribute import (
+import shifter_interface.interfaces.actions.actions as ca
+from shifter_interface.interfaces.workflows.get_set_session_attribute import (
     SetAttributeValueSessionAction,
     GetAttributeValueSessionAction,
 )
-from cider.interfaces.workflows.get_objects_in_session import GetSegmentAppsListAction
+from shifter_interface.interfaces.workflows.get_objects_in_session import GetSegmentAppsListAction
 
 from typing import Dict, Sequence, Optional
 from enum import IntEnum

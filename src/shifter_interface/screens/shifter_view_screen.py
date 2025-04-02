@@ -4,14 +4,14 @@ from textual.widgets import TabbedContent, TabPane, Header, Footer, Static
 from textual import on
 from textual.css.query import NoMatches
 
-from cider.widgets.multicomponent_panel import MultiComponentEnableDisablePanel
-from cider.interfaces.controller.config_wrapper import ConfigurationWrapper
-from cider.widgets.options_panel import OptionPanel
-from cider.widgets.file_select_panel import FilePanelWidget
-from cider.utils.consolidate_file import ConsolidateFile
-from cider.utils.daq_conf_tree import DaqConfTree
-from cider.interfaces.controller.application_controller import ShifterInterfaceState
-from cider.utils.generate_enable_disable_map import EnableDisableMapGen
+from shifter_interface.widgets.multicomponent_panel import MultiComponentEnableDisablePanel
+from shifter_interface.interfaces.controller.config_wrapper import ConfigurationWrapper
+from shifter_interface.widgets.options_panel import OptionPanel
+from shifter_interface.widgets.file_select_panel import FilePanelWidget
+from shifter_interface.utils.consolidate_file import ConsolidateFile
+from shifter_interface.utils.daq_conf_tree import DaqConfTree
+from shifter_interface.interfaces.controller.application_controller import ShifterInterfaceState
+from shifter_interface.utils.generate_enable_disable_map import EnableDisableMapGen
 
 import traceback
 
@@ -19,7 +19,7 @@ from pathlib import Path
 import os
 import logging
 
-from cider.widgets.popup_message import PopupMessage
+from shifter_interface.widgets.popup_message import PopupMessage
 
 
 class ShifterViewScreen(Screen):
@@ -166,6 +166,8 @@ class ShifterViewScreen(Screen):
 
         # Now we make a temporary copy of the configuration object
         # For ease of copying we copy the entire session into a single file
+        logging.info(f"Session name {self._app_controller.session_name}")
+        
         ConsolidateFile(
             self._app_controller.oks_configuration,
             self._app_controller.session_name,

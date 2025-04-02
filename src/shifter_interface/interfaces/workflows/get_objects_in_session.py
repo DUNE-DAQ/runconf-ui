@@ -1,5 +1,5 @@
-import cider.interfaces.actions.actions as ca
-from cider.interfaces.actions.action_interfaces import ActionInterface
+import shifter_interface.interfaces.actions.actions as ca
+from shifter_interface.interfaces.actions.action_interfaces import ActionInterface
 
 
 class GetSegmentAppsListAction(ActionInterface):

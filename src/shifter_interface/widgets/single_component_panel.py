@@ -1,9 +1,9 @@
-from cider.interfaces.controller.config_wrapper import ConfigurationWrapper
-from cider.widgets.enable_disable_base import EnableDisablePanel
-from cider.interfaces.workflows.get_objects_in_session import GetObjectsInSessionAction
-import cider.interfaces.actions.actions as ca
-from cider.interfaces.workflows.extract_system_info import SubsystemStatus
-from cider.interfaces.controller.application_controller import ShifterInterfaceState
+from shifter_interface.interfaces.controller.config_wrapper import ConfigurationWrapper
+from shifter_interface.widgets.enable_disable_base import EnableDisablePanel
+from shifter_interface.interfaces.workflows.get_objects_in_session import GetObjectsInSessionAction
+import shifter_interface.interfaces.actions.actions as ca
+from shifter_interface.interfaces.workflows.extract_system_info import SubsystemStatus
+from shifter_interface.interfaces.controller.application_controller import ShifterInterfaceState
 
 from textual.visual import SupportsVisual
 from typing import List

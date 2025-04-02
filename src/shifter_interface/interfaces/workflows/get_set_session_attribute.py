@@ -1,6 +1,6 @@
-import cider.interfaces.actions.actions as ca
-from cider.interfaces.actions.action_interfaces import ActionInterface
-from cider.interfaces.workflows.get_objects_in_session import GetObjectsInSessionAction
+import shifter_interface.interfaces.actions.actions as ca
+from shifter_interface.interfaces.actions.action_interfaces import ActionInterface
+from shifter_interface.interfaces.workflows.get_objects_in_session import GetObjectsInSessionAction
 
 
 class SetAttributeValueSessionAction(ActionInterface):
