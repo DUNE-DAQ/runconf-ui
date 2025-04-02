@@ -42,6 +42,7 @@ class DAQSelectMenu(Select):
         # Disable the select if there's only one option
         if len(options) == 1:
             value = self.check_options(options, options[0][1])
+            disabled = True
         else:
             value = self.check_options(options, value)
 
@@ -197,6 +198,8 @@ class SelectDAQConfiguration(DAQSelectMenu):
         if self._management_interface.daq_version == self._current_version:
             logging.info(f"DAQ version already selected {self._current_version}")
             return
+        
+        self._current_version = self._management_interface.daq_version
         
         options = self._management_interface.get_configurations()
 

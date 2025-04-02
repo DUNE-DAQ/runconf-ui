@@ -24,15 +24,36 @@ The interface is initialised with
 ```bash
 shifter-view
 ```
-optionally the following flags exist for custom paths:
+optionally the following CLI flags exist for custom paths:
 ```
- [-d/--input-directory path/to/files] [-o/--output-directory /path/to/output] [-c/--interface_config interface configuration]
-```
-By default, the input directory points to `DUNEDAQ_DB_PATH`, the output directory the current working directory, and the interface config is https://github.com/DUNE-DAQ/cider/blob/develop/src/cider/configuration/np02_configuration.yml. This configuration is used to define trigger and detector subsystems.
+  -a, --apparatus                 Set the detector apparatus i.e. NP02/NP04
+  
+  -s, --shifter-interface-config  Set default yaml config for this interface
+  
+  -d, --daq-config-directory      Where do you want to download configs
+                                  from/where are they located
+  
+  --session-name                  Name of daq session
+  
+  --base-url                      Base URL for the interface, not used for
+                                  local operation
+  
+  --operation-url                 Operation URL for the interface, not used
+                                  for local operation
+  
+  --debug                         Set the debug log level
 
+  -l, --local-config              Use local config files instead of
+                                  downloading from the github, expert use
+                                  only! [flag option]
+
+  --help                          Show help
+```
+
+The default settings can be found in `src/cider/configuration/np02_configuration.yml` and can be set either directly or via environment variable. Specifying an option in the CLI overrides the yaml default.
  
 ### Usage
-To get started, select a file from the dropdown menu and then select a session to modify. Press "open" to load the session.
+To get started pick a version of the daq configuration from the left hand side drop down menu. If only one version/directory is available this menu will be disabled & and that version automatically picked. Next pick your configuration from the right hand menu, again this will be disabled and automated if only one configuration file is available.
 
 Currently there are 3 categories of objects that can be enabled or disabled:
 - **Detector subsystems**: For example the APAs, PDS, etc.
@@ -50,6 +71,6 @@ Older configurations are automatically moved to <RUN FOLDER>/old_configs/run_<DA
 
 If you are unhappy with changes + want to revert to the original configuration, press the "Reset" button.
 
-Finally to quit the interface, press the "Quit" button. The configuration can be run in drunc using the command provided after quitting.
+Finally to quit the interface, press the "create" button. The configuration can be run in drunc using the command provided after quitting.
 
 If you have any questions, please contact the DAQ shifter on duty. Enjoy your shift!

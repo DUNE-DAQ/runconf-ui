@@ -8,7 +8,7 @@ from cider.utils.config_path_reader import ConfigPathReader
 from cider.interfaces.controller.config_wrapper import ConfigurationWrapper
 from cider.interfaces.controller.application_controller import ShifterInterfaceState
 import cider.interfaces.actions.actions as ca
-
+import logging
 
 import re
 from abc import ABC, abstractmethod
@@ -36,6 +36,7 @@ class ManagementInterface(ABC):
         Set the DAQ version
         """
         self._daq_version = daq_version
+        logging.info(f"Set DAQ version to {daq_version}")
 
     @property
     def daq_version(self) -> str:
