@@ -2,7 +2,7 @@ from setuptools import setup
 
 # Determine the install_requires list based on whether config-management is installed
 setup(
-    name="cider",
+    name="runconf_ui",
     install_requires=[
     "textual",
     "textual_dev",

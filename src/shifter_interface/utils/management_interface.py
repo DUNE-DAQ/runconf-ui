@@ -3,11 +3,11 @@ Simple wrapper for talking to config-management
 """
 
 from config_management.ConfPool import ConfPool
-from shifter_interface.utils.shifter_config_reader import ShifterConfigReader
-from shifter_interface.utils.config_path_reader import ConfigPathReader
-from shifter_interface.interfaces.controller.config_wrapper import ConfigurationWrapper
-from shifter_interface.interfaces.controller.application_controller import ShifterInterfaceState
-import shifter_interface.interfaces.actions.actions as ca
+from runconf_ui.utils.shifter_config_reader import ShifterConfigReader
+from runconf_ui.utils.config_path_reader import ConfigPathReader
+from runconf_ui.interfaces.controller.config_wrapper import ConfigurationWrapper
+from runconf_ui.interfaces.controller.application_controller import ShifterInterfaceState
+import runconf_ui.interfaces.actions.actions as ca
 import logging
 
 import re

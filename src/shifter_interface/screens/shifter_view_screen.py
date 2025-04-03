@@ -4,14 +4,14 @@ from textual.widgets import TabbedContent, TabPane, Header, Footer, Static
 from textual import on
 from textual.css.query import NoMatches
 
-from shifter_interface.widgets.multicomponent_panel import MultiComponentEnableDisablePanel
-from shifter_interface.interfaces.controller.config_wrapper import ConfigurationWrapper
-from shifter_interface.widgets.options_panel import OptionPanel
-from shifter_interface.widgets.file_select_panel import FilePanelWidget
-from shifter_interface.utils.consolidate_file import ConsolidateFile
-from shifter_interface.utils.daq_conf_tree import DaqConfTree
-from shifter_interface.interfaces.controller.application_controller import ShifterInterfaceState
-from shifter_interface.utils.generate_enable_disable_map import EnableDisableMapGen
+from runconf_ui.widgets.multicomponent_panel import MultiComponentEnableDisablePanel
+from runconf_ui.interfaces.controller.config_wrapper import ConfigurationWrapper
+from runconf_ui.widgets.options_panel import OptionPanel
+from runconf_ui.widgets.file_select_panel import FilePanelWidget
+from runconf_ui.utils.consolidate_file import ConsolidateFile
+from runconf_ui.utils.daq_conf_tree import DaqConfTree
+from runconf_ui.interfaces.controller.application_controller import ShifterInterfaceState
+from runconf_ui.utils.generate_enable_disable_map import EnableDisableMapGen
 
 import traceback
 
@@ -19,7 +19,7 @@ from pathlib import Path
 import os
 import logging
 
-from shifter_interface.widgets.popup_message import PopupMessage
+from runconf_ui.widgets.popup_message import PopupMessage
 
 
 class ShifterViewScreen(Screen):

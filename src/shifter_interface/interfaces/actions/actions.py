@@ -1,5 +1,5 @@
-from shifter_interface.interfaces.actions.action_interfaces import ActionInterface
-from shifter_interface.interfaces.controller.config_wrapper import ConfigurationWrapper
+from runconf_ui.interfaces.actions.action_interfaces import ActionInterface
+from runconf_ui.interfaces.controller.config_wrapper import ConfigurationWrapper
 import shutil
 
 """

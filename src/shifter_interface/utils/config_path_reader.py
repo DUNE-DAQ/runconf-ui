@@ -1,5 +1,5 @@
-import shifter_interface.interfaces.actions.actions as ca
-from shifter_interface.interfaces.controller.config_wrapper import ConfigurationWrapper
+import runconf_ui.interfaces.actions.actions as ca
+from runconf_ui.interfaces.controller.config_wrapper import ConfigurationWrapper
 
 from pathlib import Path
 from typing import List

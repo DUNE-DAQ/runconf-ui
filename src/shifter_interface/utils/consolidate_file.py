@@ -1,6 +1,6 @@
-from shifter_interface.interfaces.controller.config_wrapper import ConfigurationWrapper
+from runconf_ui.interfaces.controller.config_wrapper import ConfigurationWrapper
 
-from shifter_interface.interfaces.actions.actions import (
+from runconf_ui.interfaces.actions.actions import (
     GetDalObjectAction,
     CopyDalAction,
     GetRelatedDalsAction,

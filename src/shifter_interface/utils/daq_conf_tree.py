@@ -1,16 +1,16 @@
 # Essentially the tree from https://github.com/DUNE-DAQ/daqconf/blob/develop/scripts/daqconf_inspector
 
-import shifter_interface.interfaces.actions.actions as ca
-from shifter_interface.interfaces.controller.config_wrapper import ConfigurationWrapper
-from shifter_interface.interfaces.workflows.extract_system_info import (
+import runconf_ui.interfaces.actions.actions as ca
+from runconf_ui.interfaces.controller.config_wrapper import ConfigurationWrapper
+from runconf_ui.interfaces.workflows.extract_system_info import (
     DetectorExtractor,
     SubsystemStatus,
 )
-from shifter_interface.exceptions import CiderBadActionException
+from runconf_ui.exceptions import CiderBadActionException
 
 from rich.tree import Tree
 from abc import ABC, abstractmethod
-from shifter_interface.interfaces.controller.application_controller import ShifterInterfaceState
+from runconf_ui.interfaces.controller.application_controller import ShifterInterfaceState
 
 
 class DaqConfTreeBase(ABC):

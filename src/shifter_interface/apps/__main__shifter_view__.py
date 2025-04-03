@@ -2,11 +2,11 @@
 Main application for the shifter view interface.
 """
 
-from shifter_interface.screens.shifter_view_screen import ShifterViewScreen
-from shifter_interface.screens.quit_screen import QuitScreen
-from shifter_interface.utils.file_cleaner import clean_old_files
-from shifter_interface.utils.shifter_config_reader import ShifterConfigReader
-from shifter_interface.interfaces.controller.application_controller import ShifterInterfaceState
+from runconf_ui.screens.shifter_view_screen import ShifterViewScreen
+from runconf_ui.screens.quit_screen import QuitScreen
+from runconf_ui.utils.file_cleaner import clean_old_files
+from runconf_ui.utils.shifter_config_reader import ShifterConfigReader
+from runconf_ui.interfaces.controller.application_controller import ShifterInterfaceState
 
 from textual.app import App
 import click
@@ -87,7 +87,7 @@ class ShifterView(App):
         self.theme = "catppuccin-latte"
 
         self.title = (
-            f"Shifter Interface v{pkg_resources.get_distribution('shifter_interface').version}"
+            f"Shifter Interface v{pkg_resources.get_distribution('runconf_ui').version}"
         )
 
         self.install_screen(

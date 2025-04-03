@@ -1,10 +1,10 @@
-from shifter_interface.interfaces.workflows.extract_system_info import SubsystemStatus
+from runconf_ui.interfaces.workflows.extract_system_info import SubsystemStatus
 
 from textual.visual import SupportsVisual
 from textual.widgets import Static, Button
 from textual.containers import ScrollableContainer
 from textual.message import Message
-from shifter_interface.interfaces.controller.application_controller import ShifterInterfaceState
+from runconf_ui.interfaces.controller.application_controller import ShifterInterfaceState
 import logging
 
 class EnableDisablePanel(Static):

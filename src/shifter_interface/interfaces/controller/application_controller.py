@@ -3,8 +3,8 @@
 from dataclasses import dataclass
 
 from typing import Optional
-from shifter_interface.utils.shifter_config_reader import ShifterConfigReader
-from shifter_interface.interfaces.controller.config_wrapper import ConfigurationWrapper
+from runconf_ui.utils.shifter_config_reader import ShifterConfigReader
+from runconf_ui.interfaces.controller.config_wrapper import ConfigurationWrapper
 
 
 @dataclass

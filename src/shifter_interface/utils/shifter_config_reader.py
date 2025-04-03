@@ -1,4 +1,4 @@
-from shifter_interface.utils.path_or_env_check import path_or_env_check
+from runconf_ui.utils.path_or_env_check import path_or_env_check
 
 import yaml
 import os

@@ -1,6 +1,6 @@
-import shifter_interface.interfaces.actions.actions as ca
-from shifter_interface.interfaces.actions.action_interfaces import ActionInterface
-from shifter_interface.interfaces.workflows.get_objects_in_session import GetObjectsInSessionAction
+import runconf_ui.interfaces.actions.actions as ca
+from runconf_ui.interfaces.actions.action_interfaces import ActionInterface
+from runconf_ui.interfaces.workflows.get_objects_in_session import GetObjectsInSessionAction
 
 
 class SetAttributeValueSessionAction(ActionInterface):

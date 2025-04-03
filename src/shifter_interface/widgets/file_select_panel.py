@@ -12,11 +12,11 @@ from pathlib import Path
 import logging
 import traceback
 
-from shifter_interface.utils.management_interface import (
+from runconf_ui.utils.management_interface import (
     LocalManagementInterface,
     RemoteManagementInterface,
 )
-from shifter_interface.interfaces.controller.application_controller import ShifterInterfaceState
+from runconf_ui.interfaces.controller.application_controller import ShifterInterfaceState
 
 
 class DAQSelectMenu(Select):

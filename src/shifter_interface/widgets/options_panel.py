@@ -1,10 +1,10 @@
-import shifter_interface.interfaces.actions.actions as ca
-from shifter_interface.interfaces.controller.config_wrapper import ConfigurationWrapper
-from shifter_interface.screens.quit_screen import QuitScreen
-from shifter_interface.screens.help_screen import HelpScreen
-from shifter_interface.widgets.popup_message import PopupMessage
-from shifter_interface.utils.file_cleaner import clean_old_files
-from shifter_interface.widgets.file_select_panel import FilePanelWidget
+import runconf_ui.interfaces.actions.actions as ca
+from runconf_ui.interfaces.controller.config_wrapper import ConfigurationWrapper
+from runconf_ui.screens.quit_screen import QuitScreen
+from runconf_ui.screens.help_screen import HelpScreen
+from runconf_ui.widgets.popup_message import PopupMessage
+from runconf_ui.utils.file_cleaner import clean_old_files
+from runconf_ui.widgets.file_select_panel import FilePanelWidget
 
 from textual.css.query import NoMatches
 from textual.containers import ScrollableContainer
@@ -14,7 +14,7 @@ from pathlib import Path
 from datetime import datetime
 import shutil
 import logging
-from shifter_interface.interfaces.controller.application_controller import ShifterInterfaceState
+from runconf_ui.interfaces.controller.application_controller import ShifterInterfaceState
 
 
 class OptionPanel(Static):
