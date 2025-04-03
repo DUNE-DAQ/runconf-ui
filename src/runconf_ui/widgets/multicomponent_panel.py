@@ -5,7 +5,9 @@ from runconf_ui.interfaces.workflows.extract_system_info import (
     DetectorExtractor,
 )
 from runconf_ui.utils.daq_conf_tree import ComponentLevelTree
-from runconf_ui.interfaces.controller.application_controller import ShifterInterfaceState
+from runconf_ui.interfaces.controller.application_controller import (
+    ShifterInterfaceState,
+)
 
 from typing import Dict, Optional
 from textual.visual import SupportsVisual

@@ -10,7 +10,9 @@ from runconf_ui.exceptions import CiderBadActionException
 
 from rich.tree import Tree
 from abc import ABC, abstractmethod
-from runconf_ui.interfaces.controller.application_controller import ShifterInterfaceState
+from runconf_ui.interfaces.controller.application_controller import (
+    ShifterInterfaceState,
+)
 
 
 class DaqConfTreeBase(ABC):

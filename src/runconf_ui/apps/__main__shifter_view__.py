@@ -6,7 +6,9 @@ from runconf_ui.screens.shifter_view_screen import ShifterViewScreen
 from runconf_ui.screens.quit_screen import QuitScreen
 from runconf_ui.utils.file_cleaner import clean_old_files
 from runconf_ui.utils.shifter_config_reader import ShifterConfigReader
-from runconf_ui.interfaces.controller.application_controller import ShifterInterfaceState
+from runconf_ui.interfaces.controller.application_controller import (
+    ShifterInterfaceState,
+)
 
 from textual.app import App
 import click

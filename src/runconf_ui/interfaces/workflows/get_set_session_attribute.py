@@ -1,6 +1,8 @@
 import runconf_ui.interfaces.actions.actions as ca
 from runconf_ui.interfaces.actions.action_interfaces import ActionInterface
-from runconf_ui.interfaces.workflows.get_objects_in_session import GetObjectsInSessionAction
+from runconf_ui.interfaces.workflows.get_objects_in_session import (
+    GetObjectsInSessionAction,
+)
 
 
 class SetAttributeValueSessionAction(ActionInterface):

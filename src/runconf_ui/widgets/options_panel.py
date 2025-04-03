@@ -14,7 +14,9 @@ from pathlib import Path
 from datetime import datetime
 import shutil
 import logging
-from runconf_ui.interfaces.controller.application_controller import ShifterInterfaceState
+from runconf_ui.interfaces.controller.application_controller import (
+    ShifterInterfaceState,
+)
 
 
 class OptionPanel(Static):

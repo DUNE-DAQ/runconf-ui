@@ -10,7 +10,9 @@ from runconf_ui.widgets.options_panel import OptionPanel
 from runconf_ui.widgets.file_select_panel import FilePanelWidget
 from runconf_ui.utils.consolidate_file import ConsolidateFile
 from runconf_ui.utils.daq_conf_tree import DaqConfTree
-from runconf_ui.interfaces.controller.application_controller import ShifterInterfaceState
+from runconf_ui.interfaces.controller.application_controller import (
+    ShifterInterfaceState,
+)
 from runconf_ui.utils.generate_enable_disable_map import EnableDisableMapGen
 
 import traceback
@@ -167,7 +169,7 @@ class ShifterViewScreen(Screen):
         # Now we make a temporary copy of the configuration object
         # For ease of copying we copy the entire session into a single file
         logging.info(f"Session name {self._app_controller.session_name}")
-        
+
         ConsolidateFile(
             self._app_controller.oks_configuration,
             self._app_controller.session_name,
