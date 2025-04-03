@@ -39,7 +39,7 @@ class ConfigPathReader:
     def __check_default_session(self, config_file: ConfigurationWrapper) -> bool:
         if self._default_session is None:
             return True
-        
+
         return ca.GetAttributeAction(config_file)(s, "id") == self._default_session
 
     def _get_number_of_sessions(self, config_file_path: str) -> int:
@@ -49,7 +49,8 @@ class ConfigPathReader:
 
             return len(
                 [
-                    s for s in ca.GetDalsOfClassAction(config_file)("Session")
+                    s
+                    for s in ca.GetDalsOfClassAction(config_file)("Session")
                     if self.__check_default_session(s)
                 ]
             )

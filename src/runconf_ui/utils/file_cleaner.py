@@ -3,6 +3,7 @@ import os
 import shutil
 from pathlib import Path
 
+
 def clean_old_files(
     logging_path: Path,
     extension: str = "log",

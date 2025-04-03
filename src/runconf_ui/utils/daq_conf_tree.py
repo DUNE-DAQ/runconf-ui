@@ -13,6 +13,7 @@ from runconf_ui.interfaces.controller.application_controller import (
     ShifterInterfaceState,
 )
 
+
 class DaqConfTreeBase(ABC):
     """
     Base class for the daq conf tree

@@ -5,6 +5,7 @@ from typing import Optional
 from runconf_ui.utils.shifter_config_reader import ShifterConfigReader
 from runconf_ui.interfaces.controller.config_wrapper import ConfigurationWrapper
 
+
 @dataclass
 class ShifterInterfaceState:
     # YAML used to configure the interface

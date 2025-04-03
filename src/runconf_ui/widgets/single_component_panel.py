@@ -11,6 +11,7 @@ from runconf_ui.interfaces.controller.application_controller import (
 from textual.visual import SupportsVisual
 from typing import List
 
+
 class SingleComponentEnableDisablePanel(EnableDisablePanel):
     """
     For enabling/disabling systems made of just a single component class

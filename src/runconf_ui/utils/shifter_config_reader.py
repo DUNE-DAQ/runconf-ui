@@ -3,6 +3,7 @@ from runconf_ui.utils.path_or_env_check import path_or_env_check
 import yaml
 import os
 
+
 # Class for reading a YAML config and producing panels
 class ShifterConfigReader:
     def __init__(self, config_file, **kwargs):

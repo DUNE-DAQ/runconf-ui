@@ -1,5 +1,6 @@
 import conffwk
 
+
 class ConfigurationWrapper(conffwk.Configuration):
     """
     Small wrapper layer around the configuration. In principal this allows configuration interface

@@ -6,7 +6,7 @@ try:
     from runconftools.ConfPool import ConfPool
 except ImportError:
     from config_management.ConfPool import ConfPool
-except Exception as e:
+except Exception:
     raise ImportError(
         "Could not import runconftool or config_management. Please install runconftools or config_management"
     )
