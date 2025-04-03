@@ -1,4 +1,3 @@
-from runconf_ui.interfaces.controller.config_wrapper import ConfigurationWrapper
 from runconf_ui.widgets.enable_disable_base import EnableDisablePanel
 from runconf_ui.interfaces.workflows.extract_system_info import (
     SubsystemStatus,

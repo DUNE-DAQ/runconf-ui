@@ -1,10 +1,8 @@
 import runconf_ui.interfaces.actions.actions as ca
-from runconf_ui.interfaces.controller.config_wrapper import ConfigurationWrapper
 from runconf_ui.screens.quit_screen import QuitScreen
 from runconf_ui.screens.help_screen import HelpScreen
 from runconf_ui.widgets.popup_message import PopupMessage
 from runconf_ui.utils.file_cleaner import clean_old_files
-from runconf_ui.widgets.file_select_panel import FilePanelWidget
 
 from textual.css.query import NoMatches
 from textual.containers import ScrollableContainer

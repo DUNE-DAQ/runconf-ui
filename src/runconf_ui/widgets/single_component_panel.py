@@ -1,4 +1,3 @@
-from runconf_ui.interfaces.controller.config_wrapper import ConfigurationWrapper
 from runconf_ui.widgets.enable_disable_base import EnableDisablePanel
 from runconf_ui.interfaces.workflows.get_objects_in_session import (
     GetObjectsInSessionAction,
@@ -11,7 +10,6 @@ from runconf_ui.interfaces.controller.application_controller import (
 
 from textual.visual import SupportsVisual
 from typing import List
-
 
 class SingleComponentEnableDisablePanel(EnableDisablePanel):
     """

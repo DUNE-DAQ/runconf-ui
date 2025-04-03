@@ -1,7 +1,6 @@
 # Essentially the tree from https://github.com/DUNE-DAQ/daqconf/blob/develop/scripts/daqconf_inspector
 
 import runconf_ui.interfaces.actions.actions as ca
-from runconf_ui.interfaces.controller.config_wrapper import ConfigurationWrapper
 from runconf_ui.interfaces.workflows.extract_system_info import (
     DetectorExtractor,
     SubsystemStatus,
@@ -13,7 +12,6 @@ from abc import ABC, abstractmethod
 from runconf_ui.interfaces.controller.application_controller import (
     ShifterInterfaceState,
 )
-
 
 class DaqConfTreeBase(ABC):
     """

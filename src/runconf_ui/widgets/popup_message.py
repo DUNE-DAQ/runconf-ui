@@ -1,7 +1,6 @@
 from textual.visual import SupportsVisual
 from textual.widgets import Static
 
-
 class PopupMessage(Static):
     """A custom widget for displaying pop-up messages."""
 
