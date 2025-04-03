@@ -194,8 +194,6 @@ class OptionPanel(Static):
 
             # Make sure what we do is valid
             except Exception as e:
-                main_screen = self.app.get_screen("shifter_view_screen")
-
                 logging.error(f"Error saving configuration: {e}")
                 self.show_popup(
                     f"[white]Invalid configuration[/white] [bold grey3]{self._application_controller.oks_configuration}:{self._application_controller.session_name}[/bold grey3] [white]passed, please check with the experts!"
