@@ -31,7 +31,7 @@ class SaveFileHandler:
 
         logging.debug(f"Copying configuration to {output_file_path}")
         ca.CopyFullConfigurationAction(
-            self._application_controller.dummy_oks_configuration
+            self._application_controller.buffer_daq_config
         )(output_file_path)
 
         logging.info(f"Configuration saved to {output_file_path}")
@@ -64,7 +64,7 @@ class SaveFileHandler:
 
     def generate_output_name(self):
         # Hacky method to talk to the main screen
-        full_path = self._application_controller.oks_configuration
+        full_path = self._application_controller.current_daq_config
 
         config_name = str(Path(full_path).name)
         config_name = config_name.replace(".data.xml", "")

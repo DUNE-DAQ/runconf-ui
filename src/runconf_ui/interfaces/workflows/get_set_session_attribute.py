@@ -26,17 +26,17 @@ class SetAttributeValueSessionAction(ActionInterface):
         :param specific_objects: A list of specific objects to modify. If None, all objects of the class will be modified
         '''
 
-        apps = GetObjectsInSessionAction(self._configuration).action(
+        apps = GetObjectsInSessionAction(self._daq_configuration).action(
             session_dal, applied_class, specific_objects
         )
 
         for roapp in apps:
             # If we want to change only specific objects, skip the rest
-            ca.ChangeAttributeAction(self._configuration)(
+            ca.ChangeAttributeAction(self._daq_configuration)(
                 roapp, attribute_name, attribute_value
             )
-            ca.UpdateDalAction(self._configuration)(roapp)
-            ca.UpdateDalAction(self._configuration)(session_dal)
+            ca.UpdateDalAction(self._daq_configuration)(roapp)
+            ca.UpdateDalAction(self._daq_configuration)(session_dal)
 
 
 class GetAttributeValueSessionAction(ActionInterface):
@@ -58,11 +58,11 @@ class GetAttributeValueSessionAction(ActionInterface):
         :param specific_objects: A list of specific objects to modify. If None, all objects of the class will be modified
         '''
         
-        apps = GetObjectsInSessionAction(self._configuration).action(
+        apps = GetObjectsInSessionAction(self._daq_configuration).action(
             session_dal, applied_class, specific_objects
         )
 
         return [
-            ca.GetAttributeAction(self._configuration)(roapp, attribute_name)
+            ca.GetAttributeAction(self._daq_configuration)(roapp, attribute_name)
             for roapp in apps
         ]

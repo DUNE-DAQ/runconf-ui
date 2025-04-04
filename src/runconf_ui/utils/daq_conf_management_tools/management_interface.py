@@ -3,7 +3,7 @@ Simple wrapper for talking to config-management
 """
 
 
-from runconf_ui.interfaces.controller.config_wrapper import ConfigurationWrapper
+from runconf_ui.interfaces.controller.daq_conf_wrapper import DaqConfigurationWrapper
 from runconf_ui.interfaces.controller.application_controller import (
     ShifterInterfaceState,
 )
@@ -43,13 +43,13 @@ class ManagementInterface(ABC):
         """
         return self._daq_version
 
-    def open_file(self, file_path: Path) -> ConfigurationWrapper:
+    def open_file(self, file_path: Path) -> DaqConfigurationWrapper:
         self.file_name = file_path
-        return ConfigurationWrapper(f"{file_path}")
+        return DaqConfigurationWrapper(f"{file_path}")
 
     @classmethod
     def find_session(cls, file_name: str):
-        config_file = ConfigurationWrapper(file_name)
+        config_file = DaqConfigurationWrapper(file_name)
         file_sessions = ca.GetDalsOfClassAction(config_file)("Session")
         if file_sessions:
             return ca.GetAttributeAction(config_file)(file_sessions[0], "id")

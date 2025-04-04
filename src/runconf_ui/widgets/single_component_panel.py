@@ -3,7 +3,7 @@ from runconf_ui.interfaces.workflows.get_objects_in_session import (
     GetObjectsInSessionAction,
 )
 import runconf_ui.interfaces.actions.actions as ca
-from runconf_ui.interfaces.workflows.extract_system_info import SubsystemStatus
+from runconf_ui.utils.subsystem_status import SubsystemStatus
 from runconf_ui.interfaces.controller.application_controller import (
     ShifterInterfaceState,
 )
@@ -49,11 +49,11 @@ class SingleComponentEnableDisablePanel(EnableDisablePanel):
     def generate_button_list(self):
         if (
             self._application_controller.session_name is None
-            or self._application_controller.dummy_oks_configuration is None
+            or self._application_controller.buffer_daq_config is None
         ):
             return {}
 
-        session = ca.GetDalObjectAction(self._application_controller.dummy_oks_configuration)(
+        session = ca.GetDalObjectAction(self._application_controller.buffer_daq_config)(
             self._application_controller.session_name, "Session"
         )
 
@@ -61,11 +61,11 @@ class SingleComponentEnableDisablePanel(EnableDisablePanel):
 
         for class_ in self._class_list:
             buttons += GetObjectsInSessionAction(
-                self._application_controller.dummy_oks_configuration
+                self._application_controller.buffer_daq_config
             )(session, class_)
 
-        get_id = ca.GetAttributeAction(self._application_controller.dummy_oks_configuration)
-        get_class = ca.GetClassNameAction(self._application_controller.dummy_oks_configuration)
+        get_id = ca.GetAttributeAction(self._application_controller.buffer_daq_config)
+        get_class = ca.GetClassNameAction(self._application_controller.buffer_daq_config)
 
         # Enabled first
         buttons = sorted(
@@ -79,35 +79,35 @@ class SingleComponentEnableDisablePanel(EnableDisablePanel):
 
     def _button_action(self, class_name, button_name):
 
-        dal = ca.GetDalObjectAction(self._application_controller.dummy_oks_configuration)(
+        dal = ca.GetDalObjectAction(self._application_controller.buffer_daq_config)(
             button_name, class_name
         )
         session_dal = ca.GetDalObjectAction(
-            self._application_controller.dummy_oks_configuration
+            self._application_controller.buffer_daq_config
         )(self._application_controller.session_name, "Session")
 
-        if dal in ca.GetAttributeAction(self._application_controller.dummy_oks_configuration)(
+        if dal in ca.GetAttributeAction(self._application_controller.buffer_daq_config)(
             session_dal, "disabled"
         ):
-            ca.DisableDalAction(self._application_controller.dummy_oks_configuration)(
+            ca.DisableDalAction(self._application_controller.buffer_daq_config)(
                 dal, self._application_controller.session_name, False
             )
 
         else:
-            ca.DisableDalAction(self._application_controller.dummy_oks_configuration)(
+            ca.DisableDalAction(self._application_controller.buffer_daq_config)(
                 dal, self._application_controller.session_name, True
             )
 
-        ca.UpdateDalAction(self._application_controller.dummy_oks_configuration)(session_dal)
+        ca.UpdateDalAction(self._application_controller.buffer_daq_config)(session_dal)
 
     def check_button_state(
         self, button: str, information: str | List[str]
     ) -> SubsystemStatus:
-        dal = ca.GetDalObjectAction(self._application_controller.dummy_oks_configuration)(
+        dal = ca.GetDalObjectAction(self._application_controller.buffer_daq_config)(
             button, information
         )
         return SubsystemStatus(
-            not ca.CheckIsDisabledAction(self._application_controller.dummy_oks_configuration)(
+            not ca.CheckIsDisabledAction(self._application_controller.buffer_daq_config)(
                 dal, self._application_controller.session_name
             )
         )

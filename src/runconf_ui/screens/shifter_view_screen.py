@@ -5,7 +5,7 @@ from textual import on
 from textual.css.query import NoMatches
 
 from runconf_ui.widgets.multicomponent_panel import MultiComponentEnableDisablePanel
-from runconf_ui.interfaces.controller.config_wrapper import ConfigurationWrapper
+from runconf_ui.interfaces.controller.daq_conf_wrapper import DaqConfigurationWrapper
 from runconf_ui.widgets.options_panel import OptionPanel
 from runconf_ui.widgets.file_select_panel import FilePanelWidget
 from runconf_ui.utils.daq_conf_tools.consolidate_daq_conf import ConsolidateDAQConf
@@ -109,7 +109,7 @@ class ShifterViewScreen(Screen):
         except Exception:
             # Display the error message in a pop-up
             self.show_popup(
-                f"[white]Invalid configuration[/white] [bold grey3]{self._application_controller.oks_configuration}:{self._application_controller.session_name}[/bold grey3] [white]passed, please check with the experts!"
+                f"[white]Invalid configuration[/white] [bold grey3]{self._application_controller.current_daq_config}:{self._application_controller.session_name}[/bold grey3] [white]passed, please check with the experts!"
             )
             # Optionally log the error for debugging
             logging.error(f"Error: {traceback.format_exc()}")
@@ -158,7 +158,7 @@ class ShifterViewScreen(Screen):
         """
         # Grab session + config from file selector
         logging.info(
-            f"Opening new file: {self._application_controller.session_name}:{self._application_controller.oks_configuration}"
+            f"Opening new file: {self._application_controller.session_name}:{self._application_controller.current_daq_config}"
         )
 
         # Make directories
@@ -169,15 +169,15 @@ class ShifterViewScreen(Screen):
         logging.info(f"Session name {self._application_controller.session_name}")
 
         ConsolidateDAQConf(
-            self._application_controller.oks_configuration,
-            self._application_controller.session_name,
+            self._application_controller.current_daq_config,
+            self._application_controller.session_name or "default_session_name",
             "Session",
             str(self.TMP_CONFIG),
         )()
         logging.info("Configuration copied to temporary file")
 
         # Get configuration
-        self._application_controller.dummy_oks_configuration = ConfigurationWrapper(
+        self._application_controller.buffer_daq_config = DaqConfigurationWrapper(
             str(self.TMP_CONFIG)
         )
 
@@ -186,7 +186,7 @@ class ShifterViewScreen(Screen):
 
         if (
             not self._application_controller.session_name
-            or not self._application_controller.dummy_oks_configuration
+            or not self._application_controller.buffer_daq_config
         ):
             logging.info("No session or configuration")
             return

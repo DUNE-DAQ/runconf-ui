@@ -113,7 +113,7 @@ class OptionPanel(Static):
             except Exception as e:
                 logging.error(f"Error saving configuration: {e}")
                 self.show_popup(
-                    f"[white]Invalid configuration[/white] [bold grey3]{self._application_controller.oks_configuration}:{self._application_controller.session_name}[/bold grey3] [white]passed, please check with the experts!"
+                    f"[white]Invalid configuration[/white] [bold grey3]{self._application_controller.current_daq_config}:{self._application_controller.session_name}[/bold grey3] [white]passed, please check with the experts!"
                 )
 
         # Resets to base config provided

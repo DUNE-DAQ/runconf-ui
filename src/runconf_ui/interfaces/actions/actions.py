@@ -1,5 +1,5 @@
 from runconf_ui.interfaces.actions.action_interfaces import ActionInterface
-from runconf_ui.interfaces.controller.config_wrapper import ConfigurationWrapper
+from runconf_ui.interfaces.controller.daq_conf_wrapper import DaqConfigurationWrapper
 import shutil
 
 """
@@ -14,7 +14,7 @@ class GetDalObjectAction(ActionInterface):
         """
         Gets DAL object from configuration
         """
-        conf_obj = self._configuration.get_dal(conf_obj_class, conf_obj_id)
+        conf_obj = self._daq_configuration.get_dal(conf_obj_class, conf_obj_id)
         return conf_obj
 
 
@@ -34,7 +34,7 @@ class UnloadConfigurationAction(ActionInterface):
         """
         Unload configuration
         """
-        self._configuration.unload()
+        self._daq_configuration.unload()
         return None
 
 
@@ -44,7 +44,7 @@ class UpdateDalAction(ActionInterface):
     """
 
     def action(self, dal):
-        self._configuration.update_dal(dal)
+        self._daq_configuration.update_dal(dal)
         return dal
 
 
@@ -53,7 +53,7 @@ class DestroyDalAction(ActionInterface):
         """
         Delete object from configuration
         """
-        self._configuration.destroy_dal(dal)
+        self._daq_configuration.destroy_dal(dal)
         return None
 
 
@@ -71,7 +71,7 @@ class CopyDalAction(ActionInterface):
         """
         Copy object in configuration
         """
-        self._configuration.add_dal(dal)
+        self._daq_configuration.add_dal(dal)
         return dal
 
 
@@ -80,9 +80,9 @@ class CopyFullConfigurationAction(ActionInterface):
         """
         Copy full configuration
         """
-        CommitConfigurationAction(self._configuration)()
-        shutil.copyfile(f"{self._configuration.file_name}", new_file_name)
-        return ConfigurationWrapper(new_file_name)
+        CommitConfigurationAction(self._daq_configuration)()
+        shutil.copyfile(f"{self._daq_configuration.file_name}", new_file_name)
+        return DaqConfigurationWrapper(new_file_name)
 
 
 class AddDalAction(ActionInterface):
@@ -90,8 +90,8 @@ class AddDalAction(ActionInterface):
         """
         Add object to configuration
         """
-        self._configuration.add_dal(conf_obj_id, conf_obj_class)
-        return self._configuration.get_dal(conf_obj_id, conf_obj_class)
+        self._daq_configuration.add_dal(conf_obj_id, conf_obj_class)
+        return self._daq_configuration.get_dal(conf_obj_id, conf_obj_class)
 
 
 class DisableDalAction(ActionInterface):
@@ -100,7 +100,7 @@ class DisableDalAction(ActionInterface):
         Disable object in configuration
         """
         # Not strictly "nice" but we need to be able to chain things
-        session = GetDalObjectAction(self._configuration)(session_name, "Session")
+        session = GetDalObjectAction(self._daq_configuration)(session_name, "Session")
         disabled_objects = getattr(session, "disabled")
 
         if disable:
@@ -119,7 +119,7 @@ class GetDalsOfClassAction(ActionInterface):
     """
 
     def action(self, class_id: str):
-        return self._configuration.get_dals(class_id)
+        return self._daq_configuration.get_dals(class_id)
 
 
 class GetRelatedDalsAction(ActionInterface):
@@ -128,7 +128,7 @@ class GetRelatedDalsAction(ActionInterface):
     """
 
     def action(self, dal):
-        relations = self._configuration.relations(dal.className())
+        relations = self._daq_configuration.relations(dal.className())
 
         relations_list = []
         # Loop over relations
@@ -152,7 +152,7 @@ class CanBeDisableAction(GetDalObjectAction):
     """
 
     def action(self, dal):
-        return dal in GetDalsOfClassAction(self._configuration)("Component")
+        return dal in GetDalsOfClassAction(self._daq_configuration)("Component")
 
 
 class CommitConfigurationAction(ActionInterface):
@@ -161,7 +161,7 @@ class CommitConfigurationAction(ActionInterface):
     """
 
     def action(self, save_message: str = ""):
-        self._configuration.commit(save_message)
+        self._daq_configuration.commit(save_message)
         return None
 
 
@@ -188,9 +188,9 @@ class CheckIsDisabledAction(ActionInterface):
     """
 
     def action(self, dal, session_name) -> bool:
-        session_dal = GetDalObjectAction(self._configuration)(session_name, "Session")
+        session_dal = GetDalObjectAction(self._daq_configuration)(session_name, "Session")
 
-        attr_getter = GetAttributeAction(self._configuration)
+        attr_getter = GetAttributeAction(self._daq_configuration)
         disabled_items = attr_getter(session_dal, "disabled")
 
         return dal in disabled_items

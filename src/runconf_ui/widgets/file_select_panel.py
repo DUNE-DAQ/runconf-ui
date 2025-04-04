@@ -305,8 +305,8 @@ class FilePanelWidget(Static):
         if event.configuration == Select.BLANK:
 
             self._application_controller.session_name = None
-            self._application_controller.oks_configuration = None
-            self._application_controller.dummy_oks_configuration = None
+            self._application_controller.current_daq_config = None
+            self._application_controller.buffer_daq_config = None
 
             # self.post_message(self.FileDeconfigured())
             self.query_one("#open_file_button").disabled = True
@@ -336,14 +336,14 @@ class FilePanelWidget(Static):
             self.post_message(self.FileNotFound(selected_configuration))
             return
 
-        self._application_controller.oks_configuration = daq_config_file.file_name
+        self._application_controller.current_daq_config = daq_config_file.file_name
         self._application_controller.session_name = self._management_interface.find_session(
             daq_config_file.file_name
         )
         self.query_one("#file_io_panel_message_static").update(
             f"      [bold green]DAQ Version[/bold green]:  [deep_pink4]{self._management_interface.daq_version}[/deep_pink4]\n"
             f"      [bold green]DAQ Config[/bold green]:  [deep_pink4]{selected_configuration}[/deep_pink4]\n"
-            f"      [bold green]Current Config File[/bold green]: [deep_pink4]{self._application_controller.oks_configuration}[/deep_pink4]\n"
+            f"      [bold green]Current Config File[/bold green]: [deep_pink4]{self._application_controller.current_daq_config}[/deep_pink4]\n"
             f"      [bold green]Session in Config[/bold green]:  [deep_pink4]{self._application_controller.session_name}\n"
         )
 

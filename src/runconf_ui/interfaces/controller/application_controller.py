@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from runconf_ui.utils.shifter_config_reader.shifter_config_reader import ShifterConfigReader
-from runconf_ui.interfaces.controller.config_wrapper import ConfigurationWrapper
+from runconf_ui.interfaces.controller.daq_conf_wrapper import DaqConfigurationWrapper
 
 @dataclass
 class ShifterInterfaceState:
@@ -17,11 +17,11 @@ class ShifterInterfaceState:
     # Do we want to use the local configuration? Only use if you're an expert!
     use_local: Optional[bool] = False
     # Currently selected configuration, not necessarily the open one
-    oks_configuration: Optional[str] = None
+    current_daq_config: Optional[str] = None
     # Name of session in config
     session_name: Optional[str] = None
     # Currently open configuration
-    dummy_oks_configuration: Optional[ConfigurationWrapper] = None
+    buffer_daq_config: Optional[DaqConfigurationWrapper] = None
     # Configuration name we're going to save
     saved_configuration: Optional[str] = None
     # current state of objects

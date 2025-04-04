@@ -1,7 +1,7 @@
 import conffwk
 import logging
 
-class ConfigurationWrapper(conffwk.Configuration):
+class DaqConfigurationWrapper(conffwk.Configuration):
     """
     Small wrapper layer around the configuration. In principal this allows configuration interface
     to be extended. Currently it just removes the need to add oksconflibs: to a file

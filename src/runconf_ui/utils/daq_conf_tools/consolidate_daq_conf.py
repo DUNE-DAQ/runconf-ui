@@ -1,4 +1,4 @@
-from runconf_ui.interfaces.controller.config_wrapper import ConfigurationWrapper
+from runconf_ui.interfaces.controller.daq_conf_wrapper import DaqConfigurationWrapper
 
 from runconf_ui.interfaces.actions.actions import (
     GetDalObjectAction,
@@ -45,14 +45,14 @@ class ConsolidateDAQConf:
         return list(set(includes))
 
     def open_files(self) -> None:
-        database = ConfigurationWrapper(f"{self._current_config_name}")
+        database = DaqConfigurationWrapper(f"{self._current_config_name}")
 
         # Grab included schema
         includes = [
             i for i in self.get_all_includes(database, None) if ".schema.xml" in i
         ]
 
-        new_database = ConfigurationWrapper("")
+        new_database = DaqConfigurationWrapper("")
         new_database.create_db(self._new_config_name, includes)
 
         new_database.commit()
@@ -63,8 +63,8 @@ class ConsolidateDAQConf:
 
         # Now we make the configuration
         # TODO: Simplify all of this
-        current_configuration = ConfigurationWrapper(self._current_config_name)
-        new_configuration = ConfigurationWrapper(self._new_config_name)
+        current_configuration = DaqConfigurationWrapper(self._current_config_name)
+        new_configuration = DaqConfigurationWrapper(self._new_config_name)
 
         # Now we need to get the top level DAL [usually a session]
         top_level_dal = GetDalObjectAction(current_configuration)(
