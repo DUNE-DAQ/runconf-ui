@@ -4,8 +4,11 @@ from textual.visual import SupportsVisual
 from textual.widgets import Static, Button
 from textual.containers import ScrollableContainer
 from textual.message import Message
-from runconf_ui.interfaces.controller.application_controller import ShifterInterfaceState
+from runconf_ui.interfaces.controller.application_controller import (
+    ShifterInterfaceState,
+)
 import logging
+
 
 class EnableDisablePanel(Static):
     """
@@ -131,9 +134,9 @@ class EnableDisablePanel(Static):
 
     def update_button_styles(self):
         """Update the styles of the buttons based on their current state."""
-        
+
         logging.info(f"Updating button styles for {self}")
-        
+
         for button, information in self._button_list.items():
             button_id = button.replace(" ", "_") + "_button"
             try:
@@ -172,4 +175,5 @@ class EnableDisablePanel(Static):
 
     class Changed(Message):
         """Custom message to notify when a button is pressed."""
+
         ...

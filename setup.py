@@ -9,6 +9,7 @@ setup(
     "rich",
 ],
     extras_require={"develop": ["ipdb", "ipython"],
-                    "separate_conf": ["config_management @ git+https://gitlab.cern.ch/dune-daq/online/config-management.git"]},
+                    "separate_conf": ["runconftools @ git+https://github.com/DUNE-DAQ/runconftools.git"],
+                    "old_conf": ["config_management @ git+https://gitlab.cern.ch/dune-daq/online/config-management.git"]},
     package_data={"": ["*.tcss", "*.yml"]},
 )

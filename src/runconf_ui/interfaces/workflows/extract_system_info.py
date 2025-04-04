@@ -6,7 +6,9 @@ from runconf_ui.interfaces.workflows.get_set_session_attribute import (
     SetAttributeValueSessionAction,
     GetAttributeValueSessionAction,
 )
-from runconf_ui.interfaces.workflows.get_objects_in_session import GetSegmentAppsListAction
+from runconf_ui.interfaces.workflows.get_objects_in_session import (
+    GetSegmentAppsListAction,
+)
 
 from typing import Dict, Sequence, Optional
 from enum import IntEnum

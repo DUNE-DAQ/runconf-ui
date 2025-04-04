@@ -2,11 +2,20 @@
 Simple wrapper for talking to config-management
 """
 
-from config_management.ConfPool import ConfPool
-from runconf_ui.utils.shifter_config_reader import ShifterConfigReader
+try:
+    from runconftools.ConfPool import ConfPool
+except ImportError:
+    from config_management.ConfPool import ConfPool
+except Exception:
+    raise ImportError(
+        "Could not import runconftool or config_management. Please install runconftools or config_management"
+    )
+
 from runconf_ui.utils.config_path_reader import ConfigPathReader
 from runconf_ui.interfaces.controller.config_wrapper import ConfigurationWrapper
-from runconf_ui.interfaces.controller.application_controller import ShifterInterfaceState
+from runconf_ui.interfaces.controller.application_controller import (
+    ShifterInterfaceState,
+)
 import runconf_ui.interfaces.actions.actions as ca
 import logging
 

@@ -1,11 +1,12 @@
-from runconf_ui.interfaces.controller.config_wrapper import ConfigurationWrapper
 from runconf_ui.widgets.enable_disable_base import EnableDisablePanel
 from runconf_ui.interfaces.workflows.extract_system_info import (
     SubsystemStatus,
     DetectorExtractor,
 )
 from runconf_ui.utils.daq_conf_tree import ComponentLevelTree
-from runconf_ui.interfaces.controller.application_controller import ShifterInterfaceState
+from runconf_ui.interfaces.controller.application_controller import (
+    ShifterInterfaceState,
+)
 
 from typing import Dict, Optional
 from textual.visual import SupportsVisual

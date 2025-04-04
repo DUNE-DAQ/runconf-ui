@@ -1,10 +1,8 @@
 import runconf_ui.interfaces.actions.actions as ca
-from runconf_ui.interfaces.controller.config_wrapper import ConfigurationWrapper
 from runconf_ui.screens.quit_screen import QuitScreen
 from runconf_ui.screens.help_screen import HelpScreen
 from runconf_ui.widgets.popup_message import PopupMessage
 from runconf_ui.utils.file_cleaner import clean_old_files
-from runconf_ui.widgets.file_select_panel import FilePanelWidget
 
 from textual.css.query import NoMatches
 from textual.containers import ScrollableContainer
@@ -14,7 +12,9 @@ from pathlib import Path
 from datetime import datetime
 import shutil
 import logging
-from runconf_ui.interfaces.controller.application_controller import ShifterInterfaceState
+from runconf_ui.interfaces.controller.application_controller import (
+    ShifterInterfaceState,
+)
 
 
 class OptionPanel(Static):
@@ -194,8 +194,6 @@ class OptionPanel(Static):
 
             # Make sure what we do is valid
             except Exception as e:
-                main_screen = self.app.get_screen("shifter_view_screen")
-
                 logging.error(f"Error saving configuration: {e}")
                 self.show_popup(
                     f"[white]Invalid configuration[/white] [bold grey3]{self._application_controller.oks_configuration}:{self._application_controller.session_name}[/bold grey3] [white]passed, please check with the experts!"

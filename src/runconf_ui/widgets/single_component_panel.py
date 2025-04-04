@@ -1,9 +1,12 @@
-from runconf_ui.interfaces.controller.config_wrapper import ConfigurationWrapper
 from runconf_ui.widgets.enable_disable_base import EnableDisablePanel
-from runconf_ui.interfaces.workflows.get_objects_in_session import GetObjectsInSessionAction
+from runconf_ui.interfaces.workflows.get_objects_in_session import (
+    GetObjectsInSessionAction,
+)
 import runconf_ui.interfaces.actions.actions as ca
 from runconf_ui.interfaces.workflows.extract_system_info import SubsystemStatus
-from runconf_ui.interfaces.controller.application_controller import ShifterInterfaceState
+from runconf_ui.interfaces.controller.application_controller import (
+    ShifterInterfaceState,
+)
 
 from textual.visual import SupportsVisual
 from typing import List

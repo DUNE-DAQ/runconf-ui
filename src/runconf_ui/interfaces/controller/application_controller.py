@@ -1,8 +1,7 @@
 # Dataclass containing application state information, is global and shared across everything
-
 from dataclasses import dataclass
-
 from typing import Optional
+
 from runconf_ui.utils.shifter_config_reader import ShifterConfigReader
 from runconf_ui.interfaces.controller.config_wrapper import ConfigurationWrapper
 

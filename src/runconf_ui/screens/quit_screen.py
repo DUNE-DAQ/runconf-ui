@@ -4,7 +4,9 @@ from textual.screen import Screen
 import logging
 import os
 from pathlib import Path
-from runconf_ui.interfaces.controller.application_controller import ShifterInterfaceState
+from runconf_ui.interfaces.controller.application_controller import (
+    ShifterInterfaceState,
+)
 
 
 class QuitScreen(Screen):
@@ -67,8 +69,6 @@ class QuitScreen(Screen):
     def compose(self):
         # We need to get the saved configuration name
         # TODO: Add a proper handler for this...
-        main_screen = self.app.get_screen("shifter_view_screen")
-        options = main_screen.query_one("OptionPanel")
         self._saved_configuration_name = (
             self._application_controller.saved_configuration
         )

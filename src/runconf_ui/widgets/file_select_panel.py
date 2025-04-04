@@ -16,7 +16,9 @@ from runconf_ui.utils.management_interface import (
     LocalManagementInterface,
     RemoteManagementInterface,
 )
-from runconf_ui.interfaces.controller.application_controller import ShifterInterfaceState
+from runconf_ui.interfaces.controller.application_controller import (
+    ShifterInterfaceState,
+)
 
 
 class DAQSelectMenu(Select):
@@ -285,9 +287,10 @@ class FilePanelWidget(Static):
             )
             with ScrollableContainer(id="file_io_panel_message"):
                 yield Static(
-                        "[bold medium_violet_red]   No file loaded\n  ",
-                        id="file_io_panel_message_static",
-                        shrink=True)
+                    "[bold medium_violet_red]   No file loaded\n  ",
+                    id="file_io_panel_message_static",
+                    shrink=True,
+                )
 
     @property
     def management_interface(self):
