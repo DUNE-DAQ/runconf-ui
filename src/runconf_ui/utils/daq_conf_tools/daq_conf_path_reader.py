@@ -6,7 +6,7 @@ from typing import List
 import os
 
 
-class ConfigPathReader:
+class DaqConfPathReader:
     def __init__(
         self, default_config: str | None = None, default_session_name: str | None = None
     ):

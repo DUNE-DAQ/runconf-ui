@@ -18,6 +18,13 @@ class SetAttributeValueSessionAction(ActionInterface):
         attribute_value: str,
         specific_objects=None,
     ):
+        '''
+        :param session_dal: The session dal object
+        :param applied_class: The class of the objects to be modified
+        :param attribute_name: The name of the attribute to be modified  
+        :param attribute_value: The value to set the attribute to
+        :param specific_objects: A list of specific objects to modify. If None, all objects of the class will be modified
+        '''
 
         apps = GetObjectsInSessionAction(self._configuration).action(
             session_dal, applied_class, specific_objects
@@ -44,6 +51,13 @@ class GetAttributeValueSessionAction(ActionInterface):
         attribute_name: str,
         specific_objects=None,
     ):
+        '''
+        :param session_dal: The session dal object
+        :param applied_class: The class of the objects to be modified
+        :param attribute_name: The name of the attribute to be modified
+        :param specific_objects: A list of specific objects to modify. If None, all objects of the class will be modified
+        '''
+        
         apps = GetObjectsInSessionAction(self._configuration).action(
             session_dal, applied_class, specific_objects
         )

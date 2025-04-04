@@ -8,20 +8,18 @@ from runconf_ui.widgets.multicomponent_panel import MultiComponentEnableDisableP
 from runconf_ui.interfaces.controller.config_wrapper import ConfigurationWrapper
 from runconf_ui.widgets.options_panel import OptionPanel
 from runconf_ui.widgets.file_select_panel import FilePanelWidget
-from runconf_ui.utils.consolidate_file import ConsolidateFile
-from runconf_ui.utils.daq_conf_tree import DaqConfTree
+from runconf_ui.utils.daq_conf_tools.consolidate_daq_conf import ConsolidateDAQConf
+from runconf_ui.utils.daq_conf_tools.daq_conf_tree import DaqConfTree
 from runconf_ui.interfaces.controller.application_controller import (
     ShifterInterfaceState,
 )
-from runconf_ui.utils.generate_enable_disable_map import EnableDisableMapGen
+from runconf_ui.utils.daq_conf_tools.generate_enable_disable_map import EnableDisableMapGen
+from runconf_ui.widgets.popup_message import PopupMessage
 
 import traceback
-
 from pathlib import Path
 import os
 import logging
-
-from runconf_ui.widgets.popup_message import PopupMessage
 
 
 class ShifterViewScreen(Screen):
@@ -39,7 +37,7 @@ class ShifterViewScreen(Screen):
 
     def __init__(
         self,
-        app_controller: ShifterInterfaceState,
+        application_controller: ShifterInterfaceState,
         name: str | None = None,
         id: str | None = None,
         classes: str | None = None,
@@ -48,17 +46,17 @@ class ShifterViewScreen(Screen):
 
         logging.info("Opening shifter view screen")
 
-        self._app_controller = app_controller
+        self._application_controller = application_controller
 
     def compose(self):
         """
         Generate the screen layout
         """
-        enable_disable_generator = EnableDisableMapGen(self._app_controller)
+        enable_disable_generator = EnableDisableMapGen(self._application_controller)
 
         with ScrollableContainer(id="main_container"):
             # File dropdowns
-            yield FilePanelWidget(self._app_controller, classes="file_io_panel")
+            yield FilePanelWidget(self._application_controller, classes="file_io_panel")
 
             # Grid containing buttons AND maps
             with Grid(id="enable_disable_panel_container"):
@@ -78,7 +76,7 @@ class ShifterViewScreen(Screen):
                     with TabPane("System View", id="full_system_map_tab"):
                         yield ScrollableContainer(
                             Static(
-                                DaqConfTree(self._app_controller).print_tree(),
+                                DaqConfTree(self._application_controller).print_tree(),
                                 id="tree_view_full",
                             ),
                             id="tree_view_full_container",
@@ -92,7 +90,7 @@ class ShifterViewScreen(Screen):
 
             # help/create/quit/etc.
             yield OptionPanel(
-                application_controller=self._app_controller,
+                application_controller=self._application_controller,
                 id="option_panel_main",
                 classes="options_panel",
             )
@@ -111,7 +109,7 @@ class ShifterViewScreen(Screen):
         except Exception:
             # Display the error message in a pop-up
             self.show_popup(
-                f"[white]Invalid configuration[/white] [bold grey3]{self._app_controller.oks_configuration}:{self._app_controller.session_name}[/bold grey3] [white]passed, please check with the experts!"
+                f"[white]Invalid configuration[/white] [bold grey3]{self._application_controller.oks_configuration}:{self._application_controller.session_name}[/bold grey3] [white]passed, please check with the experts!"
             )
             # Optionally log the error for debugging
             logging.error(f"Error: {traceback.format_exc()}")
@@ -160,7 +158,7 @@ class ShifterViewScreen(Screen):
         """
         # Grab session + config from file selector
         logging.info(
-            f"Opening new file: {self._app_controller.session_name}:{self._app_controller.oks_configuration}"
+            f"Opening new file: {self._application_controller.session_name}:{self._application_controller.oks_configuration}"
         )
 
         # Make directories
@@ -168,18 +166,18 @@ class ShifterViewScreen(Screen):
 
         # Now we make a temporary copy of the configuration object
         # For ease of copying we copy the entire session into a single file
-        logging.info(f"Session name {self._app_controller.session_name}")
+        logging.info(f"Session name {self._application_controller.session_name}")
 
-        ConsolidateFile(
-            self._app_controller.oks_configuration,
-            self._app_controller.session_name,
+        ConsolidateDAQConf(
+            self._application_controller.oks_configuration,
+            self._application_controller.session_name,
             "Session",
             str(self.TMP_CONFIG),
         )()
         logging.info("Configuration copied to temporary file")
 
         # Get configuration
-        self._app_controller.dummy_oks_configuration = ConfigurationWrapper(
+        self._application_controller.dummy_oks_configuration = ConfigurationWrapper(
             str(self.TMP_CONFIG)
         )
 
@@ -187,8 +185,8 @@ class ShifterViewScreen(Screen):
         self.query_one(OptionPanel).open_new_session()
 
         if (
-            not self._app_controller.session_name
-            or not self._app_controller.dummy_oks_configuration
+            not self._application_controller.session_name
+            or not self._application_controller.dummy_oks_configuration
         ):
             logging.info("No session or configuration")
             return
@@ -202,6 +200,10 @@ class ShifterViewScreen(Screen):
 
         # Update trees
         self.update_trees()
+        
+        self._application_controller.current_state = {
+            a.id: a.get_current_states() for a in self.query("EnableDisablePanel")
+        }
 
     def on_enable_disable_panel_changed(self):
         # Change from enable->disable or vice versa
@@ -209,7 +211,7 @@ class ShifterViewScreen(Screen):
 
     def update_trees(self):
         # We get the the full system first
-        main_tree = DaqConfTree(self._app_controller)
+        main_tree = DaqConfTree(self._application_controller)
 
         # Update the static panel
         self.query_one("#tree_view_full").update(main_tree.print_tree())

@@ -3,6 +3,8 @@ from runconf_ui.exceptions import CiderBadActionException
 
 from abc import ABC, abstractmethod
 from typing import Any
+import logging
+import traceback
 
 # The idea here is to define an interface for actions on a configuration,
 # currently this is very simple but there is scope to add some complexity
@@ -10,7 +12,6 @@ from typing import Any
 # Idea is that actions are glued to a configuration but can be applied independently of the configuration
 # this allows for inheritance etc.
 # '''
-
 
 class ActionInterface(ABC):
     """
@@ -26,6 +27,11 @@ class ActionInterface(ABC):
 
     def __call__(self, *args, **kwargs) -> Any:
         try:
-            return self.action(*args, **kwargs)
-        except Exception as e:
-            raise CiderBadActionException(e)
+            a = self.action(*args, **kwargs)
+            logging.debug(f"Successfully called {self.__repr__()}")
+            return a
+        except Exception:
+            raise CiderBadActionException(traceback.format_exc())
+
+    def __str__(self):
+        return f"{self.__class__.__name__} using {self._configuration.file_name}"

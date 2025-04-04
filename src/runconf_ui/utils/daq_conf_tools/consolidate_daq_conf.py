@@ -11,7 +11,7 @@ import sys
 import os
 
 
-class ConsolidateFile:
+class ConsolidateDAQConf:
     """
     File consolidator. Moves all objects in a session into a single .data.xml database
     """

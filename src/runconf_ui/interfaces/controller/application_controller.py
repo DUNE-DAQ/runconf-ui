@@ -2,12 +2,14 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from runconf_ui.utils.shifter_config_reader import ShifterConfigReader
+from runconf_ui.utils.shifter_config_reader.shifter_config_reader import ShifterConfigReader
 from runconf_ui.interfaces.controller.config_wrapper import ConfigurationWrapper
-
 
 @dataclass
 class ShifterInterfaceState:
+    '''
+    Dataclass containing application state information, is global and shared across everything
+    '''
     # YAML used to configure the interface
     interface_config: ShifterConfigReader
     # NP02/NP04
@@ -22,3 +24,5 @@ class ShifterInterfaceState:
     dummy_oks_configuration: Optional[ConfigurationWrapper] = None
     # Configuration name we're going to save
     saved_configuration: Optional[str] = None
+    # current state of objects
+    current_state: Optional[dict] = None

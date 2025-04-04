@@ -19,7 +19,7 @@ class SingleComponentEnableDisablePanel(EnableDisablePanel):
 
     def __init__(
         self,
-        app_controller: ShifterInterfaceState,
+        application_controller: ShifterInterfaceState,
         class_list: List[str],
         content: str | SupportsVisual = "",
         *,
@@ -32,7 +32,7 @@ class SingleComponentEnableDisablePanel(EnableDisablePanel):
         disabled: bool = False
     ) -> None:
         super().__init__(
-            app_controller,
+            application_controller,
             content,
             expand=expand,
             shrink=shrink,
@@ -48,24 +48,24 @@ class SingleComponentEnableDisablePanel(EnableDisablePanel):
 
     def generate_button_list(self):
         if (
-            self._app_controller.session_name is None
-            or self._app_controller.dummy_oks_configuration is None
+            self._application_controller.session_name is None
+            or self._application_controller.dummy_oks_configuration is None
         ):
             return {}
 
-        session = ca.GetDalObjectAction(self._app_controller.dummy_oks_configuration)(
-            self._app_controller.session_name, "Session"
+        session = ca.GetDalObjectAction(self._application_controller.dummy_oks_configuration)(
+            self._application_controller.session_name, "Session"
         )
 
         buttons = []
 
         for class_ in self._class_list:
             buttons += GetObjectsInSessionAction(
-                self._app_controller.dummy_oks_configuration
+                self._application_controller.dummy_oks_configuration
             )(session, class_)
 
-        get_id = ca.GetAttributeAction(self._app_controller.dummy_oks_configuration)
-        get_class = ca.GetClassNameAction(self._app_controller.dummy_oks_configuration)
+        get_id = ca.GetAttributeAction(self._application_controller.dummy_oks_configuration)
+        get_class = ca.GetClassNameAction(self._application_controller.dummy_oks_configuration)
 
         # Enabled first
         buttons = sorted(
@@ -79,35 +79,35 @@ class SingleComponentEnableDisablePanel(EnableDisablePanel):
 
     def _button_action(self, class_name, button_name):
 
-        dal = ca.GetDalObjectAction(self._app_controller.dummy_oks_configuration)(
+        dal = ca.GetDalObjectAction(self._application_controller.dummy_oks_configuration)(
             button_name, class_name
         )
         session_dal = ca.GetDalObjectAction(
-            self._app_controller.dummy_oks_configuration
-        )(self._app_controller.session_name, "Session")
+            self._application_controller.dummy_oks_configuration
+        )(self._application_controller.session_name, "Session")
 
-        if dal in ca.GetAttributeAction(self._app_controller.dummy_oks_configuration)(
+        if dal in ca.GetAttributeAction(self._application_controller.dummy_oks_configuration)(
             session_dal, "disabled"
         ):
-            ca.DisableDalAction(self._app_controller.dummy_oks_configuration)(
-                dal, self._app_controller.session_name, False
+            ca.DisableDalAction(self._application_controller.dummy_oks_configuration)(
+                dal, self._application_controller.session_name, False
             )
 
         else:
-            ca.DisableDalAction(self._app_controller.dummy_oks_configuration)(
-                dal, self._app_controller.session_name, True
+            ca.DisableDalAction(self._application_controller.dummy_oks_configuration)(
+                dal, self._application_controller.session_name, True
             )
 
-        ca.UpdateDalAction(self._app_controller.dummy_oks_configuration)(session_dal)
+        ca.UpdateDalAction(self._application_controller.dummy_oks_configuration)(session_dal)
 
     def check_button_state(
         self, button: str, information: str | List[str]
     ) -> SubsystemStatus:
-        dal = ca.GetDalObjectAction(self._app_controller.dummy_oks_configuration)(
+        dal = ca.GetDalObjectAction(self._application_controller.dummy_oks_configuration)(
             button, information
         )
         return SubsystemStatus(
-            not ca.CheckIsDisabledAction(self._app_controller.dummy_oks_configuration)(
-                dal, self._app_controller.session_name
+            not ca.CheckIsDisabledAction(self._application_controller.dummy_oks_configuration)(
+                dal, self._application_controller.session_name
             )
         )

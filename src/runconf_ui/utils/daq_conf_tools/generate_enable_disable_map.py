@@ -9,13 +9,13 @@ from textual.containers import ScrollableContainer
 
 
 class EnableDisableMapGen:
-    def __init__(self, app_controller: ShifterInterfaceState) -> None:
-        self._app_controller = app_controller
+    def __init__(self, application_controller: ShifterInterfaceState) -> None:
+        self._application_controller = application_controller
         self._panel_list, self._map_list, self._panel_labels = self.read_panel_options()
 
     def read_panel_options(self):
         # Grab all panels we specify in the YAML
-        panel_opts = self._app_controller.interface_config.panel_options
+        panel_opts = self._application_controller.interface_config.panel_options
 
         # To be filled with panels
         panel_list = []
@@ -47,7 +47,7 @@ class EnableDisableMapGen:
 
     def initialise_single_system(self, panel_name, opts):
         panel = SingleComponentEnableDisablePanel(
-            self._app_controller,
+            self._application_controller,
             opts.get("classes", []),
             id=f"{opts.get('label', 'SingleSystem')}_subsystem_panel",
             classes="detector_subsystem",
@@ -64,7 +64,7 @@ class EnableDisableMapGen:
 
     def initialise_multi_system(self, panel_name, opts):
         panel = MultiComponentEnableDisablePanel(
-            self._app_controller,
+            self._application_controller,
             opts,
             id=f"{opts.get('label', 'MultiSystem')}_subsystem_panel",
             classes="detector_subsystem",

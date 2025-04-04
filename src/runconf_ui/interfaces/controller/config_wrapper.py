@@ -1,5 +1,5 @@
 import conffwk
-
+import logging
 
 class ConfigurationWrapper(conffwk.Configuration):
     """
@@ -9,7 +9,7 @@ class ConfigurationWrapper(conffwk.Configuration):
 
     def __init__(self, configuration_file_path: str):
         super().__init__(f"oksconflibs:{configuration_file_path}")
-
+        logging.debug(f"Opening Configuration file: {configuration_file_path}")
         self._file_name: str = configuration_file_path
 
     @property

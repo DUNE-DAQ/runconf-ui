@@ -3,7 +3,7 @@ from runconf_ui.interfaces.workflows.extract_system_info import (
     SubsystemStatus,
     DetectorExtractor,
 )
-from runconf_ui.utils.daq_conf_tree import ComponentLevelTree
+from runconf_ui.utils.daq_conf_tools.daq_conf_tree import ComponentLevelTree
 from runconf_ui.interfaces.controller.application_controller import (
     ShifterInterfaceState,
 )
@@ -20,7 +20,7 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
 
     def __init__(
         self,
-        app_controller: ShifterInterfaceState,
+        application_controller: ShifterInterfaceState,
         object_list: Dict = {},
         content: str | SupportsVisual = "",
         *,
@@ -34,7 +34,7 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
     ) -> None:
 
         super().__init__(
-            app_controller,
+            application_controller,
             content,
             expand=expand,
             shrink=shrink,
@@ -50,22 +50,22 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
         self._disabled_items = []
 
         self._extractor = DetectorExtractor(
-            self._app_controller.dummy_oks_configuration,
-            self._app_controller.session_name,
+            self._application_controller.dummy_oks_configuration,
+            self._application_controller.session_name,
             object_list,
         )
 
     def generate_button_list(self) -> Dict | None:
         if (
-            self._app_controller.session_name is None
-            or self._app_controller.dummy_oks_configuration is None
+            self._application_controller.session_name is None
+            or self._application_controller.dummy_oks_configuration is None
         ):
             return {}
 
         # Set up information extractor
         self._extractor.set_config_session(
-            self._app_controller.dummy_oks_configuration,
-            self._app_controller.session_name,
+            self._application_controller.dummy_oks_configuration,
+            self._application_controller.session_name,
         )
 
         # Grabs state information for each button
@@ -103,7 +103,7 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
     def get_tree(self):
 
         tree = ComponentLevelTree(
-            self._app_controller,
+            self._application_controller,
             extractor=self._extractor,
         )
         return tree

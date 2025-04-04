@@ -8,18 +8,14 @@ from textual.containers import Grid, ScrollableContainer
 from textual.widgets._select import NoSelection
 from rich.console import ConsoleRenderable, RichCast
 from textual import on
+
+from runconf_ui.utils.daq_conf_management_tools.local_daq_conf_manager import LocalDaqConfManager
+from runconf_ui.utils.daq_conf_management_tools.remote_daq_conf_manger import RemoteDaqConfManager
+from runconf_ui.interfaces.controller.application_controller import ShifterInterfaceState
+
 from pathlib import Path
 import logging
 import traceback
-
-from runconf_ui.utils.management_interface import (
-    LocalManagementInterface,
-    RemoteManagementInterface,
-)
-from runconf_ui.interfaces.controller.application_controller import (
-    ShifterInterfaceState,
-)
-
 
 class DAQSelectMenu(Select):
     def __init__(
@@ -229,7 +225,7 @@ class SelectDAQConfiguration(DAQSelectMenu):
 class FilePanelWidget(Static):
     def __init__(
         self,
-        app_controller: ShifterInterfaceState,
+        application_controller: ShifterInterfaceState,
         content: ConsoleRenderable | RichCast | str | SupportsVisual = "",
         *,
         expand: bool = False,
@@ -251,18 +247,18 @@ class FilePanelWidget(Static):
             disabled=disabled,
         )
 
-        self._app_controller = app_controller
+        self._application_controller = application_controller
 
-        if app_controller.use_local:
-            self._management_interface = LocalManagementInterface(self._app_controller)
+        if application_controller.use_local:
+            self._management_interface = LocalDaqConfManager(self._application_controller)
             self._daq_version_message = "Select database in local DAQ Repository"
         else:
-            self._management_interface = RemoteManagementInterface(self._app_controller)
+            self._management_interface = RemoteDaqConfManager(self._application_controller)
             self._daq_version_message = "Select DAQ configuration version"
 
     def compose(self):
-        default_config = self._app_controller.interface_config.default_daq_config
-        default_version = self._app_controller.interface_config.default_version
+        default_config = self._application_controller.interface_config.default_daq_config
+        default_version = self._application_controller.interface_config.default_version
 
         s = SelectDAQConfiguration(
             self._management_interface,
@@ -308,9 +304,9 @@ class FilePanelWidget(Static):
     ) -> None:
         if event.configuration == Select.BLANK:
 
-            self._app_controller.session_name = None
-            self._app_controller.oks_configuration = None
-            self._app_controller.dummy_oks_configuration = None
+            self._application_controller.session_name = None
+            self._application_controller.oks_configuration = None
+            self._application_controller.dummy_oks_configuration = None
 
             # self.post_message(self.FileDeconfigured())
             self.query_one("#open_file_button").disabled = True
@@ -340,15 +336,15 @@ class FilePanelWidget(Static):
             self.post_message(self.FileNotFound(selected_configuration))
             return
 
-        self._app_controller.oks_configuration = daq_config_file.file_name
-        self._app_controller.session_name = self._management_interface.find_session(
+        self._application_controller.oks_configuration = daq_config_file.file_name
+        self._application_controller.session_name = self._management_interface.find_session(
             daq_config_file.file_name
         )
         self.query_one("#file_io_panel_message_static").update(
             f"      [bold green]DAQ Version[/bold green]:  [deep_pink4]{self._management_interface.daq_version}[/deep_pink4]\n"
             f"      [bold green]DAQ Config[/bold green]:  [deep_pink4]{selected_configuration}[/deep_pink4]\n"
-            f"      [bold green]Current Config File[/bold green]: [deep_pink4]{self._app_controller.oks_configuration}[/deep_pink4]\n"
-            f"      [bold green]Session in Config[/bold green]:  [deep_pink4]{self._app_controller.session_name}\n"
+            f"      [bold green]Current Config File[/bold green]: [deep_pink4]{self._application_controller.oks_configuration}[/deep_pink4]\n"
+            f"      [bold green]Session in Config[/bold green]:  [deep_pink4]{self._application_controller.session_name}\n"
         )
 
     class FileSelected(Message): ...
