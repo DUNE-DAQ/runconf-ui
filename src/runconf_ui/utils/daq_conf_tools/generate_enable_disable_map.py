@@ -15,7 +15,7 @@ class EnableDisableMapGen:
 
     def read_panel_options(self):
         # Grab all panels we specify in the YAML
-        panel_opts = self._application_controller.interface_config.panel_options
+        panel_opts = self._application_controller.shifter_interface_config.panel_options
 
         # To be filled with panels
         panel_list = []

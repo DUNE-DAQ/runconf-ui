@@ -193,7 +193,7 @@ class SystemExtractor(MultiItemExtractor):
 
     def get_attributes(self, system_name: Optional[str] = None):
         # Get list of attributes in system
-        return [ls
+        return [
             s for s in self._attributes if self._check_subsystem_cond(s, system_name)
         ]
 

@@ -257,8 +257,8 @@ class FilePanelWidget(Static):
             self._daq_version_message = "Select DAQ configuration version"
 
     def compose(self):
-        default_config = self._application_controller.interface_config.default_daq_config
-        default_version = self._application_controller.interface_config.default_version
+        default_config = self._application_controller.shifter_interface_config.default_daq_config
+        default_version = self._application_controller.shifter_interface_config.default_version
 
         s = SelectDAQConfiguration(
             self._management_interface,

@@ -31,10 +31,10 @@ class RemoteDaqConfManager(ManagementInterface):
             )
 
         self.conf_pool = ConfPool(
-            self.application_controller.interface_config.download_directory,
+            self.application_controller.shifter_interface_config.download_directory,
             apparatus=application_controller.apparatus,
-            operation_url=self.application_controller.interface_config.operation_url,
-            base_url=self.application_controller.interface_config.base_url,
+            operation_url=self.application_controller.shifter_interface_config.operation_url,
+            base_url=self.application_controller.shifter_interface_config.base_url,
         )
 
     def get_daq_versions(self) -> list[str]:
@@ -57,11 +57,11 @@ class RemoteDaqConfManager(ManagementInterface):
 
         # Now we can open the file
         config_path_reader = DaqConfPathReader(
-            self.application_controller.interface_config.default_config,
-            self.application_controller.interface_config.session_name,
+            self.application_controller.shifter_interface_config.default_config,
+            self.application_controller.shifter_interface_config.session_name,
         )
         config_file = config_path_reader(
-            self.application_controller.interface_config.download_directory
+            self.application_controller.shifter_interface_config.download_directory
         )[0]
 
         if config_file is None:

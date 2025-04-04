@@ -5,7 +5,7 @@ Main application for the shifter view interface.
 from runconf_ui.screens.shifter_view_screen import ShifterViewScreen
 from runconf_ui.screens.quit_screen import QuitScreen
 from runconf_ui.utils.file_io_tools.file_cleaner import clean_old_files
-from runconf_ui.utils.shifter_config_reader.shifter_config_reader import ShifterConfigReader
+from runconf_ui.utils.shifter_config_tools.shifter_config_reader import ShifterConfigReader
 from runconf_ui.interfaces.controller.application_controller import (
     ShifterInterfaceState,
 )
@@ -60,7 +60,7 @@ class ShifterView(App):
         # Global application controller, dataclass containing state information
         self.application_controller = ShifterInterfaceState(
             apparatus=apparatus,
-            interface_config=interface_config,
+            shifter_interface_config=interface_config,
             use_local=kwargs.get("use_local", False),
         )
 
@@ -70,7 +70,7 @@ class ShifterView(App):
         # Grab from config reader
 
         logging_path = Path(
-            f"{self.application_controller.interface_config.output_directory}/logs"
+            f"{self.application_controller.shifter_interface_config.output_directory}/logs"
         )
         logging_path.mkdir(parents=True, exist_ok=True)
 

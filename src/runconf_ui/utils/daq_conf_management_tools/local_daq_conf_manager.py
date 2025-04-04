@@ -14,7 +14,7 @@ class LocalDaqConfManager(ManagementInterface):
 
         self.config_directories = [
             Path(p)
-            for p in f"{self.application_controller.interface_config.download_directory}".split(
+            for p in f"{self.application_controller.shifter_interface_config.download_directory}".split(
                 ":"
             )
         ]
@@ -33,6 +33,6 @@ class LocalDaqConfManager(ManagementInterface):
             return []
 
         return DaqConfPathReader(
-            str(self.application_controller.interface_config.default_config),
-            str(self.application_controller.interface_config.session_name),
+            str(self.application_controller.shifter_interface_config.default_config),
+            str(self.application_controller.shifter_interface_config.session_name),
         )(self._daq_version)

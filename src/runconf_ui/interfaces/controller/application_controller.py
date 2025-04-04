@@ -2,7 +2,7 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from runconf_ui.utils.shifter_config_reader.shifter_config_reader import ShifterConfigReader
+from runconf_ui.utils.shifter_config_tools.shifter_config_reader import ShifterConfigReader
 from runconf_ui.interfaces.controller.daq_conf_wrapper import DaqConfigurationWrapper
 
 @dataclass
@@ -11,7 +11,7 @@ class ShifterInterfaceState:
     Dataclass containing application state information, is global and shared across everything
     '''
     # YAML used to configure the interface
-    interface_config: ShifterConfigReader
+    shifter_interface_config: ShifterConfigReader
     # NP02/NP04
     apparatus: Optional[str] = None
     # Do we want to use the local configuration? Only use if you're an expert!
