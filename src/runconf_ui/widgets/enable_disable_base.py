@@ -1,4 +1,4 @@
-from runconf_ui.utils.shifter_config_tools.daq_system_readers. import SubsystemStatus
+from runconf_ui.utils.shifter_config_tools.shifter_config_systems. import SubsystemStatus
 
 from textual.visual import SupportsVisual
 from textual.widgets import Static, Button

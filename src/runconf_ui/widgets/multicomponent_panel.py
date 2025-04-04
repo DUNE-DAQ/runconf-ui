@@ -1,5 +1,5 @@
 from runconf_ui.widgets.enable_disable_base import EnableDisablePanel
-from runconf_ui.utils.shifter_config_tools.daq_system_readers.detector_extractor import DetectorExtractor
+from runconf_ui.utils.shifter_config_tools.shifter_config_systems.detector_extractor import DetectorExtractor
 from runconf_ui.utils.subsystem_status import SubsystemStatus
 
 from runconf_ui.utils.daq_conf_tools.daq_conf_tree import ComponentLevelTree

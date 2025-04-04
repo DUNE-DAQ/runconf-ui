@@ -1,7 +1,7 @@
 # Essentially the tree from https://github.com/DUNE-DAQ/daqconf/blob/develop/scripts/daqconf_inspector
 
 import runconf_ui.interfaces.actions.actions as ca
-from runconf_ui.utils.shifter_config_tools.daq_system_readers.detector_extractor import DetectorExtractor
+from runconf_ui.utils.shifter_config_tools.shifter_config_systems.detector_extractor import DetectorExtractor
 from runconf_ui.utils.subsystem_status import SubsystemStatus
 
 from runconf_ui.exceptions import CiderBadActionException
