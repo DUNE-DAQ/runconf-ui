@@ -8,7 +8,7 @@ from runconf_ui.interfaces.controller.daq_conf_wrapper import DaqConfigurationWr
 @dataclass
 class ShifterInterfaceState:
     '''
-    Dataclass containing application state information, is global and shared across everything
+    Dataclass containing application state information, should be shared across everything
     '''
     # YAML used to configure the interface
     shifter_interface_config: ShifterConfigReader

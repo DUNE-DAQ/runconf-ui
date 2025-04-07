@@ -68,3 +68,9 @@ If you are unhappy with changes + want to revert to the original configuration, 
 Finally to quit the interface, press the "create" button. The configuration can be run in drunc using the command provided after quitting.
 
 If you have any questions, please contact the DAQ shifter on duty. Enjoy your shift!
+
+## Configuring the Interface
+Specific instructions for setting up the interface YAMLs can be found [here](shttps://github.com/DUNE-DAQ/runconf-ui/blob/develop/docs/runconf_ui_config.md).
+
+## Instructions for Developers
+Developer instruction can be found [here](shttps://github.com/DUNE-DAQ/runconf-ui/blob/develop/docs/dev_instructions.md).
