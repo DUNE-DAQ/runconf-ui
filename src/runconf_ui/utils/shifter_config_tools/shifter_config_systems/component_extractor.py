@@ -1,10 +1,8 @@
-from runconf_ui.utils.shifter_config_tools.shifter_config_systems.extractor_interfaces import SubsystemExtractor, SubsystemStatus
+from runconf_ui.utils.shifter_config_tools.shifter_config_systems.extractor_interfaces import SubsystemExtractor
 import runconf_ui.interfaces.actions.actions as ca
 from runconf_ui.exceptions import CiderBadActionException
 from runconf_ui.utils.subsystem_status import SubsystemStatus
 
-
-import logging
 import logging
 
 

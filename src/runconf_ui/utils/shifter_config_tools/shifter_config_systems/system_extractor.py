@@ -1,7 +1,6 @@
 from runconf_ui.interfaces.controller.daq_conf_wrapper import DaqConfigurationWrapper
 from runconf_ui.utils.shifter_config_tools.shifter_config_systems.extractor_interfaces import (MultiItemExtractor,
-                                                                                           SubsystemExtractor,
-                                                                                           SubsystemStatus)
+                                                                                           SubsystemExtractor)
 from runconf_ui.utils.shifter_config_tools.shifter_config_systems.attribute_extractor import AttributeExtractor
 from runconf_ui.utils.shifter_config_tools.shifter_config_systems.component_extractor import ComponentExtractor
 from runconf_ui.utils.subsystem_status import SubsystemStatus

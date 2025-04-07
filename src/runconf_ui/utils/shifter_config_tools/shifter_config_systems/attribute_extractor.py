@@ -3,7 +3,7 @@ from runconf_ui.interfaces.workflows.get_set_session_attribute import (
     GetAttributeValueSessionAction,
 )
 from runconf_ui.interfaces.controller.daq_conf_wrapper import DaqConfigurationWrapper
-from runconf_ui.utils.shifter_config_tools.shifter_config_systems.extractor_interfaces import SubsystemExtractor, SubsystemStatus
+from runconf_ui.utils.shifter_config_tools.shifter_config_systems.extractor_interfaces import SubsystemExtractor
 import runconf_ui.interfaces.actions.actions as ca
 from runconf_ui.interfaces.workflows.get_objects_in_session import (
     GetSegmentAppsListAction,

@@ -7,7 +7,6 @@ from pathlib import Path
 from runconf_ui.interfaces.controller.application_controller import (
     ShifterInterfaceState,
 )
-from pathlib import Path
 from runconf_ui.utils.file_io_tools.save_file_handler import SaveFileHandler
 
 
@@ -146,7 +145,6 @@ class QuitScreen(Screen):
         if event.button.id == "quit_screen_quit_button":
             logging.info("Quitting without saving")
             # Check if we've saved something!
-
             if (
                 quit_and_save := self._application_controller.saved_configuration
                 is not None

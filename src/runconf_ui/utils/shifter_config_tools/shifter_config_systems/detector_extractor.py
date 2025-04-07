@@ -1,5 +1,5 @@
 from runconf_ui.interfaces.controller.daq_conf_wrapper import DaqConfigurationWrapper
-from runconf_ui.utils.shifter_config_tools.shifter_config_systems.extractor_interfaces import MultiItemExtractor, SubsystemStatus
+from runconf_ui.utils.shifter_config_tools.shifter_config_systems.extractor_interfaces import MultiItemExtractor
 from runconf_ui.utils.shifter_config_tools.shifter_config_systems.system_extractor import SystemExtractor
 from runconf_ui.exceptions import CiderBadActionException
 from runconf_ui.utils.subsystem_status import SubsystemStatus
