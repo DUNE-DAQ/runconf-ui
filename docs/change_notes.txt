@@ -1,9 +1,0 @@
-- Configuration should be separate to actions ON the Configuration, this allows it to be extendible
-- Configuration wrapper should be minimal
-
-- Widgets should have generic constructor
-- Only require one screen interface which has access to the constructor
-- All objects should have access to sub_controller -> controller interface
-- Widgets should make no assumptions about other widgets aside from what lives in daq_widget_base
-
-- App should contain all CSS and make no asu
