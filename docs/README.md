@@ -70,7 +70,7 @@ Finally to quit the interface, press the "create" button. The configuration can 
 If you have any questions, please contact the DAQ shifter on duty. Enjoy your shift!
 
 ## Configuring the Interface
-Specific instructions for setting up the interface YAMLs can be found [here](shttps://github.com/DUNE-DAQ/runconf-ui/blob/develop/docs/runconf_ui_config.md).
+Specific instructions for setting up the interface YAMLs can be found [here](https://github.com/DUNE-DAQ/runconf-ui/blob/develop/docs/runconf_ui_config.md).
 
 ## Instructions for Developers
-Developer instruction can be found [here](shttps://github.com/DUNE-DAQ/runconf-ui/blob/develop/docs/dev_instructions.md).
+Developer instruction can be found [here](https://github.com/DUNE-DAQ/runconf-ui/blob/develop/docs/dev_instructions.md).
