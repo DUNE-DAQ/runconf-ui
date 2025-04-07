@@ -1,4 +1,4 @@
-from runconf_ui.interfaces.workflows.extract_system_info import SubsystemStatus
+from runconf_ui.utils.subsystem_status import SubsystemStatus
 
 from textual.visual import SupportsVisual
 from textual.widgets import Static, Button
@@ -17,7 +17,7 @@ class EnableDisablePanel(Static):
 
     def __init__(
         self,
-        app_controller: ShifterInterfaceState,
+        application_controller: ShifterInterfaceState,
         content: str | SupportsVisual = "",
         *,
         expand: bool = False,
@@ -39,12 +39,12 @@ class EnableDisablePanel(Static):
             disabled=disabled,
         )
 
-        self._app_controller = app_controller
+        self._application_controller = application_controller
         self.open_new_session()
 
     @property
     def session_name(self) -> str | None:
-        return self._app_controller.session_name
+        return self._application_controller.session_name
 
     def open_new_session(self):
         self._button_list = self.generate_button_list()

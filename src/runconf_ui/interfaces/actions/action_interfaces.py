@@ -1,8 +1,10 @@
-from runconf_ui.interfaces.controller.config_wrapper import ConfigurationWrapper
+from runconf_ui.interfaces.controller.daq_conf_wrapper import DaqConfigurationWrapper
 from runconf_ui.exceptions import CiderBadActionException
 
 from abc import ABC, abstractmethod
 from typing import Any
+import logging
+import traceback
 
 # The idea here is to define an interface for actions on a configuration,
 # currently this is very simple but there is scope to add some complexity
@@ -11,14 +13,13 @@ from typing import Any
 # this allows for inheritance etc.
 # '''
 
-
 class ActionInterface(ABC):
     """
     Generic interface defining an abstract action
     """
 
-    def __init__(self, configuration: ConfigurationWrapper):
-        self._configuration = configuration
+    def __init__(self, configuration: DaqConfigurationWrapper):
+        self._daq_configuration = configuration
 
     @abstractmethod
     def action(self, *args, **kwargs):
@@ -26,6 +27,11 @@ class ActionInterface(ABC):
 
     def __call__(self, *args, **kwargs) -> Any:
         try:
-            return self.action(*args, **kwargs)
-        except Exception as e:
-            raise CiderBadActionException(e)
+            a = self.action(*args, **kwargs)
+            logging.debug(f"Successfully called {self.__repr__()}")
+            return a
+        except Exception:
+            raise CiderBadActionException(traceback.format_exc())
+
+    def __str__(self):
+        return f"{self.__class__.__name__} using {self._daq_configuration.file_name}"

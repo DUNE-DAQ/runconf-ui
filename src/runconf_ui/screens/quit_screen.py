@@ -7,9 +7,11 @@ from pathlib import Path
 from runconf_ui.interfaces.controller.application_controller import (
     ShifterInterfaceState,
 )
+from runconf_ui.utils.file_io_tools.save_file_handler import SaveFileHandler
 
 
 class QuitScreen(Screen):
+    
     """Screen with a dialog to quit."""
 
     def __init__(
@@ -20,9 +22,18 @@ class QuitScreen(Screen):
         id: str | None = None,
         classes: str | None = None,
     ) -> None:
+        """
+        :param application_controller: The application controller
+        :param render_no_create: If True, the screen will not show the create button 
+        :param name: The name of the screen
+        :param id: The id of the screen
+        :param classes: The tcss classes of the screen
+        
+        """
 
         super().__init__(name, id, classes)
         self._render_no_create = render_no_create
+        self._save_handler = SaveFileHandler(application_controller)
         self._application_controller = application_controller
 
     def message(self, quit_without_saving: bool = False) -> str:
@@ -66,9 +77,9 @@ class QuitScreen(Screen):
         output += f"[purple]To run[/purple] use [bold green]{run_cmd}\n"
         return output
 
+
     def compose(self):
         # We need to get the saved configuration name
-        # TODO: Add a proper handler for this...
         self._saved_configuration_name = (
             self._application_controller.saved_configuration
         )
@@ -105,6 +116,8 @@ class QuitScreen(Screen):
                 disabled=button_disabled,
             )
 
+            
+            # This is a tad hacky but it means create+quit use the same screen
             if self._render_no_create:
                 yield Button(
                     "Quit Without Creating Config",
@@ -120,28 +133,24 @@ class QuitScreen(Screen):
                 classes="pop_up_button quit_screen_button",
             )
 
-    def on_button_pressed(self, event: Button.Pressed) -> None:
-        main_screen = self.app.get_screen("shifter_view_screen")
-        options = main_screen.query_one("OptionPanel")
-
+    def on_button_pressed(self, event: Button.Pressed) -> None:        
         if event.button.id == "quit_screen_savequit_button":
             logging.info("Quitting and saved")
 
             # HACK: This is a hack to save correctly
-            options.save_backup()
-            options.save_main()
+            
+            self._save_handler()
             self.app.exit(self.message())
 
         if event.button.id == "quit_screen_quit_button":
             logging.info("Quitting without saving")
             # Check if we've saved something!
-
             if (
                 quit_and_save := self._application_controller.saved_configuration
                 is not None
             ):
-                options.save_backup()
-
+                # Backup anyway!
+                self._save_handler.save_backup()
             self.app.exit(self.message(not quit_and_save))
 
         else:

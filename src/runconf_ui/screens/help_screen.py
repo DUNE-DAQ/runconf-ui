@@ -20,7 +20,7 @@ class HelpScreen(Screen):
     def message(self):
         return dedent(
             """\
-            [bold]Hello and welcome to the DAQ Shifter interface!![/bold]
+            [bold]Hello and welcome to the DAQ Shifter View!![/bold]
 
             To get started, please select the following from dropdown menus:
                 1. The DAQ version you would like to use 
@@ -48,10 +48,15 @@ class HelpScreen(Screen):
             
             If you are unhappy with changes + want to revert to the original configuration, press the "Reset" button.
             
-            Finally to quit the interface, press the "Quit" button. The configuration can be run in drunc using the command provided after quitting.
             
-            If you have any questions, please contact the DAQ shifter on duty. Enjoy your shift!!
+            Finally to quit the interface, press the "Create" button. The configuration can be run in drunc using the command provided after quitting.
+            
+            Pressing Quit gives you option to quit the interface without saving the configuration.
+
+            If you have any questions, please contact the DAQ shifter on duty! Enjoy your shift!! 
+                
         """
+        
         )
 
     def on_button_pressed(self, event: Button.Pressed) -> None:

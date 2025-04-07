@@ -1,12 +1,12 @@
 import runconf_ui.interfaces.actions.actions as ca
-from runconf_ui.interfaces.controller.config_wrapper import ConfigurationWrapper
+from runconf_ui.interfaces.controller.daq_conf_wrapper import DaqConfigurationWrapper
 
 from pathlib import Path
 from typing import List
 import os
 
 
-class ConfigPathReader:
+class DaqConfPathReader:
     def __init__(
         self, default_config: str | None = None, default_session_name: str | None = None
     ):
@@ -36,7 +36,7 @@ class ConfigPathReader:
 
         return file_path
 
-    def __check_default_session(self, session, config_file: ConfigurationWrapper) -> bool:
+    def __check_default_session(self, session, config_file: DaqConfigurationWrapper) -> bool:
         if self._default_session is None:
             return True
 
@@ -45,7 +45,7 @@ class ConfigPathReader:
     def _get_number_of_sessions(self, config_file_path: str) -> int:
         """Returns the number of sessions in the given configuration file."""
         try:
-            config_file = ConfigurationWrapper(config_file_path)
+            config_file = DaqConfigurationWrapper(config_file_path)
 
             return len(
                 [

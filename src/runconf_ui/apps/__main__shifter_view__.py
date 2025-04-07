@@ -4,8 +4,8 @@ Main application for the shifter view interface.
 
 from runconf_ui.screens.shifter_view_screen import ShifterViewScreen
 from runconf_ui.screens.quit_screen import QuitScreen
-from runconf_ui.utils.file_cleaner import clean_old_files
-from runconf_ui.utils.shifter_config_reader import ShifterConfigReader
+from runconf_ui.utils.file_io_tools.file_cleaner import clean_old_files
+from runconf_ui.utils.shifter_config_tools.shifter_config_reader import ShifterConfigReader
 from runconf_ui.interfaces.controller.application_controller import (
     ShifterInterfaceState,
 )
@@ -57,9 +57,10 @@ class ShifterView(App):
         else:
             raise FileNotFoundError(f"Configuration file {configuration} not found")
 
+        # Global application controller, dataclass containing state information
         self.application_controller = ShifterInterfaceState(
             apparatus=apparatus,
-            interface_config=interface_config,
+            shifter_interface_config=interface_config,
             use_local=kwargs.get("use_local", False),
         )
 
@@ -69,7 +70,7 @@ class ShifterView(App):
         # Grab from config reader
 
         logging_path = Path(
-            f"{self.application_controller.interface_config.output_directory}/logs"
+            f"{self.application_controller.shifter_interface_config.output_directory}/logs"
         )
         logging_path.mkdir(parents=True, exist_ok=True)
 
@@ -86,12 +87,17 @@ class ShifterView(App):
         """
         Mount App
         """
+        logging.info("Mounting app")
+        
+        # I just like this theme
         self.theme = "catppuccin-latte"
 
+        # NOTE: If you install with the -e flag, this will be the version of the package installed at that point and will not update!
         self.title = (
             f"Shifter Interface v{pkg_resources.get_distribution('runconf_ui').version}"
         )
 
+        # Set the application controller
         self.install_screen(
             ShifterViewScreen(self.application_controller),
             name="shifter_view_screen",
@@ -102,10 +108,10 @@ class ShifterView(App):
     def action_quit(self):
         """Quit the application."""
 
-        logging.info(self.screen.__class__)
-
         if isinstance(self.screen, QuitScreen):
             self.pop_screen()
+
+        logging.debug("Quitting application")
 
         self.push_screen(
             QuitScreen(
@@ -120,6 +126,7 @@ class ShifterView(App):
             self._exit_message = message
         else:
             self._exit_message = "[bold red]Force exiting the application!!!"
+        logging.info(f"Exiting application with message: {message}")
         super().exit()  # Call the original exit method
 
     def exit_message(self) -> str:
