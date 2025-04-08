@@ -97,6 +97,11 @@ class SelectDAQVersion(DAQSelectMenu):
         # We need to correctly format options
         options = [(str(Path(o).name), o) for o in options_list]
 
+        if not len(options):
+            logging.error("No DAQ versions found, please check your configuration")
+            logging.error(traceback.format_exc())
+            raise Exception("No DAQ versions found, please check your configuration")
+
         if len(options) == 1:
             management_interface.set_version(options_list[0])
 

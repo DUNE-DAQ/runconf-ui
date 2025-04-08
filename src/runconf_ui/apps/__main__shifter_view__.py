@@ -141,7 +141,7 @@ class ShifterView(App):
     "apparatus",
     required=False,
     default=os.getenv("APPARATUS"),
-    help="set the detector apparatus i.e. NP02/NP04",
+    help="set the detector apparatus i.e. np02/np04",
 )
 @click.option(
     "-s",
