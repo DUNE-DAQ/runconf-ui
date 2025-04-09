@@ -149,6 +149,7 @@ class DaqConfTree(DaqConfTreeBase):
                 or seg in self._disabled_objs
             ):
                 seg_disabled = True
+                self._disabled_objs.append(seg)
                 colour = "grey35"
                 message = "DISABLED"
             else:

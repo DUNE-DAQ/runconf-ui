@@ -1,8 +1,6 @@
 """
 Simple wrapper for talking to config-management
 """
-
-
 from runconf_ui.interfaces.controller.daq_conf_wrapper import DaqConfigurationWrapper
 from runconf_ui.interfaces.controller.application_controller import (
     ShifterInterfaceState,

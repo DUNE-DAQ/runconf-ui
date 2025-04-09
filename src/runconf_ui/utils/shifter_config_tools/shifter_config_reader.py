@@ -6,13 +6,16 @@ import os
 
 # Class for reading a YAML config and producing panels
 class ShifterConfigReader:
-    def __init__(self, config_file, **kwargs):
+    def __init__(self, settings_config_file: str, detector_config_file: str, **kwargs):
 
-        with open(config_file, "r") as f:
-            self._config = yaml.safe_load(f)
+        with open(detector_config_file, "r") as f:
+            self._detector_config = yaml.safe_load(f)
+
+        with open(settings_config_file, "r") as f:
+            self._settings_config = yaml.safe_load(f)
 
         # We can get settings
-        general_settings = self._config.get("General", {})
+        general_settings = self._settings_config.get("General", {})
 
         # Update with any user args
         general_settings.update(kwargs)
@@ -39,13 +42,6 @@ class ShifterConfigReader:
             general_settings.get("operation_url", None)
         )
 
-        self._default_version = path_or_env_check(
-            general_settings.get("default_daq_version", None)
-        )
-
-        self._default_daq_config = path_or_env_check(
-            general_settings.get("default_daq_config", None)
-        )
 
     @property
     def output_directory(self):
@@ -93,12 +89,4 @@ class ShifterConfigReader:
 
     @property
     def panel_options(self):
-        return self._config.get("PanelOptions", {})
-
-    @property
-    def default_version(self):
-        return self._default_version
-
-    @property
-    def default_daq_config(self):
-        return self._default_daq_config
+        return self._detector_config.get("PanelOptions", {})

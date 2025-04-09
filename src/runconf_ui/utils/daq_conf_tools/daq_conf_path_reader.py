@@ -1,21 +1,12 @@
 import runconf_ui.interfaces.actions.actions as ca
 from runconf_ui.interfaces.controller.daq_conf_wrapper import DaqConfigurationWrapper
+from runconf_ui.utils.daq_conf_tools.consolidate_daq_conf import ConsolidateDAQConf
 
 from pathlib import Path
 from typing import List
 import os
 
-
 class DaqConfPathReader:
-    def __init__(
-        self, default_config: str | None = None, default_session_name: str | None = None
-    ):
-        """
-        Initialize the ConfigPathReader with a configuration file.
-        """
-        self._default_config = default_config
-        self._default_session = default_session_name
-
     def get_db_from_path(self, file_path: Path) -> Path | None:
         """Returns a database path if the file is a valid configuration.
         Slightly chunky, but it makes the the code easier to read.
@@ -26,36 +17,23 @@ class DaqConfPathReader:
         if not file_path.is_file():
             return None
 
-        if self._default_config is not None and self._default_config not in str(
-            file_path
-        ):
-            return None
-
-        if self._get_number_of_sessions(str(file_path)) < 0:
+        if self._get_number_of_sessions(str(file_path)) < 1:
             return None
 
         return file_path
 
-    def __check_default_session(self, session, config_file: DaqConfigurationWrapper) -> bool:
-        if self._default_session is None:
-            return True
-
-        return ca.GetAttributeAction(config_file)(session, "id") == self._default_session
 
     def _get_number_of_sessions(self, config_file_path: str) -> int:
         """Returns the number of sessions in the given configuration file."""
-        try:
-            config_file = DaqConfigurationWrapper(config_file_path)
-
-            return len(
-                [
-                    s
-                    for s in ca.GetDalsOfClassAction(config_file)("Session")
-                    if self.__check_default_session(s, config_file)
-                ]
-            )
-        except Exception:
+        daq_config_file = DaqConfigurationWrapper(config_file_path)
+        
+        # Not perfect but useful if something is wrong with the file
+        if not ca.CanBeSavedAction(daq_config_file)():
             return 0
+        
+        return len([s for s in ca.GetDalsOfClassAction(daq_config_file)("Session")])
+        
+            
 
     # FILE STUFF
     def __call__(self, config_directories) -> List[Path]:
@@ -74,6 +52,10 @@ class DaqConfPathReader:
 
         database_list = []
         for directory in self.config_directories:
+            if not isinstance(directory, Path):
+                continue
+            
+            
             if not directory.is_dir():
                 continue
 

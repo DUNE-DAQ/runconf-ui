@@ -1,7 +1,8 @@
 from runconf_ui.interfaces.actions.action_interfaces import ActionInterface
 from runconf_ui.interfaces.controller.daq_conf_wrapper import DaqConfigurationWrapper
 import shutil
-
+import logging
+import traceback
 """
 A collection of simple actions on a configuration. These should take a single configuration
 and then be able to repeatedly perform a single operation on it
@@ -90,8 +91,10 @@ class AddDalAction(ActionInterface):
         """
         Add object to configuration
         """
-        self._daq_configuration.add_dal(conf_obj_id, conf_obj_class)
-        return self._daq_configuration.get_dal(conf_obj_id, conf_obj_class)
+        self._daq_configuration.create_obj(uid=conf_obj_id, class_name=conf_obj_class)
+        dal_obj = GetDalObjectAction(self._daq_configuration)(conf_obj_id, conf_obj_class)
+        UpdateDalAction(self._daq_configuration)(dal_obj)
+        return dal_obj
 
 
 class DisableDalAction(ActionInterface):
@@ -164,7 +167,6 @@ class CommitConfigurationAction(ActionInterface):
         self._daq_configuration.commit(save_message)
         return None
 
-
 # Actions for getting information
 class GetAttributeAction(ActionInterface):
     def action(self, dal, attr_name):
@@ -194,3 +196,20 @@ class CheckIsDisabledAction(ActionInterface):
         disabled_items = attr_getter(session_dal, "disabled")
 
         return dal in disabled_items
+
+class CanBeSavedAction(ActionInterface):
+    """
+    Check if the configuration is valid
+    """
+
+    def action(self):
+        try:        
+            dummy_dal = AddDalAction(self._daq_configuration)("dummy_variable", "Resource")
+            DestroyDalAction(self._daq_configuration)(dummy_dal)
+            CommitConfigurationAction(self._daq_configuration)()
+            return True
+
+        except Exception as e:
+            logging.debug(traceback.format_exc())
+            logging.error(f"Error saving configuration: {e}")
+            return False

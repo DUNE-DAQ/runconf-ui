@@ -45,23 +45,33 @@ class ShifterView(App):
         super().__init__(*args)
 
         self._exit_message = ""
+        
         # Read kwargs
+        use_local = kwargs.get("use_local", False)
+        
+        if use_local:
+            interface_config = f"{Path(__file__).parent.absolute()}/../configuration/interface_configs/local_configuration.yml"
+        else:
+            interface_config = f"{Path(__file__).parent.absolute()}/../configuration/interface_configs/ehn1_configuration.yml"
+        
         apparatus = kwargs.get("apparatus", os.environ.get("APPARATUS", "np02"))
 
         # messy...
-        configuration = f"{Path(__file__).parent.absolute()}/../configuration/{apparatus}_configuration.yml"
+        detector_configuration = f"{Path(__file__).parent.absolute()}/../configuration/detector_configs/{apparatus}_configuration.yml"
 
         # Now we've done logs, we can read the configuration
-        if Path(configuration).exists():
-            interface_config = ShifterConfigReader(configuration, **kwargs)
+        if Path(detector_configuration).exists() and Path(interface_config).exists():
+            interface_config = ShifterConfigReader(detector_config_file=detector_configuration,
+                                                   settings_config_file=interface_config, 
+                                                   **kwargs)
         else:
-            raise FileNotFoundError(f"Configuration file {configuration} not found")
+            raise FileNotFoundError(f"Configuration file not found")
 
         # Global application controller, dataclass containing state information
         self.application_controller = ShifterInterfaceState(
             apparatus=apparatus,
             shifter_interface_config=interface_config,
-            use_local=kwargs.get("use_local", False),
+            use_local=use_local
         )
 
         self._init_logger(kwargs.get("log_level", "INFO"))

@@ -46,10 +46,12 @@ class SaveFileHandler:
         self.generate_change_log(self._application_controller.saved_configuration)
 
     def save_backup(self):
+        old_config_dir = Path(f"{self._application_controller.shifter_interface_config.output_directory}/old_configs")
+        # make sure old config directory exists
+        old_config_dir.mkdir(parents=True, exist_ok=True)
+
         clean_old_files(
-            Path(
-                f"{self._application_controller.shifter_interface_config.output_directory}/old_configs"
-            ),
+            old_config_dir,
             extension=".data.xml",
             n_files=5,
             include_folders=True,

@@ -132,11 +132,9 @@ class SystemExtractor(MultiItemExtractor):
             and s.get_state() is not SubsystemStatus.STATE_NOT_DEFINED
         ]
 
-
         if len(states) == 0:
             logging.debug(f"No states found for {system_name}")
             return SubsystemStatus.STATE_NOT_DEFINED
-
 
         if (
             all([s == states[0] for s in states])

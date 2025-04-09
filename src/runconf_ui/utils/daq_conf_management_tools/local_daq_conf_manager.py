@@ -32,7 +32,10 @@ class LocalDaqConfManager(ManagementInterface):
         if self._daq_version == "":
             return []
 
-        return DaqConfPathReader(
-            str(self.application_controller.shifter_interface_config.default_config),
-            str(self.application_controller.shifter_interface_config.session_name),
-        )(self._daq_version)
+        return DaqConfPathReader()(self._daq_version)
+
+    def get_default_version(self) -> str:
+        """
+        Get the default DAQ version
+        """
+        return ""

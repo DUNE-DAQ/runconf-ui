@@ -16,7 +16,8 @@ from runconf_ui.utils.daq_conf_management_tools.management_interface import Mana
 
 import re
 from pathlib import Path
-
+import logging
+import traceback
 
 class RemoteDaqConfManager(ManagementInterface):
     def __init__(self, application_controller: ShifterInterfaceState):
@@ -31,7 +32,7 @@ class RemoteDaqConfManager(ManagementInterface):
             )
 
         self.conf_pool = ConfPool(
-            self.application_controller.shifter_interface_config.download_directory,
+            str(self.application_controller.shifter_interface_config.download_directory),
             apparatus=application_controller.apparatus,
             operation_url=self.application_controller.shifter_interface_config.operation_url,
             base_url=self.application_controller.shifter_interface_config.base_url,
@@ -56,17 +57,33 @@ class RemoteDaqConfManager(ManagementInterface):
         self.conf_pool.checkout_conf(daq_configuration, self._daq_version)
 
         # Now we can open the file
-        config_path_reader = DaqConfPathReader(
-            self.application_controller.shifter_interface_config.default_config,
-            self.application_controller.shifter_interface_config.session_name,
-        )
-        config_file = config_path_reader(
+        config_path_reader = DaqConfPathReader()
+        config_list = config_path_reader(
             self.application_controller.shifter_interface_config.download_directory
-        )[0]
+        )
+        
+        valid_config_files = [c for c in config_list if c.name == self.application_controller.shifter_interface_config.default_config]
 
-        if config_file is None:
-            raise ValueError(f"Could not find config file for {daq_configuration}")
+        if not len(valid_config_files):
+            logging.error(
+                f"Could not find config file for {daq_configuration}. Found: {config_list}"
+            )
+            logging.error(traceback.format_exc())
+            raise Exception(
+                f"Could not find config file for {daq_configuration}. Found: {config_list}"
+            )
 
+        if len(valid_config_files) > 1:
+            logging.warning(
+                f"Found multiple config files with the same name: {valid_config_files}, using the first one"
+            )
+
+        config_file = valid_config_files[0] 
+        
         return super().open_file(Path(config_file))
 
-
+    def get_default_version(self) -> str:
+        """
+        Get the default DAQ version
+        """
+        return self.conf_pool.get_release()

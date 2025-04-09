@@ -1,29 +1,4 @@
 ---
-General:
-  # Environment variables
-
-  # Default .data.xml configuration file
-  default_config: "SESSION_FILE"
-  # Default download directory for DAQ configuration files OR local directory containing configurations
-  download_directory: "CONFIG_DIR"
-  # Name of TMUX session
-  session_name: "SESSION_NAME"
-
-  ## CONFIGURATION MANAGER  SETTINGS
-
-  # Grabs git branch "default_daq_version/default_daq_config"
-
-  # Default DAQ version 
-  default_daq_version: "EHN1_DEFAULT_VERSION"
-  # Default DAQ configuration file 
-  default_daq_config: "EHN1_DEFAULT_CONFIG"
-
-  # URL containing git repos
-  base_url: "https://gitlab.cern.ch/dune-daq/online/ehn1-daqconfigs"
-  # URL containing git repos for the operation configuration
-  operation_url: "https://gitlab.cern.ch/dune-daq/online/np02-configs-operation.git"
-
-# Optionw to generate panels
 PanelOptions:
 
   Detector:

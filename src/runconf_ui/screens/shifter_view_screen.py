@@ -3,6 +3,7 @@ from textual.containers import ScrollableContainer, Grid
 from textual.widgets import TabbedContent, TabPane, Header, Footer, Static
 from textual import on
 from textual.css.query import NoMatches
+from textual.message import Message
 
 from runconf_ui.widgets.multicomponent_panel import MultiComponentEnableDisablePanel
 from runconf_ui.interfaces.controller.daq_conf_wrapper import DaqConfigurationWrapper
@@ -113,7 +114,6 @@ class ShifterViewScreen(Screen):
             )
             # Optionally log the error for debugging
             logging.error(f"Error: {traceback.format_exc()}")
-            await self.deconfigure()
 
     def show_popup(self, message: str, timer: float = 10.0):
         """
@@ -138,13 +138,6 @@ class ShifterViewScreen(Screen):
             # No pop-up to remove
             pass
 
-    @on(FilePanelWidget.FileDeconfigured)
-    async def deconfigure(self):
-        self.query_one(OptionPanel).open_new_session()
-        for a in self.query("EnableDisablePanel"):
-            a.open_new_session()
-            a.refresh(recompose=True)
-
     @on(FilePanelWidget.FileNotFound)
     async def file_not_found(self, event: FilePanelWidget.FileNotFound):
         self.show_popup(
@@ -167,14 +160,18 @@ class ShifterViewScreen(Screen):
         # Now we make a temporary copy of the configuration object
         # For ease of copying we copy the entire session into a single file
         logging.info(f"Session name {self._application_controller.session_name}")
-
-        ConsolidateDAQConf(
-            self._application_controller.current_daq_config,
-            self._application_controller.session_name or "default_session_name",
-            "Session",
-            str(self.TMP_CONFIG),
-        )()
-        logging.info("Configuration copied to temporary file")
+        try:
+            ConsolidateDAQConf(
+                self._application_controller.current_daq_config,
+                self._application_controller.session_name,
+                "Session",
+                str(self.TMP_CONFIG),
+            )()
+            logging.info("Configuration copied to temporary file")
+        except Exception as e:
+            logging.error(f"Error copying configuration: {e}")
+            logging.error(traceback.format_exc())
+            raise e
 
         # Get configuration
         self._application_controller.buffer_daq_config = DaqConfigurationWrapper(
@@ -197,33 +194,40 @@ class ShifterViewScreen(Screen):
             a.open_new_session()
             a.refresh(recompose=True)
             a.update_button_styles()
+            self._application_controller.current_state = {
+                a.id: a.get_current_states() for a in self.query("EnableDisablePanel")
+            }         
 
         # Update trees
         self.update_trees()
         
-        self._application_controller.current_state = {
-            a.id: a.get_current_states() for a in self.query("EnableDisablePanel")
-        }
+        
+        self.query_one("FilePanelWidget").update_file_info()
 
     def on_enable_disable_panel_changed(self):
         # Change from enable->disable or vice versa
         self.update_trees()
 
+
     def update_trees(self):
         # We get the the full system first
         main_tree = DaqConfTree(self._application_controller)
-
         # Update the static panel
         self.query_one("#tree_view_full").update(main_tree.print_tree())
         # Tree also tells us exactly what's on/off
         disabled = main_tree.disabled_objs
+        logging.info(f"Disabled objects: {disabled}")
 
         # Update component level trees
         for panel in self.query("EnableDisablePanel"):
+            self._application_controller.current_state[panel.id] = panel.get_current_states()
+
             if isinstance(panel, MultiComponentEnableDisablePanel):
                 panel.update_disabled(disabled)
                 self.update_tree(panel)
+                
             # Have to do this twice to get the correct state
+
             panel.update_button_styles()
 
     def update_tree(self, panel: MultiComponentEnableDisablePanel):
@@ -231,3 +235,4 @@ class ShifterViewScreen(Screen):
         self.query_one(f"#tree_view_{panel.id.replace('_subsystem_panel', '')}").update(
             panel.get_tree().print_tree()
         )
+
