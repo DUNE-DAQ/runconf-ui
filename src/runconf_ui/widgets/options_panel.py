@@ -10,6 +10,7 @@ import logging
 from runconf_ui.interfaces.controller.application_controller import (
     ShifterInterfaceState,
 )
+from runconf_ui.screens.popup_manager import PopupManager
 
 
 class OptionPanel(Static):
@@ -38,31 +39,6 @@ class OptionPanel(Static):
         )
 
         self._application_controller = application_controller
-
-    def show_popup(self, message: str):
-        """
-        Display a pop-up message on the screen.
-        """
-        # Remove any existing pop-up to avoid duplicates
-        self.remove_popup()
-
-        # Create and mount the pop-up
-        popup = PopupMessage(message, classes="popup popup_success")
-
-        main_screen = self.app.get_screen("shifter_view_screen")
-        main_screen.query_one("#main_container").mount(popup)
-
-    def remove_popup(self):
-        """
-        Remove any existing pop-up from the screen.
-        """
-        try:
-            # Find and remove any existing pop-up
-            existing_popup = self.query_one(".popup", expect_type=PopupMessage)
-            existing_popup.remove()
-        except NoMatches:
-            # No pop-up to remove
-            pass
 
     def compose(self):
         logging.debug("OptionPanel compose")
@@ -112,8 +88,12 @@ class OptionPanel(Static):
             # Make sure what we do is valid
             except Exception as e:
                 logging.error(f"Error saving configuration: {e}")
-                self.show_popup(
-                    f"[white]Invalid configuration[/white] [bold grey3]{self._application_controller.current_daq_config}:{self._application_controller.session_name}[/bold grey3] [white]passed, please check with the experts!"
+                popup = PopupManager(self.app.get_screen("shifter_view_screen"))
+                
+                popup.show(
+                    f"[white]Invalid configuration[/white] [bold grey3]{self._application_controller.current_daq_config}:{self._application_controller.session_name}[/bold grey3] [white]passed, please check with the experts!",
+                    timer=4.0,
+                    success=False
                 )
 
         # Resets to base config provided
