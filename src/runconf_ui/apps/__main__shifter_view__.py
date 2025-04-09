@@ -59,17 +59,20 @@ class ShifterView(App):
         # messy...
         detector_configuration = f"{Path(__file__).parent.absolute()}/../config_files/detector_configs/{apparatus}_configuration.yml"
 
+        if not Path(detector_configuration).exists():
+            raise Exception(f"Detector configuration file {detector_configuration} does not exist")
+        
+        if not Path(interface_config).exists():
+            raise Exception(f"Interface configuration file {interface_config} does not exist")
+
         # Now we've done logs, we can read the configuration
-        if Path(detector_configuration).exists() and Path(interface_config).exists():
-            interface_config = ShifterConfigReader(detector_config_file=detector_configuration,
-                                                   settings_config_file=interface_config, 
-                                                   **kwargs)
-        else:
-            raise FileNotFoundError(f"Configuration file not found")
+        interface_config = ShifterConfigReader(detector_config_file=detector_configuration,
+                                                settings_config_file=interface_config, 
+                                                **kwargs)
 
         # Global application controller, dataclass containing state information
         self.application_controller = ShifterInterfaceState(
-            apparatus=apparatus,
+            apparatus=apparatus, 
             shifter_interface_config=interface_config,
             use_local=use_local
         )
