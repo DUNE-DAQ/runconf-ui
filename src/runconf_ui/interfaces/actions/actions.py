@@ -197,19 +197,3 @@ class CheckIsDisabledAction(ActionInterface):
 
         return dal in disabled_items
 
-class CanBeSavedAction(ActionInterface):
-    """
-    Check if the configuration is valid
-    """
-
-    def action(self):
-        try:        
-            dummy_dal = AddDalAction(self._daq_configuration)("dummy_variable", "Resource")
-            DestroyDalAction(self._daq_configuration)(dummy_dal)
-            CommitConfigurationAction(self._daq_configuration)()
-            return True
-
-        except Exception as e:
-            logging.debug(traceback.format_exc())
-            logging.error(f"Error saving configuration: {e}")
-            return False

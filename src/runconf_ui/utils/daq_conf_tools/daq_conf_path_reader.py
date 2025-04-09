@@ -5,6 +5,7 @@ from runconf_ui.utils.daq_conf_tools.consolidate_daq_conf import ConsolidateDAQC
 from pathlib import Path
 from typing import List
 import os
+import logging
 
 class DaqConfPathReader:
     def get_db_from_path(self, file_path: Path) -> Path | None:
@@ -25,14 +26,13 @@ class DaqConfPathReader:
 
     def _get_number_of_sessions(self, config_file_path: str) -> int:
         """Returns the number of sessions in the given configuration file."""
-        daq_config_file = DaqConfigurationWrapper(config_file_path)
-        
-        # Not perfect but useful if something is wrong with the file
-        if not ca.CanBeSavedAction(daq_config_file)():
-            return 0
-        
-        return len([s for s in ca.GetDalsOfClassAction(daq_config_file)("Session")])
-        
+        try:
+            daq_config_file = DaqConfigurationWrapper(config_file_path)
+                    
+            return len([s for s in ca.GetDalsOfClassAction(daq_config_file)("Session")])
+        except Exception as e:  
+            logging.debug(f"Error reading configuration file {config_file_path}: {e}")
+            return 0        
             
 
     # FILE STUFF

@@ -115,7 +115,7 @@ class ShifterViewScreen(Screen):
             # Optionally log the error for debugging
             logging.error(f"Error: {traceback.format_exc()}")
 
-    def show_popup(self, message: str, timer: float = 10.0):
+    def show_popup(self, message: str, timer: float = 10.0, classes: str = "popup popup_failure"):
         """
         Display a pop-up message on the screen.
         """
@@ -123,7 +123,7 @@ class ShifterViewScreen(Screen):
         self.remove_popup()
 
         # Create and mount the pop-up
-        popup = PopupMessage(message, timer, classes="popup popup_failure")
+        popup = PopupMessage(message, timer, classes=classes)
         self.query_one("#main_container").mount(popup)
 
     def remove_popup(self):
@@ -201,8 +201,10 @@ class ShifterViewScreen(Screen):
         # Update trees
         self.update_trees()
         
-        
         self.query_one("FilePanelWidget").update_file_info()
+        self.show_popup(f"[white]Successfully opened new configuration[/white] [bold white]{self._application_controller.current_daq_config}",
+                        timer=5.0, classes="popup popup_success")
+
 
     def on_enable_disable_panel_changed(self):
         # Change from enable->disable or vice versa
