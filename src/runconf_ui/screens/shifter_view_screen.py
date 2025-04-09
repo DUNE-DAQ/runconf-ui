@@ -6,15 +6,14 @@ from textual import on
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
     ShifterInterfaceState,
 )
-from runconf_ui.utils.daq_conf_tools.generate_enable_disable_map import EnableDisableMapGen
+from runconf_ui.runconf_ui_configuration.detector_config_readers.generate_enable_disable_map import EnableDisableMapGen
 from runconf_ui.widgets.file_select_panel import FilePanelWidget
 from runconf_ui.widgets.options_panel import OptionPanel
 
 import traceback
 import logging
-
-from runconf_ui.utils.daq_conf_management_tools.buffer_file_manager import BufferFileManager
-from runconf_ui.utils.daq_conf_tools.daq_tree_manager import DaqTreeManager
+from runconf_ui.daq_config_interfaces.daq_config_file_io.buffer_file_manager import BufferFileManager
+from runconf_ui.daq_config_interfaces.daq_tree_tools.daq_tree_manager import DaqTreeManager
 from runconf_ui.screens.popup_manager import PopupManager
 
 class ShifterViewScreen(Screen):
