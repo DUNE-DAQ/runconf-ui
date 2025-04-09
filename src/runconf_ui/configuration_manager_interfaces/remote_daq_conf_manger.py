@@ -8,11 +8,11 @@ except Exception:
         "Could not import runconftool or config_management. Please install runconftools or config_management"
     )
 
-from runconf_ui.utils.daq_conf_tools.daq_conf_path_reader import DaqConfPathReader
-from runconf_ui.interfaces.controller.application_controller import (
+from runconf_ui.daq_config_interfaces.daq_config_file_io.daq_conf_path_reader import DaqConfPathReader
+from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
     ShifterInterfaceState,
 )
-from runconf_ui.utils.daq_conf_management_tools.management_interface import ManagementInterface
+from runconf_ui.configuration_manager_interfaces.management_interface import ManagementInterface
 
 import re
 from pathlib import Path

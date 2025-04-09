@@ -1,6 +1,5 @@
-import runconf_ui.interfaces.actions.actions as ca
-from runconf_ui.interfaces.controller.daq_conf_wrapper import DaqConfigurationWrapper
-from runconf_ui.utils.daq_conf_tools.consolidate_daq_conf import ConsolidateDAQConf
+import runconf_ui.daq_config_interfaces.actions.actions as ca
+from runconf_ui.daq_config_interfaces.daq_config_file_io.daq_config_wrapper import DaqConfigurationWrapper
 
 from pathlib import Path
 from typing import List

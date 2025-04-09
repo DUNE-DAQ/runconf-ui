@@ -1,11 +1,11 @@
 """
 Simple wrapper for talking to config-management
 """
-from runconf_ui.interfaces.controller.daq_conf_wrapper import DaqConfigurationWrapper
-from runconf_ui.interfaces.controller.application_controller import (
+from runconf_ui.daq_config_interfaces.daq_config_file_io.daq_config_wrapper import DaqConfigurationWrapper
+from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
     ShifterInterfaceState,
 )
-import runconf_ui.interfaces.actions.actions as ca
+import runconf_ui.daq_config_interfaces.actions.actions as ca
 
 import logging
 from abc import ABC, abstractmethod

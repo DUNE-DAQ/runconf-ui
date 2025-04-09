@@ -3,7 +3,7 @@ from textual.containers import ScrollableContainer, Grid
 from textual.widgets import TabbedContent, TabPane, Header, Footer, Static
 from textual import on
 
-from runconf_ui.interfaces.controller.application_controller import (
+from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
     ShifterInterfaceState,
 )
 from runconf_ui.utils.daq_conf_tools.generate_enable_disable_map import EnableDisableMapGen

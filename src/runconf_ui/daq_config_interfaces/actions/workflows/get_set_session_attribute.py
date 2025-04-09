@@ -1,6 +1,6 @@
-import runconf_ui.interfaces.actions.actions as ca
-from runconf_ui.interfaces.actions.action_interfaces import ActionInterface
-from runconf_ui.interfaces.workflows.get_objects_in_session import (
+import runconf_ui.daq_config_interfaces.actions.actions as ca
+from runconf_ui.daq_config_interfaces.actions.action_interfaces import ActionInterface
+from runconf_ui.daq_config_interfaces.actions.workflows.get_objects_in_session import (
     GetObjectsInSessionAction,
 )
 

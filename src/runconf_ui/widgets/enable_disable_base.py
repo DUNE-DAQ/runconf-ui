@@ -4,7 +4,7 @@ from textual.visual import SupportsVisual
 from textual.widgets import Static, Button
 from textual.containers import ScrollableContainer
 from textual.message import Message
-from runconf_ui.interfaces.controller.application_controller import (
+from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
     ShifterInterfaceState,
 )
 import logging

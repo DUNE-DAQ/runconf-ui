@@ -1,6 +1,6 @@
-from runconf_ui.interfaces.controller.daq_conf_wrapper import DaqConfigurationWrapper
+from runconf_ui.daq_config_interfaces.daq_config_file_io.daq_config_wrapper import DaqConfigurationWrapper
 from runconf_ui.exceptions import CiderBadActionException
-import runconf_ui.interfaces.actions.actions as ca
+import runconf_ui.daq_config_interfaces.actions.actions as ca
 from runconf_ui.utils.subsystem_status import SubsystemStatus
 
 from typing import Dict, Optional

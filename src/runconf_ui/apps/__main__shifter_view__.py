@@ -4,9 +4,9 @@ Main application for the shifter view interface.
 
 from runconf_ui.screens.shifter_view_screen import ShifterViewScreen
 from runconf_ui.screens.quit_screen import QuitScreen
-from runconf_ui.utils.file_io_tools.file_cleaner import clean_old_files
-from runconf_ui.utils.shifter_config_tools.shifter_config_reader import ShifterConfigReader
-from runconf_ui.interfaces.controller.application_controller import (
+from runconf_ui.utils.file_cleaner import clean_old_files
+from runconf_ui.runconf_ui_configuration.shifter_config_reader import ShifterConfigReader
+from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
     ShifterInterfaceState,
 )
 
@@ -50,9 +50,9 @@ class ShifterView(App):
         use_local = kwargs.get("use_local", False)
         
         if use_local:
-            interface_config = f"{Path(__file__).parent.absolute()}/../configuration/interface_configs/local_configuration.yml"
+            interface_config = f"{Path(__file__).parent.absolute()}/../shifter_config_files/interface_configs/local_configuration.yml"
         else:
-            interface_config = f"{Path(__file__).parent.absolute()}/../configuration/interface_configs/ehn1_configuration.yml"
+            interface_config = f"{Path(__file__).parent.absolute()}/../shifter_config_files/interface_configs/ehn1_configuration.yml"
         
         apparatus = kwargs.get("apparatus", os.environ.get("APPARATUS", "np02"))
 

@@ -9,9 +9,9 @@ from textual.widgets._select import NoSelection
 from rich.console import ConsoleRenderable, RichCast
 from textual import on
 
-from runconf_ui.utils.daq_conf_management_tools.local_daq_conf_manager import LocalDaqConfManager
-from runconf_ui.utils.daq_conf_management_tools.remote_daq_conf_manger import RemoteDaqConfManager
-from runconf_ui.interfaces.controller.application_controller import ShifterInterfaceState
+from runconf_ui.configuration_manager_interfaces.local_daq_conf_manager import LocalDaqConfManager
+from runconf_ui.configuration_manager_interfaces.remote_daq_conf_manger import RemoteDaqConfManager
+from runconf_ui.runconf_ui_controllers.runconf_ui_state import ShifterInterfaceState
 
 from pathlib import Path
 import logging

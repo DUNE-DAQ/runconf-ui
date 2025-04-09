@@ -1,11 +1,11 @@
-from runconf_ui.interfaces.workflows.get_set_session_attribute import (
+from runconf_ui.daq_config_interfaces.actions.workflows.get_set_session_attribute import (
     SetAttributeValueSessionAction,
     GetAttributeValueSessionAction,
 )
-from runconf_ui.interfaces.controller.daq_conf_wrapper import DaqConfigurationWrapper
-from runconf_ui.utils.shifter_config_tools.shifter_config_systems.extractor_interfaces import SubsystemExtractor
-import runconf_ui.interfaces.actions.actions as ca
-from runconf_ui.interfaces.workflows.get_objects_in_session import (
+from runconf_ui.daq_config_interfaces.daq_config_file_io.daq_config_wrapper import DaqConfigurationWrapper
+from runconf_ui.runconf_ui_configuration.detector_config_readers.extractor_interfaces import SubsystemExtractor
+import runconf_ui.daq_config_interfaces.actions.actions as ca
+from runconf_ui.daq_config_interfaces.actions.workflows.get_objects_in_session import (
     GetSegmentAppsListAction,
 )
 from runconf_ui.exceptions import CiderBadActionException

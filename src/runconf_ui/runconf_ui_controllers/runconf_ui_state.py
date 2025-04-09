@@ -2,8 +2,8 @@
 from dataclasses import dataclass, field
 from typing import Optional
 
-from runconf_ui.utils.shifter_config_tools.shifter_config_reader import ShifterConfigReader
-from runconf_ui.interfaces.controller.daq_conf_wrapper import DaqConfigurationWrapper
+from runconf_ui.runconf_ui_configuration.shifter_config_reader import ShifterConfigReader
+from runconf_ui.daq_config_interfaces.daq_config_file_io.daq_config_wrapper import DaqConfigurationWrapper
 
 @dataclass
 class ShifterInterfaceState:

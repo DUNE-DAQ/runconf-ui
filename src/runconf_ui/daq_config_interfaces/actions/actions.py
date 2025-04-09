@@ -1,8 +1,6 @@
-from runconf_ui.interfaces.actions.action_interfaces import ActionInterface
-from runconf_ui.interfaces.controller.daq_conf_wrapper import DaqConfigurationWrapper
+from runconf_ui.daq_config_interfaces.actions.action_interfaces import ActionInterface
+from runconf_ui.daq_config_interfaces.daq_config_file_io.daq_config_wrapper import DaqConfigurationWrapper
 import shutil
-import logging
-import traceback
 """
 A collection of simple actions on a configuration. These should take a single configuration
 and then be able to repeatedly perform a single operation on it

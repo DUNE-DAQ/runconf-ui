@@ -1,6 +1,6 @@
-from runconf_ui.interfaces.controller.daq_conf_wrapper import DaqConfigurationWrapper
-from runconf_ui.utils.daq_conf_tools.consolidate_daq_conf import ConsolidateDAQConf
-from runconf_ui.interfaces.controller.application_controller import (
+from runconf_ui.daq_config_interfaces.daq_config_file_io.consolidate_daq_conf import ConsolidateDAQConf
+from runconf_ui.daq_config_interfaces.daq_config_file_io.daq_config_wrapper import DaqConfigurationWrapper
+from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
     ShifterInterfaceState,
 )
 from pathlib import Path

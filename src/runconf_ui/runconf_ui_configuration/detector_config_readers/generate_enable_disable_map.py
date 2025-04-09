@@ -1,6 +1,6 @@
 from runconf_ui.widgets.multicomponent_panel import MultiComponentEnableDisablePanel
 from runconf_ui.widgets.single_component_panel import SingleComponentEnableDisablePanel
-from runconf_ui.interfaces.controller.application_controller import (
+from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
     ShifterInterfaceState,
 )
 

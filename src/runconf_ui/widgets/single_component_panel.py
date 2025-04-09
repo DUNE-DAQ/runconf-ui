@@ -1,10 +1,10 @@
 from runconf_ui.widgets.enable_disable_base import EnableDisablePanel
-from runconf_ui.interfaces.workflows.get_objects_in_session import (
+from runconf_ui.daq_config_interfaces.actions.workflows.get_objects_in_session import (
     GetObjectsInSessionAction,
 )
-import runconf_ui.interfaces.actions.actions as ca
+import runconf_ui.daq_config_interfaces.actions.actions as ca
 from runconf_ui.utils.subsystem_status import SubsystemStatus
-from runconf_ui.interfaces.controller.application_controller import (
+from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
     ShifterInterfaceState,
 )
 

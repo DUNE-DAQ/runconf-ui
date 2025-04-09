@@ -1,6 +1,5 @@
-import runconf_ui.interfaces.actions.actions as ca
-from runconf_ui.interfaces.actions.action_interfaces import ActionInterface
-
+import runconf_ui.daq_config_interfaces.actions.actions as ca
+from runconf_ui.daq_config_interfaces.actions.action_interfaces import ActionInterface
 
 class GetSegmentAppsListAction(ActionInterface):
     def action(self, segment):
