@@ -1,0 +1,68 @@
+import runconf_ui.daq_config_interfaces.actions.actions as ca
+from runconf_ui.daq_config_interfaces.actions.action_interfaces import ActionInterface
+from runconf_ui.daq_config_interfaces.actions.workflows.get_objects_in_session import (
+    GetObjectsInSessionAction,
+)
+
+
+class SetAttributeValueSessionAction(ActionInterface):
+    """
+    Sets the value of an attribute of objects (or a subset) in Session
+    """
+
+    def action(
+        self,
+        session_dal,
+        applied_class: str,
+        attribute_name: str,
+        attribute_value: str,
+        specific_objects=None,
+    ):
+        '''
+        :param session_dal: The session dal object
+        :param applied_class: The class of the objects to be modified
+        :param attribute_name: The name of the attribute to be modified  
+        :param attribute_value: The value to set the attribute to
+        :param specific_objects: A list of specific objects to modify. If None, all objects of the class will be modified
+        '''
+
+        apps = GetObjectsInSessionAction(self._daq_configuration).action(
+            session_dal, applied_class, specific_objects
+        )
+
+        for roapp in apps:
+            # If we want to change only specific objects, skip the rest
+            ca.ChangeAttributeAction(self._daq_configuration)(
+                roapp, attribute_name, attribute_value
+            )
+            ca.UpdateDalAction(self._daq_configuration)(roapp)
+            ca.UpdateDalAction(self._daq_configuration)(session_dal)
+
+
+class GetAttributeValueSessionAction(ActionInterface):
+    """
+    Gets the value of an attribute of objects (or a subset) in Session
+    """
+
+    def action(
+        self,
+        session_dal,
+        applied_class: str,
+        attribute_name: str,
+        specific_objects=None,
+    ):
+        '''
+        :param session_dal: The session dal object
+        :param applied_class: The class of the objects to be modified
+        :param attribute_name: The name of the attribute to be modified
+        :param specific_objects: A list of specific objects to modify. If None, all objects of the class will be modified
+        '''
+        
+        apps = GetObjectsInSessionAction(self._daq_configuration).action(
+            session_dal, applied_class, specific_objects
+        )
+
+        return [
+            ca.GetAttributeAction(self._daq_configuration)(roapp, attribute_name)
+            for roapp in apps
+        ]

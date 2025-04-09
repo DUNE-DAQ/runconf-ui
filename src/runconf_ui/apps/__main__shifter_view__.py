@@ -4,9 +4,9 @@ Main application for the shifter view interface.
 
 from runconf_ui.screens.shifter_view_screen import ShifterViewScreen
 from runconf_ui.screens.quit_screen import QuitScreen
-from runconf_ui.utils.file_io_tools.file_cleaner import clean_old_files
-from runconf_ui.utils.shifter_config_tools.shifter_config_reader import ShifterConfigReader
-from runconf_ui.interfaces.controller.application_controller import (
+from runconf_ui.utils.file_cleaner import clean_old_files
+from runconf_ui.runconf_ui_configuration.shifter_config_reader import ShifterConfigReader
+from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
     ShifterInterfaceState,
 )
 
@@ -45,23 +45,36 @@ class ShifterView(App):
         super().__init__(*args)
 
         self._exit_message = ""
+        
         # Read kwargs
+        use_local = kwargs.get("use_local", False)
+        
+        if use_local:
+            interface_config = f"{Path(__file__).parent.absolute()}/../config_files/interface_configs/local_configuration.yml"
+        else:
+            interface_config = f"{Path(__file__).parent.absolute()}/../config_files/interface_configs/ehn1_configuration.yml"
+        
         apparatus = kwargs.get("apparatus", os.environ.get("APPARATUS", "np02"))
 
         # messy...
-        configuration = f"{Path(__file__).parent.absolute()}/../configuration/{apparatus}_configuration.yml"
+        detector_configuration = f"{Path(__file__).parent.absolute()}/../config_files/detector_configs/{apparatus}_configuration.yml"
+
+        if not Path(detector_configuration).exists():
+            raise Exception(f"Detector configuration file {detector_configuration} does not exist")
+        
+        if not Path(interface_config).exists():
+            raise Exception(f"Interface configuration file {interface_config} does not exist")
 
         # Now we've done logs, we can read the configuration
-        if Path(configuration).exists():
-            interface_config = ShifterConfigReader(configuration, **kwargs)
-        else:
-            raise FileNotFoundError(f"Configuration file {configuration} not found")
+        interface_config = ShifterConfigReader(detector_config_file=detector_configuration,
+                                                settings_config_file=interface_config, 
+                                                **kwargs)
 
         # Global application controller, dataclass containing state information
         self.application_controller = ShifterInterfaceState(
-            apparatus=apparatus,
+            apparatus=apparatus, 
             shifter_interface_config=interface_config,
-            use_local=kwargs.get("use_local", False),
+            use_local=use_local
         )
 
         self._init_logger(kwargs.get("log_level", "INFO"))
@@ -141,7 +154,7 @@ class ShifterView(App):
     "apparatus",
     required=False,
     default=os.getenv("APPARATUS"),
-    help="set the detector apparatus i.e. NP02/NP04",
+    help="set the detector apparatus i.e. np02/np04",
 )
 @click.option(
     "-s",
