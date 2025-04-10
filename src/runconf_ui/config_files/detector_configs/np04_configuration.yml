@@ -11,14 +11,24 @@ PanelOptions:
           components:
             - id: tpc-segment
               class: Segment
-            - id: crp4-segment
+            - id: apa1-segment
               class: Segment
-              system_label: CRP4
+              system_label: APA1
               separate_system: True
 
-            - id: crp5-segment
+            - id: apa2-segment
               class: Segment
-              system_label: CRP5
+              system_label: APA2
+              separate_system: True
+
+            - id: apa3-segment
+              class: Segment
+              system_label: APA2
+              separate_system: True
+
+            - id: apa4-segment
+              class: Segment
+              system_label: APA2
               separate_system: True
 
       - PDS:
@@ -43,11 +53,11 @@ PanelOptions:
       - TPC TPG:
           attributes:
               - id: tp_generation_enabled
-                segments: ["tpc-segment", "crp4-segment", "crp5-segment"]
+                segments: ["tpc-segment", "apa1-segment", "apa2-segment", "apa3-segment", "apa4-segment"]
                 class: ReadoutApplication
 
               - id: ta_generation_enabled
-                segments: ["tpc-segment", "crp4-segment", "crp5-segment"]
+                segments: ["tpc-segment", "apa1-segment", "apa2-segment", "apa3-segment", "apa4-segment"]
                 class: ReadoutApplication
 
           components:
