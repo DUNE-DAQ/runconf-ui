@@ -25,7 +25,7 @@ class ShifterViewScreen(Screen):
         name: str | None = None,
         id: str | None = None,
         classes: str | None = None,
-    ) -> None:
+    ) -> None: 
         super().__init__(name, id, classes)
         logging.info("Opening shifter view screen")
         self._application_controller = application_controller

@@ -74,7 +74,7 @@ class QuitScreen(Screen):
         if quit_without_saving:
             output += "[bold red]WARNING!! Configuration was created earlier but you've quit without saving so this may not be up to date with all the changes you've made, be careful![/bold red]\n"
 
-        output += f"[purple]To run[/purple] use [bold green]{run_cmd}\n"
+        output += f"[purple]To run[/purple] use [bold green]{run_cmd}"
         return output
 
 
