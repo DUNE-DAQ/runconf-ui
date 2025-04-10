@@ -16,7 +16,7 @@ pip install [-e] .
 ## Initialisation
 The interface is initialised with 
 ```bash
-shifter-view
+runconf-shifter-ui
 ```
 optionally the following CLI flags exist for custom paths:
 ```
