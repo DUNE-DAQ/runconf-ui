@@ -3,7 +3,6 @@ Main application for the shifter view interface.
 """
 
 from runconf_ui.screens.shifter_view_screen import ShifterViewScreen
-from runconf_ui.screens.quit_screen import QuitScreen
 from runconf_ui.utils.file_cleaner import clean_old_files
 from runconf_ui.runconf_ui_configuration.shifter_config_reader import ShifterConfigReader
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
@@ -11,7 +10,6 @@ from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
 )
 
 from textual.app import App
-from textual import on
 import click
 from rich import print
 
