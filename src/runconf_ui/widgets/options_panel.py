@@ -1,15 +1,16 @@
 from runconf_ui.screens.quit_screen import QuitScreen
 from runconf_ui.screens.help_screen import HelpScreen
-
-from textual.containers import ScrollableContainer
-from textual.visual import SupportsVisual
-from textual.widgets import Button, Static
-import logging
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
     ShifterInterfaceState,
 )
 from runconf_ui.screens.popup_manager import PopupManager
 
+from textual.containers import ScrollableContainer
+from textual.visual import SupportsVisual
+from textual.widgets import Button, Static
+from textual.message import Message
+
+import logging
 
 class OptionPanel(Static):
     def __init__(
@@ -97,10 +98,16 @@ class OptionPanel(Static):
         # Resets to base config provided
         elif event.button.id == "undo_changes_button":
             # Reset everything!
-            logging.debug("Reset button pressed")
-            self.app.get_screen("shifter_view_screen").open_new_file()
+            logging.info("Reset button pressed")
+            self.post_message(self.ResetPressed())
+            # self.app.get_screen("shifter_view_screen").select_new_file()
 
         # Quit
         elif event.button.id == "quit_button":
             logging.debug("Quit button pressed")
             return self.app.action_quit()
+        
+        
+    class ResetPressed(Message):
+        ...
+        

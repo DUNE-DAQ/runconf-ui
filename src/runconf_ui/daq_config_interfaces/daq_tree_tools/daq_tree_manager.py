@@ -15,7 +15,7 @@ class DaqTreeManager:
         main_tree = DaqConfTree(self._application_controller)
         screen.query_one("#tree_view_full").update(main_tree.print_tree())
         disabled = main_tree.disabled_objs
-        logging.info(f"Disabled objects: {disabled}")
+        logging.debug(f"Disabled objects: {disabled}")
 
         for panel in screen.query("EnableDisablePanel"):
             self._application_controller.current_state[panel.id] = panel.get_current_states()

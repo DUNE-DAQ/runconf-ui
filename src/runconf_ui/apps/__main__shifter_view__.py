@@ -11,6 +11,7 @@ from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
 )
 
 from textual.app import App
+from textual import on
 import click
 from rich import print
 
@@ -118,20 +119,6 @@ class ShifterView(App):
         # Start with the SelectFileSessionScreen
         self.push_screen("shifter_view_screen")
 
-    def action_quit(self):
-        """Quit the application."""
-
-        if isinstance(self.screen, QuitScreen):
-            self.pop_screen()
-
-        logging.debug("Quitting application")
-
-        self.push_screen(
-            QuitScreen(
-                self.application_controller,
-                classes="pop_up_screen",
-            )
-        )
 
     def exit(self, message) -> None:
         """Override the exit method to store the exit message."""
