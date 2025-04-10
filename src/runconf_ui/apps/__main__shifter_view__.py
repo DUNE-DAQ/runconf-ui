@@ -8,6 +8,7 @@ from runconf_ui.runconf_ui_configuration.shifter_config_reader import ShifterCon
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
     ShifterInterfaceState,
 )
+from runconf_ui.screens.quit_screen import QuitScreen
 
 from textual.app import App
 import click
@@ -116,14 +117,29 @@ class ShifterView(App):
         )
         # Start with the SelectFileSessionScreen
         self.push_screen("shifter_view_screen")
+  
+    def action_quit(self):
+        """Quit the application."""
+
+        logging.info(self.screen.__class__)
+
+        if isinstance(self.screen, QuitScreen):
+            self.pop_screen()
+
+        self.push_screen(
+            QuitScreen(
+                self.application_controller,
+                classes="pop_up_screen",
+            )
+        )
 
 
-    def exit(self, message) -> None:
+    def exit(self, message: str | None = None) -> None:
         """Override the exit method to store the exit message."""
         if message is not None:
             self._exit_message = message
         else:
-            self._exit_message = "[bold red]Force exiting the application!!!"
+            self._exit_message = "[bold red]Quit without saving!!!"
         logging.info(f"Exiting application with message: {message}")
         super().exit()  # Call the original exit method
 
