@@ -49,6 +49,7 @@ class DaqConfPathReader:
         else:
             self.config_directories = [self.config_directories]
 
+
         database_list = []
         for directory in self.config_directories:
             if not isinstance(directory, Path):

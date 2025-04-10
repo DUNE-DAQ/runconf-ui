@@ -31,7 +31,7 @@ class LocalDaqConfManager(ManagementInterface):
         """
         if self._daq_version == "":
             return []
-
+                
         return DaqConfPathReader()(self._daq_version)
 
     def get_default_version(self) -> str:

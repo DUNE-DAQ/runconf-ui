@@ -1,6 +1,7 @@
 # Dataclass containing application state information, is global and shared across everything
 from dataclasses import dataclass, field
 from typing import Optional
+from pathlib import Path
 
 from runconf_ui.runconf_ui_configuration.shifter_config_reader import ShifterConfigReader
 from runconf_ui.daq_config_interfaces.daq_config_file_io.daq_config_wrapper import DaqConfigurationWrapper
@@ -26,3 +27,11 @@ class ShifterInterfaceState:
     saved_configuration: Optional[str] = None
     # current state of objects
     current_state: dict = field(default_factory=lambda: {})
+
+
+    @property
+    def direct_config_path(self)->Path:
+        """
+        Get the path to the configuration file
+        """
+        return Path(f"{self.shifter_interface_config.download_directory}/{self.shifter_interface_config.default_config}")

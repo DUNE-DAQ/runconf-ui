@@ -58,13 +58,18 @@ class RemoteDaqConfManager(ManagementInterface):
 
         # Now we can open the file
         config_path_reader = DaqConfPathReader()
+        
+        # Logic for single file
+        if self.application_controller.direct_config_path.is_file():
+            return super().open_file(self.application_controller.direct_config_path)
+        
         config_list = config_path_reader(
             self.application_controller.shifter_interface_config.download_directory
         )
         
         valid_config_files = [c for c in config_list if c.name == self.application_controller.shifter_interface_config.default_config]
 
-        if not len(valid_config_files):
+        if len(valid_config_files) == 0:
             logging.error(
                 f"Could not find config file for {daq_configuration}. Found: {config_list}"
             )
