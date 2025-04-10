@@ -50,10 +50,11 @@ class QuitScreen(Screen):
         else:
             run_mode = Path(run_mode).stem
 
-        run_cmd = f"drunc-unified-shell {run_mode} {self._application_controller.saved_configuration} {self._application_controller.session_name}"
+        buffer_id = os.environ.get("SESSION_NAME", os.getlogin())
+
+        run_cmd = f"drunc-unified-shell {run_mode} {self._application_controller.saved_configuration} {self._application_controller.session_name} {buffer_id}"
 
         # hacky
-        buffer_id = os.environ.get("SESSION_NAME", os.getlogin())
         output_script = f"/tmp/shifter_configs-{buffer_id}/set_next_run.sh"
 
         with open(f"{output_script}", "w") as f:
