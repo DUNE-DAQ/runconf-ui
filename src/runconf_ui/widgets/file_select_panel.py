@@ -284,7 +284,7 @@ class FilePanelWidget(Static):
     def handle_open_file_button_pressed(self) -> None:
         # Get the selected configuration
         selected_configuration = self.query_one("#daq_configuration_select").value
-        logging.info(f"{selected_configuration}")
+        logging.info(f"Opning: {selected_configuration}")
 
         if selected_configuration == Select.BLANK:
             return

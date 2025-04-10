@@ -64,6 +64,7 @@ class ShifterViewScreen(Screen):
         yield Header()
         yield Footer()
 
+    @on(OptionPanel.ResetPressed)
     @on(FilePanelWidget.FileSelected)
     async def select_new_file(self):
         """Handle new file selection"""
