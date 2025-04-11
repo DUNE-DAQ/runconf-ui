@@ -94,7 +94,7 @@ class ShifterViewScreen(Screen):
     @on(FilePanelWidget.RepoCorrupted)
     async def repo_corrupted(self, event: FilePanelWidget.RepoCorrupted):
         self.popups.show(
-            f"[white]Configuration git repo corrupted, resetting",
+            "[white]Configuration git repo corrupted, resetting",
             timer=10.0
         )
 
