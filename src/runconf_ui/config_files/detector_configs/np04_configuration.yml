@@ -12,6 +12,7 @@ PanelOptions:
           components:
             - id: tpc-segment
               class: Segment
+           
             - id: apa1-segment
               class: Segment
               system_label: APA1
@@ -24,12 +25,12 @@ PanelOptions:
 
             - id: apa3-segment
               class: Segment
-              system_label: APA2
+              system_label: APA3
               separate_system: True
 
             - id: apa4-segment
               class: Segment
-              system_label: APA2
+              system_label: APA4
               separate_system: True
 
       - PDS:

@@ -9,6 +9,7 @@ from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
 )
 import logging
 
+import collections
 
 class EnableDisablePanel(Static):
     """
@@ -61,7 +62,10 @@ class EnableDisablePanel(Static):
         raise NotImplementedError("Check is disabled not implemented for class")
 
     def compose(self):
-        with ScrollableContainer(id="buttons_panel"):
+        
+        
+        with ScrollableContainer(id="buttons_panel"):        
+
             for button, information in self._button_list.items():
 
                 button_status = self.check_button_state(button, information)
