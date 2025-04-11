@@ -65,7 +65,6 @@ class RemoteDaqConfManager(ManagementInterface):
         except Exception as e:
             logging.error(traceback.format_exc())
             raise(e)
-        
 
         # Now we can open the file
         config_path_reader = DaqConfPathReader()
@@ -108,6 +107,7 @@ class RemoteDaqConfManager(ManagementInterface):
         '''
         Occasionally the conf pool gets corrupted. This is a workaround to reset it.
         '''
+        
         shutil.rmtree(
             str(self.application_controller.shifter_interface_config.download_directory),
             ignore_errors=True,

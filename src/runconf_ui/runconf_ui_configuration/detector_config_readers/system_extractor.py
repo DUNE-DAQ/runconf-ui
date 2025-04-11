@@ -228,8 +228,8 @@ class SystemExtractor(MultiItemExtractor):
         
         else:
             for s in self._attributes + self._components:
-                if s.is_system: continue
-                s.set_state(state)        
+                if not s.is_system: 
+                    s.set_state(state)  
 
     def get_all_states(self):
         '''
