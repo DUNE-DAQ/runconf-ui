@@ -182,7 +182,7 @@ class SystemExtractor(MultiItemExtractor):
     def _set_state(self, state: SubsystemStatus, system_name: Optional[str]):
         # Basically if there are no non-system systems we assume this is a control for all subsystems!
         if self._subsystem_dependent:
-            self.set_global_state(state, system_name)
+            self._set_full_system_state(state, system_name)
 
         for s in self._attributes + self._components: 
             if self._check_subsystem_cond(s, system_name):
@@ -190,9 +190,18 @@ class SystemExtractor(MultiItemExtractor):
 
 
 
-    def set_global_state(self, state: SubsystemStatus, system_name: str | None):
+    def _set_full_system_state(self, state: SubsystemStatus, system_name: str | None):
         '''
         Set state of non-subsystem comps
+        
+        Logic is as follows:
+            1. If the system is not defined, we assume this is the root system and ignore
+            2. We look at the state of all subsystems that AREN'T the root system or the one we're about to set
+            3. If everything else is different to the state we're about to set, we set the state to PARTIALLY_ENABLED
+            4. If everything else is the same, we set the state to the state we're about to set
+            
+        This means we can enable/disable global components at will. This is painful logic but it works.
+        
         '''
         if system_name is None:
             return
@@ -213,10 +222,6 @@ class SystemExtractor(MultiItemExtractor):
         for st in self._attributes + self._components:
             if st.is_system: continue
             st.set_state(state)
-
-
-
-        logging.info(state)
         
         if state == SubsystemStatus.PARTIALLY_ENABLED:
             return
