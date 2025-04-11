@@ -10,9 +10,6 @@ from typing import Dict, Sequence, Optional
 import logging
 import traceback
 
-
-
-
 class SystemExtractor(MultiItemExtractor):
     def __init__(
         self,

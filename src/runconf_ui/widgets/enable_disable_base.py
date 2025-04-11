@@ -9,8 +9,6 @@ from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
 )
 import logging
 
-import collections
-
 class EnableDisablePanel(Static):
     """
     Base class for all of the enable/disable button panel
