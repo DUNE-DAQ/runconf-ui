@@ -97,6 +97,7 @@ class SystemExtractor(MultiItemExtractor):
             self._system_names.append("root")
 
         self._subsystem_dependent = system.get("subsystem_dependent", False)
+        self._display_full_system = system.get("display_full_system", True)
 
         logging.debug(f"System names: {self._system_names}")
 
@@ -123,13 +124,10 @@ class SystemExtractor(MultiItemExtractor):
         '''
 
         # If the top level is disabled disable all lower level stuff
-        if system_name != self.system_name:
-            if self.get_state(self.system_name) == SubsystemStatus.DISABLED:
+        if system_name != self._system_name:
+            if self.get_state(self.system_name) in [SubsystemStatus.DISABLED, SubsystemStatus.TOP_LEVEL_DISABLED]\
+            and not self._subsystem_dependent:
                 return SubsystemStatus.TOP_LEVEL_DISABLED
-            
-        elif self.all_subsystems_disabled():
-            logging.info(f"All subsystems disabled for {self.system_name}")
-            return SubsystemStatus.DISABLED
 
         # Get the state of all subsystems in the system        
         states = [
@@ -143,13 +141,18 @@ class SystemExtractor(MultiItemExtractor):
             logging.debug(f"No states found for {system_name}")
             return SubsystemStatus.STATE_NOT_DEFINED
 
+        # If we depend on subsystem behaviour
+        if system_name in [None, self._system_name] and self._subsystem_dependent: 
+            # If the system is not defined, we assume this is the root system
+            state = self._get_subsystem_state()
+            if state != SubsystemStatus.STATE_NOT_DEFINED:
+                return state
+
+        # Otherwise we check the states of the system itself
         if (
             all([s == states[0] for s in states])
             and states[0] is not SubsystemStatus.STATE_NOT_DEFINED
         ):
-            logging.debug(
-                f"All states are the same for {system_name}, returning {states[0].name}"
-            )
             return states[0]
 
 
@@ -158,24 +161,70 @@ class SystemExtractor(MultiItemExtractor):
         )
         return SubsystemStatus.PARTIALLY_ENABLED
 
+    def _get_subsystem_state(self) -> SubsystemStatus:
+        subsyst_states = [
+            s.get_state()
+            for s in self._attributes + self._components
+            if s.get_state() is not SubsystemStatus.STATE_NOT_DEFINED
+            and s.is_system
+        ]
+    
+        if not len(subsyst_states):
+            return SubsystemStatus.STATE_NOT_DEFINED
+
+        if all([s == subsyst_states[0] for s in subsyst_states]):
+            return subsyst_states[0]            
+
+        else:
+            return SubsystemStatus.PARTIALLY_ENABLED
+        
+
     def _set_state(self, state: SubsystemStatus, system_name: Optional[str]):
         # Basically if there are no non-system systems we assume this is a control for all subsystems!
-        for s in self._attributes + self._components:
+        if self._subsystem_dependent:
+            self.set_global_state(state, system_name)
+
+        for s in self._attributes + self._components: 
             if self._check_subsystem_cond(s, system_name):
                 s.set_state(state)
 
-    def all_subsystems_disabled(self):
+
+
+    def set_global_state(self, state: SubsystemStatus, system_name: str | None):
         '''
-        Bit hacky, to avoid infinite loop checking if all subsystems are disabled
+        Set state of non-subsystem comps
         '''
-        if not self._subsystem_dependent:
-            return False
+        if system_name is None:
+            return
         
-        for s in self._attributes + self._components:
-            if s.system_name != self.system_name and s.system_name is not None:
-                if s.get_state() != SubsystemStatus.DISABLED:
-                    return False
-        return True
+        subsystem_states = [
+            s.get_state()
+            for s in self._attributes + self._components
+            if s.get_state() is not SubsystemStatus.STATE_NOT_DEFINED
+            and s.is_system
+            and s.system_name != system_name
+        ]
+        
+        if all([s==subsystem_states[0] for s in subsystem_states]) and subsystem_states[0]==state:
+            ...
+        else:
+            state = SubsystemStatus.ENABLED
+
+        for st in self._attributes + self._components:
+            if st.is_system: continue
+            st.set_state(state)
+
+
+
+        logging.info(state)
+        
+        if state == SubsystemStatus.PARTIALLY_ENABLED:
+            return
+        
+        else:
+            for s in self._attributes + self._components:
+                if s.is_system: continue
+                s.set_state(state)        
 
     def get_all_states(self):
         '''
@@ -186,10 +235,15 @@ class SystemExtractor(MultiItemExtractor):
             return
 
         return_dict = {}
-        return_dict[self._system_name] = self.get_state()
+        
+        if self._display_full_system:
+            return_dict[self._system_name] = self.get_state()
 
         # Grab the other systems
         for s in self._system_names:
+            if s in [None, self._system_name]:
+                continue
+        
             try:
                 state = self.get_state(s)
                 if state is not None:

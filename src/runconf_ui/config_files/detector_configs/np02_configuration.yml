@@ -44,6 +44,8 @@ PanelOptions:
     Systems:
       - TPG:
           subsystem_dependent: True
+          display_full_system: False
+
           components:
             - id: tc-maker-tpc
               class: TriggerApplication
