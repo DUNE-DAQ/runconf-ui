@@ -220,8 +220,8 @@ class SystemExtractor(MultiItemExtractor):
             state = SubsystemStatus.ENABLED
 
         for st in self._attributes + self._components:
-            if st.is_system: continue
-            st.set_state(state)
+            if not st.is_system: 
+                st.set_state(state)
         
         if state == SubsystemStatus.PARTIALLY_ENABLED:
             return
