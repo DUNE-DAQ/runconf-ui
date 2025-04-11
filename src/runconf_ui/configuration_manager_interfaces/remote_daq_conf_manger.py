@@ -27,14 +27,14 @@ class RemoteDaqConfManager(ManagementInterface):
         """
         super().__init__(application_controller)
 
-        if application_controller.apparatus is None:
+        if self.application_controller.apparatus is None:
             raise ValueError(
                 "Apparatus not set! Please set the APPARATUS in your env or use the --apparatus flag"
             )
 
         self.conf_pool = ConfPool(
             str(self.application_controller.shifter_interface_config.download_directory),
-            apparatus=application_controller.apparatus,
+            apparatus=self.application_controller.apparatus,
             operation_url=self.application_controller.shifter_interface_config.operation_url,
             base_url=self.application_controller.shifter_interface_config.base_url,
         )
@@ -105,6 +105,9 @@ class RemoteDaqConfManager(ManagementInterface):
         return self.conf_pool.get_release()
     
     def reset(self):
+        '''
+        Occasionally the conf pool gets corrupted. This is a workaround to reset it.
+        '''
         shutil.rmtree(
             str(self.application_controller.shifter_interface_config.download_directory),
             ignore_errors=True,
@@ -114,7 +117,7 @@ class RemoteDaqConfManager(ManagementInterface):
         )
         self.conf_pool = ConfPool(
             str(self.application_controller.shifter_interface_config.download_directory),
-            apparatus=application_controller.apparatus,
+            apparatus=self.application_controller.apparatus,
             operation_url=self.application_controller.shifter_interface_config.operation_url,
             base_url=self.application_controller.shifter_interface_config.base_url,
         )
