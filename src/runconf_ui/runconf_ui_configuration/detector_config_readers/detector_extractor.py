@@ -1,7 +1,7 @@
 from runconf_ui.daq_config_interfaces.daq_config_file_io.daq_config_wrapper import DaqConfigurationWrapper
 from runconf_ui.runconf_ui_configuration.detector_config_readers.extractor_interfaces import MultiItemExtractor
 from runconf_ui.runconf_ui_configuration.detector_config_readers.system_extractor import SystemExtractor
-from runconf_ui.exceptions import CiderBadActionException
+from runconf_ui.exceptions import CiderBadActionException, CiderInvalidConfigurationException
 from runconf_ui.utils.subsystem_status import SubsystemStatus
 
 from typing import Dict, Optional
@@ -125,7 +125,7 @@ class DetectorExtractor(MultiItemExtractor):
                 logging.error(
                     f"Could not get all states for {system.system_name} due to {e}"
                 )
-                raise e
+                raise CiderInvalidConfigurationException(e)
 
         logging.debug(f"All states: {return_dict}")
         return return_dict

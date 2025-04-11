@@ -18,6 +18,7 @@ import re
 from pathlib import Path
 import logging
 import traceback
+import shutil
 
 class RemoteDaqConfManager(ManagementInterface):
     def __init__(self, application_controller: ShifterInterfaceState):
@@ -26,14 +27,14 @@ class RemoteDaqConfManager(ManagementInterface):
         """
         super().__init__(application_controller)
 
-        if application_controller.apparatus is None:
+        if self.application_controller.apparatus is None:
             raise ValueError(
                 "Apparatus not set! Please set the APPARATUS in your env or use the --apparatus flag"
             )
 
         self.conf_pool = ConfPool(
             str(self.application_controller.shifter_interface_config.download_directory),
-            apparatus=application_controller.apparatus,
+            apparatus=self.application_controller.apparatus,
             operation_url=self.application_controller.shifter_interface_config.operation_url,
             base_url=self.application_controller.shifter_interface_config.base_url,
         )
@@ -54,7 +55,16 @@ class RemoteDaqConfManager(ManagementInterface):
         return self.conf_pool.get_confs(re.compile(f"^{self._daq_version}$"))
 
     def open_file(self, daq_configuration: str):
-        self.conf_pool.checkout_conf(daq_configuration, self._daq_version)
+        try:
+            self.conf_pool.checkout_conf(daq_configuration, self._daq_version)
+        # Reset conf_pool if we get an error
+        except OSError:
+            logging.error(traceback.format_exc())
+            logging.error("Resetting conf_pool")
+            self.reset()
+        except Exception as e:
+            logging.error(traceback.format_exc())
+            raise(e)
 
         # Now we can open the file
         config_path_reader = DaqConfPathReader()
@@ -92,3 +102,22 @@ class RemoteDaqConfManager(ManagementInterface):
         Get the default DAQ version
         """
         return self.conf_pool.get_release()
+    
+    def reset(self):
+        '''
+        Occasionally the conf pool gets corrupted. This is a workaround to reset it.
+        '''
+        
+        shutil.rmtree(
+            str(self.application_controller.shifter_interface_config.download_directory),
+            ignore_errors=True,
+        )
+        Path(self.application_controller.shifter_interface_config.download_directory).mkdir(
+            parents=True, exist_ok=True
+        )
+        self.conf_pool = ConfPool(
+            str(self.application_controller.shifter_interface_config.download_directory),
+            apparatus=self.application_controller.apparatus,
+            operation_url=self.application_controller.shifter_interface_config.operation_url,
+            base_url=self.application_controller.shifter_interface_config.base_url,
+        )

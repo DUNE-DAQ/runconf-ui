@@ -11,6 +11,7 @@ from abc import ABC, abstractmethod
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
     ShifterInterfaceState,
 )
+import logging
 
 
 class DaqConfTreeBase(ABC):
@@ -302,50 +303,62 @@ class ComponentLevelTree(DaqConfTreeBase):
             )
             subsyst_tree.add(f"[{colour}]{comp.system_id}   [bold]{message}")
 
-    def _add_attributes_to_tree(self, system, subsyst, subsyst_tree, is_disabled: bool):
-        """Add attributes and their affected objects to the tree."""
-        attribute_objs = self._get_unique_attribute_objects(system, subsyst)
-        attribute_tree = self._build_attribute_tree(attribute_objs, is_disabled)
-
-        for attr in system.get_attributes(subsyst):
-            if subsyst == system.system_names[-1] and attr.system_name is not None:
-                continue
-
-            self._add_attribute_to_tree(attr, attribute_tree, is_disabled)
-
-        for attr_tree in attribute_tree.values():
-            subsyst_tree.add(attr_tree)
-
     def _get_unique_attribute_objects(self, system, subsyst):
-        """Get unique attribute objects for a subsystem."""
-        attribute_objs = []
+        """Get unique attribute objects for a subsystem, ensuring they are referenced by at least one attribute."""
+        attribute_objs = set()
         for attr in system.get_attributes(subsyst):
-            attribute_objs.extend(attr.get_affected_object_dals())
-
-        return list(set(attribute_objs))
+            affected_objs = attr.get_affected_object_dals()
+            if affected_objs:  # Only include attributes that affect objects
+                attribute_objs.update(affected_objs)
+        return list(attribute_objs)
 
     def _build_attribute_tree(self, attribute_objs, system_disabled: bool = False):
-        """Build a tree structure for attribute objects."""
+        """Build a tree structure for attribute objects, only including those with attributes."""
         attribute_tree = {}
         for obj in attribute_objs:
             obj_id = ca.GetAttributeAction(
                 self._application_controller.buffer_daq_config
             )(obj, "id")
+            
             # Check if the attribute object is in the disabled list
             obj_disabled = obj in self._extractor.get_disabled_dals() or system_disabled
-
-            status = (
-                SubsystemStatus.DISABLED if obj_disabled else SubsystemStatus.ENABLED
-            )
-
+            status = SubsystemStatus.DISABLED if obj_disabled else SubsystemStatus.ENABLED
             colour, _ = self.get_text_colour_message(status)
 
+            # Only add to tree if there are attributes for this object
             attribute_tree[obj_id] = Tree(f"[{colour}]{obj_id}")
 
         return attribute_tree
 
+    def _add_attributes_to_tree(self, system, subsyst, subsyst_tree, is_disabled: bool):
+        """Add attributes and their affected objects to the tree, skipping empty objects."""
+        attribute_objs = self._get_unique_attribute_objects(system, subsyst)
+        logging.info(f"Attribute objects: {attribute_objs}, {system}, {subsyst}")
+
+        # Only proceed if there are attributes for this subsystem
+        if not attribute_objs:
+            return
+
+        attribute_tree = self._build_attribute_tree(attribute_objs, is_disabled)
+        has_attributes = False  # Track if any attributes were added
+
+        for attr in system.get_attributes(subsyst):
+            if subsyst == system.system_names[-1] and attr.system_name is not None:
+                continue
+
+            affected_objs = attr.get_affected_object_names()
+            if affected_objs:  # Only process attributes that affect objects
+                self._add_attribute_to_tree(attr, attribute_tree, is_disabled)
+                has_attributes = True
+
+        # Only add the attribute tree if it contains attributes
+        if has_attributes:
+            for attr_tree in attribute_tree.values():
+                subsyst_tree.add(attr_tree)
+
     def _add_attribute_to_tree(self, attr, attribute_tree, is_disabled: bool):
         """Add an attribute and its affected objects to the attribute tree."""
+
         for obj_name in attr.get_affected_object_names():
             if obj_name in attribute_tree:
                 # If the attribute object is in the disabled list, mark it as disabled

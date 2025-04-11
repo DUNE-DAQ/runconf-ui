@@ -105,6 +105,7 @@ Firstly we have the name of the **panel** in the TUI, in this case `Detector`. F
 
 Components correspond to large-scale elements of the DAQ, for example ReadoutApplications and Segments. In OKS these have a specific definition of disabled/enabled. Attributes, meanwhile, are values of elements within the configuration. For example every `ReadoutApplication` has a `tp_generation_enabled` attribute which can be enabled/disabled.
 
+
 #### Components
 Firstly let's look more closely at the settings for components
 ```yml
@@ -118,6 +119,8 @@ Firstly let's look more closely at the settings for components
 One can see this more obviously if we look at the TPC 
 ```yml
 - TPC:
+  subsystem_dependent: True
+
     components:
     - id: tpc-segment
         class: Segment
@@ -135,6 +138,8 @@ This will generate the following buttons:
 1. TPC: This will enable/disable all the components in the configuration
 2. CRP4: This will just turn off all components [and attributes] labelled `CRP4`
 2. CRP5: This will just turn off all components [and attributes] labelled `CRP5`
+
+Since we've set the `subsystem_dependent` flag to true, the entire system (`tpc-segment`) is set to be disabled if the two sub-systems in it (`CRP5`, `CRP4`) are disabled.
 
 #### Attributes
 Settings for attributes slightly more complex than components. Let's consider the attributes of the `TPC TPG`
