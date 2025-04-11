@@ -22,7 +22,7 @@ class AttributeExtractor(SubsystemExtractor):
     '''
     
     def __init__(
-        self,
+        self, 
         daq_configuration: DaqConfigurationWrapper | None,
         session_name: str,
         subsystem: Dict,

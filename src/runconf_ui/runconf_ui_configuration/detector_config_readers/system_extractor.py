@@ -32,6 +32,7 @@ class SystemExtractor(MultiItemExtractor):
         System is of form
         
         "System_Name": {
+            subsystem_dependent: bool, # If all subsystems are disabled, disable this system
             attributes: [ <list of attribute subsystems> ],
             components: [ <list of component subsystems> ]
         }
@@ -51,7 +52,7 @@ class SystemExtractor(MultiItemExtractor):
 
         super().__init__(daq_configuration, session, system, disabled_dals)
 
-    def read_system(self, system: Optional[Dict], system_name: Optional[str] = None):
+    def read_system(self, system: Dict, system_name: Optional[str] = None):
         
         '''
         Read dictionary containing system information. This is used to extract the state of the system.
@@ -95,6 +96,9 @@ class SystemExtractor(MultiItemExtractor):
             # If the system name is not defined, we assume this is the root system
             self._system_names.append("root")
 
+        self._subsystem_dependent = system.get("subsystem_dependent", False)
+        self._display_full_system = system.get("display_full_system", True)
+
         logging.debug(f"System names: {self._system_names}")
 
     @property
@@ -120,8 +124,9 @@ class SystemExtractor(MultiItemExtractor):
         '''
 
         # If the top level is disabled disable all lower level stuff
-        if system_name is not self.system_name:
-            if self.get_state(self.system_name) == SubsystemStatus.DISABLED:
+        if system_name != self._system_name:
+            if self.get_state(self.system_name) in [SubsystemStatus.DISABLED, SubsystemStatus.TOP_LEVEL_DISABLED]\
+            and not self._subsystem_dependent:
                 return SubsystemStatus.TOP_LEVEL_DISABLED
 
         # Get the state of all subsystems in the system        
@@ -136,13 +141,18 @@ class SystemExtractor(MultiItemExtractor):
             logging.debug(f"No states found for {system_name}")
             return SubsystemStatus.STATE_NOT_DEFINED
 
+        # If we depend on subsystem behaviour
+        if system_name in [None, self._system_name] and self._subsystem_dependent: 
+            # If the system is not defined, we assume this is the root system
+            state = self._get_subsystem_state()
+            if state != SubsystemStatus.STATE_NOT_DEFINED:
+                return state
+
+        # Otherwise we check the states of the system itself
         if (
             all([s == states[0] for s in states])
             and states[0] is not SubsystemStatus.STATE_NOT_DEFINED
         ):
-            logging.debug(
-                f"All states are the same for {system_name}, returning {states[0].name}"
-            )
             return states[0]
 
 
@@ -151,11 +161,75 @@ class SystemExtractor(MultiItemExtractor):
         )
         return SubsystemStatus.PARTIALLY_ENABLED
 
+    def _get_subsystem_state(self) -> SubsystemStatus:
+        subsyst_states = [
+            s.get_state()
+            for s in self._attributes + self._components
+            if s.get_state() is not SubsystemStatus.STATE_NOT_DEFINED
+            and s.is_system
+        ]
+    
+        if not len(subsyst_states):
+            return SubsystemStatus.STATE_NOT_DEFINED
+
+        if all([s == subsyst_states[0] for s in subsyst_states]):
+            return subsyst_states[0]            
+
+        else:
+            return SubsystemStatus.PARTIALLY_ENABLED
+        
+
     def _set_state(self, state: SubsystemStatus, system_name: Optional[str]):
         # Basically if there are no non-system systems we assume this is a control for all subsystems!
-        for s in self._attributes + self._components:
+        if self._subsystem_dependent:
+            self._set_full_system_state(state, system_name)
+
+        for s in self._attributes + self._components: 
             if self._check_subsystem_cond(s, system_name):
                 s.set_state(state)
+
+
+
+    def _set_full_system_state(self, state: SubsystemStatus, system_name: str | None):
+        '''
+        Set state of non-subsystem comps
+        
+        Logic is as follows:
+            1. If the system is not defined, we assume this is the root system and ignore
+            2. We look at the state of all subsystems that AREN'T the root system or the one we're about to set
+            3. If everything else is different to the state we're about to set, we set the state to PARTIALLY_ENABLED
+            4. If everything else is the same, we set the state to the state we're about to set
+            
+        This means we can enable/disable global components at will. This is painful logic but it works.
+        
+        '''
+        if system_name is None:
+            return
+        
+        subsystem_states = [
+            s.get_state()
+            for s in self._attributes + self._components
+            if s.get_state() is not SubsystemStatus.STATE_NOT_DEFINED
+            and s.is_system
+            and s.system_name != system_name
+        ]
+        
+        if all([s==subsystem_states[0] for s in subsystem_states]) and subsystem_states[0]==state:
+            ...
+        else:
+            state = SubsystemStatus.ENABLED
+
+        for st in self._attributes + self._components:
+            if not st.is_system: 
+                st.set_state(state)
+        
+        if state == SubsystemStatus.PARTIALLY_ENABLED:
+            return
+        
+        else:
+            for s in self._attributes + self._components:
+                if not s.is_system: 
+                    s.set_state(state)  
 
     def get_all_states(self):
         '''
@@ -166,10 +240,15 @@ class SystemExtractor(MultiItemExtractor):
             return
 
         return_dict = {}
-        return_dict[self._system_name] = self.get_state()
+        
+        if self._display_full_system:
+            return_dict[self._system_name] = self.get_state()
 
         # Grab the other systems
         for s in self._system_names:
+            if s in [None, self._system_name]:
+                continue
+        
             try:
                 state = self.get_state(s)
                 if state is not None:
@@ -199,5 +278,3 @@ class SystemExtractor(MultiItemExtractor):
         super().set_disabled_dals(disabled_dals)
         for s in self._attributes + self._components:
             s.set_disabled_dals(disabled_dals)
-
-
