@@ -41,29 +41,35 @@ PanelOptions:
     panel_type: "multisystem"
 
     Systems:
-      - TPC TPG:
-          attributes:
-              - id: tp_generation_enabled
-                segments: ["tpc-segment", "crp4-segment", "crp5-segment"]
-                class: ReadoutApplication
-
-              - id: ta_generation_enabled
-                segments: ["tpc-segment", "crp4-segment", "crp5-segment"]
-                class: ReadoutApplication
-
+      - TPG:
           components:
             - id: tc-maker-tpc
               class: TriggerApplication
+
             - id: tp-stream-writer
               class: TPStreamWriterApplication
 
-      - PDS TPG:
           attributes:
-              - id: tp_generation_enabled
-                segments: ["pds-segment"]
-                class: ReadoutApplication
-    
-              - id: ta_generation_enabled
-                segments: ["pds-segment"]
-                class: ReadoutApplication
+            - id: tp_generation_enabled
+              segments: ["tpc-segment"]
+              class: ReadoutApplication
+              system_label: TPC
+              separate_system: True
+
+            - id: ta_generation_enabled
+              segments: ["tpc-segment", "crp4-segment", "crp5-segment"]
+              class: ReadoutApplication
+              system_label: TPC
+              separate_system: True
+
+            - id: tp_generation_enabled
+              segments: ["pds-segment"]
+              class: ReadoutApplication
+              system_label: PDS
+              separate_system: True
+
+
+              # - id: ta_generation_enabled
+              #   segments: ["pds-segment"]
+              #   class: ReadoutApplication
 

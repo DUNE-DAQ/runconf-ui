@@ -9,6 +9,8 @@ from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
 from runconf_ui.runconf_ui_configuration.detector_config_readers.generate_enable_disable_map import EnableDisableMapGen
 from runconf_ui.widgets.file_select_panel import FilePanelWidget
 from runconf_ui.widgets.options_panel import OptionPanel
+from runconf_ui.exceptions import CiderInvalidConfigurationException
+
 
 import traceback
 import logging
@@ -70,6 +72,12 @@ class ShifterViewScreen(Screen):
         """Handle new file selection"""
         try:
             self._load_new_configuration()
+        except CiderInvalidConfigurationException:
+            self.popups.show(
+                f"[white]Invalid configuration[/white] [bold grey3]{self._application_controller.shifter_interface_config} set up incorrectly!"
+            )
+            logging.error(f"Error: {traceback.format_exc()}")
+            
         except Exception:
             self.popups.show(
                 f"[white]Invalid configuration[/white] [bold grey3]{self._application_controller.current_daq_config}:{self._application_controller.session_name}[/bold grey3] [white]passed, please check with the experts!"

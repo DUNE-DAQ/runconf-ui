@@ -199,5 +199,3 @@ class SystemExtractor(MultiItemExtractor):
         super().set_disabled_dals(disabled_dals)
         for s in self._attributes + self._components:
             s.set_disabled_dals(disabled_dals)
-
-
