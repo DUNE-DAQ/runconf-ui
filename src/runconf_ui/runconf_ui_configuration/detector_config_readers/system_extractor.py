@@ -32,6 +32,7 @@ class SystemExtractor(MultiItemExtractor):
         System is of form
         
         "System_Name": {
+            subsystem_dependent: bool, # If all subsystems are disabled, disable this system
             attributes: [ <list of attribute subsystems> ],
             components: [ <list of component subsystems> ]
         }
@@ -51,7 +52,7 @@ class SystemExtractor(MultiItemExtractor):
 
         super().__init__(daq_configuration, session, system, disabled_dals)
 
-    def read_system(self, system: Optional[Dict], system_name: Optional[str] = None):
+    def read_system(self, system: Dict, system_name: Optional[str] = None):
         
         '''
         Read dictionary containing system information. This is used to extract the state of the system.
@@ -95,6 +96,8 @@ class SystemExtractor(MultiItemExtractor):
             # If the system name is not defined, we assume this is the root system
             self._system_names.append("root")
 
+        self._subsystem_dependent = system.get("subsystem_dependent", False)
+
         logging.debug(f"System names: {self._system_names}")
 
     @property
@@ -120,9 +123,13 @@ class SystemExtractor(MultiItemExtractor):
         '''
 
         # If the top level is disabled disable all lower level stuff
-        if system_name is not self.system_name:
+        if system_name != self.system_name:
             if self.get_state(self.system_name) == SubsystemStatus.DISABLED:
                 return SubsystemStatus.TOP_LEVEL_DISABLED
+            
+        elif self.all_subsystems_disabled():
+            logging.info(f"All subsystems disabled for {self.system_name}")
+            return SubsystemStatus.DISABLED
 
         # Get the state of all subsystems in the system        
         states = [
@@ -156,6 +163,19 @@ class SystemExtractor(MultiItemExtractor):
         for s in self._attributes + self._components:
             if self._check_subsystem_cond(s, system_name):
                 s.set_state(state)
+
+    def all_subsystems_disabled(self):
+        '''
+        Bit hacky, to avoid infinite loop checking if all subsystems are disabled
+        '''
+        if not self._subsystem_dependent:
+            return False
+        
+        for s in self._attributes + self._components:
+            if s.system_name != self.system_name and s.system_name is not None:
+                if s.get_state() != SubsystemStatus.DISABLED:
+                    return False
+        return True
 
     def get_all_states(self):
         '''

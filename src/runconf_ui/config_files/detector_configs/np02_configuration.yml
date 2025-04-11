@@ -9,6 +9,7 @@ PanelOptions:
 
     Systems:
       - TPC:
+          subsystem_dependent: True
           components:
             - id: tpc-segment
               class: Segment
@@ -42,6 +43,7 @@ PanelOptions:
 
     Systems:
       - TPG:
+          subsystem_dependent: True
           components:
             - id: tc-maker-tpc
               class: TriggerApplication
