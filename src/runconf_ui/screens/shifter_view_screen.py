@@ -91,6 +91,13 @@ class ShifterViewScreen(Screen):
             timer=10.0,
         )
 
+    @on(FilePanelWidget.RepoCorrupted)
+    async def repo_corrupted(self, event: FilePanelWidget.RepoCorrupted):
+        self.popups.show(
+            f"[white]Configuration git repo corrupted, resetting",
+            timer=10.0
+        )
+
     def _load_new_configuration(self):
         """Handle loading a new configuration file"""
         logging.info(
