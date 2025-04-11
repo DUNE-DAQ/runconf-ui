@@ -10,9 +10,6 @@ from typing import Dict, Sequence, Optional
 import logging
 import traceback
 
-
-
-
 class SystemExtractor(MultiItemExtractor):
     def __init__(
         self,
@@ -245,7 +242,7 @@ class SystemExtractor(MultiItemExtractor):
             return_dict[self._system_name] = self.get_state()
 
         # Grab the other systems
-        for s in self._system_names:
+        for s in sorted(self._system_names):
             if s in [None, self._system_name]:
                 continue
         

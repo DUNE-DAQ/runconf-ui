@@ -8,17 +8,29 @@ PanelOptions:
 
     Systems:
       - TPC:
+          subsystem_dependent: True
           components:
             - id: tpc-segment
               class: Segment
-            - id: crp4-segment
+           
+            - id: apa1-segment
               class: Segment
-              system_label: CRP4
+              system_label: APA1
               separate_system: True
 
-            - id: crp5-segment
+            - id: apa2-segment
               class: Segment
-              system_label: CRP5
+              system_label: APA2
+              separate_system: True
+
+            - id: apa3-segment
+              class: Segment
+              system_label: APA3
+              separate_system: True
+
+            - id: apa4-segment
+              class: Segment
+              system_label: APA4
               separate_system: True
 
       - PDS:
@@ -40,29 +52,33 @@ PanelOptions:
     panel_type: "multisystem"
 
     Systems:
-      - TPC TPG:
-          attributes:
-              - id: tp_generation_enabled
-                segments: ["tpc-segment", "crp4-segment", "crp5-segment"]
-                class: ReadoutApplication
-
-              - id: ta_generation_enabled
-                segments: ["tpc-segment", "crp4-segment", "crp5-segment"]
-                class: ReadoutApplication
+      - TPG:
+          subsystem_dependent: True
+          display_full_system: False
 
           components:
             - id: tc-maker-tpc
               class: TriggerApplication
+
             - id: tp-stream-writer
               class: TPStreamWriterApplication
 
-      - PDS TPG:
           attributes:
-              - id: tp_generation_enabled
-                segments: ["pds-segment"]
-                class: ReadoutApplication
-    
-              - id: ta_generation_enabled
-                segments: ["pds-segment"]
-                class: ReadoutApplication
+            - id: tp_generation_enabled
+              segments: ["tpc-segment"]
+              class: ReadoutApplication
+              system_label: TPC
+              separate_system: True
+
+            - id: ta_generation_enabled
+              segments: ["tpc-segment", "crp4-segment", "crp5-segment"]
+              class: ReadoutApplication
+              system_label: TPC
+              separate_system: True
+
+            - id: tp_generation_enabled
+              segments: ["pds-segment"]
+              class: ReadoutApplication
+              system_label: PDS
+              separate_system: True
 
