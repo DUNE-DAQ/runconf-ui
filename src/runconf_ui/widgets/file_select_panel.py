@@ -296,6 +296,21 @@ class FilePanelWidget(Static):
 
             self.post_message(self.FileSelected())
 
+        except OSError as e:
+            if isinstance(self._management_interface, RemoteDaqConfManager):
+                logging.error("Remote DAQ configuration manager error")
+                logging.error(traceback.format_exc())
+                self.post_message(self.RepoCorrupted())
+                self._management_interface.reset()
+                daq_config_file = self._management_interface.open_file(
+                    selected_configuration
+                )
+                
+            
+            else:
+                logging.error(traceback.format_exc())
+                raise (e)
+
         except Exception:
             logging.error(f"{traceback.format_exc()}")
             self.post_message(self.FileNotFound(selected_configuration))
@@ -317,7 +332,11 @@ class FilePanelWidget(Static):
             f"      [bold green]Session in Config[/bold green]:  [deep_pink4]{self._application_controller.session_name}\n"
         )
 
-    class FileSelected(Message): ...
+    class FileSelected(Message): 
+        ...
+    
+    class RepoCorrupted(Message):
+        ...
 
     class FileNotFound(Message):
         def __init__(self, file_path: Path):

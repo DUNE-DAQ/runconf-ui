@@ -58,10 +58,8 @@ class RemoteDaqConfManager(ManagementInterface):
         try:
             self.conf_pool.checkout_conf(daq_configuration, self._daq_version)
         # Reset conf_pool if we get an error
-        except OSError:
-            logging.error(traceback.format_exc())
-            logging.error("Resetting conf_pool")
-            self.reset()
+        except OSError as e:
+            raise e
         except Exception as e:
             logging.error(traceback.format_exc())
             raise(e)
