@@ -9,7 +9,7 @@ from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
 from runconf_ui.runconf_ui_configuration.detector_config_readers.generate_enable_disable_map import EnableDisableMapGen
 from runconf_ui.widgets.file_select_panel import FilePanelWidget
 from runconf_ui.widgets.options_panel import OptionPanel
-from runconf_ui.exceptions import CiderInvalidConfigurationException, CiderInvalidRepoException
+from runconf_ui.exceptions import CiderInvalidConfigurationException
 
 
 import traceback

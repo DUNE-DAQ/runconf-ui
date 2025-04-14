@@ -1,5 +1,3 @@
-# Just needs to be the widgets, we will wire in the functionality in a bit
-
 from typing import Iterable, Any, List
 from textual.message import Message
 from textual.visual import SupportsVisual
