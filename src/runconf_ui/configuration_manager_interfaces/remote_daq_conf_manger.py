@@ -20,8 +20,6 @@ import logging
 import traceback
 import shutil
 
-from time import sleep
-
 class RemoteDaqConfManager(ManagementInterface):
     def __init__(self, application_controller: ShifterInterfaceState):
         """
