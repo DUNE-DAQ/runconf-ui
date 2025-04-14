@@ -294,24 +294,24 @@ class FilePanelWidget(Static):
         try:
             self._open_file(selected_configuration)
 
-        except CiderInvalidRepoException as e:
+        except CiderInvalidRepoException:
             if isinstance(self._management_interface, RemoteDaqConfManager):
                 self.post_message(self.RepoCorrupted())
                 logging.error("Remote DAQ configuration manager error")
                 logging.error(traceback.format_exc())
                 self._management_interface.reset()
-                
-                
+    
                 try:
                     self._open_file(selected_configuration)
-                except Exception as e:
+                except Exception:
                     logging.error("Error opening file after reset attempt")
                     logging.error(traceback.format_exc())
                     self.post_message(self.FileNotFound(selected_configuration))
                 
 
-        except Exception as e:
+        except Exception:
             logging.error("Error opening file")
+            logging.error(traceback.format_exc())
             self._application_controller.current_daq_config = selected_configuration.file_name
             self.post_message(self.FileNotFound(selected_configuration))
 
