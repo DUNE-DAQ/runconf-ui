@@ -20,6 +20,8 @@ import logging
 import traceback
 import shutil
 
+from runconf_ui.exceptions import CiderInvalidRepoException
+
 class RemoteDaqConfManager(ManagementInterface):
     def __init__(self, application_controller: ShifterInterfaceState):
         """
@@ -62,11 +64,9 @@ class RemoteDaqConfManager(ManagementInterface):
         try:
             self.conf_pool.checkout_conf(daq_configuration, self._daq_version)
         # Reset conf_pool if we get an error
-        except OSError as e:
-            raise e
         except Exception as e:
             logging.error(traceback.format_exc())
-            raise(e)
+            CiderInvalidRepoException(e)
 
         # Now we can open the file
         config_path_reader = DaqConfPathReader()

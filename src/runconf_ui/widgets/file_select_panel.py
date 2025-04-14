@@ -1,5 +1,3 @@
-# Just needs to be the widgets, we will wire in the functionality in a bit
-
 from typing import Iterable, Any, List
 from textual.message import Message
 from textual.visual import SupportsVisual
@@ -10,6 +8,7 @@ from rich.console import ConsoleRenderable, RichCast
 from textual import on
 
 
+from runconf_ui.exceptions import CiderInvalidRepoException
 from runconf_ui.configuration_manager_interfaces.local_daq_conf_manager import LocalDaqConfManager
 from runconf_ui.configuration_manager_interfaces.remote_daq_conf_manger import RemoteDaqConfManager
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import ShifterInterfaceState
@@ -293,13 +292,28 @@ class FilePanelWidget(Static):
         try:
             self._open_file(selected_configuration)
 
-        except Exception:
+        except CiderInvalidRepoException:
             if isinstance(self._management_interface, RemoteDaqConfManager):
                 self.post_message(self.RepoCorrupted())
                 logging.error("Remote DAQ configuration manager error")
                 logging.error(traceback.format_exc())
                 self._management_interface.reset()
-                self._open_file(selected_configuration)
+    
+                try:
+                    self._open_file(selected_configuration)
+                except Exception:
+                    logging.error("Error opening file after reset attempt")
+                    logging.error(traceback.format_exc())
+                    self.post_message(self.FileNotFound(selected_configuration))
+                
+
+        except Exception:
+            logging.error("Error opening file")
+            logging.error(traceback.format_exc())
+            self._application_controller.current_daq_config = selected_configuration.file_name
+            self.post_message(self.FileNotFound(selected_configuration))
+
+        self.post_message(self.FileSelected())
         
         
     def _open_file(self, configuration: Path):
@@ -309,8 +323,7 @@ class FilePanelWidget(Static):
                 daq_config_file.file_name
             )
             self.post_message(self.FileSelected())
-            self.update_file_info()
-    
+            self.update_file_info()    
     
     def update_file_info(self):    
         selected_configuration = self.query_one("#daq_configuration_select").value
