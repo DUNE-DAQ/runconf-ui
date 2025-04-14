@@ -20,6 +20,8 @@ import logging
 import traceback
 import shutil
 
+from time import sleep
+
 class RemoteDaqConfManager(ManagementInterface):
     def __init__(self, application_controller: ShifterInterfaceState):
         """
@@ -31,13 +33,17 @@ class RemoteDaqConfManager(ManagementInterface):
             raise ValueError(
                 "Apparatus not set! Please set the APPARATUS in your env or use the --apparatus flag"
             )
+        try:
+            self.conf_pool = ConfPool(
+                str(self.application_controller.shifter_interface_config.download_directory),
+                apparatus=self.application_controller.apparatus,
+                operation_url=self.application_controller.shifter_interface_config.operation_url,
+                base_url=self.application_controller.shifter_interface_config.base_url,
+            )
+        except Exception:
+            logging.error(traceback.format_exc())
+            self.reset()
 
-        self.conf_pool = ConfPool(
-            str(self.application_controller.shifter_interface_config.download_directory),
-            apparatus=self.application_controller.apparatus,
-            operation_url=self.application_controller.shifter_interface_config.operation_url,
-            base_url=self.application_controller.shifter_interface_config.base_url,
-        )
 
     def get_daq_versions(self) -> list[str]:
         """
@@ -105,17 +111,16 @@ class RemoteDaqConfManager(ManagementInterface):
         '''
         Occasionally the conf pool gets corrupted. This is a workaround to reset it.
         '''
+        logging.info("Resetting conf pool")
+
+        # self.make_writable_and_log(self.application_controller.shifter_interface_config.download_directory)
+        if self.conf_pool.repo:
+            self.conf_pool.repo.close()
         
-        shutil.rmtree(
-            str(self.application_controller.shifter_interface_config.download_directory),
-            ignore_errors=True,
-        )
+        shutil.rmtree(self.application_controller.shifter_interface_config.download_directory)
+
         Path(self.application_controller.shifter_interface_config.download_directory).mkdir(
             parents=True, exist_ok=True
         )
-        self.conf_pool = ConfPool(
-            str(self.application_controller.shifter_interface_config.download_directory),
-            apparatus=self.application_controller.apparatus,
-            operation_url=self.application_controller.shifter_interface_config.operation_url,
-            base_url=self.application_controller.shifter_interface_config.base_url,
-        )
+
+        self.__init__(self.application_controller)

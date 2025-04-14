@@ -9,6 +9,7 @@ from textual.widgets._select import NoSelection
 from rich.console import ConsoleRenderable, RichCast
 from textual import on
 
+
 from runconf_ui.configuration_manager_interfaces.local_daq_conf_manager import LocalDaqConfManager
 from runconf_ui.configuration_manager_interfaces.remote_daq_conf_manger import RemoteDaqConfManager
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import ShifterInterfaceState
@@ -281,47 +282,35 @@ class FilePanelWidget(Static):
         self.query_one("#open_file_button").disabled = False
 
     @on(Button.Pressed)
-    def handle_open_file_button_pressed(self) -> None:
+    async def handle_open_file_button_pressed(self) -> None:
         # Get the selected configuration
         selected_configuration = self.query_one("#daq_configuration_select").value
-        logging.info(f"Opning: {selected_configuration}")
+        logging.info(f"Opening: {selected_configuration}")
 
         if selected_configuration == Select.BLANK:
             return
         # Open the file
         try:
-            daq_config_file = self._management_interface.open_file(
-                selected_configuration
-            )
-
-            self.post_message(self.FileSelected())
-
-        except OSError as e:
-            if isinstance(self._management_interface, RemoteDaqConfManager):
-                logging.error("Remote DAQ configuration manager error")
-                logging.error(traceback.format_exc())
-                self.post_message(self.RepoCorrupted())
-                self._management_interface.reset()
-                daq_config_file = self._management_interface.open_file(
-                    selected_configuration
-                )
-                
-            
-            else:
-                logging.error(traceback.format_exc())
-                raise (e)
+            self._open_file(selected_configuration)
 
         except Exception:
-            logging.error(f"{traceback.format_exc()}")
-            self.post_message(self.FileNotFound(selected_configuration))
-            return
-
-        self._application_controller.current_daq_config = daq_config_file.file_name
-        self._application_controller.session_name = self._management_interface.find_session(
-            daq_config_file.file_name
-        )
+            if isinstance(self._management_interface, RemoteDaqConfManager):
+                self.post_message(self.RepoCorrupted())
+                logging.error("Remote DAQ configuration manager error")
+                logging.error(traceback.format_exc())
+                self._management_interface.reset()
+                self._open_file(selected_configuration)
         
         
+    def _open_file(self, configuration: Path):
+            daq_config_file = self._management_interface.open_file(configuration)
+            self._application_controller.current_daq_config = daq_config_file.file_name
+            self._application_controller.session_name = self._management_interface.find_session(
+                daq_config_file.file_name
+            )
+            self.post_message(self.FileSelected())
+            self.update_file_info()
+    
     
     def update_file_info(self):    
         selected_configuration = self.query_one("#daq_configuration_select").value
