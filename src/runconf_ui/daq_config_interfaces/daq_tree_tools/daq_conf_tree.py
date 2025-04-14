@@ -11,8 +11,6 @@ from abc import ABC, abstractmethod
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
     ShifterInterfaceState,
 )
-import logging
-
 
 class DaqConfTreeBase(ABC):
     """
@@ -333,8 +331,6 @@ class ComponentLevelTree(DaqConfTreeBase):
     def _add_attributes_to_tree(self, system, subsyst, subsyst_tree, is_disabled: bool):
         """Add attributes and their affected objects to the tree, skipping empty objects."""
         attribute_objs = self._get_unique_attribute_objects(system, subsyst)
-        logging.info(f"Attribute objects: {attribute_objs}, {system}, {subsyst}")
-
         # Only proceed if there are attributes for this subsystem
         if not attribute_objs:
             return

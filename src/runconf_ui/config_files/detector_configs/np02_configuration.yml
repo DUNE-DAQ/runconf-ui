@@ -67,7 +67,7 @@ PanelOptions:
               separate_system: True
 
             - id: tp_generation_enabled
-              segments: ["pds-segment"]
+              segments: ["pds-segment"] 
               class: ReadoutApplication
               system_label: PDS
               separate_system: True
