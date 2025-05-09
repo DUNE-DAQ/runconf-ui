@@ -28,17 +28,15 @@ PanelOptions:
             - id: pds-segment
               class: Segment
 
-  # Dataflow
-  Dataflow:
-    label: "dataflow"
-    panel_type: "singlesystem"
-    classes:
-      - "DFApplication"
+      - CTB:
+          components:
+            - id: ctb-segment
+              class: Segment
 
 
-  Trigger:
-    label: "trigger"
-    view_panel: "Trigger View"
+  TPG:
+    label: "TPG"
+    view_panel: "TPG View"
     panel_type: "multisystem"
 
     Systems:
@@ -77,3 +75,16 @@ PanelOptions:
               #   segments: ["pds-segment"]
               #   class: ReadoutApplication
 
+  Trigger:
+    label: "Trigger"
+    panel_type: "singlesystem"
+    classes:
+      - "CTBHLT"
+      - "CTBLLT"
+
+  # Dataflow
+  Dataflow:
+    label: "dataflow"
+    panel_type: "singlesystem"
+    classes:
+      - "DFApplication"
