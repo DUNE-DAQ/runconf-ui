@@ -1,7 +1,4 @@
 from runconf_ui.widgets.enable_disable_base import EnableDisablePanel
-from runconf_ui.daq_config_interfaces.actions.workflows.get_objects_in_session import (
-    GetObjectsInSessionAction,
-)
 import runconf_ui.daq_config_interfaces.actions.actions as ca
 from runconf_ui.utils.subsystem_status import SubsystemStatus
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
@@ -128,7 +125,7 @@ class SingleComponentEnableDisablePanel(EnableDisablePanel):
                         self._application_controller.buffer_daq_config
                     )(button, filter_["attribute"]) == filter_["value"]:
                         filtered_buttons.append(button)
-                except:
+                except Exception:
                     # If the attribute does not exist, we ignore it
                     filtered_buttons.append(button)
         
