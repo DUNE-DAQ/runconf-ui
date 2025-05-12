@@ -10,7 +10,7 @@ from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
 
 from textual.visual import SupportsVisual
 from typing import List
-
+import logging
 
 class SingleComponentEnableDisablePanel(EnableDisablePanel):
     """
@@ -21,6 +21,7 @@ class SingleComponentEnableDisablePanel(EnableDisablePanel):
         self,
         application_controller: ShifterInterfaceState,
         class_list: List[str],
+        filters: List[dict] = [],
         content: str | SupportsVisual = "",
         *,
         expand: bool = False,
@@ -45,6 +46,7 @@ class SingleComponentEnableDisablePanel(EnableDisablePanel):
 
         # Make a dict
         self._class_list = class_list
+        self._filters = filters
 
     def generate_button_list(self):
         if (
@@ -52,17 +54,18 @@ class SingleComponentEnableDisablePanel(EnableDisablePanel):
             or self._application_controller.buffer_daq_config is None
         ):
             return {}
-
-        session = ca.GetDalObjectAction(self._application_controller.buffer_daq_config)(
-            self._application_controller.session_name, "Session"
-        )
-
+        
         buttons = []
 
         for class_ in self._class_list:
-            buttons += GetObjectsInSessionAction(
-                self._application_controller.buffer_daq_config
-            )(session, class_)
+            logging.info(f"{class_}, {ca.GetDalsOfClassAction(self._application_controller.buffer_daq_config)(class_)}")
+            buttons += ca.GetDalsOfClassAction(self._application_controller.buffer_daq_config)(class_)
+        
+            
+        logging.info(f"Buttons: {buttons}")
+            
+        if len(self._filters):
+            buttons = self._filter_options(buttons)
 
         get_id = ca.GetAttributeAction(self._application_controller.buffer_daq_config)
         get_class = ca.GetClassNameAction(self._application_controller.buffer_daq_config)
@@ -78,6 +81,7 @@ class SingleComponentEnableDisablePanel(EnableDisablePanel):
         return {get_id(b, "id"): get_class(b) for b in buttons}
 
     def _button_action(self, class_name, button_name):
+        logging.info(f"Setting button state of {button_name} [ {class_name} ]")
 
         dal = ca.GetDalObjectAction(self._application_controller.buffer_daq_config)(
             button_name, class_name
@@ -111,3 +115,21 @@ class SingleComponentEnableDisablePanel(EnableDisablePanel):
                 dal, self._application_controller.session_name
             )
         )
+
+    def _filter_options(self, buttons):
+        """
+        Filter the options based on the filter list
+        """
+        filtered_buttons = []
+        for button in buttons:
+            for filter_ in self._filters:
+                try:
+                    if not ca.GetAttributeAction(
+                        self._application_controller.buffer_daq_config
+                    )(button, filter_["attribute"]) == filter_["value"]:
+                        filtered_buttons.append(button)
+                except:
+                    # If the attribute does not exist, we ignore it
+                    filtered_buttons.append(button)
+        
+        return filtered_buttons

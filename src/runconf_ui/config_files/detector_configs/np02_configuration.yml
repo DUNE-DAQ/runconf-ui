@@ -70,17 +70,15 @@ PanelOptions:
               system_label: PDS
               separate_system: True
 
-
-              # - id: ta_generation_enabled
-              #   segments: ["pds-segment"]
-              #   class: ReadoutApplication
-
   Trigger:
     label: "Trigger"
     panel_type: "singlesystem"
     classes:
       - "CTBHLT"
       - "CTBLLT"
+    filters:
+      - description: "spare"
+      - description: "Spare"
 
   # Dataflow
   Dataflow:

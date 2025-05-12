@@ -58,7 +58,7 @@ class DaqConfTreeBase(ABC):
             raise ValueError(f"Invalid state {system_state}")
 
         # Just so we can make it readable!
-        return colour, system_state.name.replace("_", " ")
+        return colour, system_state.name.replace("~", " ")
 
     @abstractmethod
     def generate_tree(self):

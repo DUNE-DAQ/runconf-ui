@@ -87,17 +87,22 @@ class EnableDisablePanel(Static):
                         "detector_subsystem_button detector_subsystem_button_disabled"
                     )
 
-                id_name = button.replace(" ", "_")
+                id_name = button.replace(" ", "~")
 
                 yield Button(name_str, id=f"{id_name}_button", classes=classes)
 
     def on_button_pressed(self, event: Button.Pressed):
         button_name = event.button.id.replace("_button", "")
 
-        button_name = button_name.replace("_", " ")
+        logging.info(f"Button pressed: {button_name}")
+
+        button_name = button_name.replace("~", " ")
         objs_affected = self._button_list.get(button_name, None)
 
         if objs_affected is None:
+            logging.warning(
+                f"Button {button_name} not found in button list, ignoring event"
+            )
             return
 
         self._button_action(objs_affected, button_name)
@@ -121,7 +126,7 @@ class EnableDisablePanel(Static):
                 continue
 
             # Hacky but it means we can have readable buttons and textual can use them...
-            button = button.replace(" ", "_")
+            button = button.replace(" ", "~")
             output_str += f"_{button}_{'on' if state else 'off'}"
 
         return output_str
@@ -140,7 +145,7 @@ class EnableDisablePanel(Static):
         logging.debug(f"Updating button styles for {self}")
 
         for button, information in self._button_list.items():
-            button_id = button.replace(" ", "_") + "_button"
+            button_id = button.replace(" ", "~") + "_button"
             try:
                 button_widget = self.query_one(f"#{button_id}", Button)
             except Exception:
@@ -177,5 +182,4 @@ class EnableDisablePanel(Static):
 
     class Changed(Message):
         """Custom message to notify when a button is pressed."""
-
         ...

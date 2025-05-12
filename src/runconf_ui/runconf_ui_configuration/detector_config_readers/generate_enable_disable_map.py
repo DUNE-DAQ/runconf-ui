@@ -49,6 +49,7 @@ class EnableDisableMapGen:
         panel = SingleComponentEnableDisablePanel(
             self._application_controller,
             opts.get("classes", []),
+            filters=opts.get("filters", []),
             id=f"{opts.get('label', 'SingleSystem')}_subsystem_panel",
             classes="detector_subsystem",
         )
