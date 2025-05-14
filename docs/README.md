@@ -55,6 +55,10 @@ To get started pick a version of the daq configuration from the left hand side d
 
 File information will be displayed directly below the file I/O banner detailing the file path, session name, configuration version and base branch. 
 
+![initial_view.png](docs/figs/initial_view.png)
+
+
+
 To disable/enable items simply press the buttons on the left side of the screen. Each set of objects is given its own tab.
 In addition, we provide 3 views of the detector configuration, although this is mostly intended for expert use.
 - **Configuration view**: View a tree describing detector configuration
@@ -69,6 +73,7 @@ If you are unhappy with changes + want to revert to the original configuration, 
 Finally to quit the interface, press the "create" button. The configuration can be run in drunc using the command provided after quitting.
 
 If you have any questions, please contact the DAQ shifter on duty. Enjoy your shift!
+When 
 
 ## Configuring the Interface
 Specific instructions for setting up the interface YAMLs can be found [here](https://github.com/DUNE-DAQ/runconf-ui/blob/develop/docs/runconf_ui_config.md).
