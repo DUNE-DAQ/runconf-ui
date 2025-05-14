@@ -1,7 +1,7 @@
 # Shifter Interface
 
 ## Overview
-The Shifter-Interface is a TUI designed to be used to enable/disable elements of the detector. Currently it can interface with 3 elements
+The Shifter-Interface is a TUI designed to be used to enable/disable elements of the detector for running in NP02. Currently it can interface with 3 elements
 
 - **Detector Subsystems**: These are large scale elements of the detector possibly consisting of many components, for example the NP04 APAs.
 - **Dataflow Applications**: Straightforwardly, these are simply the applications which control dataflow from the detector
@@ -44,15 +44,16 @@ optionally the following CLI flags exist for custom paths:
   --help                          Show help
 ```
 
-The default settings can be found in `src/cider/configuration/np02_configuration.yml` and can be set either directly or via environment variable. Specifying an option in the CLI overrides the yaml default.
+The default settings for an NP02-like environment can be found in `src/runconf-ui/interface_configs/ehn1_configuration.yml.yml` and can be set either directly or via environment variable. This environment can be initialised by running `scripts/setup_np02_environment.sh`. This will interface with the `runconftools` manager to grab configurations used in EHN1. 
+
+There is also a local mode. Here we instead use the runconf-shifter-ui interface on a set of local configuration files. In order to enable this modes the `-l` flag must be specified and `-d /path/to/config/dir` must be used. The interface will then find all files containing a session. 
+
+Specifying an option in the CLI overrides the yaml default.
  
 ## Usage
-To get started pick a version of the daq configuration from the left hand side drop down menu. If only one version/directory is available this menu will be disabled & and that version automatically picked. Next pick your configuration from the right hand menu, again this will be disabled and automated if only one configuration file is available.
+To get started pick a version of the daq configuration from the left hand side drop down menu. If only one version/directory is available this menu will be disabled & and that version automatically picked. Next pick your configuration from the right hand menu, again this will be disabled and automated if only one configuration file is available. Once these to options have been selected, the open button will be enabled. Pressing this will open the file.
 
-Currently there are 3 categories of objects that can be enabled or disabled:
-- **Detector subsystems**: For example the APAs, PDS, etc.
-- **The Trigger System**: Triggers to enable/disable including trigger primitive generation
-- **Dataflow applications**: Objects that control dataflow
+File information will be displayed directly below the file I/O banner detailing the file path, session name, configuration version and base branch. 
 
 To disable/enable items simply press the buttons on the left side of the screen. Each set of objects is given its own tab.
 In addition, we provide 3 views of the detector configuration, although this is mostly intended for expert use.
@@ -60,8 +61,8 @@ In addition, we provide 3 views of the detector configuration, although this is 
 - **Detector system view**: Summary of detector subsystems which are enabled/disabled
 - **Trigger View**: A summary of triggers/trigger objects which are enabled/disabled 
 
-Once you have made the desired changes, press the "Create" button to save the configuration. By default the current configuration is saved in the <RUN FOLDER>/current_config directory.
-Older configurations are automatically moved to <RUN FOLDER>/old_configs/run_<DATE> when a new configuration is saved. 
+Once you have made the desired changes, press the "Create" button to save the configuration. By default the current configuration is saved in the `<RUN FOLDER>/current_config directory`.
+Older configurations are automatically moved to `<RUN FOLDER>/old_configs/run_<DATE>` when a new configuration is saved. 
 
 If you are unhappy with changes + want to revert to the original configuration, press the "Reset" button.
 
