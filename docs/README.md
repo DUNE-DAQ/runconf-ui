@@ -55,7 +55,7 @@ To get started pick a version of the daq configuration from the left hand side d
 
 File information will be displayed directly below the file I/O banner detailing the file path, session name, configuration version and base branch. 
 
-![initial_view.png](docs/figs/initial_view.png)
+![initial_view.png](figs/initial_view.png)
 
 
 
