@@ -51,19 +51,30 @@ There is also a local mode. Here we instead use the runconf-shifter-ui interface
 Specifying an option in the CLI overrides the yaml default.
  
 ## Usage
-To get started pick a version of the daq configuration from the left hand side drop down menu. If only one version/directory is available this menu will be disabled & and that version automatically picked. Next pick your configuration from the right hand menu, again this will be disabled and automated if only one configuration file is available. Once these to options have been selected, the open button will be enabled. Pressing this will open the file.
-
+To get started pick a version of the daq configuration from the left hand side drop down menu. If only one version/directory is available this menu will be disabled & and that version automatically picked. 
 File information will be displayed directly below the file I/O banner detailing the file path, session name, configuration version and base branch. 
 
 ![initial_view.png](figs/initial_view.png)
+**initial view for the runconf-shifter-ui, develop has been selected by default**
 
+Next pick your configuration from the right hand menu, again this will be disabled and automated if only one configuration file is available. Once these to options have been selected, the open button will be enabled. Pressing this will open the file.
 
+![file_open.png](figs/file_open.png)
+**The interface after a configuration version + configuration have been selected. When done successfully the green banner at the bottom will flash up**
 
 To disable/enable items simply press the buttons on the left side of the screen. Each set of objects is given its own tab.
 In addition, we provide 3 views of the detector configuration, although this is mostly intended for expert use.
 - **Configuration view**: View a tree describing detector configuration
 - **Detector system view**: Summary of detector subsystems which are enabled/disabled
 - **Trigger View**: A summary of triggers/trigger objects which are enabled/disabled 
+
+Some components might be inter-depedendent. For example pressing the `CRP4` button on the left will also set TPC to being "partially enabled" since you've switched off a sub-component of it.
+![crp4_disabled.png](figs/det_crp4_disable.png)
+**The interface after CRP4 has been disabled. The detector view is shown giving a diagramatic view of what exactly gets switched on/off when a given button is pressd.**
+
+Equally, if one disables the entire TPC by pressing `TPC`, will disable both `CRP4` and `CRP5`. 
+![tpc_disabled](figs/det_tpc_disable.png)
+
 
 Once you have made the desired changes, press the "Create" button to save the configuration. By default the current configuration is saved in the `<RUN FOLDER>/current_config directory`.
 Older configurations are automatically moved to `<RUN FOLDER>/old_configs/run_<DATE>` when a new configuration is saved. 
