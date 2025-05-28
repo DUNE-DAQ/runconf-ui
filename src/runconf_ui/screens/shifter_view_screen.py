@@ -83,7 +83,7 @@ class ShifterViewScreen(Screen):
                 self.popups.show("[white]No configuration can be selected, please make sure you're using a compatible DAQ version[/white]")
                     
             self.popups.show(
-                f"[white]Invalid configuration[/white] [bold grey3]{self._application_controller.current_daq_config}:{self._application_controller.session_name}[/bold grey3] [white]passed, please check with the experts!"
+                f"[white]Configuration:[/white] [bold grey3]{self._application_controller.current_daq_config}[/bold grey3] [white]does not contain a useable configuration file, please check the DAQ version (i.e. 3.5.2 vs develop)"
             )
             logging.error(f"Error: {traceback.format_exc()}")
 

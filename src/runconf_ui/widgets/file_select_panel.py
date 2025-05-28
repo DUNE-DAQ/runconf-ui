@@ -323,7 +323,7 @@ class FilePanelWidget(Static):
                 daq_config_file.file_name
             )
             self.post_message(self.FileSelected())
-            self.update_file_info()    
+            self.update_file_info()
     
     def update_file_info(self):    
         selected_configuration = self.query_one("#daq_configuration_select").value
