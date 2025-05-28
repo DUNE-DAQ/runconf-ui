@@ -33,7 +33,6 @@ PanelOptions:
             - id: ctb-segment
               class: Segment
 
-
   TPG:
     label: "TPG"
     view_panel: "TPG View"
@@ -75,7 +74,6 @@ PanelOptions:
     panel_type: "singlesystem"
     classes:
       - "CTBHLT"
-      - "CTBLLT"
     filters:
       - description: "spare"
       - description: "Spare"
