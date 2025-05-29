@@ -16,10 +16,6 @@ from textual.visual import SupportsVisual
 from textual.widgets import Button
 import logging
 
-
-from collections import OrderedDict
-
-
 class MultiComponentEnableDisablePanel(EnableDisablePanel):
     """
     For enabling/disabling systems made of many different things
