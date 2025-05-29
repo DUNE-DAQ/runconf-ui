@@ -9,13 +9,18 @@ from textual import on
 
 
 from runconf_ui.exceptions import CiderInvalidRepoException
-from runconf_ui.configuration_manager_interfaces.local_daq_conf_manager import LocalDaqConfManager
-from runconf_ui.configuration_manager_interfaces.remote_daq_conf_manger import RemoteDaqConfManager
+from runconf_ui.configuration_manager_interfaces.local_daq_conf_manager import (
+    LocalDaqConfManager,
+)
+from runconf_ui.configuration_manager_interfaces.remote_daq_conf_manger import (
+    RemoteDaqConfManager,
+)
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import ShifterInterfaceState
 
 from pathlib import Path
 import logging
 import traceback
+
 
 class DAQSelectMenu(Select):
     def __init__(
@@ -33,7 +38,6 @@ class DAQSelectMenu(Select):
         tooltip: ConsoleRenderable | RichCast | str | None = None,
     ):
 
-
         # Check if the value is in the options
         # Disable the select if there's only one option
         if len(options) == 1:
@@ -42,9 +46,8 @@ class DAQSelectMenu(Select):
         else:
             value = self.check_options(options, value)
 
-        logging.debug(f"Options: {options}, Value: {value}") 
+        logging.debug(f"Options: {options}, Value: {value}")
 
-        
         super().__init__(
             options,
             prompt=prompt,
@@ -93,7 +96,7 @@ class SelectDAQVersion(DAQSelectMenu):
         tooltip: ConsoleRenderable | RichCast | str | None = None,
     ):
 
-        options = [(str(o),o) for o in management_interface.get_daq_versions()]
+        options = [(str(o), o) for o in management_interface.get_daq_versions()]
         default = management_interface.get_default_version()
 
         super().__init__(
@@ -147,8 +150,10 @@ class SelectDAQConfiguration(DAQSelectMenu):
         if default_version in management_interface.get_daq_versions():
             management_interface.set_version(default_version)
 
-        options = [(str(Path(o).name), o) for o in management_interface.get_configurations()]
-        
+        options = [
+            (str(Path(o).name), o) for o in management_interface.get_configurations()
+        ]
+
         self._current_version = management_interface.daq_version
 
         if not options:
@@ -225,10 +230,14 @@ class FilePanelWidget(Static):
         self._application_controller = application_controller
 
         if application_controller.use_local:
-            self._management_interface = LocalDaqConfManager(self._application_controller)
+            self._management_interface = LocalDaqConfManager(
+                self._application_controller
+            )
             self._daq_version_message = "Select database in local DAQ Repository"
         else:
-            self._management_interface = RemoteDaqConfManager(self._application_controller)
+            self._management_interface = RemoteDaqConfManager(
+                self._application_controller
+            )
             self._daq_version_message = "Select DAQ configuration version"
 
     def compose(self):
@@ -301,34 +310,34 @@ class FilePanelWidget(Static):
                 logging.error("Remote DAQ configuration manager error")
                 logging.error(traceback.format_exc())
                 self._management_interface.reset()
-    
+
                 try:
                     self._open_file(selected_configuration)
                 except Exception:
                     logging.error("Error opening file after reset attempt")
                     logging.error(traceback.format_exc())
                     self.post_message(self.FileNotFound(selected_configuration))
-                
 
         except Exception:
             logging.error("Error opening file")
             logging.error(traceback.format_exc())
-            self._application_controller.current_daq_config = selected_configuration.file_name
+            self._application_controller.current_daq_config = (
+                selected_configuration.file_name
+            )
             self.post_message(self.FileNotFound(selected_configuration))
 
         self.post_message(self.FileSelected())
-        
-        
+
     def _open_file(self, configuration: Path):
-            daq_config_file = self._management_interface.open_file(configuration)
-            self._application_controller.current_daq_config = daq_config_file.file_name
-            self._application_controller.session_name = self._management_interface.find_session(
-                daq_config_file.file_name
-            )
-            self.post_message(self.FileSelected())
-            self.update_file_info()    
-    
-    def update_file_info(self):    
+        daq_config_file = self._management_interface.open_file(configuration)
+        self._application_controller.current_daq_config = daq_config_file.file_name
+        self._application_controller.session_name = (
+            self._management_interface.find_session(daq_config_file.file_name)
+        )
+        self.post_message(self.FileSelected())
+        self.update_file_info()
+
+    def update_file_info(self):
         selected_configuration = self.query_one("#daq_configuration_select").value
         self.query_one("#file_io_panel_message_static").update(
             f"      [bold green]DAQ Version[/bold green]:  [deep_pink4]{self._management_interface.daq_version}[/deep_pink4]\n"
@@ -337,11 +346,9 @@ class FilePanelWidget(Static):
             f"      [bold green]Session in Config[/bold green]:  [deep_pink4]{self._application_controller.session_name}\n"
         )
 
-    class FileSelected(Message): 
-        ...
-    
-    class RepoCorrupted(Message):
-        ...
+    class FileSelected(Message): ...
+
+    class RepoCorrupted(Message): ...
 
     class FileNotFound(Message):
         def __init__(self, file_path: Path):

@@ -1,6 +1,13 @@
-from runconf_ui.runconf_ui_configuration.detector_config_readers.extractor_interfaces import MultiItemExtractor
-from runconf_ui.runconf_ui_configuration.detector_config_readers.system_extractor import SystemExtractor
-from runconf_ui.exceptions import CiderBadActionException, CiderInvalidConfigurationException
+from runconf_ui.runconf_ui_configuration.detector_config_readers.extractor_interfaces import (
+    MultiItemExtractor,
+)
+from runconf_ui.runconf_ui_configuration.detector_config_readers.system_extractor import (
+    SystemExtractor,
+)
+from runconf_ui.exceptions import (
+    CiderBadActionException,
+    CiderInvalidConfigurationException,
+)
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
     ShifterInterfaceState,
 )
@@ -19,26 +26,26 @@ class DetectorExtractor(MultiItemExtractor):
         detector_config: Optional[Dict],
         disabled_dals=[],
     ):
-        '''
+        """
         Extracts the states of ALL systems present in the detector config for a given top level system (i.e. trigger).
         :param daq_configuration: daq_configuration object
         :param session: Name of session
         :param detector_config: Dictionary containing detector information
         :param disabled_dals: List of disabled dals, defaults to []
-        
+
         Detector config is of the form
-        
+
         "Detector System Name": {
             - label: str     # Name of the system for labelling widgets
             - panel_type:    # multi-system OR single system
             - Systems [
                 {systsem_a},
-                {system_b}, 
+                {system_b},
                 ...
             ]
         }
-        
-        '''
+
+        """
         # Config file
         self._detector_config = {}
         # List of systems in the detector config
@@ -60,7 +67,7 @@ class DetectorExtractor(MultiItemExtractor):
 
         extracted_systems = detector_config.get("Systems", [])
         system_name = list(detector_config.keys())[0]
-        
+
         logging.debug(f"Reading system {system_name}")
 
         for s in extracted_systems:
@@ -96,7 +103,7 @@ class DetectorExtractor(MultiItemExtractor):
             # Check given system extractor contains the system name
             if state_name not in system.system_names:
                 continue
-            
+
             if state_name == system.system_name:
                 for s in system.system_names:
                     system.set_state(state, s)

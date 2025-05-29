@@ -9,6 +9,7 @@ from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
 )
 import logging
 
+
 class EnableDisablePanel(Static):
     """
     Base class for all of the enable/disable button panel
@@ -60,7 +61,7 @@ class EnableDisablePanel(Static):
         raise NotImplementedError("Check is disabled not implemented for class")
 
     def compose(self):
-        with ScrollableContainer(id="buttons_panel"):        
+        with ScrollableContainer(id="buttons_panel"):
 
             for button, information in self._button_list.items():
 
@@ -87,10 +88,12 @@ class EnableDisablePanel(Static):
 
                 id_name = button.replace(" ", "~")
 
-                button_widget = Button(name_str, id=f"{id_name}_button", classes=classes)
+                button_widget = Button(
+                    name_str, id=f"{id_name}_button", classes=classes
+                )
                 button_widget.tooltip = self.get_tooltip(button)
                 yield button_widget
-                
+
     def on_button_pressed(self, event: Button.Pressed):
         button_name = event.button.id.replace("_button", "")
 
@@ -150,7 +153,7 @@ class EnableDisablePanel(Static):
                 button_widget = self.query_one(f"#{button_id}", Button)
             except Exception:
                 continue
-            
+
             button_state = self.check_button_state(button, information)
 
             button_widget.remove_class("detector_subsystem_button_enabled")
@@ -182,6 +185,7 @@ class EnableDisablePanel(Static):
 
     class Changed(Message):
         """Custom message to notify when a button is pressed."""
+
         ...
 
     def get_tooltip(self, button_name: str) -> str:

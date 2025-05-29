@@ -2,7 +2,9 @@ from runconf_ui.daq_config_interfaces.actions.workflows.get_set_session_attribut
     SetAttributeValueSessionAction,
     GetAttributeValueSessionAction,
 )
-from runconf_ui.runconf_ui_configuration.detector_config_readers.extractor_interfaces import SubsystemExtractor
+from runconf_ui.runconf_ui_configuration.detector_config_readers.extractor_interfaces import (
+    SubsystemExtractor,
+)
 import runconf_ui.daq_config_interfaces.actions.actions as ca
 from runconf_ui.daq_config_interfaces.actions.workflows.get_objects_in_session import (
     GetSegmentAppsListAction,
@@ -18,13 +20,14 @@ from typing import Dict
 import logging
 import traceback
 
+
 class AttributeExtractor(SubsystemExtractor):
-    '''
+    """
     Class for extracting the state of an attribute within a subsystem
-    '''
-    
+    """
+
     def __init__(
-        self, 
+        self,
         application_controller: ShifterInterfaceState,
         subsystem: Dict,
         disabled_dals=[],
@@ -38,7 +41,9 @@ class AttributeExtractor(SubsystemExtractor):
         for s in self._segments:
             try:
                 segment_dals.append(
-                    ca.GetDalObjectAction(self._application_controller.buffer_daq_config)(s, "Segment")
+                    ca.GetDalObjectAction(
+                        self._application_controller.buffer_daq_config
+                    )(s, "Segment")
                 )
             except CiderBadActionException:
                 logging.debug(
@@ -53,15 +58,24 @@ class AttributeExtractor(SubsystemExtractor):
 
         self._affected_objects = list(
             set(
-                ca.GetAttributeAction(self._application_controller.buffer_daq_config)(a, "id")
+                ca.GetAttributeAction(self._application_controller.buffer_daq_config)(
+                    a, "id"
+                )
                 for t in segment_dals
-                for a in GetSegmentAppsListAction(self._application_controller.buffer_daq_config)(t)
-                if ca.GetClassNameAction(self._application_controller.buffer_daq_config)(a) == subsystem["class"]
+                for a in GetSegmentAppsListAction(
+                    self._application_controller.buffer_daq_config
+                )(t)
+                if ca.GetClassNameAction(
+                    self._application_controller.buffer_daq_config
+                )(a)
+                == subsystem["class"]
             )
         )
 
     def _get_state(self) -> SubsystemStatus | None:
-        current_states = GetAttributeValueSessionAction(self._application_controller.buffer_daq_config)(
+        current_states = GetAttributeValueSessionAction(
+            self._application_controller.buffer_daq_config
+        )(
             self._session_dal,
             self._system_class,
             self._system_id,
@@ -93,19 +107,18 @@ class AttributeExtractor(SubsystemExtractor):
 
     def get_state_for_obj(self, object_name: str) -> SubsystemStatus:
         try:
-            object_dal = ca.GetDalObjectAction(self._application_controller.buffer_daq_config)(
-                object_name, self._system_class
-            )
-            object_state = (
-                ca.GetAttributeAction(self._application_controller.buffer_daq_config)(object_dal, self._system_id)
-            )
+            object_dal = ca.GetDalObjectAction(
+                self._application_controller.buffer_daq_config
+            )(object_name, self._system_class)
+            object_state = ca.GetAttributeAction(
+                self._application_controller.buffer_daq_config
+            )(object_dal, self._system_id)
 
             if object_state == self._disabled_dals or object_dal in self._disabled_dals:
                 return SubsystemStatus.DISABLED
             else:
 
                 return SubsystemStatus.ENABLED
-            
 
         except Exception:
             raise CiderBadActionException(
@@ -123,10 +136,12 @@ class AttributeExtractor(SubsystemExtractor):
             if state == SubsystemStatus.ENABLED
             else self._disabled_state
         )
-        
+
         print(f"Setting state for {self._system_id} to {state_value}")
 
-        SetAttributeValueSessionAction(self._application_controller.buffer_daq_config).action(
+        SetAttributeValueSessionAction(
+            self._application_controller.buffer_daq_config
+        ).action(
             self._session_dal,
             self._system_class,
             self._system_id,
@@ -142,13 +157,15 @@ class AttributeExtractor(SubsystemExtractor):
 
     def get_affected_object(self, obj_name):
         if obj_name in self._affected_objects:
-            return ca.GetDalObjectAction(self._application_controller.buffer_daq_config)(
-                obj_name, self._system_class
-            )
+            return ca.GetDalObjectAction(
+                self._application_controller.buffer_daq_config
+            )(obj_name, self._system_class)
         return None
 
     def get_affected_object_dals(self):
         return [
-            ca.GetDalObjectAction(self._application_controller.buffer_daq_config)(a, self._system_class)
+            ca.GetDalObjectAction(self._application_controller.buffer_daq_config)(
+                a, self._system_class
+            )
             for a in self._affected_objects
         ]

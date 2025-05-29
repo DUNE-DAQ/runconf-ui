@@ -3,6 +3,7 @@ from textual.css.query import NoMatches
 
 from runconf_ui.widgets.popup_message import PopupMessage
 
+
 class PopupManager:
     def __init__(self, screen: Screen):
         self.screen = screen

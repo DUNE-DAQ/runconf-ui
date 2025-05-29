@@ -1,6 +1,7 @@
 import conffwk
 import logging
 
+
 class DaqConfigurationWrapper(conffwk.Configuration):
     """
     Small wrapper layer around the configuration. In principal this allows configuration interface

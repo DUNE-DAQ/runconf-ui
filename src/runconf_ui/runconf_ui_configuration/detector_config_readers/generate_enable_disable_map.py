@@ -8,6 +8,7 @@ from textual.containers import ScrollableContainer
 
 import logging
 
+
 class EnableDisableMapGen:
     def __init__(self, application_controller: ShifterInterfaceState) -> None:
         self._application_controller = application_controller
@@ -17,7 +18,7 @@ class EnableDisableMapGen:
     def read_panel_options(self):
         # Grab all panels we specify in the YAML
         panel_opts = self._application_controller.shifter_interface_config.panel_options
-        
+
         logging.debug(f"Panel options: {panel_opts}")
 
         # To be filled with panels
@@ -30,7 +31,9 @@ class EnableDisableMapGen:
         for panel_name, opts in panel_opts.items():
             panel, map = self._parse_options(panel_name, opts)
             if panel is None:
-                logging.warning(f"Panel {panel_name} could not be created with options {opts}")
+                logging.warning(
+                    f"Panel {panel_name} could not be created with options {opts}"
+                )
                 continue
 
             panel_list.append(panel)

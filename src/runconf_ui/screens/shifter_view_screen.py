@@ -6,7 +6,9 @@ from textual import on
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
     ShifterInterfaceState,
 )
-from runconf_ui.runconf_ui_configuration.detector_config_readers.generate_enable_disable_map import EnableDisableMapGen
+from runconf_ui.runconf_ui_configuration.detector_config_readers.generate_enable_disable_map import (
+    EnableDisableMapGen,
+)
 from runconf_ui.widgets.file_select_panel import FilePanelWidget
 from runconf_ui.widgets.options_panel import OptionPanel
 from runconf_ui.exceptions import CiderInvalidConfigurationException
@@ -14,9 +16,14 @@ from runconf_ui.exceptions import CiderInvalidConfigurationException
 
 import traceback
 import logging
-from runconf_ui.daq_config_interfaces.daq_config_file_io.buffer_file_manager import BufferFileManager
-from runconf_ui.daq_config_interfaces.daq_tree_tools.daq_tree_manager import DaqTreeManager
+from runconf_ui.daq_config_interfaces.daq_config_file_io.buffer_file_manager import (
+    BufferFileManager,
+)
+from runconf_ui.daq_config_interfaces.daq_tree_tools.daq_tree_manager import (
+    DaqTreeManager,
+)
 from runconf_ui.screens.popup_manager import PopupManager
+
 
 class ShifterViewScreen(Screen):
     """Main shifter view, this is the main screen that the shifter will see"""
@@ -27,7 +34,7 @@ class ShifterViewScreen(Screen):
         name: str | None = None,
         id: str | None = None,
         classes: str | None = None,
-    ) -> None: 
+    ) -> None:
         super().__init__(name, id, classes)
         logging.info("Opening shifter view screen")
         self._application_controller = application_controller
@@ -47,7 +54,11 @@ class ShifterViewScreen(Screen):
                     for panel in enable_disable_generator.panel_list:
                         yield panel
 
-                with TabbedContent("SystematicMap", id="systematic_map_tabs", classes="systematic_map_tabs"):
+                with TabbedContent(
+                    "SystematicMap",
+                    id="systematic_map_tabs",
+                    classes="systematic_map_tabs",
+                ):
                     with TabPane("System View", id="full_system_map_tab"):
                         yield ScrollableContainer(
                             Static("", id="tree_view_full"),
@@ -78,11 +89,16 @@ class ShifterViewScreen(Screen):
                 f"[white]Invalid configuration[/white] [bold grey3]{self._application_controller.shifter_interface_config} set up incorrectly!"
             )
             logging.error(f"Error: {traceback.format_exc()}")
-        
+
         except Exception:
-            if self._application_controller.session_name is None or self._application_controller.current_daq_config is None:
-                self.popups.show("[white]No configuration can be selected, please make sure you're using a compatible DAQ version[/white]")
-                    
+            if (
+                self._application_controller.session_name is None
+                or self._application_controller.current_daq_config is None
+            ):
+                self.popups.show(
+                    "[white]No configuration can be selected, please make sure you're using a compatible DAQ version[/white]"
+                )
+
             self.popups.show(
                 f"[white]Invalid configuration[/white] [bold grey3]{self._application_controller.current_daq_config}:{self._application_controller.session_name}[/bold grey3] [white]passed, please check with the experts!"
             )
@@ -98,8 +114,7 @@ class ShifterViewScreen(Screen):
     @on(FilePanelWidget.RepoCorrupted)
     async def repo_corrupted(self):
         self.popups.show(
-            "[white]Configuration git repo corrupted, resetting",
-            timer=10.0
+            "[white]Configuration git repo corrupted, resetting", timer=10.0
         )
 
     def _load_new_configuration(self):
@@ -111,8 +126,10 @@ class ShifterViewScreen(Screen):
         self.file_service.load_configuration()
         self.query_one(OptionPanel).open_new_session()
 
-        if not (self._application_controller.session_name and 
-                self._application_controller.buffer_daq_config):
+        if not (
+            self._application_controller.session_name
+            and self._application_controller.buffer_daq_config
+        ):
             logging.info("No session or configuration")
             return
 
@@ -131,11 +148,11 @@ class ShifterViewScreen(Screen):
 
         self.tree_manager.update_all_trees(self)
         self.query_one("FilePanelWidget").update_file_info()
-        
+
         self.popups.show(
             f"[white]Successfully opened new configuration[/white] [bold white]{self._application_controller.current_daq_config}",
             timer=5.0,
-            success=True
+            success=True,
         )
 
     def on_enable_disable_panel_changed(self):

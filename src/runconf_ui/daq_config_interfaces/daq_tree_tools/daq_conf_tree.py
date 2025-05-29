@@ -1,7 +1,9 @@
 # Essentially the tree from https://github.com/DUNE-DAQ/daqconf/blob/develop/scripts/daqconf_inspector
 
 import runconf_ui.daq_config_interfaces.actions.actions as ca
-from runconf_ui.runconf_ui_configuration.detector_config_readers.detector_extractor import DetectorExtractor
+from runconf_ui.runconf_ui_configuration.detector_config_readers.detector_extractor import (
+    DetectorExtractor,
+)
 from runconf_ui.utils.subsystem_status import SubsystemStatus
 
 from runconf_ui.exceptions import CiderBadActionException
@@ -11,6 +13,7 @@ from abc import ABC, abstractmethod
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
     ShifterInterfaceState,
 )
+
 
 class DaqConfTreeBase(ABC):
     """
@@ -102,9 +105,9 @@ class DaqConfTree(DaqConfTreeBase):
 
         # Inexplicably session labels its segments as "segments" and not "segment"
         if class_name == "Segment":
-            return ca.GetAttributeAction(self._application_controller.buffer_daq_config)(
-                segment, "segments"
-            )
+            return ca.GetAttributeAction(
+                self._application_controller.buffer_daq_config
+            )(segment, "segments")
         elif class_name == "Session":
             return [
                 ca.GetAttributeAction(self._application_controller.buffer_daq_config)(
@@ -141,9 +144,9 @@ class DaqConfTree(DaqConfTreeBase):
             )(seg, "id")
 
             if (
-                ca.CheckIsDisabledAction(self._application_controller.buffer_daq_config)(
-                    seg, self._application_controller.session_name
-                )
+                ca.CheckIsDisabledAction(
+                    self._application_controller.buffer_daq_config
+                )(seg, self._application_controller.session_name)
                 or is_disabled
                 or seg in self._disabled_objs
             ):
@@ -179,9 +182,9 @@ class DaqConfTree(DaqConfTreeBase):
             )(app, "id")
 
             if (
-                ca.CheckIsDisabledAction(self._application_controller.buffer_daq_config)(
-                    app, self._application_controller.session_name
-                )
+                ca.CheckIsDisabledAction(
+                    self._application_controller.buffer_daq_config
+                )(app, self._application_controller.session_name)
                 or seg_disabled
             ):
                 colour = "grey35"
@@ -317,10 +320,12 @@ class ComponentLevelTree(DaqConfTreeBase):
             obj_id = ca.GetAttributeAction(
                 self._application_controller.buffer_daq_config
             )(obj, "id")
-            
+
             # Check if the attribute object is in the disabled list
             obj_disabled = obj in self._extractor.get_disabled_dals() or system_disabled
-            status = SubsystemStatus.DISABLED if obj_disabled else SubsystemStatus.ENABLED
+            status = (
+                SubsystemStatus.DISABLED if obj_disabled else SubsystemStatus.ENABLED
+            )
             colour, _ = self.get_text_colour_message(status)
 
             # Only add to tree if there are attributes for this object

@@ -1,6 +1,7 @@
 import runconf_ui.daq_config_interfaces.actions.actions as ca
 from runconf_ui.daq_config_interfaces.actions.action_interfaces import ActionInterface
 
+
 class GetSegmentAppsListAction(ActionInterface):
     def action(self, segment):
         """
@@ -13,7 +14,9 @@ class GetSegmentAppsListAction(ActionInterface):
             apps_list_flat += self.action(ss)
 
         # loop over all attributes
-        for aa in ca.GetAttributeAction(self._daq_configuration)(segment, "applications"):
+        for aa in ca.GetAttributeAction(self._daq_configuration)(
+            segment, "applications"
+        ):
             apps_list_flat.append(aa)
 
         return apps_list_flat

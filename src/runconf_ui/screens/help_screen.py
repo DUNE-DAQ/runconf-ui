@@ -56,7 +56,6 @@ class HelpScreen(Screen):
             If you have any questions, please contact the DAQ shifter on duty! Enjoy your shift!! 
                 
         """
-        
         )
 
     def on_button_pressed(self, event: Button.Pressed) -> None:

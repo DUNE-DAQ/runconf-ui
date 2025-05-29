@@ -1,6 +1,9 @@
 from runconf_ui.daq_config_interfaces.actions.action_interfaces import ActionInterface
-from runconf_ui.daq_config_interfaces.daq_config_file_io.daq_config_wrapper import DaqConfigurationWrapper
+from runconf_ui.daq_config_interfaces.daq_config_file_io.daq_config_wrapper import (
+    DaqConfigurationWrapper,
+)
 import shutil
+
 """
 A collection of simple actions on a configuration. These should take a single configuration
 and then be able to repeatedly perform a single operation on it
@@ -73,8 +76,8 @@ class CopyDalAction(ActionInterface):
         self._daq_configuration.add_dal(dal)
         UpdateDalAction(self._daq_configuration)(dal)
         return self._daq_configuration.get_dal(dal.className(), dal.id)
-        
-        
+
+
 class GetAllClassesAction(ActionInterface):
     """
     Get all classes in the configuration
@@ -85,6 +88,7 @@ class GetAllClassesAction(ActionInterface):
         Get all classes in the configuration
         """
         return self._daq_configuration.classes()
+
 
 class GetAllDalsAction(ActionInterface):
     """
@@ -100,6 +104,7 @@ class GetAllDalsAction(ActionInterface):
             dals += GetDalsOfClassAction(self._daq_configuration)(class_name)
 
         return list(set(dals))
+
 
 class CopyFullConfigurationAction(ActionInterface):
     def action(self, new_file_name):
@@ -117,7 +122,9 @@ class AddDalAction(ActionInterface):
         Add object to configuration
         """
         self._daq_configuration.create_obj(uid=conf_obj_id, class_name=conf_obj_class)
-        dal_obj = GetDalObjectAction(self._daq_configuration)(conf_obj_id, conf_obj_class)
+        dal_obj = GetDalObjectAction(self._daq_configuration)(
+            conf_obj_id, conf_obj_class
+        )
         UpdateDalAction(self._daq_configuration)(dal_obj)
         return dal_obj
 
@@ -171,8 +178,10 @@ class GetRelatedDalsAction(ActionInterface):
             )
 
         return relations_list
-        
+
         CommitConfigurationAction(self._daq_configuration)()
+
+
 # Tiny bit hacky + hardcoded, lets us disable stuff
 class CanBeDisableAction(GetDalObjectAction):
     """
@@ -191,6 +200,7 @@ class CommitConfigurationAction(ActionInterface):
     def action(self, save_message: str = ""):
         self._daq_configuration.commit(save_message)
         return None
+
 
 # Actions for getting information
 class GetAttributeAction(ActionInterface):
@@ -215,10 +225,11 @@ class CheckIsDisabledAction(ActionInterface):
     """
 
     def action(self, dal, session_name) -> bool:
-        session_dal = GetDalObjectAction(self._daq_configuration)(session_name, "Session")
+        session_dal = GetDalObjectAction(self._daq_configuration)(
+            session_name, "Session"
+        )
 
         attr_getter = GetAttributeAction(self._daq_configuration)
         disabled_items = attr_getter(session_dal, "disabled")
 
         return dal in disabled_items
-

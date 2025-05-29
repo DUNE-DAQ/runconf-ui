@@ -1,11 +1,13 @@
-from runconf_ui.daq_config_interfaces.daq_config_file_io.daq_config_wrapper import DaqConfigurationWrapper
+from runconf_ui.daq_config_interfaces.daq_config_file_io.daq_config_wrapper import (
+    DaqConfigurationWrapper,
+)
 
 from runconf_ui.daq_config_interfaces.actions.actions import (
     GetDalObjectAction,
     CopyDalAction,
     GetRelatedDalsAction,
     GetAllDalsAction,
-    CommitConfigurationAction
+    CommitConfigurationAction,
 )
 from typing import Any
 

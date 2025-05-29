@@ -1,8 +1,12 @@
 from runconf_ui.widgets.enable_disable_base import EnableDisablePanel
-from runconf_ui.runconf_ui_configuration.detector_config_readers.detector_extractor import DetectorExtractor
+from runconf_ui.runconf_ui_configuration.detector_config_readers.detector_extractor import (
+    DetectorExtractor,
+)
 from runconf_ui.utils.subsystem_status import SubsystemStatus
 
-from runconf_ui.daq_config_interfaces.daq_tree_tools.daq_conf_tree import ComponentLevelTree
+from runconf_ui.daq_config_interfaces.daq_tree_tools.daq_conf_tree import (
+    ComponentLevelTree,
+)
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
     ShifterInterfaceState,
 )
@@ -15,6 +19,7 @@ import re
 
 
 from collections import OrderedDict
+
 
 class MultiComponentEnableDisablePanel(EnableDisablePanel):
     """
@@ -53,14 +58,10 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
         self._disabled_items = []
 
         logging.debug(f"Initializing MultiComponentEnableDisablePanel {id}...")
-        self._extractor = DetectorExtractor(
-            self._application_controller,
-            object_list
-        )
+        self._extractor = DetectorExtractor(self._application_controller, object_list)
         logging.debug(f"Extractor initialized with {self._extractor.get_all_states()}")
-        
+
         logging.debug("MultiComponentEnableDisablePanel initialized.")
-        
 
     def generate_button_list(self) -> Dict | None:
         if (
@@ -74,19 +75,24 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
 
         # Get states
         unordered_states = self._extractor.get_all_states()
-        
-        #sort keys alphabetically, but keep the values as they are
-        
+
+        # sort keys alphabetically, but keep the values as they are
+
         # put enabled items first
-        ordered_states = OrderedDict(sorted(
-                sorted(unordered_states.items(), key = self.__natural_sort_key),
-                key=lambda item: item[1] != SubsystemStatus.ENABLED))
+        ordered_states = OrderedDict(
+            sorted(
+                sorted(unordered_states.items(), key=self.__natural_sort_key),
+                key=lambda item: item[1] != SubsystemStatus.ENABLED,
+            )
+        )
         return ordered_states
-    
+
     # Natural sort key function, lets us display things like HLT In a "nice" ordering
     def __natural_sort_key(self, s):
-        return [int(text) if text.isdigit() else text.lower() 
-                for text in re.split('([0-9]+)', s[0])]
+        return [
+            int(text) if text.isdigit() else text.lower()
+            for text in re.split("([0-9]+)", s[0])
+        ]
 
     def _button_action(self, _, button_name: str) -> None:
 
@@ -127,8 +133,8 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
                 button_widget = self.query_one(f"#{button_id}_button", Button)
             except Exception:
                 continue
-            
+
             button_widget.tooltip = self._extractor.get_tooltip(button)
-            
+
     def get_tooltip(self, button_name: str) -> str:
         return self._extractor.get_tooltip(button_name)
