@@ -42,7 +42,6 @@ class ShifterConfigReader:
             general_settings.get("operation_url", None)
         )
 
-
     @property
     def output_directory(self):
         return f"{self._download_directory}/../shifter_configs/{self._session_name}"

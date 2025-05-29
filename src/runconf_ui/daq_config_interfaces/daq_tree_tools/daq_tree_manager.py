@@ -5,7 +5,6 @@ from runconf_ui.runconf_ui_controllers.runconf_ui_state import ShifterInterfaceS
 import logging
 
 
-
 class DaqTreeManager:
     def __init__(self, application_controller: ShifterInterfaceState):
         self._application_controller = application_controller
@@ -18,15 +17,17 @@ class DaqTreeManager:
         logging.debug(f"Disabled objects: {disabled}")
 
         for panel in screen.query("EnableDisablePanel"):
-            self._application_controller.current_state[panel.id] = panel.get_current_states()
-            
+            self._application_controller.current_state[panel.id] = (
+                panel.get_current_states()
+            )
+
             if isinstance(panel, MultiComponentEnableDisablePanel):
                 panel.update_disabled(disabled)
                 self.update_component_tree(screen, panel)
-                
+
             panel.update_button_styles()
 
     def update_component_tree(self, screen, panel: MultiComponentEnableDisablePanel):
-        screen.query_one(f"#tree_view_{panel.id.replace('_subsystem_panel', '')}").update(
-            panel.get_tree().print_tree()
-        )
+        screen.query_one(
+            f"#tree_view_{panel.id.replace('_subsystem_panel', '')}"
+        ).update(panel.get_tree().print_tree())

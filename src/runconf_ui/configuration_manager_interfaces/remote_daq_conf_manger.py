@@ -8,11 +8,15 @@ except Exception:
         "Could not import runconftool or config_management. Please install runconftools or config_management"
     )
 
-from runconf_ui.daq_config_interfaces.daq_config_file_io.daq_conf_path_reader import DaqConfPathReader
+from runconf_ui.daq_config_interfaces.daq_config_file_io.daq_conf_path_reader import (
+    DaqConfPathReader,
+)
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
     ShifterInterfaceState,
 )
-from runconf_ui.configuration_manager_interfaces.management_interface import ManagementInterface
+from runconf_ui.configuration_manager_interfaces.management_interface import (
+    ManagementInterface,
+)
 
 import re
 from pathlib import Path
@@ -21,6 +25,7 @@ import traceback
 import shutil
 
 from runconf_ui.exceptions import CiderInvalidRepoException
+
 
 class RemoteDaqConfManager(ManagementInterface):
     def __init__(self, application_controller: ShifterInterfaceState):
@@ -35,7 +40,9 @@ class RemoteDaqConfManager(ManagementInterface):
             )
         try:
             self.conf_pool = ConfPool(
-                str(self.application_controller.shifter_interface_config.download_directory),
+                str(
+                    self.application_controller.shifter_interface_config.download_directory
+                ),
                 apparatus=self.application_controller.apparatus,
                 operation_url=self.application_controller.shifter_interface_config.operation_url,
                 base_url=self.application_controller.shifter_interface_config.base_url,
@@ -43,7 +50,6 @@ class RemoteDaqConfManager(ManagementInterface):
         except Exception:
             logging.error(traceback.format_exc())
             self.reset()
-
 
     def get_daq_versions(self) -> list[str]:
         """
@@ -70,16 +76,21 @@ class RemoteDaqConfManager(ManagementInterface):
 
         # Now we can open the file
         config_path_reader = DaqConfPathReader()
-        
+
         # Logic for single file
         if self.application_controller.direct_config_path.is_file():
             return super().open_file(self.application_controller.direct_config_path)
-        
+
         config_list = config_path_reader(
             self.application_controller.shifter_interface_config.download_directory
         )
-        
-        valid_config_files = [c for c in config_list if c.name == self.application_controller.shifter_interface_config.default_config]
+
+        valid_config_files = [
+            c
+            for c in config_list
+            if c.name
+            == self.application_controller.shifter_interface_config.default_config
+        ]
 
         if len(valid_config_files) == 0:
             logging.error(
@@ -95,8 +106,8 @@ class RemoteDaqConfManager(ManagementInterface):
                 f"Found multiple config files with the same name: {valid_config_files}, using the first one"
             )
 
-        config_file = valid_config_files[0] 
-        
+        config_file = valid_config_files[0]
+
         return super().open_file(Path(config_file))
 
     def get_default_version(self) -> str:
@@ -104,21 +115,23 @@ class RemoteDaqConfManager(ManagementInterface):
         Get the default DAQ version
         """
         return self.conf_pool.get_release()
-    
+
     def reset(self):
-        '''
+        """
         Occasionally the conf pool gets corrupted. This is a workaround to reset it.
-        '''
+        """
         logging.info("Resetting conf pool")
 
         # self.make_writable_and_log(self.application_controller.shifter_interface_config.download_directory)
         if self.conf_pool.repo:
             self.conf_pool.repo.close()
-        
-        shutil.rmtree(self.application_controller.shifter_interface_config.download_directory)
 
-        Path(self.application_controller.shifter_interface_config.download_directory).mkdir(
-            parents=True, exist_ok=True
+        shutil.rmtree(
+            self.application_controller.shifter_interface_config.download_directory
         )
+
+        Path(
+            self.application_controller.shifter_interface_config.download_directory
+        ).mkdir(parents=True, exist_ok=True)
 
         self.__init__(self.application_controller)
