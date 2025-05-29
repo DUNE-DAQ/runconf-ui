@@ -4,7 +4,9 @@ Main application for the shifter view interface.
 
 from runconf_ui.screens.shifter_view_screen import ShifterViewScreen
 from runconf_ui.utils.file_cleaner import clean_old_files
-from runconf_ui.runconf_ui_configuration.shifter_config_reader import ShifterConfigReader
+from runconf_ui.runconf_ui_configuration.shifter_config_reader import (
+    ShifterConfigReader,
+)
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
     ShifterInterfaceState,
 )
@@ -45,36 +47,42 @@ class ShifterView(App):
         super().__init__(*args)
 
         self._exit_message = ""
-        
+
         # Read kwargs
         use_local = kwargs.get("use_local", False)
-        
+
         if use_local:
             interface_config = f"{Path(__file__).parent.absolute()}/../config_files/interface_configs/local_configuration.yml"
         else:
             interface_config = f"{Path(__file__).parent.absolute()}/../config_files/interface_configs/ehn1_configuration.yml"
-        
+
         apparatus = kwargs.get("apparatus", os.environ.get("APPARATUS", "np02"))
 
         # messy...
         detector_configuration = f"{Path(__file__).parent.absolute()}/../config_files/detector_configs/{apparatus}_configuration.yml"
 
         if not Path(detector_configuration).exists():
-            raise Exception(f"Detector configuration file {detector_configuration} does not exist")
-        
+            raise Exception(
+                f"Detector configuration file {detector_configuration} does not exist"
+            )
+
         if not Path(interface_config).exists():
-            raise Exception(f"Interface configuration file {interface_config} does not exist")
+            raise Exception(
+                f"Interface configuration file {interface_config} does not exist"
+            )
 
         # Now we've done logs, we can read the configuration
-        interface_config = ShifterConfigReader(detector_config_file=detector_configuration,
-                                                settings_config_file=interface_config, 
-                                                **kwargs)
+        interface_config = ShifterConfigReader(
+            detector_config_file=detector_configuration,
+            settings_config_file=interface_config,
+            **kwargs,
+        )
 
         # Global application controller, dataclass containing state information
         self.application_controller = ShifterInterfaceState(
-            apparatus=apparatus, 
+            apparatus=apparatus,
             shifter_interface_config=interface_config,
-            use_local=use_local
+            use_local=use_local,
         )
 
         self._init_logger(kwargs.get("log_level", "INFO"))
@@ -101,7 +109,7 @@ class ShifterView(App):
         Mount App
         """
         logging.info("Mounting app")
-        
+
         # I just like this theme
         self.theme = "catppuccin-latte"
 
@@ -117,7 +125,7 @@ class ShifterView(App):
         )
         # Start with the SelectFileSessionScreen
         self.push_screen("shifter_view_screen")
-  
+
     def action_quit(self):
         """Quit the application."""
 
@@ -132,7 +140,6 @@ class ShifterView(App):
                 classes="pop_up_screen",
             )
         )
-
 
     def exit(self, message: str | None = None) -> None:
         """Override the exit method to store the exit message."""

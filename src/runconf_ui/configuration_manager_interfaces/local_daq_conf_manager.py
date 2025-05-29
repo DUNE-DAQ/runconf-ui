@@ -1,9 +1,14 @@
 from pathlib import Path
-from runconf_ui.configuration_manager_interfaces.management_interface import ManagementInterface
-from runconf_ui.daq_config_interfaces.daq_config_file_io.daq_conf_path_reader import DaqConfPathReader
+from runconf_ui.configuration_manager_interfaces.management_interface import (
+    ManagementInterface,
+)
+from runconf_ui.daq_config_interfaces.daq_config_file_io.daq_conf_path_reader import (
+    DaqConfPathReader,
+)
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
     ShifterInterfaceState,
 )
+
 
 class LocalDaqConfManager(ManagementInterface):
     def __init__(self, application_controller: ShifterInterfaceState):
@@ -31,7 +36,7 @@ class LocalDaqConfManager(ManagementInterface):
         """
         if self._daq_version == "":
             return []
-                
+
         return DaqConfPathReader()(self._daq_version)
 
     def get_default_version(self) -> str:

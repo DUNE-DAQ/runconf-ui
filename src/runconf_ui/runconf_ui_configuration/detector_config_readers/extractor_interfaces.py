@@ -1,12 +1,15 @@
-from runconf_ui.daq_config_interfaces.daq_config_file_io.daq_config_wrapper import DaqConfigurationWrapper
 from runconf_ui.exceptions import CiderBadActionException
 import runconf_ui.daq_config_interfaces.actions.actions as ca
 from runconf_ui.utils.subsystem_status import SubsystemStatus
+from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
+    ShifterInterfaceState,
+)
 
-from typing import Dict, Optional
+from typing import Any, Optional, Dict
 from abc import ABC, abstractmethod
 import logging
 import traceback
+
 
 """
 Base classes for extracting the state of a subsystem. 
@@ -42,15 +45,15 @@ Base classes for extracting the state of a subsystem.
         System B:
             ...
         
-    2. Work out the state of each subsytem
+    2. Work out the state of each subsystem
         
 """
+
 
 class ItemExtractor(ABC):
     def __init__(
         self,
-        daq_configuration: DaqConfigurationWrapper | None,
-        session_name: Optional[str] = None,
+        application_controller: ShifterInterfaceState,
         disabled_dals=[],
     ):
         """
@@ -63,28 +66,23 @@ class ItemExtractor(ABC):
         :type session_name: Optional[str], optional
         :param disabled_dals: List of disabled dals in daq_configuration, defaults to []
         :type disabled_dals: list, optional
-        """        
+        """
 
         # DAQ daq_configuration we're using
-        self._daq_configuration = daq_configuration
-        # The session name we're using
-        self._session_name = session_name
+        self._application_controller = application_controller
+
         # The dal objects that are disabled
         self._disabled_dals = disabled_dals
-        if daq_configuration is None or session_name is None:
+        if (
+            self._application_controller.buffer_daq_config is None
+            or self._application_controller.session_name is None
+        ):
             return
 
-    def set_config_session(
-        self, daq_configuration: DaqConfigurationWrapper, session_name: str
-    ):
-        # Set session + daq_configuration within session
-        self._daq_configuration = daq_configuration
-        self._session_name = session_name
-
     def get_state(self, *args, **kwargs) -> SubsystemStatus:
-        '''
+        """
         Wrapper around the get state function. This is used to catch exceptions
-        '''
+        """
         try:
             return self._get_state(*args, **kwargs)
         except CiderBadActionException:
@@ -105,9 +103,9 @@ class ItemExtractor(ABC):
         pass
 
     def set_state(self, state: SubsystemStatus, *args, **kwargs):
-        '''
+        """
         Wrapper around the set state function. This is used to catch exceptions
-        '''
+        """
         try:
             self._set_state(state, *args, **kwargs)
         except CiderBadActionException:
@@ -128,12 +126,11 @@ class ItemExtractor(ABC):
 class SubsystemExtractor(ItemExtractor):
     def __init__(
         self,
-        daq_configuration: DaqConfigurationWrapper | None,
-        session_name: str,
+        application_controller: ShifterInterfaceState,
         subsystem: dict,
         disabled_dals=[],
     ):
-        """    
+        """
         Base class for extracting the state of a single subsystem.
 
         :param daq_configuration: daq_configuration object
@@ -144,8 +141,8 @@ class SubsystemExtractor(ItemExtractor):
         :type subsystem: dict
         :param disabled_dals: List of disabled dals, defaults to []
         :type disabled_dals: list, optional
-        
-        
+
+
         Here subsystem dict is of the following form:
         {
             "id": str,                 # name of subsystem
@@ -155,21 +152,21 @@ class SubsystemExtractor(ItemExtractor):
             'separate_system": bool,   # Does this require an additional button to the full system?
             "system_label": str,       # If it's a separate system, what is its name?
         }
-        
-        
-        """        
 
-        super().__init__(daq_configuration, session_name, disabled_dals)
+
+        """
+
+        super().__init__(application_controller, disabled_dals)
 
         # Subsystem information
         self._subsystem = subsystem
-        self._session_dal = ca.GetDalObjectAction(self._daq_configuration)(
-            self._session_name, "Session"
-        )
+        self._session_dal = ca.GetDalObjectAction(
+            self._application_controller.buffer_daq_config
+        )(self._application_controller.session_name, "Session")
 
         # Attributes
 
-        # DAL object class 
+        # DAL object class
         self._system_class = subsystem["class"]
         # DAL object id
         self._system_id = subsystem["id"]
@@ -187,6 +184,20 @@ class SubsystemExtractor(ItemExtractor):
             raise CiderBadActionException(
                 f"Subsystem {self._system_id} is a system but does not have a system name"
             )
+
+        self._tooltip = ""
+        if self._is_system:
+            self._tooltip = subsystem.get(
+                "tooltip", f"Enable/disable {self._system_name} subsystem"
+            )
+
+    @property
+    def tooltip(self) -> Optional[str]:
+        return self._tooltip
+
+    @tooltip.setter
+    def tooltip(self, tooltip: Optional[str]):
+        self._tooltip = tooltip
 
     @property
     def is_system(self) -> bool:
@@ -212,31 +223,53 @@ class SubsystemExtractor(ItemExtractor):
     def system_class(self) -> str:
         return self._system_class
 
+    @property
+    def enabled_state(self) -> Any:
+        return self._enabled_state
+
+    @enabled_state.setter
+    def enabled_state(self, state: Any):
+        self._enabled_state = state
+
+    @property
+    def disabled_state(self) -> Any:
+        return self._disabled_state
+
+    @disabled_state.setter
+    def disabled_state(self, state: Any):
+        self._disabled_state = state
 
 
 class MultiItemExtractor(ItemExtractor):
     def __init__(
         self,
-        daq_configuration: DaqConfigurationWrapper | None,
-        session_name: str | None = None,
+        application_controller: ShifterInterfaceState,
         system: Dict | None = None,
         disabled_dals=[],
     ):
-        '''
+        """
         :param daq_configuration: daq_configuration object
         :param session_name: Name of session, defaults to None
         :param system: Dictionary containing system information, defaults to None
         :param disabled_dals: List of disabled dals, defaults to []
-        
-        Base class for extracting the state of multiple items. This is used to extract the state of a full subsystem
-        '''
-        super().__init__(daq_configuration, session_name, disabled_dals)
 
-        if self._daq_configuration is not None and system is not None:
+        Base class for extracting the state of multiple items. This is used to extract the state of a full subsystem
+        """
+        super().__init__(application_controller, disabled_dals)
+
+        if (
+            self._application_controller.buffer_daq_config is not None
+            and system is not None
+        ):
             self.read_system(system)
 
     def read_system(self, system: Optional[Dict]):
-        if system is None or self._daq_configuration is None or self._session_name is None:
+        if (
+            system is None
+            or self._application_controller.buffer_daq_config is None
+            or self._application_controller.session_name is None
+        ):
             return False
 
         return True
+

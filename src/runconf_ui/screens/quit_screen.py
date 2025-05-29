@@ -9,8 +9,8 @@ from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
 )
 from runconf_ui.utils.save_file_handler import SaveFileHandler
 
+
 class QuitScreen(Screen):
-    
     """Screen with a dialog to quit."""
 
     def __init__(
@@ -23,11 +23,11 @@ class QuitScreen(Screen):
     ) -> None:
         """
         :param application_controller: The application controller
-        :param render_no_create: If True, the screen will not show the create button 
+        :param render_no_create: If True, the screen will not show the create button
         :param name: The name of the screen
         :param id: The id of the screen
         :param classes: The tcss classes of the screen
-        
+
         """
 
         super().__init__(name, id, classes)
@@ -77,7 +77,6 @@ class QuitScreen(Screen):
         output += f"[purple]To run[/purple] use [bold green]{run_cmd}"
         return output
 
-
     def compose(self):
         # We need to get the saved configuration name
         self._saved_configuration_name = (
@@ -116,7 +115,6 @@ class QuitScreen(Screen):
                 disabled=button_disabled,
             )
 
-            
             # This is a tad hacky but it means create+quit use the same screen
             if self._render_no_create:
                 yield Button(
@@ -133,12 +131,12 @@ class QuitScreen(Screen):
                 classes="pop_up_button quit_screen_button",
             )
 
-    def on_button_pressed(self, event: Button.Pressed) -> None:        
+    def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "quit_screen_savequit_button":
             logging.info("Quitting and saved")
 
             # HACK: This is a hack to save correctly
-            
+
             self._save_handler()
             self.app.exit(self.message())
 
