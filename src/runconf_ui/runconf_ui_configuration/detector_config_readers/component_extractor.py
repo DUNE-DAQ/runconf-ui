@@ -27,16 +27,12 @@ class ComponentExtractor(SubsystemExtractor):
         
         subsystem_dal = self.get_dal()
 
-        dal_disabled = ca.CheckIsDisabledAction(self._daq_configuration)(
-            subsystem_dal, self._session_name
+        dal_disabled = ca.CheckIsDisabledAction(self._application_controller.buffer_daq_config)(
+            subsystem_dal, self._application_controller.session_name
         )
-
-        logging.debug(
-            f"Subsystem {self._system_id} is {'disabled' if dal_disabled else 'enabled'}"
-        )
-
+                
         return SubsystemStatus(
-            not dal_disabled and subsystem_dal not in self._disabled_dals
+    not dal_disabled and subsystem_dal not in self._disabled_dals
         )
 
     def _set_state(self, state: SubsystemStatus):
@@ -45,24 +41,47 @@ class ComponentExtractor(SubsystemExtractor):
                 "Cannot set partially enabled state for a component"
             )
 
-        subsystem_dal = ca.GetDalObjectAction(self._daq_configuration)(
+        subsystem_dal = ca.GetDalObjectAction(self._application_controller.buffer_daq_config)(
             self._system_id, self._system_class
         )
 
         # Disable dal
-        ca.DisableDalAction(self._daq_configuration)(
-            subsystem_dal, self._session_name, not state
+        ca.DisableDalAction(self._application_controller.buffer_daq_config)(
+            subsystem_dal, self._application_controller.session_name, not state
         )
     
         # Update OKS object for dal and session
-        ca.UpdateDalAction(self._daq_configuration)(subsystem_dal)
-        ca.UpdateDalAction(self._daq_configuration)(self._session_dal)
+        ca.UpdateDalAction(self._application_controller.buffer_daq_config)(subsystem_dal)
+        ca.UpdateDalAction(self._application_controller.buffer_daq_config)(self._session_dal)
         
         logging.debug(
             f"Subsystem {self._system_id} is {'disabled' if not state else 'enabled'}")
 
     def get_dal(self):
-        return ca.GetDalObjectAction(self._daq_configuration)(
+        return ca.GetDalObjectAction(self._application_controller.buffer_daq_config)(
             self._system_id, self._system_class
         )
 
+
+    def is_filtered(self) -> bool:
+        subsystem_filters = self._subsystem.get("filters", [])
+        
+        for filter in subsystem_filters:
+            attribute = filter.get("attribute")
+            values = filter.get("value", [])
+            
+            try:
+                for value in values:
+                    if ca.GetAttributeAction(self._application_controller.buffer_daq_config)(
+                        self.get_dal(), attribute
+                    ) == value:
+                        return True
+
+            except CiderBadActionException:
+                # If the attribute does not exist, we ignore it
+                logging.warning(
+                    f"Bad filter: Attribute {attribute} not found in DAL object {self.get_dal()} when trying to apply filter."
+                )
+                
+            
+        return False

@@ -3,8 +3,14 @@ from runconf_ui.runconf_ui_configuration.detector_config_readers.extractor_inter
                                                                                            SubsystemExtractor)
 from runconf_ui.runconf_ui_configuration.detector_config_readers.attribute_extractor import AttributeExtractor
 from runconf_ui.runconf_ui_configuration.detector_config_readers.component_extractor import ComponentExtractor
+from runconf_ui.runconf_ui_configuration.detector_config_readers.relationship_extractor import RelationshipExtractor
 from runconf_ui.utils.subsystem_status import SubsystemStatus
 from runconf_ui.exceptions import CiderBadActionException
+import runconf_ui.daq_config_interfaces.actions.actions as ca
+from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
+    ShifterInterfaceState,
+)
+
 
 from typing import Dict, Sequence, Optional
 import logging
@@ -13,8 +19,7 @@ import traceback
 class SystemExtractor(MultiItemExtractor):
     def __init__(
         self,
-        daq_configuration: Optional[DaqConfigurationWrapper],
-        session: Optional[str],
+        application_controller: ShifterInterfaceState,
         system_name: Optional[str],
         system: Optional[Dict],
         disabled_dals=[],
@@ -46,8 +51,9 @@ class SystemExtractor(MultiItemExtractor):
 
         # The system name for the full sysystem
         self._system_name = system_name
+        self._display_full_system = True
 
-        super().__init__(daq_configuration, session, system, disabled_dals)
+        super().__init__(application_controller, system, disabled_dals)
 
     def read_system(self, system: Dict, system_name: Optional[str] = None):
         
@@ -56,8 +62,9 @@ class SystemExtractor(MultiItemExtractor):
         '''
         # Just to allow this to be run at start up
         if not super().read_system(system):
+            logging.error(f"System with name {system_name} is not valid, cannot read system.")
             return
-
+        
         self._system_name = (
             system_name if system_name is not None else self._system_name
         )
@@ -65,18 +72,15 @@ class SystemExtractor(MultiItemExtractor):
         logging.debug(f"Reading system {self._system_name}")
 
         self._attributes = [
-            AttributeExtractor(self._daq_configuration, self._session_name, s)
+            AttributeExtractor(self._application_controller, s)
             for s in system.get("attributes", [])
         ]
         
-        logging.debug(f"Attributes: {[a.system_id for a in self._attributes]}")
+        self._attributes.extend(RelationshipExtractor(self._application_controller, s)
+            for s in system.get("relationships", []))
+        
+        self.extract_components(system)
 
-        self._components = [
-            ComponentExtractor(self._daq_configuration, self._session_name, s)
-            for s in system.get("components", [])
-        ]
-
-        logging.debug(f"Components: {[c.system_id for c in self._components]}")
         self._system_names = list(
             set(
                 [
@@ -86,6 +90,7 @@ class SystemExtractor(MultiItemExtractor):
                 ]
             )
         )
+        
         
         if self._system_name is not None:
             self._system_names.append(self._system_name)
@@ -97,6 +102,38 @@ class SystemExtractor(MultiItemExtractor):
         self._display_full_system = system.get("display_full_system", True)
 
         logging.debug(f"System names: {self._system_names}")
+
+    def extract_components(self, system: Dict):
+        self._components = []
+        for s in system.get("components", []):
+            if s.get('each_component_separate', False):
+                # If the component is not a separate component, we can just add it as a subsystem
+                self.__extract_multi_comp(s)
+            # If the component is a separate component, we need to which contain the ID as the substring + are the right class
+            else:
+                self.__add_component(s)
+
+    def __extract_multi_comp(self, sub_syst: Dict):
+        comp_names = self.find_components_with_wildcard(sub_syst['id'], sub_syst['class'])
+        for comp in comp_names:
+            s_copy = sub_syst.copy()            
+            # Swap the id around to ensure uniqueness
+            s_copy['id'] = comp
+
+            # If the component is not a separate system, we need to set the system label and separate_system
+            # this gives us buttons for each component in the system
+            if not s_copy.get('separate_system', False):     
+                s_copy['system_label'] = comp
+                s_copy['separate_system'] = True
+
+            self.__add_component(s_copy)
+
+
+    def __add_component(self, system: Dict):
+        ext = ComponentExtractor(self._application_controller, system)    
+        if not ext.is_filtered():
+            self._components.append(ext)
+
 
     @property
     def system_names(self) -> Sequence[str]:
@@ -233,7 +270,7 @@ class SystemExtractor(MultiItemExtractor):
         Get the state of the system and any nested subsystems. 
         '''
         # Just to allow this to be run at start up
-        if self._session_name is None or self._daq_configuration is None:
+        if self._application_controller.session_name is None or self._application_controller.buffer_daq_config is None:
             return
 
         return_dict = {}
@@ -275,3 +312,18 @@ class SystemExtractor(MultiItemExtractor):
         super().set_disabled_dals(disabled_dals)
         for s in self._attributes + self._components:
             s.set_disabled_dals(disabled_dals)
+            
+    def find_components_with_wildcard(self, wildcard: str, class_name: str):
+        """
+        Find components with a wildcard in the system.
+        :param wildcard: Wildcard to search for
+        :param system_name: Name of the system to search in, defaults to None
+        :return: List of components that match the wildcard
+        """
+        dals = ca.GetDalsOfClassAction(self._application_controller.buffer_daq_config)(class_name)
+        if not dals:
+            return []
+        
+        return [ca.GetAttributeAction(self._application_controller.buffer_daq_config)(d, "id") for d in dals
+                if wildcard in ca.GetAttributeAction(self._application_controller.buffer_daq_config)(d, "id")]
+        

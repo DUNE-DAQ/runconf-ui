@@ -1,5 +1,4 @@
 from runconf_ui.widgets.multicomponent_panel import MultiComponentEnableDisablePanel
-from runconf_ui.widgets.single_component_panel import SingleComponentEnableDisablePanel
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
     ShifterInterfaceState,
 )
@@ -7,15 +6,19 @@ from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
 from textual.widgets import TabPane, Static
 from textual.containers import ScrollableContainer
 
+import logging
 
 class EnableDisableMapGen:
     def __init__(self, application_controller: ShifterInterfaceState) -> None:
         self._application_controller = application_controller
+        logging.debug("Generating enable/disable map...")
         self._panel_list, self._map_list, self._panel_labels = self.read_panel_options()
 
     def read_panel_options(self):
         # Grab all panels we specify in the YAML
         panel_opts = self._application_controller.shifter_interface_config.panel_options
+        
+        logging.debug(f"Panel options: {panel_opts}")
 
         # To be filled with panels
         panel_list = []
@@ -26,6 +29,9 @@ class EnableDisableMapGen:
 
         for panel_name, opts in panel_opts.items():
             panel, map = self._parse_options(panel_name, opts)
+            if panel is None:
+                logging.warning(f"Panel {panel_name} could not be created with options {opts}")
+                continue
 
             panel_list.append(panel)
 
@@ -35,26 +41,7 @@ class EnableDisableMapGen:
         return panel_list, map_list, panel_labels
 
     def _parse_options(self, panel_name: str, opts: dict):
-        panel_type = opts.get("panel_type", None)
-        if panel_type == "singlesystem":
-            return self.initialise_single_system(panel_name, opts), None
-
-        elif panel_type == "multisystem":
-            return self.initialise_multi_system(panel_name, opts)
-
-        else:
-            raise ValueError(f"Unknown panel type {opts.get('panel_type')}")
-
-    def initialise_single_system(self, panel_name, opts):
-        panel = SingleComponentEnableDisablePanel(
-            self._application_controller,
-            opts.get("classes", []),
-            filters=opts.get("filters", []),
-            id=f"{opts.get('label', 'SingleSystem')}_subsystem_panel",
-            classes="detector_subsystem",
-        )
-
-        return self._initalise_system(panel_name, opts, panel)
+        return self.initialise_multi_system(panel_name, opts)
 
     def _initalise_system(self, panel_name, opts, panel):
         return TabPane(

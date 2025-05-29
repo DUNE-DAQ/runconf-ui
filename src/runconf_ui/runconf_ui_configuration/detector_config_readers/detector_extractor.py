@@ -2,6 +2,10 @@ from runconf_ui.daq_config_interfaces.daq_config_file_io.daq_config_wrapper impo
 from runconf_ui.runconf_ui_configuration.detector_config_readers.extractor_interfaces import MultiItemExtractor
 from runconf_ui.runconf_ui_configuration.detector_config_readers.system_extractor import SystemExtractor
 from runconf_ui.exceptions import CiderBadActionException, CiderInvalidConfigurationException
+from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
+    ShifterInterfaceState,
+)
+
 from runconf_ui.utils.subsystem_status import SubsystemStatus
 
 from typing import Dict, Optional
@@ -12,8 +16,7 @@ import traceback
 class DetectorExtractor(MultiItemExtractor):
     def __init__(
         self,
-        daq_configuration: DaqConfigurationWrapper,
-        session: str | None,
+        application_controller: ShifterInterfaceState,
         detector_config: Optional[Dict],
         disabled_dals=[],
     ):
@@ -41,15 +44,20 @@ class DetectorExtractor(MultiItemExtractor):
         self._detector_config = {}
         # List of systems in the detector config
         self._system_extractors = []
-        super().__init__(daq_configuration, session, detector_config, disabled_dals)
+        logging.debug("Initializing DetectorExtractor...")
+        logging.debug(f"Detector configuration {detector_config}")
+        super().__init__(application_controller, detector_config, disabled_dals)
 
     def read_system(self, detector_config: Dict):
         # Read system dict
         if not super().read_system(detector_config):
+            logging.error("Detector config is not valid, cannot read systems.")
+            logging.error(f"Detector config: {detector_config}")
             return
 
         self._detector_config = detector_config
         self._system_extractors = []
+        logging.debug(f"Detector config: {self._detector_config}")
 
         extracted_systems = detector_config.get("Systems", [])
         system_name = list(detector_config.keys())[0]
@@ -57,6 +65,7 @@ class DetectorExtractor(MultiItemExtractor):
         logging.debug(f"Reading system {system_name}")
 
         for s in extracted_systems:
+            logging.debug(f"Extracting system {s}")
             try:
                 system_name = list(s.keys())[0]
 
@@ -64,14 +73,14 @@ class DetectorExtractor(MultiItemExtractor):
 
                 self._system_extractors.append(
                     SystemExtractor(
-                        self._daq_configuration,
-                        self._session_name,
+                        self._application_controller,
                         system_name,
                         system_info,
                     )
                 )
-            except CiderBadActionException:
+            except CiderBadActionException as e:
                 logging.debug(f"Could not extract system {system_name}")
+                logging.debug(f"{traceback.format_exc()}")
             except Exception as e:
                 logging.error(f"Could not extract system {system_name} due to {e}")
                 logging.error(f"{traceback.format_exc()}")

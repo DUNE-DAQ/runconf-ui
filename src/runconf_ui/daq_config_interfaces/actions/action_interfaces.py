@@ -28,7 +28,6 @@ class ActionInterface(ABC):
     def __call__(self, *args, **kwargs) -> Any:
         try:
             a = self.action(*args, **kwargs)
-            logging.debug(f"Successfully called {self.__repr__()}")
             return a
         except Exception:
             raise CiderBadActionException(traceback.format_exc())

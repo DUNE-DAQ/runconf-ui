@@ -19,6 +19,7 @@ class SingleComponentEnableDisablePanel(EnableDisablePanel):
         application_controller: ShifterInterfaceState,
         class_list: List[str],
         filters: List[dict] = [],
+        tool_tip_var: str = "", 
         content: str | SupportsVisual = "",
         *,
         expand: bool = False,
@@ -44,6 +45,8 @@ class SingleComponentEnableDisablePanel(EnableDisablePanel):
         # Make a dict
         self._class_list = class_list
         self._filters = filters
+        self._tool_tip_var = tool_tip_var
+        self._tool_tip_list = []
 
     def generate_button_list(self):
         if (
@@ -54,11 +57,11 @@ class SingleComponentEnableDisablePanel(EnableDisablePanel):
         
         buttons = []
 
+
         for class_ in self._class_list:
             logging.info(f"{class_}, {ca.GetDalsOfClassAction(self._application_controller.buffer_daq_config)(class_)}")
             buttons += ca.GetDalsOfClassAction(self._application_controller.buffer_daq_config)(class_)
-        
-            
+                    
         logging.info(f"Buttons: {buttons}")
             
         if len(self._filters):

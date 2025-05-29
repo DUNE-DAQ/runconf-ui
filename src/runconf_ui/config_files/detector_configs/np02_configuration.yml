@@ -5,7 +5,6 @@ PanelOptions:
   Detector:
     label: "detector"
     view_panel: "Detector View"
-    panel_type: "multisystem"
 
     Systems:
       - TPC:
@@ -36,7 +35,6 @@ PanelOptions:
   TPG:
     label: "TPG"
     view_panel: "TPG View"
-    panel_type: "multisystem"
 
     Systems:
       - TPG:
@@ -70,17 +68,37 @@ PanelOptions:
               separate_system: True
 
   Trigger:
-    label: "Trigger"
-    panel_type: "singlesystem"
-    classes:
-      - "CTBHLT"
-    filters:
-      - description: "spare"
-      - description: "Spare"
+    label: "trigger"
+    view_panel: "Trigger View"
+    Systems:
+      - Trigger: 
+          display_full_system: False
+          subsystem_dependent: True
+          components:
+            - id: ""
+              class: CTBHLT
+              each_component_separate: True
+              filters:
+                - attribute: "description"
+                  values: ["Spare", "spare"]
+
+      - RandomTrigger:
+          relationships:
+            - id: standalone_candidate_maker_confs
+              class: MLTApplication
+              segments: ['trg-segment']
+              relationship_class: RandomTCMakerConf
+              enabled_state: [random-tc-generator]
+              disabled_state: []
 
   # Dataflow
   Dataflow:
     label: "dataflow"
-    panel_type: "singlesystem"
-    classes:
-      - "DFApplication"
+    Systems:
+      - Dataflow:
+          subsystem_dependent: True
+          display_full_system: False
+          components:
+            - id: ""
+              class: "DFApplication"
+              each_component_separate: True

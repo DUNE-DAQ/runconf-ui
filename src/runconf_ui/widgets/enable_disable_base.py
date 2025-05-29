@@ -60,8 +60,6 @@ class EnableDisablePanel(Static):
         raise NotImplementedError("Check is disabled not implemented for class")
 
     def compose(self):
-        
-        
         with ScrollableContainer(id="buttons_panel"):        
 
             for button, information in self._button_list.items():
@@ -89,12 +87,13 @@ class EnableDisablePanel(Static):
 
                 id_name = button.replace(" ", "~")
 
-                yield Button(name_str, id=f"{id_name}_button", classes=classes)
-
+                button = Button(name_str, id=f"{id_name}_button", classes=classes)
+                yield button
+                
     def on_button_pressed(self, event: Button.Pressed):
         button_name = event.button.id.replace("_button", "")
 
-        logging.info(f"Button pressed: {button_name}")
+        logging.debug(f"Button pressed: {button_name}")
 
         button_name = button_name.replace("~", " ")
         objs_affected = self._button_list.get(button_name, None)

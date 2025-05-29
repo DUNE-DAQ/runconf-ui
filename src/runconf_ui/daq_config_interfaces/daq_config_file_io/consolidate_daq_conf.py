@@ -4,6 +4,8 @@ from runconf_ui.daq_config_interfaces.actions.actions import (
     GetDalObjectAction,
     CopyDalAction,
     GetRelatedDalsAction,
+    GetAllDalsAction,
+    CommitConfigurationAction
 )
 from typing import Any
 
@@ -108,6 +110,21 @@ class ConsolidateDAQConf:
 
         return relation_list
 
+    def fill_all(self) -> None:
+        """
+        Fill the configuration with all objects in the session.
+        """
+        current_configuration = DaqConfigurationWrapper(self._current_config_name)
+        new_configuration = DaqConfigurationWrapper(self._new_config_name)
+
+        for dal in GetAllDalsAction(current_configuration)():
+            CopyDalAction(new_configuration)(dal)
+
+        CommitConfigurationAction(new_configuration)(
+            f"Consolidated from {self._current_config_name}"
+        )
+
     def __call__(self) -> Any:
         self.open_files()
-        self.populate_configuration()
+        # self.populate_configuration()
+        self.fill_all()

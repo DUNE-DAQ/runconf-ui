@@ -42,6 +42,9 @@ class DAQSelectMenu(Select):
         else:
             value = self.check_options(options, value)
 
+        logging.debug(f"Options: {options}, Value: {value}") 
+
+        
         super().__init__(
             options,
             prompt=prompt,

@@ -55,7 +55,8 @@ class ShifterViewScreen(Screen):
                             classes="tree_view_full_container",
                         )
                     for panel in enable_disable_generator.map_list:
-                        yield panel
+                        if panel is not None:
+                            yield panel
 
             yield OptionPanel(
                 application_controller=self._application_controller,

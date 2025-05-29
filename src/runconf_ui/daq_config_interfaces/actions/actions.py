@@ -71,8 +71,35 @@ class CopyDalAction(ActionInterface):
         Copy object in configuration
         """
         self._daq_configuration.add_dal(dal)
-        return dal
+        UpdateDalAction(self._daq_configuration)(dal)
+        return self._daq_configuration.get_dal(dal.className(), dal.id)
+        
+        
+class GetAllClassesAction(ActionInterface):
+    """
+    Get all classes in the configuration
+    """
 
+    def action(self):
+        """
+        Get all classes in the configuration
+        """
+        return self._daq_configuration.classes()
+
+class GetAllDalsAction(ActionInterface):
+    """
+    Get all DALs in the configuration
+    """
+
+    def action(self):
+        """
+        Get all DALs in the configuration
+        """
+        dals = []
+        for class_name in GetAllClassesAction(self._daq_configuration)():
+            dals += GetDalsOfClassAction(self._daq_configuration)(class_name)
+
+        return list(set(dals))
 
 class CopyFullConfigurationAction(ActionInterface):
     def action(self, new_file_name):
@@ -144,8 +171,8 @@ class GetRelatedDalsAction(ActionInterface):
             )
 
         return relations_list
-
-
+        
+        CommitConfigurationAction(self._daq_configuration)()
 # Tiny bit hacky + hardcoded, lets us disable stuff
 class CanBeDisableAction(GetDalObjectAction):
     """

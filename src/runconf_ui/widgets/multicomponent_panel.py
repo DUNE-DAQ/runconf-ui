@@ -10,7 +10,10 @@ from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
 from typing import Dict, Optional
 from textual.visual import SupportsVisual
 import logging
+import re
 
+
+from collections import OrderedDict
 
 class MultiComponentEnableDisablePanel(EnableDisablePanel):
     """
@@ -48,11 +51,15 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
 
         self._disabled_items = []
 
+        logging.debug(f"Initializing MultiComponentEnableDisablePanel {id}...")
         self._extractor = DetectorExtractor(
-            self._application_controller.buffer_daq_config,
-            self._application_controller.session_name,
-            object_list,
+            self._application_controller,
+            object_list
         )
+        logging.debug(f"Extractor initialized with {self._extractor.get_all_states()}")
+        
+        logging.debug("MultiComponentEnableDisablePanel initialized.")
+        
 
     def generate_button_list(self) -> Dict | None:
         if (
@@ -61,18 +68,25 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
         ):
             return {}
 
-        # Set up information extractor
-        self._extractor.set_config_session(
-            self._application_controller.buffer_daq_config,
-            self._application_controller.session_name,
-        )
-
         # Grabs state information for each button
         self._extractor.read_system(self._object_list)
 
-        # Makes sure that the button states are set correctly and consistent
+        # Get states
+        unordered_states = self._extractor.get_all_states()
+        
+        #sort keys alphabetically, but keep the values as they are
+        
+        # put enabled items first
+        ordered_states = OrderedDict(sorted(
+                sorted(unordered_states.items(), key = self.__natural_sort_key),
+                key=lambda item: item[1] != SubsystemStatus.ENABLED))
+        return ordered_states
+    
+    # Natural sort key function, lets us display things like HLT In a "nice" ordering
+    def __natural_sort_key(self, s):
+        return [int(text) if text.isdigit() else text.lower() 
+                for text in re.split('([0-9]+)', s[0])]
 
-        return self._extractor.get_all_states()
 
     def _button_action(self, _, button_name: str) -> None:
 
@@ -100,7 +114,6 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
         return self._extractor.get_state(button)
 
     def get_tree(self):
-
         tree = ComponentLevelTree(
             self._application_controller,
             extractor=self._extractor,
