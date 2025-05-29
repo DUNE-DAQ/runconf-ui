@@ -1,4 +1,3 @@
-from runconf_ui.daq_config_interfaces.daq_config_file_io.daq_config_wrapper import DaqConfigurationWrapper
 from runconf_ui.runconf_ui_configuration.detector_config_readers.extractor_interfaces import MultiItemExtractor
 from runconf_ui.runconf_ui_configuration.detector_config_readers.system_extractor import SystemExtractor
 from runconf_ui.exceptions import CiderBadActionException, CiderInvalidConfigurationException
@@ -78,7 +77,7 @@ class DetectorExtractor(MultiItemExtractor):
                         system_info,
                     )
                 )
-            except CiderBadActionException as e:
+            except CiderBadActionException:
                 logging.debug(f"Could not extract system {system_name}")
                 logging.debug(f"{traceback.format_exc()}")
             except Exception as e:

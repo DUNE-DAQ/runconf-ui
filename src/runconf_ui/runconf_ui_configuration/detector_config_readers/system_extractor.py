@@ -1,4 +1,3 @@
-from runconf_ui.daq_config_interfaces.daq_config_file_io.daq_config_wrapper import DaqConfigurationWrapper
 from runconf_ui.runconf_ui_configuration.detector_config_readers.extractor_interfaces import (MultiItemExtractor,
                                                                                            SubsystemExtractor)
 from runconf_ui.runconf_ui_configuration.detector_config_readers.attribute_extractor import AttributeExtractor

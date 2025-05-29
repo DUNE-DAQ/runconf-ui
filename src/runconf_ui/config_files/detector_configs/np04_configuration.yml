@@ -4,7 +4,6 @@ PanelOptions:
   Detector:
     label: "detector"
     view_panel: "Detector View"
-    panel_type: "multisystem"
 
     Systems:
       - TPC:
@@ -53,7 +52,6 @@ PanelOptions:
   Trigger:
     label: "trigger"
     view_panel: "Trigger View"
-    panel_type: "multisystem"
 
     Systems:
       - TPG:

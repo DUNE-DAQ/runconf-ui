@@ -3,7 +3,6 @@ from runconf_ui.exceptions import CiderBadActionException
 
 from abc import ABC, abstractmethod
 from typing import Any
-import logging
 import traceback
 
 # The idea here is to define an interface for actions on a configuration,

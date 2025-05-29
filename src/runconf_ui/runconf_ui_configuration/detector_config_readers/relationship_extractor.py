@@ -85,7 +85,7 @@ class RelationshipExtractor(AttributeExtractor):
         try:
             # First try with buffer config
             return self._get_states(state, self._application_controller.buffer_daq_config)
-        except Exception as e:
+        except Exception:
             logging.debug(
                 "Couldn't find enable/disable state in buffer config, trying full config. "
             )
