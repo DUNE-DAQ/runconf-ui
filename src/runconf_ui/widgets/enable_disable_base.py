@@ -70,21 +70,7 @@ class EnableDisablePanel(Static):
                 if button_status == SubsystemStatus.STATE_NOT_DEFINED:
                     continue
 
-                if button_status == SubsystemStatus.ENABLED:
-                    name_str = f"{button} (Enabled)"
-                    classes = (
-                        "detector_subsystem_button detector_subsystem_button_enabled"
-                    )
-                elif button_status == SubsystemStatus.PARTIALLY_ENABLED:
-                    name_str = f"{button} (Partially Enabled)"
-                    classes = (
-                        "detector_subsystem_button detector_subsystem_button_partial"
-                    )
-                else:
-                    name_str = f"{button} (Disabled)"
-                    classes = (
-                        "detector_subsystem_button detector_subsystem_button_disabled"
-                    )
+                classes, name_str = self.get_button_classes_name(button, button_status)
 
                 id_name = button.replace(" ", "~")
 
@@ -92,7 +78,9 @@ class EnableDisablePanel(Static):
                     name_str, id=f"{id_name}_button", classes=classes
                 )
                 button_widget.tooltip = self.get_tooltip(button)
+               
                 yield button_widget
+
 
     def on_button_pressed(self, event: Button.Pressed):
         button_name = event.button.id.replace("_button", "")
@@ -194,3 +182,26 @@ class EnableDisablePanel(Static):
         Override this method in subclasses to provide specific tooltips.
         """
         return f"Enable/disable {button_name} subsystem"
+
+    def get_button_classes_name(self, button: str, button_status: SubsystemStatus):
+        """
+        Get the classes for a button based on its name.
+        Override this method in subclasses to provide specific classes.
+        """
+        if button_status == SubsystemStatus.ENABLED:
+            name_str = f"{button} (Enabled)"
+            classes = (
+                "detector_subsystem_button detector_subsystem_button_enabled"
+            )
+        elif button_status == SubsystemStatus.PARTIALLY_ENABLED:
+            name_str = f"{button} (Partially Enabled)"
+            classes = (
+                "detector_subsystem_button detector_subsystem_button_partial"
+            )
+        else:
+            name_str = f"{button} (Disabled)"
+            classes = (
+                "detector_subsystem_button detector_subsystem_button_disabled"
+            )
+
+        return classes, name_str

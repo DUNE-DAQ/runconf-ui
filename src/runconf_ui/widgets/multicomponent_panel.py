@@ -15,7 +15,6 @@ from typing import Dict, Optional
 from textual.visual import SupportsVisual
 from textual.widgets import Button
 import logging
-import re
 
 
 from collections import OrderedDict
@@ -74,25 +73,8 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
         self._extractor.read_system(self._object_list)
 
         # Get states
-        unordered_states = self._extractor.get_all_states()
+        return self._extractor.get_all_states()
 
-        # sort keys alphabetically, but keep the values as they are
-
-        # put enabled items first
-        ordered_states = OrderedDict(
-            sorted(
-                sorted(unordered_states.items(), key=self.__natural_sort_key),
-                key=lambda item: item[1] != SubsystemStatus.ENABLED,
-            )
-        )
-        return ordered_states
-
-    # Natural sort key function, lets us display things like HLT In a "nice" ordering
-    def __natural_sort_key(self, s):
-        return [
-            int(text) if text.isdigit() else text.lower()
-            for text in re.split("([0-9]+)", s[0])
-        ]
 
     def _button_action(self, _, button_name: str) -> None:
 
@@ -127,7 +109,7 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
         return tree
 
     def on_mount(self):
-        for button, information in self._button_list.items():
+        for button in self._button_list.keys():
             button_id = button.replace(" ", "~")
             try:
                 button_widget = self.query_one(f"#{button_id}_button", Button)
@@ -138,3 +120,4 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
 
     def get_tooltip(self, button_name: str) -> str:
         return self._extractor.get_tooltip(button_name)
+

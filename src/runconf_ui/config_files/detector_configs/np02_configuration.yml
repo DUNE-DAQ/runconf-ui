@@ -71,17 +71,6 @@ PanelOptions:
     label: "trigger"
     view_panel: "Trigger View"
     Systems:
-      - Trigger: 
-          display_full_system: False
-          subsystem_dependent: True
-          components:
-            - id: ""
-              class: CTBHLT
-              each_component_separate: True
-              filters:
-                - attribute: "description"
-                  values: ["Spare", "spare"]
-              tooltip: 'description'
 
       - RandomTrigger:
           relationships:
@@ -93,6 +82,17 @@ PanelOptions:
               disabled_state: []
               tooltip: "Enable/Disable random trigger"
 
+      - Trigger: 
+          display_full_system: False
+          subsystem_dependent: True
+          components:
+            - id: ""
+              class: CTBHLT
+              each_component_separate: True
+              filters:
+                - attribute: "description"
+                  values: ["Spare", "spare"]
+              tooltip: 'description'
   # Dataflow
   Dataflow:
     label: "dataflow"

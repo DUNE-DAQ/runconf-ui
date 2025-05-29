@@ -47,13 +47,6 @@ class RelationshipExtractor(AttributeExtractor):
         self.enabled_state = self._find_enable_disable_state(self.enabled_state)
         self.disabled_state = self._find_enable_disable_state(self.disabled_state)
 
-        logging.info(f"Enabled state: {self.enabled_state}")
-        logging.info(
-            f"State is in {ca.GetDalObjectAction(self._application_controller.buffer_daq_config)(getattr(self._enabled_state[0], 'id'), self._relationship_class)}"
-        )
-
-        logging.info(f"Disabled state: {self.disabled_state}")
-
     def _get_states(
         self, state: Union[str, List[str]], configuration: DaqConfigurationWrapper
     ) -> Union[object, List[object]]:
