@@ -142,3 +142,10 @@ class DetectorExtractor(MultiItemExtractor):
     @property
     def system_info(self):
         return self._detector_config
+
+    def get_tooltip(self, state_name: str) -> str:
+        for system in self._system_extractors:
+            if state_name in system.system_names:
+                return system.get_tooltip(state_name)
+
+        return "No tooltip available for this state"

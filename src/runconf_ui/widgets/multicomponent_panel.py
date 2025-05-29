@@ -9,6 +9,7 @@ from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
 
 from typing import Dict, Optional
 from textual.visual import SupportsVisual
+from textual.widgets import Button
 import logging
 import re
 
@@ -87,7 +88,6 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
         return [int(text) if text.isdigit() else text.lower() 
                 for text in re.split('([0-9]+)', s[0])]
 
-
     def _button_action(self, _, button_name: str) -> None:
 
         current_state = self._extractor.get_state(button_name)
@@ -119,3 +119,16 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
             extractor=self._extractor,
         )
         return tree
+
+    def on_mount(self):
+        for button, information in self._button_list.items():
+            button_id = button.replace(" ", "~")
+            try:
+                button_widget = self.query_one(f"#{button_id}_button", Button)
+            except Exception:
+                continue
+            
+            button_widget.tooltip = self._extractor.get_tooltip(button)
+            
+    def get_tooltip(self, button_name: str) -> str:
+        return self._extractor.get_tooltip(button_name)

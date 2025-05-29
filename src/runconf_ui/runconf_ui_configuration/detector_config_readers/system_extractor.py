@@ -53,6 +53,8 @@ class SystemExtractor(MultiItemExtractor):
         self._system_name = system_name
         self._display_full_system = True
 
+        self._tooltips = {'full_syst': f"Enable/disable {self._system_name}"}
+
         super().__init__(application_controller, system, disabled_dals)
 
     def read_system(self, system: Dict, system_name: Optional[str] = None):
@@ -91,7 +93,9 @@ class SystemExtractor(MultiItemExtractor):
             )
         )
         
-        
+        for s in self._system_names:
+            self._tooltips[s] = [*self.get_components(s), *self.get_attributes()][0].tooltip
+            
         if self._system_name is not None:
             self._system_names.append(self._system_name)
         else:
@@ -130,10 +134,12 @@ class SystemExtractor(MultiItemExtractor):
 
 
     def __add_component(self, system: Dict):
+        if system.get('separate_system', False):
+            self._tooltips[system['system_label']] = system.get('tooltip', f"Enable/Disable {system['system_label']}")
+        
         ext = ComponentExtractor(self._application_controller, system)    
         if not ext.is_filtered():
             self._components.append(ext)
-
 
     @property
     def system_names(self) -> Sequence[str]:
@@ -327,3 +333,14 @@ class SystemExtractor(MultiItemExtractor):
         return [ca.GetAttributeAction(self._application_controller.buffer_daq_config)(d, "id") for d in dals
                 if wildcard in ca.GetAttributeAction(self._application_controller.buffer_daq_config)(d, "id")]
         
+
+    def get_tooltip(self, system_name: Optional[str] = None):
+        """
+        Get the tooltip for the system or subsystem.
+        :param system_name: Name of the system to get the tooltip for, defaults to None
+        :return: Tooltip for the system or subsystem
+        """
+        if system_name is None:
+            return self._tooltips.get('full_syst', f"Enable/Disable {self._system_name}")
+        
+        return self._tooltips.get(system_name, f"Enable/Disable {system_name}")

@@ -181,10 +181,23 @@ class SubsystemExtractor(ItemExtractor):
         # If it is a seoarate system, we need to know what the system name is
         self._system_name = subsystem.get("system_label", None)
 
+
         if self._is_system and self._system_name is None:
             raise CiderBadActionException(
                 f"Subsystem {self._system_id} is a system but does not have a system name"
             )
+            
+        self._tooltip = ''
+        if self._is_system:
+            self._tooltip = subsystem.get('tooltip', f"Enable/disable {self._system_name} subsystem")
+
+    @property
+    def tooltip(self) -> Optional[str]:
+        return self._tooltip
+
+    @tooltip.setter
+    def tooltip(self, tooltip: Optional[str]):
+        self._tooltip = tooltip
 
     @property
     def is_system(self) -> bool:

@@ -87,8 +87,9 @@ class EnableDisablePanel(Static):
 
                 id_name = button.replace(" ", "~")
 
-                button = Button(name_str, id=f"{id_name}_button", classes=classes)
-                yield button
+                button_widget = Button(name_str, id=f"{id_name}_button", classes=classes)
+                button_widget.tooltip = self.get_tooltip(button)
+                yield button_widget
                 
     def on_button_pressed(self, event: Button.Pressed):
         button_name = event.button.id.replace("_button", "")
@@ -149,7 +150,7 @@ class EnableDisablePanel(Static):
                 button_widget = self.query_one(f"#{button_id}", Button)
             except Exception:
                 continue
-
+            
             button_state = self.check_button_state(button, information)
 
             button_widget.remove_class("detector_subsystem_button_enabled")
@@ -182,3 +183,10 @@ class EnableDisablePanel(Static):
     class Changed(Message):
         """Custom message to notify when a button is pressed."""
         ...
+
+    def get_tooltip(self, button_name: str) -> str:
+        """
+        Get the tooltip for a button based on its name.
+        Override this method in subclasses to provide specific tooltips.
+        """
+        return f"Enable/disable {button_name} subsystem"

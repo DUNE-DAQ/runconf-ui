@@ -85,3 +85,20 @@ class ComponentExtractor(SubsystemExtractor):
                 
             
         return False
+    
+    @property
+    def tooltip(self) -> str:
+        
+        # We can try to get the attribute
+        try:
+            return ca.GetAttributeAction(
+                self._application_controller.buffer_daq_config)(
+                self.get_dal(), self._tooltip
+            )
+        except CiderBadActionException:
+            logging.debug("Tooltip attribute not found, using default tooltip.")
+
+        if self._is_system:
+            return f"Enable/disable {self._system_name} component"
+        else:
+            return f"Enable/disable {self._system_id} component"

@@ -81,6 +81,7 @@ PanelOptions:
               filters:
                 - attribute: "description"
                   values: ["Spare", "spare"]
+              tooltip: 'description'
 
       - RandomTrigger:
           relationships:
@@ -90,6 +91,7 @@ PanelOptions:
               relationship_class: RandomTCMakerConf
               enabled_state: [random-tc-generator]
               disabled_state: []
+              tooltip: "Enable/Disable random trigger"
 
   # Dataflow
   Dataflow:
