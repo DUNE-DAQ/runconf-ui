@@ -41,10 +41,14 @@ PanelOptions:
   # Dataflow
   Dataflow:
     label: "dataflow"
-    panel_type: "singlesystem"
-    classes:
-      - "DFApplication"
-
+    Systems:
+      - Dataflow:
+          subsystem_dependent: True
+          display_full_system: False
+          components:
+            - id: ""
+              class: "DFApplication"
+              each_component_separate: True
 
   Trigger:
     label: "trigger"
