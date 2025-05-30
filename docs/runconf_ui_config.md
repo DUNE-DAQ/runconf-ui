@@ -46,7 +46,12 @@ Full panel description with defaults if provided
 
 ```yml
 ---
-# Everything is stored in PanelOptions
+Settings:
+  # List of classses to show on map panels
+  classes_to_show [list str]:
+    
+
+# PanelOptions are the list of "panels" that display both trees (if view_panel has a name) and lists of what to show
 PanelOptions:
   # Panel ID
   Panel: 

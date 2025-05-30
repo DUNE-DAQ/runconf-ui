@@ -321,9 +321,7 @@ class FilePanelWidget(Static):
         except Exception:
             logging.error("Error opening file")
             logging.error(traceback.format_exc())
-            self._application_controller.current_daq_config = (
-                selected_configuration.file_name
-            )
+            self._application_controller.current_daq_config = selected_configuration
             self.post_message(self.FileNotFound(selected_configuration))
 
         self.post_message(self.FileSelected())

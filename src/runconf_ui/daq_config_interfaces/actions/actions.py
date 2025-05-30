@@ -166,6 +166,10 @@ class GetRelatedDalsAction(ActionInterface):
         relations = self._daq_configuration.relations(dal.className())
 
         relations_list = []
+        # HW : HACK to make sure we get all relations
+        if contains:= getattr(dal, "contains", None):
+            relations["contains"] = contains
+
         # Loop over relations
         for rel, rel_info in relations.items():
             rel_val = getattr(dal, rel)
@@ -177,9 +181,8 @@ class GetRelatedDalsAction(ActionInterface):
                 {rel: [v for v in rel_val if v is not None], "rel_info": rel_info}
             )
 
-        return relations_list
 
-        CommitConfigurationAction(self._daq_configuration)()
+        return relations_list
 
 
 # Tiny bit hacky + hardcoded, lets us disable stuff

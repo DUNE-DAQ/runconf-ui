@@ -1,7 +1,13 @@
 ---
-# Optionw to generate panels
-PanelOptions:
+# Options to generate panels
+Settings:
+  classes_to_show:
+    - Segment
+    - SmartDaqApplication
+    - CTBHLT
+    - CTBoardConf
 
+PanelOptions:
   Detector:
     label: "detector"
     view_panel: "Detector View"
