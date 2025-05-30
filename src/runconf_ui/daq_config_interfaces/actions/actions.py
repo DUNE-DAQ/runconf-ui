@@ -3,7 +3,6 @@ from runconf_ui.daq_config_interfaces.daq_config_file_io.daq_config_wrapper impo
     DaqConfigurationWrapper,
 )
 import shutil
-import logging
 
 """
 A collection of simple actions on a configuration. These should take a single configuration

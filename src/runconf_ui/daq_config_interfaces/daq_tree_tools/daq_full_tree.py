@@ -4,7 +4,7 @@ from runconf_ui.runconf_ui_controllers.runconf_ui_state import ShifterInterfaceS
 from rich.tree import Tree
 import runconf_ui.daq_config_interfaces.actions.actions as ca
 import logging
-from typing import Optional, Set
+from typing import Set
 
 class DaqFullTree(DaqConfTreeBase):
     def __init__(
