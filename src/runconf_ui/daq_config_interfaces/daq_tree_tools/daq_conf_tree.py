@@ -85,14 +85,20 @@ class DaqConfTree(DaqConfTreeBase):
     def generate_tree(self) -> Tree:
         """Generate the tree."""
         # Add the session
-        self._tree = Tree(f"[bold red1] {self._application_controller.session_name}")
+        
+        if self._application_controller.buffer_daq_config is None:
+            self._tree = Tree("[bold red1] No Configuration Loaded")
+        
+        else:        
+            self._tree = Tree(f"[bold red1] {self._application_controller.session_name}")
 
-        # We're now going to recurssively loop through relations to session
-        session_dal = ca.GetDalObjectAction(
-            self._application_controller.buffer_daq_config
-        )(self._application_controller.session_name, "Session")
+            # We're now going to recurssively loop through relations to session
+            session_dal = ca.GetDalObjectAction(
+                self._application_controller.buffer_daq_config
+            )(self._application_controller.session_name, "Session")
 
-        self.build_tree(session_dal, self._tree, False)
+            self.build_tree(session_dal, self._tree, False)
+
         return self._tree
 
     def get_related_segments(self, segment):
