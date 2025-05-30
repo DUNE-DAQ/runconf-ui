@@ -1,6 +1,18 @@
 ---
-PanelOptions:
+Settings:
+  classes_to_show:
+    - Segment
+    - TriggerApplication
+    - TPStreamWriterApplication
+    - ReadoutApplication
+    - MLTApplication
+    - RandomTCMakerConf
+    - CTBHLT
+    - DFApplication
+    - CTBoardConf
 
+
+PanelOptions:
   Detector:
     label: "detector"
     view_panel: "Detector View"

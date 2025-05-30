@@ -12,7 +12,7 @@ class DaqTreeManager:
     def update_all_trees(self, screen: Screen):
         """Update all tree views in the screen"""
         # main_tree = DaqConfTree(self._application_controller)
-        main_tree = DaqFullTree(self._application_controller, class_filters=["SmartDaqApplication", "Segment"])
+        main_tree = DaqFullTree(self._application_controller)
         main_tree.generate_tree()
         screen.query_one("#tree_view_full").update(main_tree.print_tree())
         disabled = main_tree.disabled_objs
