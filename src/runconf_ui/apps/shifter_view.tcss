@@ -73,6 +73,32 @@ SelectCurrent{
     background: $warning-lighten-2;
 }
 
+/* === Adjustable Panel === */
+
+
+.adjustable-attribute-grid{
+    grid-size: 7 1;
+    width: 100%;
+    grid-gutter: 3;
+}
+
+.adjustable-attribute-button{
+    column-span: 1;
+}
+
+.adjustable-attribute-name{
+    column-span: 2;
+}
+
+.adjustable-attribute-input{
+    column-span: 2;
+}
+
+.adjustable-attribute-label{
+    padding: 1 0;
+}
+
+
 /* === Detector Subsystem Panel === */
 #enable_disable_panel_container {
     grid-size: 20;
@@ -82,21 +108,23 @@ SelectCurrent{
     row-span: 6;
 }
 
-#systematic_map_tabs{
-       column-span: 14;
-       align-horizontal: right;
+.systematic_map_tabs{
+    width: 100%;
+    align-horizontal: right;
+}
+
+.multi_view_tabs{
+    column-span: 14;
 }
 
 #selection_tabs{
     column-span: 6;
 }
 
-
 #buttons_panel {
     column-span: 10;
     background: $background-darken-1;
 }
-
 
 /* === Options Panel === */
 #option_panel_main {
@@ -218,3 +246,4 @@ SelectCurrent{
 .popup_success{
     background: $success
 }
+

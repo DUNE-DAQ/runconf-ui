@@ -95,6 +95,14 @@ class ShifterConfigReader:
         return self._detector_config.get("PanelOptions", {})
 
     @property
+    def adjustable_attributes(self):
+        """
+        Get the adjustable attributes from the detector config.
+        This is a dictionary of attributes that can be adjusted in the UI.
+        """
+        return self._detector_config.get("AdjustableAttributes", {})
+
+    @property
     def classes_to_show(self):
         """
         Get the set of classes to show in the UI.

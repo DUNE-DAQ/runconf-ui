@@ -7,6 +7,7 @@ Settings:
     - CTBHLT
     - CTBoardConf
 
+
 PanelOptions:
   Detector:
     label: "detector"
@@ -110,3 +111,16 @@ PanelOptions:
             - id: ""
               class: "DFApplication"
               each_component_separate: True
+
+
+AdjustableAttributes:
+  TriggerRates:
+    label: "TriggerRates"
+    Systems:
+      - object_id: "random-tc-generator"
+        object_class: RandomTCMakerConf
+        attribute_name: "trigger_rate_hz"
+
+      - object_class: "CTBRandomTrigger"
+        attribute_name: "period"
+        convert_to_hertz: True

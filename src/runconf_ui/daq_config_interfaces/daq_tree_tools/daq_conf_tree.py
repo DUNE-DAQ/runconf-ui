@@ -1,7 +1,7 @@
 # Essentially the tree from https://github.com/DUNE-DAQ/daqconf/blob/develop/scripts/daqconf_inspector
 
 import runconf_ui.daq_config_interfaces.actions.actions as ca
-from runconf_ui.runconf_ui_configuration.detector_config_readers.detector_extractor import (
+from runconf_ui.runconf_ui_configuration.object_extractors.detector_extractor import (
     DetectorExtractor,
 )
 from runconf_ui.utils.subsystem_status import SubsystemStatus

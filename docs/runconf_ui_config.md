@@ -280,3 +280,27 @@ You can see that these correspond to the following
 
 As with components one can also specify `system_label` and `separate_system` to make additional buttons in the configuration.
 
+## Adjustable Triggers
+In addition to being able to turn on and off things the shifter-ui lets the user adjust the values of various trigger rates. This can be added using an `AdjustableAttributes` entry to the detector config file i.e.
+```yaml
+Settings:
+  ...
+PanelOptions:
+  ...
+AdjustableAttributes:
+  AttributeGroup: # Group of attributes to put in a tab
+    - label [str]: # internal label to keep textual sane
+    Systems:
+      - object_id [str, Optional]: # ID of object containing a given attribute. If left blank it will search for all objects of a given class
+        object_class [str]: # Class of objects with given attribute
+        attribute_name [str]: #Name of attribute to modify 
+        lower_limit [Optional, Any]: # Lower limit allowed for attribute
+        upper_limit [Optional, Any]: # Upper limit allowed for attribute
+
+        convert_to_hertz: [Optional, bool] # Convert to hertz by doing clock rate/value
+```
+
+The result is a view like
+![alt text](image.png)
+
+As you can see this is an additional tab in the same place as the map view. The left hand text gives the object name + attribute whilst the text on the far right tells you its current value. The apply button changes the value of the attribute and reset sets it to its original value in the configuration file.

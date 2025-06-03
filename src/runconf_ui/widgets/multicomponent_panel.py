@@ -1,5 +1,5 @@
 from runconf_ui.widgets.enable_disable_base import EnableDisablePanel
-from runconf_ui.runconf_ui_configuration.detector_config_readers.detector_extractor import (
+from runconf_ui.runconf_ui_configuration.object_extractors.detector_extractor import (
     DetectorExtractor,
 )
 from runconf_ui.utils.subsystem_status import SubsystemStatus
@@ -89,6 +89,7 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
         desired_state = SubsystemStatus(not bool(current_state))
 
         self._extractor.set_state(desired_state, button_name)
+        
 
     def update_disabled(self, disabled_states):
         self._disabled_items = disabled_states

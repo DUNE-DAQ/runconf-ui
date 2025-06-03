@@ -61,7 +61,7 @@ class EnableDisablePanel(Static):
         raise NotImplementedError("Check is disabled not implemented for class")
 
     def compose(self):
-        with ScrollableContainer(id="buttons_panel"):
+        with ScrollableContainer(id="buttons_panel", classes="large_box_container"):
 
             for button, information in self._button_list.items():
 
