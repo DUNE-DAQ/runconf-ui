@@ -20,19 +20,17 @@ class DetectorMapReaderBase(ABC):
     def __init__(self, application_controller: ShifterInterfaceState) -> None:
         self._application_controller = application_controller
         logging.debug("Generating detector map...")
-            
+
         full_opts = self.get_opts_from_controller()
-        
+
         self._labels = [full_opts[k]["label"] for k in full_opts.keys()]
         self._panel_list = []
-        
+
         for name, opts in full_opts.items():
             self.append_to_panel(name, opts)
 
-
     @abstractmethod
-    def get_opts_from_controller(selfs)->Dict:
-        ...
+    def get_opts_from_controller(selfs) -> Dict: ...
 
     @abstractmethod
     def append_to_panel(self, name: str, opts: Dict) -> None:
@@ -41,7 +39,7 @@ class DetectorMapReaderBase(ABC):
         This method should be implemented by subclasses to define how panels are added.
         """
         ...
-            
+
     def initialise_system(self, panel_name: str, opts: Dict, panel: Static) -> TabPane:
         """
         Initialise a system panel with the given options.

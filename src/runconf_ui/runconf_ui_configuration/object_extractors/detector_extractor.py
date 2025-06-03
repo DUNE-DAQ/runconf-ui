@@ -134,20 +134,25 @@ class DetectorExtractor(MultiItemExtractor):
         for system in self._system_extractors:
             try:
                 system_dict = system.get_all_states()
-                
-                main_syst = system_dict.pop(system.system_name, None)  # Remove system name key
+
+                main_syst = system_dict.pop(
+                    system.system_name, None
+                )  # Remove system name key
                 if main_syst is not None:
-                    return_dict[system.system_name] = main_syst  # Add it back as the first item
-                
+                    return_dict[system.system_name] = (
+                        main_syst  # Add it back as the first item
+                    )
+
                 # Sort by value
-                ordered_states = OrderedDict(sorted(
-                                    sorted(system_dict.items(), key=self.__natural_sort_key),
-                                    key=lambda item: item[1] != SubsystemStatus.ENABLED)
-                                )
-                
+                ordered_states = OrderedDict(
+                    sorted(
+                        sorted(system_dict.items(), key=self.__natural_sort_key),
+                        key=lambda item: item[1] != SubsystemStatus.ENABLED,
+                    )
+                )
+
                 return_dict.update(ordered_states)
-                
-                
+
             except CiderBadActionException:
                 logging.debug(f"Could not get all states for {system.system_name}")
                 logging.debug(f"{traceback.format_exc()}")
@@ -179,13 +184,13 @@ class DetectorExtractor(MultiItemExtractor):
             for text in re.split("([0-9]+)", s[0])
         ]
 
-    def get_is_subsystem(self, state_name: str)->bool:
+    def get_is_subsystem(self, state_name: str) -> bool:
         """
         Check if the state name corresponds to a subsystem.
-        
+
         Args:
             state_name: The name of the state to check.
-        
+
         Returns:
             True if the state name corresponds to a subsystem, False otherwise.
         """
@@ -193,6 +198,5 @@ class DetectorExtractor(MultiItemExtractor):
             # If it's the full system name, it's not a subsystem
             if state_name == system.system_name:
                 return False
-            
+
         return True
-        

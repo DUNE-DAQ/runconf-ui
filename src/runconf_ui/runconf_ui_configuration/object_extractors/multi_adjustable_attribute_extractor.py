@@ -1,5 +1,8 @@
-from runconf_ui.runconf_ui_configuration.object_extractors.adjustable_attribute_extractor import AdjustableAttributeManager
+from runconf_ui.runconf_ui_configuration.object_extractors.adjustable_attribute_extractor import (
+    AdjustableAttributeManager,
+)
 import logging
+
 
 class MultiAdjustableAttributeExtractor:
     def __init__(self, application_controller, **kwargs):
@@ -11,13 +14,16 @@ class MultiAdjustableAttributeExtractor:
         self._application_controller = application_controller
 
         self._adjustable_attributes = []
-        for obj in kwargs['Systems']:
+        for obj in kwargs["Systems"]:
             try:
-                self._adjustable_attributes.append(AdjustableAttributeManager(self._application_controller, **obj))
+                self._adjustable_attributes.append(
+                    AdjustableAttributeManager(self._application_controller, **obj)
+                )
             except:
-                logging.debug(f"Failed to initialize AdjustableAttributeManager with {obj}.")
-        
-    
+                logging.debug(
+                    f"Failed to initialize AdjustableAttributeManager with {obj}."
+                )
+
     def set_state(self, object_id: str, attribute_name: str, value: float):
         """
         Sets the specified attribute for the given object ID.
@@ -26,11 +32,16 @@ class MultiAdjustableAttributeExtractor:
         :param value: The value to set for the attribute.
         """
         for manager in self._adjustable_attributes:
-            if object_id in manager.get_all_states() and attribute_name == manager.attribute_name:
+            if (
+                object_id in manager.get_all_states()
+                and attribute_name == manager.attribute_name
+            ):
                 manager.set_state(object_id, value)
                 return
-        raise ValueError(f"Object ID {object_id} or attribute {attribute_name} not found in adjustable attributes.")
-    
+        raise ValueError(
+            f"Object ID {object_id} or attribute {attribute_name} not found in adjustable attributes."
+        )
+
     def get_state(self, object_id: str, attribute_name: str) -> float:
         """
         Gets the specified attribute for the given object ID.
@@ -39,10 +50,15 @@ class MultiAdjustableAttributeExtractor:
         :return: The value of the specified attribute.
         """
         for manager in self._adjustable_attributes:
-            if object_id in manager.get_all_states() and attribute_name == manager.attribute_name:
+            if (
+                object_id in manager.get_all_states()
+                and attribute_name == manager.attribute_name
+            ):
                 return manager.get_state(object_id)
-        raise ValueError(f"Object ID {object_id} or attribute {attribute_name} not found in adjustable attributes.")
-    
+        raise ValueError(
+            f"Object ID {object_id} or attribute {attribute_name} not found in adjustable attributes."
+        )
+
     def get_all_states(self) -> dict:
         """
         Gets all adjustable attributes and their states.
@@ -52,7 +68,7 @@ class MultiAdjustableAttributeExtractor:
         for manager in self._adjustable_attributes:
             all_attributes.update(manager.get_all_states())
         return all_attributes
-    
+
     def reset_attribute(self, object_id: str, attribute_name: str):
         """
         Resets the specified attribute for the given object ID to its initial value.
@@ -60,10 +76,13 @@ class MultiAdjustableAttributeExtractor:
         :param attribute_name: The name of the attribute to reset.
         """
         for manager in self._adjustable_attributes:
-            if object_id in manager.get_all_states() and attribute_name == manager.attribute_name:
+            if (
+                object_id in manager.get_all_states()
+                and attribute_name == manager.attribute_name
+            ):
                 manager.reset_value(object_id)
                 return
-    
+
     def get_tooltip(self, object_id: str, attribute_name: str) -> str | None:
         """
         Gets the tooltip for the specified attribute of the given object ID.
@@ -72,7 +91,10 @@ class MultiAdjustableAttributeExtractor:
         :return: The tooltip string for the specified attribute.
         """
         for manager in self._adjustable_attributes:
-            if object_id in manager.get_all_states() and attribute_name == manager.attribute_name:
+            if (
+                object_id in manager.get_all_states()
+                and attribute_name == manager.attribute_name
+            ):
                 return manager.get_tooltip(object_id)
 
     def lower_limit(self, object_id: str, attribute_name: str) -> float | None:
@@ -83,9 +105,12 @@ class MultiAdjustableAttributeExtractor:
         :return: The lower limit value or None if not set.
         """
         for manager in self._adjustable_attributes:
-            if object_id in manager.get_all_states() and attribute_name == manager.attribute_name:
+            if (
+                object_id in manager.get_all_states()
+                and attribute_name == manager.attribute_name
+            ):
                 return manager.lower_limit
-    
+
     def upper_limit(self, object_id: str, attribute_name: str) -> float | None:
         """
         Gets the upper limit for the specified attribute of the given object ID.
@@ -94,16 +119,24 @@ class MultiAdjustableAttributeExtractor:
         :return: The upper limit value or None if not set.
         """
         for manager in self._adjustable_attributes:
-            if object_id in manager.get_all_states() and attribute_name == manager.attribute_name:
+            if (
+                object_id in manager.get_all_states()
+                and attribute_name == manager.attribute_name
+            ):
                 return manager.upper_limit
-    
+
     def reset_value(self, object_id: str, attribute_name: str):
         """
         Resets all adjustable attributes for the given object ID to their initial values.
         :param object_id: The ID of the object to reset.
         """
         for manager in self._adjustable_attributes:
-            if object_id in manager.get_all_states() and attribute_name == manager.attribute_name:
+            if (
+                object_id in manager.get_all_states()
+                and attribute_name == manager.attribute_name
+            ):
                 manager.reset_value(object_id)
             else:
-                logging.debug(f"Object ID {object_id} not found in adjustable attributes.")
+                logging.debug(
+                    f"Object ID {object_id} not found in adjustable attributes."
+                )

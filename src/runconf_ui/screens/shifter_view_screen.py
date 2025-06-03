@@ -27,6 +27,8 @@ from runconf_ui.widgets.adjustable_attribute_panel import AdjustableAttributePan
 from runconf_ui.runconf_ui_configuration.detector_config_readers.generate_adjustable_attribute_map import (
     AdjustableAttributeMapGen,
 )
+
+
 class ShifterViewScreen(Screen):
     """Main shifter view, this is the main screen that the shifter will see"""
 
@@ -47,7 +49,9 @@ class ShifterViewScreen(Screen):
     def compose(self):
         """Generate the screen layout"""
         enable_disable_generator = EnableDisableMapGen(self._application_controller)
-        adjustable_attribute_panel = AdjustableAttributeMapGen(self._application_controller)
+        adjustable_attribute_panel = AdjustableAttributeMapGen(
+            self._application_controller
+        )
 
         with ScrollableContainer(id="main_container"):
             yield FilePanelWidget(self._application_controller, classes="file_io_panel")
@@ -68,7 +72,7 @@ class ShifterViewScreen(Screen):
                             id="systematic_map_tabs",
                             classes="systematic_map_tabs",
                         ):
-                                
+
                             with TabPane("System View", id="full_system_map_tab"):
                                 yield ScrollableContainer(
                                     Static("", id="tree_view_full"),
@@ -79,7 +83,6 @@ class ShifterViewScreen(Screen):
                                 if panel is not None:
                                     yield panel
 
-                    
                     with TabPane("Adjustable Rates", id="detector_map_tab"):
                         with TabbedContent(
                             "Attributes",
@@ -90,8 +93,7 @@ class ShifterViewScreen(Screen):
                             for panel in adjustable_attribute_panel.panel_list:
                                 if panel is not None:
                                     yield panel
-                            
-                    
+
             yield OptionPanel(
                 application_controller=self._application_controller,
                 id="option_panel_main",
@@ -139,15 +141,16 @@ class ShifterViewScreen(Screen):
         self.popups.show(
             "[white]Configuration git repo corrupted, resetting", timer=10.0
         )
-        
+
     @on(AdjustableAttributePanel.AttributeOutOfBounds)
-    async def attribute_out_of_bounds(self, event: AdjustableAttributePanel.AttributeOutOfBounds):
+    async def attribute_out_of_bounds(
+        self, event: AdjustableAttributePanel.AttributeOutOfBounds
+    ):
         """Handle out of bounds attribute values"""
         self.popups.show(
             f"[white]{event.message}",
             timer=5.0,
         )
-    
 
     def _load_new_configuration(self):
         """Handle loading a new configuration file"""
@@ -177,12 +180,13 @@ class ShifterViewScreen(Screen):
             self._application_controller.current_state = {
                 p.id: p.get_current_states() for p in self.query("EnableDisablePanel")
             }
-            
+
         for panel in self.query("AdjustableAttributePanel"):
             panel.open_new_session()
             panel.refresh(recompose=True)
             self._application_controller.current_state = {
-                p.id: p.get_current_states() for p in self.query("AdjustableAttributePanel")
+                p.id: p.get_current_states()
+                for p in self.query("AdjustableAttributePanel")
             }
 
         self.tree_manager.update_all_trees(self)

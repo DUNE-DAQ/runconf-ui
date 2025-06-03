@@ -41,7 +41,7 @@ class ShifterConfigReader:
         self._operation_url = path_or_env_check(
             general_settings.get("operation_url", None)
         )
-        
+
         # Get settings from the detector config
         detector_config_settings = self._detector_config.get("Settings", {})
         self._classes_to_show = detector_config_settings.get("classes_to_show", [])

@@ -167,7 +167,7 @@ class GetRelatedDalsAction(ActionInterface):
 
         relations_list = []
         # HW : HACK to make sure we get all relations
-        if contains:= getattr(dal, "contains", None):
+        if contains := getattr(dal, "contains", None):
             relations["contains"] = contains
 
         # Loop over relations
@@ -180,7 +180,6 @@ class GetRelatedDalsAction(ActionInterface):
             relations_list.append(
                 {rel: [v for v in rel_val if v is not None], "rel_info": rel_info}
             )
-
 
         return relations_list
 

@@ -16,6 +16,7 @@ from textual.visual import SupportsVisual
 from textual.widgets import Button
 import logging
 
+
 class MultiComponentEnableDisablePanel(EnableDisablePanel):
     """
     For enabling/disabling systems made of many different things
@@ -71,7 +72,6 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
         # Get states
         return self._extractor.get_all_states()
 
-
     def _button_action(self, _, button_name: str) -> None:
 
         current_state = self._extractor.get_state(button_name)
@@ -89,7 +89,6 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
         desired_state = SubsystemStatus(not bool(current_state))
 
         self._extractor.set_state(desired_state, button_name)
-        
 
     def update_disabled(self, disabled_states):
         self._disabled_items = disabled_states
@@ -117,4 +116,3 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
 
     def get_tooltip(self, button_name: str) -> str:
         return self._extractor.get_tooltip(button_name)
-

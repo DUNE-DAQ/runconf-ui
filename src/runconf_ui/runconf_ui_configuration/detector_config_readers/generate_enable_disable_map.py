@@ -5,10 +5,11 @@ from runconf_ui.runconf_ui_configuration.detector_config_readers.detector_map_re
 from textual.widgets import TabPane, Static
 from textual.containers import ScrollableContainer
 
+
 class EnableDisableMapGen(DetectorMapReaderBase):
     _panel_list = []
     _map_list = []
-    
+
     def get_opts_from_controller(self) -> dict:
         """
         Get the options for the panels from the application controller.
@@ -22,7 +23,6 @@ class EnableDisableMapGen(DetectorMapReaderBase):
             self._panel_list.append(panel)
         if map is not None:
             self._map_list.append(map)
-            
 
     def initialise_multi_system(self, panel_name, opts):
         panel = MultiComponentEnableDisablePanel(
@@ -46,8 +46,6 @@ class EnableDisableMapGen(DetectorMapReaderBase):
 
         return panel_tab, map_tab
 
-
     @property
     def map_list(self):
         return self._map_list
-
