@@ -39,7 +39,7 @@ class AdjustableAttributePanel(Static):
             with Grid(id=f"grid-{label_name}", classes="adjustable-attribute-grid"):
                 
                 yield Static(
-                    f"[bold red]{object_id}: {attribute}[/bold red]",
+                    f"[bold]ID:[/bold] [bold red]{object_id}[/bold red]:\n[bold]Attribute:[/bold] [bold purple]{attribute}[/bold purple]",
                     id=f"label-{label_name}",
                     classes="adjustable-attribute-label adjustable-attribute-name",
                 )
@@ -96,12 +96,9 @@ class AdjustableAttributePanel(Static):
             
             try:
                 self._attribute_manager.set_state(base_id, attribute, input_value)
-            except CiderOutOfBoundsException as e:
+            except Exception as e:
                 
-                upper_bound = self._attribute_manager.upper_limit(base_id, attribute)
-                lower_bound = self._attribute_manager.lower_limit(base_id, attribute)
-                
-                message = f"Value for {base_id} is out of bounds: {str(e)} [{lower_bound:3f}, {upper_bound:3f}] Hz"
+                message = f"Error setting attribute {attribute} for object {base_id}. Value: {input_value} is out of bounds or invalid."
                 self.post_message(self.AttributeOutOfBounds(base_id, message))
                 return
 

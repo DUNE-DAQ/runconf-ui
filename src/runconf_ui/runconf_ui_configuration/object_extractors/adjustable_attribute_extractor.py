@@ -10,7 +10,7 @@ class AdjustableAttributeManager:
 
         self._upper_limit = kwargs.get('upper_limit', None)
         self._lower_limit = kwargs.get('lower_limit', None)
-        self._convert_to_period = kwargs.get('convert_to_hertz', False)
+        self._convert_to_period = kwargs.get('convert_to_tick', False)
         
         self._object_list = []
         self._object_ids = []
