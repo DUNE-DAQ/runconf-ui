@@ -25,6 +25,7 @@ class CiderInvalidConfigSettingException(CiderInvalidConfigurationException):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+
 class CiderInvalidRepoException(CiderException):
     # When the file is not valid
     def __init__(self, *args, **kwargs):

@@ -9,6 +9,7 @@ from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
 )
 import logging
 
+
 class EnableDisablePanel(Static):
     """
     Base class for all of the enable/disable button panel
@@ -60,9 +61,7 @@ class EnableDisablePanel(Static):
         raise NotImplementedError("Check is disabled not implemented for class")
 
     def compose(self):
-        
-        
-        with ScrollableContainer(id="buttons_panel"):        
+        with ScrollableContainer(id="buttons_panel"):
 
             for button, information in self._button_list.items():
 
@@ -71,33 +70,30 @@ class EnableDisablePanel(Static):
                 if button_status == SubsystemStatus.STATE_NOT_DEFINED:
                     continue
 
-                if button_status == SubsystemStatus.ENABLED:
-                    name_str = f"{button} (Enabled)"
-                    classes = (
-                        "detector_subsystem_button detector_subsystem_button_enabled"
-                    )
-                elif button_status == SubsystemStatus.PARTIALLY_ENABLED:
-                    name_str = f"{button} (Partially Enabled)"
-                    classes = (
-                        "detector_subsystem_button detector_subsystem_button_partial"
-                    )
-                else:
-                    name_str = f"{button} (Disabled)"
-                    classes = (
-                        "detector_subsystem_button detector_subsystem_button_disabled"
-                    )
+                classes, name_str = self.get_button_classes_name(button, button_status)
 
-                id_name = button.replace(" ", "_")
+                id_name = button.replace(" ", "~")
 
-                yield Button(name_str, id=f"{id_name}_button", classes=classes)
+                button_widget = Button(
+                    name_str, id=f"{id_name}_button", classes=classes
+                )
+                button_widget.tooltip = self.get_tooltip(button)
+               
+                yield button_widget
+
 
     def on_button_pressed(self, event: Button.Pressed):
         button_name = event.button.id.replace("_button", "")
 
-        button_name = button_name.replace("_", " ")
+        logging.debug(f"Button pressed: {button_name}")
+
+        button_name = button_name.replace("~", " ")
         objs_affected = self._button_list.get(button_name, None)
 
         if objs_affected is None:
+            logging.warning(
+                f"Button {button_name} not found in button list, ignoring event"
+            )
             return
 
         self._button_action(objs_affected, button_name)
@@ -121,7 +117,7 @@ class EnableDisablePanel(Static):
                 continue
 
             # Hacky but it means we can have readable buttons and textual can use them...
-            button = button.replace(" ", "_")
+            button = button.replace(" ", "~")
             output_str += f"_{button}_{'on' if state else 'off'}"
 
         return output_str
@@ -140,7 +136,7 @@ class EnableDisablePanel(Static):
         logging.debug(f"Updating button styles for {self}")
 
         for button, information in self._button_list.items():
-            button_id = button.replace(" ", "_") + "_button"
+            button_id = button.replace(" ", "~") + "_button"
             try:
                 button_widget = self.query_one(f"#{button_id}", Button)
             except Exception:
@@ -179,3 +175,33 @@ class EnableDisablePanel(Static):
         """Custom message to notify when a button is pressed."""
 
         ...
+
+    def get_tooltip(self, button_name: str) -> str:
+        """
+        Get the tooltip for a button based on its name.
+        Override this method in subclasses to provide specific tooltips.
+        """
+        return f"Enable/disable {button_name} subsystem"
+
+    def get_button_classes_name(self, button: str, button_status: SubsystemStatus):
+        """
+        Get the classes for a button based on its name.
+        Override this method in subclasses to provide specific classes.
+        """
+        if button_status == SubsystemStatus.ENABLED:
+            name_str = f"{button} (Enabled)"
+            classes = (
+                "detector_subsystem_button detector_subsystem_button_enabled"
+            )
+        elif button_status == SubsystemStatus.PARTIALLY_ENABLED:
+            name_str = f"{button} (Partially Enabled)"
+            classes = (
+                "detector_subsystem_button detector_subsystem_button_partial"
+            )
+        else:
+            name_str = f"{button} (Disabled)"
+            classes = (
+                "detector_subsystem_button detector_subsystem_button_disabled"
+            )
+
+        return classes, name_str

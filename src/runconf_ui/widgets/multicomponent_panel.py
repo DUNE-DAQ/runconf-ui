@@ -1,16 +1,20 @@
 from runconf_ui.widgets.enable_disable_base import EnableDisablePanel
-from runconf_ui.runconf_ui_configuration.detector_config_readers.detector_extractor import DetectorExtractor
+from runconf_ui.runconf_ui_configuration.detector_config_readers.detector_extractor import (
+    DetectorExtractor,
+)
 from runconf_ui.utils.subsystem_status import SubsystemStatus
 
-from runconf_ui.daq_config_interfaces.daq_tree_tools.daq_conf_tree import ComponentLevelTree
+from runconf_ui.daq_config_interfaces.daq_tree_tools.daq_conf_tree import (
+    ComponentLevelTree,
+)
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
     ShifterInterfaceState,
 )
 
 from typing import Dict, Optional
 from textual.visual import SupportsVisual
+from textual.widgets import Button
 import logging
-
 
 class MultiComponentEnableDisablePanel(EnableDisablePanel):
     """
@@ -48,11 +52,11 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
 
         self._disabled_items = []
 
-        self._extractor = DetectorExtractor(
-            self._application_controller.buffer_daq_config,
-            self._application_controller.session_name,
-            object_list,
-        )
+        logging.debug(f"Initializing MultiComponentEnableDisablePanel {id}...")
+        self._extractor = DetectorExtractor(self._application_controller, object_list)
+        logging.debug(f"Extractor initialized with {self._extractor.get_all_states()}")
+
+        logging.debug("MultiComponentEnableDisablePanel initialized.")
 
     def generate_button_list(self) -> Dict | None:
         if (
@@ -61,18 +65,12 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
         ):
             return {}
 
-        # Set up information extractor
-        self._extractor.set_config_session(
-            self._application_controller.buffer_daq_config,
-            self._application_controller.session_name,
-        )
-
         # Grabs state information for each button
         self._extractor.read_system(self._object_list)
 
-        # Makes sure that the button states are set correctly and consistent
-
+        # Get states
         return self._extractor.get_all_states()
+
 
     def _button_action(self, _, button_name: str) -> None:
 
@@ -100,9 +98,22 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
         return self._extractor.get_state(button)
 
     def get_tree(self):
-
         tree = ComponentLevelTree(
             self._application_controller,
             extractor=self._extractor,
         )
         return tree
+
+    def on_mount(self):
+        for button in self._button_list.keys():
+            button_id = button.replace(" ", "~")
+            try:
+                button_widget = self.query_one(f"#{button_id}_button", Button)
+            except Exception:
+                continue
+
+            button_widget.tooltip = self._extractor.get_tooltip(button)
+
+    def get_tooltip(self, button_name: str) -> str:
+        return self._extractor.get_tooltip(button_name)
+

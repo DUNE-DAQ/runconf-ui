@@ -1,6 +1,9 @@
 from runconf_ui.daq_config_interfaces.actions.action_interfaces import ActionInterface
-from runconf_ui.daq_config_interfaces.daq_config_file_io.daq_config_wrapper import DaqConfigurationWrapper
+from runconf_ui.daq_config_interfaces.daq_config_file_io.daq_config_wrapper import (
+    DaqConfigurationWrapper,
+)
 import shutil
+
 """
 A collection of simple actions on a configuration. These should take a single configuration
 and then be able to repeatedly perform a single operation on it
@@ -71,7 +74,36 @@ class CopyDalAction(ActionInterface):
         Copy object in configuration
         """
         self._daq_configuration.add_dal(dal)
-        return dal
+        UpdateDalAction(self._daq_configuration)(dal)
+        return self._daq_configuration.get_dal(dal.className(), dal.id)
+
+
+class GetAllClassesAction(ActionInterface):
+    """
+    Get all classes in the configuration
+    """
+
+    def action(self):
+        """
+        Get all classes in the configuration
+        """
+        return self._daq_configuration.classes()
+
+
+class GetAllDalsAction(ActionInterface):
+    """
+    Get all DALs in the configuration
+    """
+
+    def action(self):
+        """
+        Get all DALs in the configuration
+        """
+        dals = []
+        for class_name in GetAllClassesAction(self._daq_configuration)():
+            dals += GetDalsOfClassAction(self._daq_configuration)(class_name)
+
+        return list(set(dals))
 
 
 class CopyFullConfigurationAction(ActionInterface):
@@ -90,7 +122,9 @@ class AddDalAction(ActionInterface):
         Add object to configuration
         """
         self._daq_configuration.create_obj(uid=conf_obj_id, class_name=conf_obj_class)
-        dal_obj = GetDalObjectAction(self._daq_configuration)(conf_obj_id, conf_obj_class)
+        dal_obj = GetDalObjectAction(self._daq_configuration)(
+            conf_obj_id, conf_obj_class
+        )
         UpdateDalAction(self._daq_configuration)(dal_obj)
         return dal_obj
 
@@ -132,6 +166,10 @@ class GetRelatedDalsAction(ActionInterface):
         relations = self._daq_configuration.relations(dal.className())
 
         relations_list = []
+        # HW : HACK to make sure we get all relations
+        if contains:= getattr(dal, "contains", None):
+            relations["contains"] = contains
+
         # Loop over relations
         for rel, rel_info in relations.items():
             rel_val = getattr(dal, rel)
@@ -142,6 +180,7 @@ class GetRelatedDalsAction(ActionInterface):
             relations_list.append(
                 {rel: [v for v in rel_val if v is not None], "rel_info": rel_info}
             )
+
 
         return relations_list
 
@@ -164,6 +203,7 @@ class CommitConfigurationAction(ActionInterface):
     def action(self, save_message: str = ""):
         self._daq_configuration.commit(save_message)
         return None
+
 
 # Actions for getting information
 class GetAttributeAction(ActionInterface):
@@ -188,10 +228,11 @@ class CheckIsDisabledAction(ActionInterface):
     """
 
     def action(self, dal, session_name) -> bool:
-        session_dal = GetDalObjectAction(self._daq_configuration)(session_name, "Session")
+        session_dal = GetDalObjectAction(self._daq_configuration)(
+            session_name, "Session"
+        )
 
         attr_getter = GetAttributeAction(self._daq_configuration)
         disabled_items = attr_getter(session_dal, "disabled")
 
         return dal in disabled_items
-

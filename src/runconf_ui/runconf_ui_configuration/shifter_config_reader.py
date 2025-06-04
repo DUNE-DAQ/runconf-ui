@@ -41,7 +41,10 @@ class ShifterConfigReader:
         self._operation_url = path_or_env_check(
             general_settings.get("operation_url", None)
         )
-
+        
+        # Get settings from the detector config
+        detector_config_settings = self._detector_config.get("Settings", {})
+        self._classes_to_show = detector_config_settings.get("classes_to_show", [])
 
     @property
     def output_directory(self):
@@ -90,3 +93,11 @@ class ShifterConfigReader:
     @property
     def panel_options(self):
         return self._detector_config.get("PanelOptions", {})
+
+    @property
+    def classes_to_show(self):
+        """
+        Get the set of classes to show in the UI.
+        This is a set of class names that should be displayed.
+        """
+        return list(set(self._classes_to_show))

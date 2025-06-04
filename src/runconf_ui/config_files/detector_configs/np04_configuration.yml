@@ -1,10 +1,21 @@
 ---
-PanelOptions:
+Settings:
+  classes_to_show:
+    - Segment
+    - TriggerApplication
+    - TPStreamWriterApplication
+    - ReadoutApplication
+    - MLTApplication
+    - RandomTCMakerConf
+    - CTBHLT
+    - DFApplication
+    - CTBoardConf
 
+
+PanelOptions:
   Detector:
     label: "detector"
     view_panel: "Detector View"
-    panel_type: "multisystem"
 
     Systems:
       - TPC:
@@ -41,15 +52,18 @@ PanelOptions:
   # Dataflow
   Dataflow:
     label: "dataflow"
-    panel_type: "singlesystem"
-    classes:
-      - "DFApplication"
-
+    Systems:
+      - Dataflow:
+          subsystem_dependent: True
+          display_full_system: False
+          components:
+            - id: ""
+              class: "DFApplication"
+              each_component_separate: True
 
   Trigger:
     label: "trigger"
     view_panel: "Trigger View"
-    panel_type: "multisystem"
 
     Systems:
       - TPG:

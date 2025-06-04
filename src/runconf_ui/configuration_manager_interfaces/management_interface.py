@@ -1,7 +1,10 @@
 """
 Simple wrapper for talking to config-management
 """
-from runconf_ui.daq_config_interfaces.daq_config_file_io.daq_config_wrapper import DaqConfigurationWrapper
+
+from runconf_ui.daq_config_interfaces.daq_config_file_io.daq_config_wrapper import (
+    DaqConfigurationWrapper,
+)
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
     ShifterInterfaceState,
 )
@@ -10,6 +13,7 @@ import runconf_ui.daq_config_interfaces.actions.actions as ca
 import logging
 from abc import ABC, abstractmethod
 from pathlib import Path
+
 
 class ManagementInterface(ABC):
     def __init__(self, application_controller: ShifterInterfaceState):
@@ -53,5 +57,3 @@ class ManagementInterface(ABC):
             return ca.GetAttributeAction(config_file)(file_sessions[0], "id")
         else:
             return None
-
-

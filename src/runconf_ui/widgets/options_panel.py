@@ -12,6 +12,7 @@ from textual.message import Message
 
 import logging
 
+
 class OptionPanel(Static):
     def __init__(
         self,
@@ -88,11 +89,11 @@ class OptionPanel(Static):
             except Exception as e:
                 logging.error(f"Error saving configuration: {e}")
                 popup = PopupManager(self.app.get_screen("shifter_view_screen"))
-                
+
                 popup.show(
                     f"[white]Invalid configuration[/white] [bold grey3]{self._application_controller.current_daq_config}:{self._application_controller.session_name}[/bold grey3] [white]passed, please check with the experts!",
                     timer=4.0,
-                    success=False
+                    success=False,
                 )
 
         # Resets to base config provided
@@ -106,8 +107,5 @@ class OptionPanel(Static):
         elif event.button.id == "quit_button":
             logging.debug("Quit button pressed")
             return self.app.action_quit()
-        
-        
-    class ResetPressed(Message):
-        ...
-        
+
+    class ResetPressed(Message): ...
