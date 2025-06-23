@@ -55,19 +55,25 @@ class ShifterViewScreen(Screen):
                         yield panel
 
                 with TabbedContent(
-                    "SystematicMap",
-                    id="systematic_map_tabs",
-                    classes="systematic_map_tabs",
+                    "EnableDisablePanels",
+                    id="enable_disable_tabs",
+                    classes="enable_disable_tabs",
                 ):
-                    with TabPane("System View", id="full_system_map_tab"):
-                        yield ScrollableContainer(
-                            Static("", id="tree_view_full"),
-                            id="tree_view_full_container",
-                            classes="tree_view_full_container",
-                        )
-                    for panel in enable_disable_generator.map_list:
-                        if panel is not None:
-                            yield panel
+                    with TabbedContent(
+                        "SystematicMap",
+                        id="systematic_map_tabs",
+                        classes="systematic_map_tabs",
+                    ):
+                            
+                        with TabPane("System View", id="full_system_map_tab"):
+                            yield ScrollableContainer(
+                                Static("", id="tree_view_full"),
+                                id="tree_view_full_container",
+                                classes="tree_view_full_container",
+                            )
+                        for panel in enable_disable_generator.map_list:
+                            if panel is not None:
+                                yield panel
 
             yield OptionPanel(
                 application_controller=self._application_controller,
