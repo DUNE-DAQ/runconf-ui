@@ -48,8 +48,6 @@ class DAQSelectMenu(Select):
 
         logging.debug(f"Options: {options}, Value: {value}")
 
-        options = sorted(options)
-
         super().__init__(
             options,
             prompt=prompt,
