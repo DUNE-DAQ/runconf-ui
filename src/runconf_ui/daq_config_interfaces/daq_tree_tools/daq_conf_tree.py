@@ -70,6 +70,41 @@ class DaqConfTreeBase(ABC):
 
 class ComponentLevelTree(DaqConfTreeBase):
     """
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 1 file changed, 290 insertions(+), 109 deletions(-)
+henryi@beluga4 ~/sft/MaCh3 $ git push
+Enumerating objects: 7, done.
+Counting objects: 100% (7/7), done.
+Delta compression using up to 40 threads
+Compressing objects: 100% (4/4), done.
+Writing objects: 100% (4/4), 5.13 KiB | 1.03 MiB/s, done.
+Total 4 (delta 2), reused 0 (delta 0), pack-reused 0
+remote: Resolving deltas: 100% (2/2), completed with 2 local objects.
+To ssh://github.com/mach3-software/MaCh3.git
+   c3ea0d82..51eafbb4  hwallace/autocorr_avg -> hwallace/autocorr_avg
+henryi@beluga4 ~/sft/MaCh3 $ ./install/bin/PlotMCMCDiag ~/sft/MaCh3Tutorial/studies/Adapt/T2K/mcmc_Adapt_T2K_all_on_long_MCMC_Diag.root 
+./install/bin/PlotMCMCDiag: error while loading shared libraries: libPlotting.so: cannot open shared object file: No such file or directory
+henryi@beluga4 ~/sft/MaCh3 $ source install/bin/setup.MaCh3.sh 
+Sourcing NuOscillator
+henryi@beluga4 ~/sft/MaCh3 $ ./install/bin/PlotMCMCDiag ~/sft/MaCh3Tutorial/studies/Adapt/T2K/mcmc_Adapt_T2K_all_on_long_MCMC_Diag.root 
+[PlotMCMCDiag.cpp][info] Processed 27 parameters from /home/henryi/sft/MaCh3Tutorial/studies/Adapt/T2K/mcmc_Adapt_T2K_all_on_long_MCMC_Diag.root files
+Info in <TCanvas::Print>: pdf file Average_Auto_Corr.pdf has been created
+henryi@beluga4 ~/sft/MaCh3 $ ./install/bin/PlotMCMCDiag ~/sft/MaCh3Tutorial/studies/Adapt/T2K/mcmc_Adapt_T2K_all_on_long_MCMC_Diag.root ~/sft/
+CPM.cmake/             ENV/                   general_env/           HMCMC/                 MaCh3/                 MaCh3_Patches/         MaCh3-PythonUtils/     MaCh3Tutorial/         MaCh3Tutorial_Default/ 
+henryi@beluga4 ~/sft/MaCh3 $ ./install/bin/PlotMCMCDiag ~/sft/MaCh3Tutorial/studies/Adapt/T2K/mcmc_Adapt_T2K_all_on_long_MCMC_Diag.root ~/sft/MaCh3
+MaCh3/                 MaCh3_Patches/         MaCh3-PythonUtils/     MaCh3Tutorial/         MaCh3Tutorial_Default/ 
+henryi@beluga4 ~/sft/MaCh3 $ ./install/bin/PlotMCMCDiag ~/sft/MaCh3Tutorial/studies/Adapt/T2K/mcmc_Adapt_T2K_all_on_long_MCMC_Diag.root ~/sft/MaCh3Tutorial
+MaCh3Tutorial/         MaCh3Tutorial_Default/ 
+henryi@beluga4 ~/sft/MaCh3 $ ./install/bin/PlotMCMCDiag ~/sft/MaCh3Tutorial/studies/Adapt/T2K/mcmc_Adapt_T2K_all_on_long_MCMC_Diag.root ~/sft/MaCh3Tutorial/
+build/            cmake/            Doc/              .git/             .gitignore        LICENSE.txt       plotting/         requirements.txt  splines/          Tutorial/         Utils/            
+CIValidations/    CMakeLists.txt    env.sh            .github/          install/          .mailmap          README.md         samplePDF/        studies/          TutorialConfigs/  
+henryi@beluga4 ~/sft/MaCh3 $ ./install/bin/PlotMCMCDiag ~/sft/MaCh3Tutorial/studies/Adapt/T2K/mcmc_Adapt_T2K_all_on_long_MCMC_Diag.root ~/sft/MaCh3Tutorial/studies/
+Adapt/   adhoc/   configs/ NoAdapt/ scripts/ 
+henryi@beluga4 ~/sft/MaCh3 $ ./install/bin/PlotMCMCDiag ~/sft/MaCh3Tutorial/studies/Adapt/T2K/mcmc_Adapt_T2K_all_on_long_MCMC_Diag.root ~/sft/MaCh3Tutorial/studies/
+Adapt/   adhoc/   configs/ NoAdapt/ scripts/ 
     Class to represent multi-component objects in a tree structure.
     """
 
