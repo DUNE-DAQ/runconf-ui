@@ -18,10 +18,9 @@ class AdjustableAttributeManager:
 
         self._is_hex = kwargs.get("is_hex", False) # Whether to convert values to hexadecimal when saving
         self._unit_scale = kwargs.get("unit_scale", 1.0)  # Default scale factor for conversion
-        self._unit_label = kwargs.get("unit_label", "Hz") # Default unit label
+        self._unit_label = kwargs.get("unit_label", "") # Default unit label
+        self._filter_by = kwargs.get("filter_by", None)  # Filter by a specific attribute value if needed
 
-        # Get the range of the attribute if specified in the configuration
-        self._lower_limit, self._upper_limit = self._range()
 
         self._object_list = []
         self._object_ids = []
@@ -31,6 +30,7 @@ class AdjustableAttributeManager:
         self._object_class = kwargs.get("object_class", None)
 
         self._attribute_name = kwargs.get("attribute_name", None)
+
 
         if not self._attribute_name:
             raise ValueError("Attribute name must be provided.")
@@ -47,15 +47,28 @@ class AdjustableAttributeManager:
 
         # Means we can use the attribute class to get the object list
         if object_id is None or "":
-            self._object_list = ca.GetDalsOfClassAction(
+            unfliltered_list = ca.GetDalsOfClassAction(
                 self._application_controller.buffer_daq_config
             )(self._object_class)
+            
+            self._object_list = [
+                obj for obj in unfliltered_list if self._filter(obj)]
+            
         else:
+            self._object_ids = [object_id]
+            
             self._object_list = [
                 ca.GetDalObjectAction(self._application_controller.buffer_daq_config)(
-                    object_id, self._object_class
-                )
+                    object_id, self._object_class)
+
+                for object_id in self._object_ids
+
+                if self._filter(ca.GetDalObjectAction(self._application_controller.buffer_daq_config)(
+                    object_id, self._object_class))
+                
             ]
+            
+        
 
         # Get the object IDs for the objects in the list and store
         self._object_ids = [
@@ -64,17 +77,26 @@ class AdjustableAttributeManager:
             )
             for obj in self._object_list
         ]
+        
+        self._lower_limit, self._upper_limit = self._range()
 
-        # Store initial values for the attribute
-        self._init_values = {
-            ca.GetAttributeAction(self._application_controller.buffer_daq_config)(
-                obj, "id"
-            ): ca.GetAttributeAction(self._application_controller.buffer_daq_config)(
+        # Store initial values for the attribute [convert for hex for simplicity]
+        for obj in self._object_list:
+            val = ca.GetAttributeAction(self._application_controller.buffer_daq_config)(
                 obj, self._attribute_name
             )
-            for obj in self._object_list
-        }
-
+            
+            if self._is_hex:
+                val = self.convert_from_hex(val)
+            
+            self._init_values[ca.GetAttributeAction(self._application_controller.buffer_daq_config)(
+                obj, "id"
+            )] = val
+        
+        
+        self._tooltip_var = kwargs.get("tooltip", None)
+            
+            
 
     def set_state(self, object_id: str, value) -> None:
         """
@@ -94,11 +116,12 @@ class AdjustableAttributeManager:
             logging.debug(f"Object ID {object_id} not found in object list.")
             raise ValueError(f"Object ID {object_id} not found in object list.")
 
-        value = value * self._unit_scale
+        if isinstance(value, float):
+            value = value * self._unit_scale
 
         # Convert value to hexadecimal if required
         if self._is_hex:
-            value = self.to_hex(value)
+            value = self.convert_to_hex(value)
 
         for obj in self._object_list:
             if (
@@ -133,11 +156,11 @@ class AdjustableAttributeManager:
                     self._application_controller.buffer_daq_config
                 )(obj, self._attribute_name)
 
+                if isinstance(attr_value, float):
+                    attr_value *= self._unit_scale
 
-
-                attr_value *= self._unit_scale
                 if self._is_hex:
-                    attr_value = self.to_dec(attr_value)
+                    attr_value = self.convert_from_hex(attr_value)
                 
                 return attr_value
                 
@@ -157,7 +180,24 @@ class AdjustableAttributeManager:
             for obj in self._object_ids
         }
 
-    def get_tooltip(self, object_id: str) -> str:
+    def get_tooltip(self, object_id) -> str | None:
+        if object_id not in self._object_ids:
+            logging.debug(f"Object ID {object_id} not found in object list.")
+            return None
+        
+        if self._tooltip_var is None:
+            return f"Adjust [bold]{self._attribute_name}[/bold] for [bold]{object_id}[/bold] of class [bold]{self._object_class}[/bold]"
+        
+        dal_obj = ca.GetDalObjectAction(self._application_controller.buffer_daq_config)(
+            object_id, self._object_class
+        )
+        tooltip_val = ca.GetAttributeAction(
+            self._application_controller.buffer_daq_config
+        )(dal_obj, self._tooltip_var)
+        
+        return tooltip_val
+
+    def get_value_label(self, object_id: str) -> str:
         '''
         Get the tooltip for the attribute value of a given object ID.
         '''
@@ -173,8 +213,11 @@ class AdjustableAttributeManager:
             self._application_controller.buffer_daq_config
         )(object, self._attribute_name)
 
-        if instance(attribute_value, float):
+        if isinstance(attribute_value, float):
             attribute_value = f"{attribute_value:.3f}"
+
+        if self._is_hex:
+            attribute_value = self.convert_from_hex(attribute_value)
 
 
         tooltip = f"{attribute_value} {self._unit_label}"
@@ -193,8 +236,17 @@ class AdjustableAttributeManager:
             return {}
         return {obj_id: self._init_values[obj_id] for obj_id in self._object_ids}
 
-    def to_hex(self, value: float) -> str:
-        return hex(int(value))
+    def convert_to_hex(self, value: int) -> str:
+        # Convert an integer value to hexadecimal format
+        return hex(value)
+    
+    def convert_from_hex(self, value: str) -> int:
+        # Convert a hexadecimal string to an integer
+        if value.startswith("0x"):
+            return int(value, 16)
+        else:
+            raise ValueError(f"Invalid hexadecimal value: {value}")
+
     
     def to_dec(self, value: str) -> int:
         return int(value, 16)
@@ -222,6 +274,9 @@ class AdjustableAttributeManager:
     def attribute_name(self) -> str | None:
         return self._attribute_name
 
+    @property
+    def class_name(self) -> str | None:
+        return self._object_class
 
     def _range(self)->Union[Tuple[float, float], Tuple[None, None]]:
         """
@@ -231,11 +286,29 @@ class AdjustableAttributeManager:
         """
         range_str = ca.GetConfigAttributePropertiesAction(
             self._application_controller.buffer_daq_config
-        )(self._object_class, self._attribute_name, "range")
-        
+        )(self._object_class, self._attribute_name).get("range", None)
+                
         if range_str is None or range_str == "None":
             return None, None
         
         upper, lower = range_str.split("..")
         
         return float(lower), float(upper)
+        
+    def _filter(self, obj)->bool:
+        """
+        Filter objects based on the filter_by attribute.
+        Returns True if the object matches the filter criteria, False otherwise.
+        """
+        if not self._filter_by:
+            return True
+        
+        for filter in self._filter_by.items():
+            
+            attr_name = filter["attribute"]
+            values = filter["value"]
+            
+            if ca.GetAttributeAction(self._application_controller.buffer_daq_config)(obj, attr_name) in values:
+                return False
+        
+        return True

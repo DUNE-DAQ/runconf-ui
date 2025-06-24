@@ -244,4 +244,4 @@ class GetConfigAttributePropertiesAction(ActionInterface):
         """
         Get the properties of an attribute in a DAL class
         """
-        return self._daq_configuration.attributes(class_name, all)[attribute_name]
+        return self._daq_configuration.attributes(class_name, True)[attribute_name]

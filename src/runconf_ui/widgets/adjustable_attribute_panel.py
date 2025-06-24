@@ -4,7 +4,7 @@ from runconf_ui.runconf_ui_configuration.object_extractors.multi_adjustable_attr
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import ShifterInterfaceState
 from runconf_ui.exceptions import CiderOutOfBoundsException
 from textual.widgets import Static, Input, Button
-from textual.containers import Grid
+from textual.containers import Grid, ScrollableContainer
 from textual.message import Message
 import logging
 
@@ -35,51 +35,53 @@ class AdjustableAttributePanel(Static):
 
     def compose(self):
         # Create an input field for each object
-        for object_id, object_value in self._attribute_manager.get_all_states().items():
+        with ScrollableContainer(id = "adjustable_attribute_container"):
+            for object_id, object_value in self._attribute_manager.get_all_states().items():
 
-            state = object_value["state"]
-            attribute = object_value["attribute"]
+                state = object_value["state"]
+                attribute = object_value["attribute"]
 
-            label_name = f"{object_id.replace(' ', '~')}{self.DELIMITER}{attribute.replace(' ', '~')}"
+                label_name = f"{object_id.replace(' ', '~')}{self.DELIMITER}{attribute.replace(' ', '~')}"
+                with ScrollableContainer(id=f"grid-{label_name}", classes="adjustable-attribute-grid") as grid_container:
 
-            with Grid(id=f"grid-{label_name}", classes="adjustable-attribute-grid"):
-
-                yield Static(
-                    f"[bold]ID:[/bold] [bold red]{object_id}[/bold red]:\n[bold]Attribute:[/bold] [bold purple]{attribute}[/bold purple]",
-                    id=f"label-{label_name}",
-                    classes="adjustable-attribute-label adjustable-attribute-name",
-                )
-                
-                if isinstance(state, float):
-                    state = f"{state:3f}"
+                    yield Static(
+                        f"[bold]ID:[/bold] [bold red]{object_id}[/bold red]:\n[bold]Attribute:[/bold] [bold purple]{attribute}[/bold purple]",
+                        id=f"label-{label_name}",
+                        classes="adjustable-attribute-label adjustable-attribute-name",
+                    )
+                    
+                    if isinstance(state, float):
+                        state = f"{state:3f}"
 
 
-                yield Input(
-                    value=state,
-                    placeholder=state,
-                    id=f"input-{label_name}",
-                    classes="adjustable-attribute-input",
-                )
+                    yield Input(
+                        value=f"{state}",
+                        placeholder=f"{state}",
+                        id=f"input-{label_name}",
+                        classes="adjustable-attribute-input",
+                    )
 
-                yield Button(
-                    "Apply",
-                    id=f"apply-{label_name}",
-                    classes="adjustable-attribute-button",
-                    variant="primary",
-                )
+                    yield Button(
+                        "Apply",
+                        id=f"apply-{label_name}",
+                        classes="adjustable-attribute-button",
+                        variant="primary",
+                    )
 
-                yield Button(
-                    "Reset",
-                    id=f"reset-{label_name}",
-                    classes="adjustable-attribute-button",
-                    variant="warning",
-                )
+                    yield Button(
+                        "Reset",
+                        id=f"reset-{label_name}",
+                        classes="adjustable-attribute-button",
+                        variant="warning",
+                    )
 
-                yield Static(
-                    f"[violet]{self._attribute_manager.get_tooltip(object_id, attribute)}",
-                    id=f"current-value-{label_name}",
-                    classes="adjustable-attribute-current-value adjustable-attribute-label",
-                )
+                    yield Static(
+                        f"[violet]{self._attribute_manager.get_value_label(object_id, attribute)}",
+                        id=f"current-value-{label_name}",
+                        classes="adjustable-attribute-current-value adjustable-attribute-label",
+                    )
+                    
+                    grid_container.tooltip = self._attribute_manager.get_tooltip(object_id, attribute)
 
     def on_button_pressed(self, event):
         button_id = event.button.id
@@ -88,10 +90,6 @@ class AdjustableAttributePanel(Static):
 
         ## Now need to split into attribute and object ID
         base_id, attribute = base_id_attr.split(self.DELIMITER)
-
-        logging.info(
-            f"Button pressed: {button_id} for base ID: {base_id} and attribute: {attribute}"
-        )
 
         input_id = f"input-{base_id_attr}"
         if "reset" not in button_id and "apply" not in button_id:
@@ -114,7 +112,7 @@ class AdjustableAttributePanel(Static):
                 return
 
         self.query_one(f"#current-value-{base_id_attr}").update(
-            self._attribute_manager.get_tooltip(base_id, attribute)
+            f"[violet]{self._attribute_manager.get_tooltip(base_id, attribute)}"
         )
 
         self._application_controller.current_state.update(

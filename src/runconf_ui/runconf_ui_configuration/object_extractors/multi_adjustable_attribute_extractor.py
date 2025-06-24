@@ -1,8 +1,10 @@
 from runconf_ui.runconf_ui_configuration.object_extractors.adjustable_attribute_extractor import (
     AdjustableAttributeManager,
 )
-import logging
+import runconf_ui.daq_config_interfaces.actions.actions as ca
 
+import logging
+from traceback import format_exc
 
 class MultiAdjustableAttributeExtractor:
     def __init__(self, application_controller, **kwargs):
@@ -23,6 +25,7 @@ class MultiAdjustableAttributeExtractor:
                 logging.debug(
                     f"Failed to initialize AdjustableAttributeManager with {obj}."
                 )
+                logging.debug(f"Error: {format_exc()}")
 
     def set_state(self, object_id: str, attribute_name: str, value: float):
         """
@@ -83,7 +86,7 @@ class MultiAdjustableAttributeExtractor:
                 manager.reset_value(object_id)
                 return
 
-    def get_tooltip(self, object_id: str, attribute_name: str) -> str | None:
+    def get_value_label(self, object_id: str, attribute_name: str) -> str | None:
         """
         Gets the tooltip for the specified attribute of the given object ID.
         :param object_id: The ID of the object to get the tooltip for.
@@ -95,7 +98,22 @@ class MultiAdjustableAttributeExtractor:
                 object_id in manager.get_all_states()
                 and attribute_name == manager.attribute_name
             ):
+                return manager.get_value_label(object_id)
+
+    def get_tooltip(self, object_id: str, attribute_name: str) -> str | None:
+        """
+        Gets the tooltip for the specified attribute of the given object ID.
+        :param object_id: The ID of the object to get the tooltip variable for.
+        :param attribute_name: The name of the attribute to get the tooltip variable for.
+        :return: The tooltip variable string for the specified attribute.
+        """
+        for manager in self._adjustable_attributes:
+            if (
+                object_id in manager.get_all_states()
+                and attribute_name == manager.attribute_name
+            ):
                 return manager.get_tooltip(object_id)
+                                
 
     def lower_limit(self, object_id: str, attribute_name: str) -> float | None:
         """

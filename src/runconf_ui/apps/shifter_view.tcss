@@ -75,27 +75,36 @@ SelectCurrent{
 
 /* === Adjustable Panel === */
 
+#adjustable_attribute_container{
+    layout: grid;
+    grid-size: 1;
+    grid-gutter: 1;
+    grid-rows: 6;
+}
 
 .adjustable-attribute-grid{
-    grid-size: 7 1;
+    layout: grid;
+    grid-size: 14 1;
     width: 100%;
-    grid-gutter: 3;
+    height: 100%;
+    grid-gutter: 1;
 }
 
 .adjustable-attribute-button{
-    column-span: 1;
+    column-span: 2;
 }
 
 .adjustable-attribute-name{
-    column-span: 2;
+    column-span: 1;
 }
 
 .adjustable-attribute-input{
-    column-span: 2;
+    column-span: 3;
 }
 
 .adjustable-attribute-label{
     padding: 1 0;
+    column-span: 4
 }
 
 
