@@ -5,7 +5,7 @@ import logging
 from runconf_ui.daq_config_interfaces.daq_tree_tools.daq_full_tree import DaqFullTree
 
 class DaqTreeManager:  
-§    def __init__(self, application_controller: ShifterInterfaceState):
+    def __init__(self, application_controller: ShifterInterfaceState):
         self._application_controller = application_controller
 
     def update_all_trees(self, screen: Screen):
