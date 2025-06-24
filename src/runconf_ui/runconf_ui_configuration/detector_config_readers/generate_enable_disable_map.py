@@ -2,7 +2,7 @@ from runconf_ui.widgets.multicomponent_panel import MultiComponentEnableDisableP
 from runconf_ui.runconf_ui_configuration.detector_config_readers.detector_map_reader_base import (
     DetectorMapReaderBase,
 )
-from textual.widgets import TabPane, Static
+from textual.widgets import Static
 from textual.containers import ScrollableContainer
 
 

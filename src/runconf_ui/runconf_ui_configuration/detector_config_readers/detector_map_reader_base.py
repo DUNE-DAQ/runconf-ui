@@ -1,10 +1,8 @@
-from runconf_ui.widgets.multicomponent_panel import MultiComponentEnableDisablePanel
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
     ShifterInterfaceState,
 )
 
 from textual.widgets import TabPane, Static
-from textual.containers import ScrollableContainer
 
 from typing import Dict
 import logging

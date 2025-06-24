@@ -294,10 +294,15 @@ AdjustableAttributes:
       - object_id [str, Optional]: # ID of object containing a given attribute. If left blank it will search for all objects of a given class
         object_class [str]: # Class of objects with given attribute
         attribute_name [str]: #Name of attribute to modify 
-        lower_limit [Optional, Any]: # Lower limit allowed for attribute
-        upper_limit [Optional, Any]: # Upper limit allowed for attribute
+        is_hex [bool, optional]: False # Is the attribute stored in hex
+        tooltip [str, optional]: # Attribute to use as the tool tip i.e. "description" when higlighting box
 
-        convert_to_tick: [Optional, bool] # Convert to clock tick by doing clock rate/freq.
+        # values to filter by
+        filters [List]:
+          - attribute [str]: # attribute to filter by
+            values [List[Any]]: # List of values of that attribute you want to exclude
+
+
 ```
 
 The result is a view like

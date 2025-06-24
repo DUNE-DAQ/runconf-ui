@@ -6,7 +6,6 @@ from runconf_ui.runconf_ui_configuration.detector_config_readers.detector_map_re
     DetectorMapReaderBase,
 )
 from runconf_ui.widgets.adjustable_attribute_panel import AdjustableAttributePanel
-import logging
 
 
 class AdjustableAttributeMapGen(DetectorMapReaderBase):

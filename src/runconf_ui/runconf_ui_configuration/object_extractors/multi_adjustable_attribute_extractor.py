@@ -1,7 +1,6 @@
 from runconf_ui.runconf_ui_configuration.object_extractors.adjustable_attribute_extractor import (
     AdjustableAttributeManager,
 )
-import runconf_ui.daq_config_interfaces.actions.actions as ca
 
 import logging
 from traceback import format_exc
@@ -22,7 +21,7 @@ class MultiAdjustableAttributeExtractor:
                 self._adjustable_attributes.append(
                     AdjustableAttributeManager(self._application_controller, **obj)
                 )
-            except:
+            except Exception:
                 logging.debug(
                     f"Failed to initialize AdjustableAttributeManager with {obj}."
                 )

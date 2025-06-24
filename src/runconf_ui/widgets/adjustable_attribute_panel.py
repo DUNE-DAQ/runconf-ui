@@ -2,11 +2,9 @@ from runconf_ui.runconf_ui_configuration.object_extractors.multi_adjustable_attr
     MultiAdjustableAttributeExtractor,
 )
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import ShifterInterfaceState
-from runconf_ui.exceptions import CiderOutOfBoundsException
 from textual.widgets import Static, Input, Button
-from textual.containers import Grid, ScrollableContainer
+from textual.containers import  ScrollableContainer
 from textual.message import Message
-import logging
 
 
 class AdjustableAttributePanel(Static):
