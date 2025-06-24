@@ -79,7 +79,6 @@ class AdjustableAttributeManager:
     def set_state(self, object_id: str, value) -> None:
         """
         Set the attribute value for all objects in the object list.
-        If convert_to_period is True, convert the value to a period before setting.
         """        
         if self._upper_limit is not None and value > self._upper_limit:
             raise CiderOutOfBoundsException(
@@ -174,9 +173,11 @@ class AdjustableAttributeManager:
             self._application_controller.buffer_daq_config
         )(object, self._attribute_name)
 
-        if self._convert_to_period:
-            attribute_value = self.convert_to_hertz(attribute_value)
-        tooltip = f"{attribute_value:3f} {self._unit_label}"
+        if instance(attribute_value, float):
+            attribute_value = f"{attribute_value:.3f}"
+
+
+        tooltip = f"{attribute_value} {self._unit_label}"
 
         if self._lower_limit is not None and self._upper_limit is not None:
             tooltip += f"\nLimits: [{self._lower_limit:3f}, {self._upper_limit}] {self._unit_label}"
