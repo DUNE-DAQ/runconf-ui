@@ -297,7 +297,7 @@ AdjustableAttributes:
         lower_limit [Optional, Any]: # Lower limit allowed for attribute
         upper_limit [Optional, Any]: # Upper limit allowed for attribute
 
-        convert_to_hertz: [Optional, bool] # Convert to hertz by doing clock rate/value
+        convert_to_tick: [Optional, bool] # Convert to clock tick by doing clock rate/freq.
 ```
 
 The result is a view like
