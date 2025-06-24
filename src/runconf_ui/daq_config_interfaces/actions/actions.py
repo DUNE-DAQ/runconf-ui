@@ -220,7 +220,6 @@ class GetClassNameAction(ActionInterface):
         """
         return dal.className()
 
-
 class CheckIsDisabledAction(ActionInterface):
     """
     Check if DAL is disabled
@@ -235,3 +234,14 @@ class CheckIsDisabledAction(ActionInterface):
         disabled_items = attr_getter(session_dal, "disabled")
 
         return dal in disabled_items
+
+class GetConfigAttributePropertiesAction(ActionInterface):
+    """
+    Get the properties of a configuration attribute
+    """
+
+    def action(self, class_name: str, attribute_name: str):
+        """
+        Get the properties of an attribute in a DAL class
+        """
+        return self._daq_configuration.attributes(class_name, all)[attribute_name]

@@ -103,7 +103,7 @@ class AdjustableAttributePanel(Static):
 
             try:
                 self._attribute_manager.set_state(base_id, attribute, input_value)
-            except Exception as e:
+            except Exception:
 
                 message = f"Error setting attribute {attribute} for object {base_id}. Value: {input_value} is out of bounds or invalid."
                 self.post_message(self.AttributeOutOfBounds(base_id, message))
