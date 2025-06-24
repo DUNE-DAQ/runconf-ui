@@ -5,22 +5,28 @@ from runconf_ui.exceptions import CiderOutOfBoundsException
 import logging
 from typing import Tuple, Union
 
+
 class AdjustableAttributeManager:
     def __init__(self, application_controller: ShifterInterfaceState, **kwargs):
-        '''
+        """
         Initialize the AdjustableAttributeManager with the application controller and configuration options.
         :param application_controller: The application controller managing the DAQ configuration.
 
-        :param kwargs: Additional configuration options such as upper_limit, lower_limit, object_id, object_class, and attribute_name.        
-        
-        '''
+        :param kwargs: Additional configuration options such as upper_limit, lower_limit, object_id, object_class, and attribute_name.
+
+        """
         self._application_controller = application_controller
 
-        self._is_hex = kwargs.get("is_hex", False) # Whether to convert values to hexadecimal when saving
-        self._unit_scale = kwargs.get("unit_scale", 1.0)  # Default scale factor for conversion
-        self._unit_label = kwargs.get("unit_label", "") # Default unit label
-        self._filter_by = kwargs.get("filter_by", None)  # Filter by a specific attribute value if needed
-
+        self._is_hex = kwargs.get(
+            "is_hex", False
+        )  # Whether to convert values to hexadecimal when saving
+        self._unit_scale = kwargs.get(
+            "unit_scale", 1.0
+        )  # Default scale factor for conversion
+        self._unit_label = kwargs.get("unit_label", "")  # Default unit label
+        self._filter_by = kwargs.get(
+            "filter_by", None
+        )  # Filter by a specific attribute value if needed
 
         self._object_list = []
         self._object_ids = []
@@ -31,7 +37,6 @@ class AdjustableAttributeManager:
 
         self._attribute_name = kwargs.get("attribute_name", None)
 
-
         if not self._attribute_name:
             raise ValueError("Attribute name must be provided.")
 
@@ -41,7 +46,6 @@ class AdjustableAttributeManager:
         ):
             return
 
-
         if not self._object_class:
             raise ValueError("Attribute class must be provided.")
 
@@ -50,25 +54,23 @@ class AdjustableAttributeManager:
             unfliltered_list = ca.GetDalsOfClassAction(
                 self._application_controller.buffer_daq_config
             )(self._object_class)
-            
-            self._object_list = [
-                obj for obj in unfliltered_list if self._filter(obj)]
-            
+
+            self._object_list = [obj for obj in unfliltered_list if self._filter(obj)]
+
         else:
             self._object_ids = [object_id]
-            
+
             self._object_list = [
                 ca.GetDalObjectAction(self._application_controller.buffer_daq_config)(
-                    object_id, self._object_class)
-
+                    object_id, self._object_class
+                )
                 for object_id in self._object_ids
-
-                if self._filter(ca.GetDalObjectAction(self._application_controller.buffer_daq_config)(
-                    object_id, self._object_class))
-                
+                if self._filter(
+                    ca.GetDalObjectAction(
+                        self._application_controller.buffer_daq_config
+                    )(object_id, self._object_class)
+                )
             ]
-            
-        
 
         # Get the object IDs for the objects in the list and store
         self._object_ids = [
@@ -77,7 +79,7 @@ class AdjustableAttributeManager:
             )
             for obj in self._object_list
         ]
-        
+
         self._lower_limit, self._upper_limit = self._range()
 
         # Store initial values for the attribute [convert for hex for simplicity]
@@ -85,23 +87,22 @@ class AdjustableAttributeManager:
             val = ca.GetAttributeAction(self._application_controller.buffer_daq_config)(
                 obj, self._attribute_name
             )
-            
+
             if self._is_hex:
                 val = self.convert_from_hex(val)
-            
-            self._init_values[ca.GetAttributeAction(self._application_controller.buffer_daq_config)(
-                obj, "id"
-            )] = val
-        
-        
+
+            self._init_values[
+                ca.GetAttributeAction(self._application_controller.buffer_daq_config)(
+                    obj, "id"
+                )
+            ] = val
+
         self._tooltip_var = kwargs.get("tooltip", None)
-            
-            
 
     def set_state(self, object_id: str, value) -> None:
         """
         Set the attribute value for all objects in the object list.
-        """        
+        """
         if self._upper_limit is not None and value > self._upper_limit:
             raise CiderOutOfBoundsException(
                 f"Value {value} exceeds upper limit {self._upper_limit}."
@@ -138,12 +139,12 @@ class AdjustableAttributeManager:
 
             ca.UpdateDalAction(self._application_controller.buffer_daq_config)(obj)
 
-    def get_state(self, object_id: str) :
-        '''
+    def get_state(self, object_id: str):
+        """
         Get state of the attribute for a given object ID.
         :param object_id: The ID of the object to get the state for.
         :return: The value of the attribute for the object, converted to hertz if required.
-        '''
+        """
         for obj in self._object_list:
             if (
                 ca.GetAttributeAction(self._application_controller.buffer_daq_config)(
@@ -161,9 +162,8 @@ class AdjustableAttributeManager:
 
                 if self._is_hex:
                     attr_value = self.convert_from_hex(attr_value)
-                
+
                 return attr_value
-                
 
     def get_object_list(self) -> list[str]:
         """
@@ -172,9 +172,9 @@ class AdjustableAttributeManager:
         return self._object_ids
 
     def get_all_states(self) -> dict:
-        '''
+        """
         Get state of the attribute for all objects in the object list.
-        '''
+        """
         return {
             obj: {"state": self.get_state(obj), "attribute": self._attribute_name}
             for obj in self._object_ids
@@ -184,23 +184,23 @@ class AdjustableAttributeManager:
         if object_id not in self._object_ids:
             logging.debug(f"Object ID {object_id} not found in object list.")
             return None
-        
+
         if self._tooltip_var is None:
             return f"Adjust [bold]{self._attribute_name}[/bold] for [bold]{object_id}[/bold] of class [bold]{self._object_class}[/bold]"
-        
+
         dal_obj = ca.GetDalObjectAction(self._application_controller.buffer_daq_config)(
             object_id, self._object_class
         )
         tooltip_val = ca.GetAttributeAction(
             self._application_controller.buffer_daq_config
         )(dal_obj, self._tooltip_var)
-        
+
         return tooltip_val
 
     def get_value_label(self, object_id: str) -> str:
-        '''
+        """
         Get the tooltip for the attribute value of a given object ID.
-        '''
+        """
         if object_id not in self._object_ids:
             logging.debug(f"Object ID {object_id} not found in object list.")
             return "Object ID not found."
@@ -218,7 +218,6 @@ class AdjustableAttributeManager:
 
         if self._is_hex:
             attribute_value = self.convert_from_hex(attribute_value)
-
 
         tooltip = f"{attribute_value} {self._unit_label}"
 
@@ -239,7 +238,7 @@ class AdjustableAttributeManager:
     def convert_to_hex(self, value: int) -> str:
         # Convert an integer value to hexadecimal format
         return hex(value)
-    
+
     def convert_from_hex(self, value: str) -> int:
         # Convert a hexadecimal string to an integer
         if value.startswith("0x"):
@@ -247,7 +246,6 @@ class AdjustableAttributeManager:
         else:
             raise ValueError(f"Invalid hexadecimal value: {value}")
 
-    
     def to_dec(self, value: str) -> int:
         return int(value, 16)
 
@@ -278,7 +276,7 @@ class AdjustableAttributeManager:
     def class_name(self) -> str | None:
         return self._object_class
 
-    def _range(self)->Union[Tuple[float, float], Tuple[None, None]]:
+    def _range(self) -> Union[Tuple[float, float], Tuple[None, None]]:
         """
         Get the range of the attribute.
         Returns a tuple of (lower_limit, upper_limit).
@@ -287,28 +285,33 @@ class AdjustableAttributeManager:
         range_str = ca.GetConfigAttributePropertiesAction(
             self._application_controller.buffer_daq_config
         )(self._object_class, self._attribute_name).get("range", None)
-                
+
         if range_str is None or range_str == "None":
             return None, None
-        
+
         upper, lower = range_str.split("..")
-        
+
         return float(lower), float(upper)
-        
-    def _filter(self, obj)->bool:
+
+    def _filter(self, obj) -> bool:
         """
         Filter objects based on the filter_by attribute.
         Returns True if the object matches the filter criteria, False otherwise.
         """
         if not self._filter_by:
             return True
-        
+
         for filter in self._filter_by.items():
-            
+
             attr_name = filter["attribute"]
             values = filter["value"]
-            
-            if ca.GetAttributeAction(self._application_controller.buffer_daq_config)(obj, attr_name) in values:
+
+            if (
+                ca.GetAttributeAction(self._application_controller.buffer_daq_config)(
+                    obj, attr_name
+                )
+                in values
+            ):
                 return False
-        
+
         return True

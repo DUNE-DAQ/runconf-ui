@@ -220,6 +220,7 @@ class GetClassNameAction(ActionInterface):
         """
         return dal.className()
 
+
 class CheckIsDisabledAction(ActionInterface):
     """
     Check if DAL is disabled
@@ -234,6 +235,7 @@ class CheckIsDisabledAction(ActionInterface):
         disabled_items = attr_getter(session_dal, "disabled")
 
         return dal in disabled_items
+
 
 class GetConfigAttributePropertiesAction(ActionInterface):
     """

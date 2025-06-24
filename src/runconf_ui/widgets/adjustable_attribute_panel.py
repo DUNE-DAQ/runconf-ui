@@ -35,24 +35,28 @@ class AdjustableAttributePanel(Static):
 
     def compose(self):
         # Create an input field for each object
-        with ScrollableContainer(id = "adjustable_attribute_container"):
-            for object_id, object_value in self._attribute_manager.get_all_states().items():
+        with ScrollableContainer(id="adjustable_attribute_container"):
+            for (
+                object_id,
+                object_value,
+            ) in self._attribute_manager.get_all_states().items():
 
                 state = object_value["state"]
                 attribute = object_value["attribute"]
 
                 label_name = f"{object_id.replace(' ', '~')}{self.DELIMITER}{attribute.replace(' ', '~')}"
-                with ScrollableContainer(id=f"grid-{label_name}", classes="adjustable-attribute-grid") as grid_container:
+                with ScrollableContainer(
+                    id=f"grid-{label_name}", classes="adjustable-attribute-grid"
+                ) as grid_container:
 
                     yield Static(
                         f"[bold]ID:[/bold] [bold red]{object_id}[/bold red]:\n[bold]Attribute:[/bold] [bold purple]{attribute}[/bold purple]",
                         id=f"label-{label_name}",
                         classes="adjustable-attribute-label adjustable-attribute-name",
                     )
-                    
+
                     if isinstance(state, float):
                         state = f"{state:3f}"
-
 
                     yield Input(
                         value=f"{state}",
@@ -80,8 +84,10 @@ class AdjustableAttributePanel(Static):
                         id=f"current-value-{label_name}",
                         classes="adjustable-attribute-current-value adjustable-attribute-label",
                     )
-                    
-                    grid_container.tooltip = self._attribute_manager.get_tooltip(object_id, attribute)
+
+                    grid_container.tooltip = self._attribute_manager.get_tooltip(
+                        object_id, attribute
+                    )
 
     def on_button_pressed(self, event):
         button_id = event.button.id

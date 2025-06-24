@@ -8,6 +8,7 @@ from runconf_ui.runconf_ui_configuration.detector_config_readers.detector_map_re
 from runconf_ui.widgets.adjustable_attribute_panel import AdjustableAttributePanel
 import logging
 
+
 class AdjustableAttributeMapGen(DetectorMapReaderBase):
     """
     Generates a map of adjustable attributes from the configuration.
@@ -31,9 +32,8 @@ class AdjustableAttributeMapGen(DetectorMapReaderBase):
         panels = self.initialise_adjustable_rate(name, opts)
         if panels:
             self._panel_list.append(panels)
-        
 
-    def initialise_adjustable_rate(self, panel_name, opts):        
+    def initialise_adjustable_rate(self, panel_name, opts):
         panel = AdjustableAttributePanel(
             self._application_controller,
             opts,

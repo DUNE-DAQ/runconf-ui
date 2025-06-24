@@ -6,6 +6,7 @@ import runconf_ui.daq_config_interfaces.actions.actions as ca
 import logging
 from traceback import format_exc
 
+
 class MultiAdjustableAttributeExtractor:
     def __init__(self, application_controller, **kwargs):
         """
@@ -113,7 +114,6 @@ class MultiAdjustableAttributeExtractor:
                 and attribute_name == manager.attribute_name
             ):
                 return manager.get_tooltip(object_id)
-                                
 
     def lower_limit(self, object_id: str, attribute_name: str) -> float | None:
         """

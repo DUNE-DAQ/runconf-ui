@@ -52,7 +52,6 @@ class ShifterViewScreen(Screen):
         adjustable_attribute_panel = AdjustableAttributeMapGen(
             self._application_controller
         )
-        
 
         with ScrollableContainer(id="main_container"):
             yield FilePanelWidget(self._application_controller, classes="file_io_panel")
