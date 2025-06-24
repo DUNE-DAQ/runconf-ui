@@ -11,18 +11,14 @@ class AdjustableAttributeManager:
         Initialize the AdjustableAttributeManager with the application controller and configuration options.
         :param application_controller: The application controller managing the DAQ configuration.
 
-        :param kwargs: Additional configuration options such as upper_limit, lower_limit, convert_to_tick, object_id, object_class, and attribute_name.        
+        :param kwargs: Additional configuration options such as upper_limit, lower_limit, object_id, object_class, and attribute_name.        
         
         '''
         self._application_controller = application_controller
 
-        self._upper_limit = kwargs.get("upper_limit", None)
-        self._lower_limit = kwargs.get("lower_limit", None)
-
-        self._database_hex = kwargs.get("hex_database", False)
-        self._convert_to_period = kwargs.get("convert_to_tick", False)
+        self._is_hex = kwargs.get("is_hex", False) # Whether to convert values to hexadecimal when saving
         self._unit_scale = kwargs.get("unit_scale", 1.0)  # Default scale factor for conversion
-        self._unit_label = kwargs.get("unit_label", "Hz")
+        self._unit_label = kwargs.get("unit_label", "Hz") # Default unit label
 
         # Get the range of the attribute if specified in the configuration
         self._lower_limit, self._upper_limit = self._range()
@@ -102,7 +98,7 @@ class AdjustableAttributeManager:
         value = value * self._unit_scale
 
         # Convert value to hexadecimal if required
-        if self._database_hex:
+        if self._is_hex:
             value = self.to_hex(value)
 
         for obj in self._object_list:
@@ -141,7 +137,7 @@ class AdjustableAttributeManager:
 
 
                 attr_value *= self._unit_scale
-                if self._database_hex:
+                if self._is_hex:
                     attr_value = self.to_dec(attr_value)
                 
                 return attr_value
@@ -211,10 +207,6 @@ class AdjustableAttributeManager:
             raise ValueError(f"Object ID {object_id} not found in object list.")
 
         init_value = self._init_values[object_id]
-
-        if self._convert_to_period:
-            init_value = self.convert_to_period(init_value)
-
         self.set_state(object_id, init_value)
 
     @property
@@ -226,7 +218,7 @@ class AdjustableAttributeManager:
         return self._lower_limit
 
     @property
-    def attribute_name(self) -> str:
+    def attribute_name(self) -> str | None:
         return self._attribute_name
 
 

@@ -123,11 +123,10 @@ AdjustableAttributes:
         unit_label: "Hz"
 
       - object_class: "CTBHLT"
-        attribute_name: "period"
-        convert_to_tick: True
+        attribute_name: "prescale"
         unit_label: "ticks"
+        is_hex: True
 
       - object_class: "CTBRandomTrigger"
         attribute_name: "period"
-        convert_to_tick: True
         unit_label : "ticks"
