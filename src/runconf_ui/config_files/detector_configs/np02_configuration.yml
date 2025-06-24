@@ -120,7 +120,13 @@ AdjustableAttributes:
       - object_id: "random-tc-generator"
         object_class: RandomTCMakerConf
         attribute_name: "trigger_rate_hz"
+        unit_label: "Hz"
+
+      - object_class: "CTBHLT"
+        attribute_name: "prescale"
+        unit_label: "ticks"
+        is_hex: True
 
       - object_class: "CTBRandomTrigger"
         attribute_name: "period"
-        convert_to_hertz: True
+        unit_label : "ticks"

@@ -161,9 +161,10 @@ class AdjustableAttributeManager:
             self._application_controller.buffer_daq_config
         )(object, self._attribute_name)
 
-        if self._convert_to_period:
-            attribute_value = self.convert_to_hertz(attribute_value)
-        tooltip = f"{attribute_value:3f} Hz"
+        if isinstance(attribute_value, float):
+            f"{attribute_value:3f} Hz"
+
+        tooltip = f"{attribute_value} Hz"
 
         if self._lower_limit is not None and self._upper_limit is not None:
             tooltip += f"\nLimits: [{self._lower_limit:3f}, {self._upper_limit}] Hz"

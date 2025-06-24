@@ -49,10 +49,14 @@ class AdjustableAttributePanel(Static):
                     id=f"label-{label_name}",
                     classes="adjustable-attribute-label adjustable-attribute-name",
                 )
+                
+                if isinstance(state, float):
+                    state = f"{state:3f}"
+
 
                 yield Input(
-                    value=f"{state:3f}",
-                    placeholder=f"{state:3f}",
+                    value=state,
+                    placeholder=state,
                     id=f"input-{label_name}",
                     classes="adjustable-attribute-input",
                 )
