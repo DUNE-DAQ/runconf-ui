@@ -25,6 +25,7 @@ class AdjustableAttributePanel(Static):
         self._attribute_manager = MultiAdjustableAttributeExtractor(
             application_controller, **opts
         )
+        
 
     def open_new_session(self):
         self._attribute_manager = MultiAdjustableAttributeExtractor(
@@ -103,6 +104,7 @@ class AdjustableAttributePanel(Static):
             self._attribute_manager.reset_value(base_id, attribute)
             input: Input = self.query_one(f"#{input_id}")
             input.clear()
+            input.insert_text_at_cursor(str(self._attribute_manager.get_state(base_id, attribute)))
 
         elif "apply" in button_id:
             input_value = self.query_one(f"#{input_id}").value
@@ -116,7 +118,7 @@ class AdjustableAttributePanel(Static):
                 return
 
         self.query_one(f"#current-value-{base_id_attr}").update(
-            f"[violet]{self._attribute_manager.get_tooltip(base_id, attribute)}"
+            f"[violet]{self._attribute_manager.get_value_label(base_id, attribute)}"
         )
 
         self._application_controller.current_state.update(

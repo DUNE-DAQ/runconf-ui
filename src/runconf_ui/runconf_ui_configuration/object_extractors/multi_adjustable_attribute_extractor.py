@@ -39,6 +39,8 @@ class MultiAdjustableAttributeExtractor:
                 object_id in manager.get_all_states()
                 and attribute_name == manager.attribute_name
             ):
+                logging.info(
+                    f"Setting state for object ID {object_id}, attribute {attribute_name} to {value}.")
                 manager.set_state(object_id, value)
                 return
         raise ValueError(
