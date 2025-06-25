@@ -134,7 +134,6 @@ AdjustableAttributes:
         attribute_name: "prescale"
         is_hex: True
         unit_label: ""
-
         filters:
           - attribute: "description"
             values: ["Spare", "spare"]

@@ -4,6 +4,7 @@ from runconf_ui.exceptions import CiderOutOfBoundsException
 
 import logging
 from typing import Tuple, Union
+import traceback
 
 
 class AdjustableAttributeManager:
@@ -19,7 +20,8 @@ class AdjustableAttributeManager:
 
         self._is_hex = kwargs.get(
             "is_hex", False
-        )  # Whether to convert values to hexadecimal when saving
+        )  # Whether to convert values to hexadecimal when saving        
+        
         self._unit_scale = kwargs.get(
             "unit_scale", 1.0
         )  # Default scale factor for conversion
@@ -103,16 +105,6 @@ class AdjustableAttributeManager:
         """
         Set the attribute value for all objects in the object list.
         """
-        if self._upper_limit is not None and value > self._upper_limit:
-            raise CiderOutOfBoundsException(
-                f"Value {value} exceeds upper limit {self._upper_limit}."
-            )
-
-        if self._lower_limit is not None and value < self._lower_limit:
-            raise CiderOutOfBoundsException(
-                f"Value {value} is below lower limit {self._lower_limit}."
-            )
-
         if object_id not in self._object_ids:
             logging.debug(f"Object ID {object_id} not found in object list.")
             raise ValueError(f"Object ID {object_id} not found in object list.")
@@ -122,7 +114,14 @@ class AdjustableAttributeManager:
 
         # Convert value to hexadecimal if required
         if self._is_hex:
-            value = self.convert_to_hex(value)
+            value = self.convert_to_hex(value)        
+
+        if self._upper_limit is not None and self._lower_limit is not None and isinstance(value, float|int):
+            if value < self._lower_limit or value > self._upper_limit:
+                raise CiderOutOfBoundsException(
+                    f"Value {value} exceeds bounds {self._lower_limit}, {self._upper_limit}."
+                )
+
 
         for obj in self._object_list:
             if (
@@ -133,6 +132,8 @@ class AdjustableAttributeManager:
             ):
                 continue
 
+            logging.debug(f"Setting attribute {self._attribute_name} for object {object_id} to value {value}")
+            
             ca.ChangeAttributeAction(self._application_controller.buffer_daq_config)(
                 obj, self._attribute_name, value
             )
@@ -237,7 +238,7 @@ class AdjustableAttributeManager:
 
     def convert_to_hex(self, value: int) -> str:
         # Convert an integer value to hexadecimal format
-        return hex(value)
+        return hex(int(value))
 
     def convert_from_hex(self, value: str) -> int:
         # Convert a hexadecimal string to an integer
