@@ -2,7 +2,7 @@ from textual.screen import Screen
 from runconf_ui.widgets.multicomponent_panel import MultiComponentEnableDisablePanel
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import ShifterInterfaceState
 import logging
-from runconf_ui.daq_config_interfaces.daq_tree_tools.optimised_tree import DaqFullTree
+from runconf_ui.daq_config_interfaces.daq_tree_tools.daq_full_tree import DaqFullTree
 
 
 class DaqTreeManager:

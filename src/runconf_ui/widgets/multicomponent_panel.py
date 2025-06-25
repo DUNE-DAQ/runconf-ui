@@ -4,7 +4,7 @@ from runconf_ui.runconf_ui_configuration.object_extractors.detector_extractor im
 )
 from runconf_ui.utils.subsystem_status import SubsystemStatus
 
-from runconf_ui.daq_config_interfaces.daq_tree_tools.optimised_tree import (
+from runconf_ui.daq_config_interfaces.daq_tree_tools.daq_conf_tree import (
     ComponentLevelTree,
 )
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
