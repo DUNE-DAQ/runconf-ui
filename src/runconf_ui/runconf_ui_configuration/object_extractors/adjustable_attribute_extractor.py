@@ -4,8 +4,6 @@ from runconf_ui.exceptions import CiderOutOfBoundsException
 
 import logging
 from typing import Tuple, Union
-import traceback
-
 
 class AdjustableAttributeManager:
     def __init__(self, application_controller: ShifterInterfaceState, **kwargs):
