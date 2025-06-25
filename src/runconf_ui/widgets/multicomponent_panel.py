@@ -4,7 +4,7 @@ from runconf_ui.runconf_ui_configuration.object_extractors.detector_extractor im
 )
 from runconf_ui.utils.subsystem_status import SubsystemStatus
 
-from runconf_ui.daq_config_interfaces.daq_tree_tools.daq_conf_tree import (
+from runconf_ui.daq_config_interfaces.daq_tree_tools.optimised_tree import (
     ComponentLevelTree,
 )
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
@@ -73,7 +73,6 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
         return self._extractor.get_all_states()
 
     def _button_action(self, _, button_name: str) -> None:
-
         current_state = self._extractor.get_state(button_name)
         if current_state == SubsystemStatus.STATE_NOT_DEFINED:
             logging.error(f"State not defined for {button_name}")
@@ -87,7 +86,6 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
             current_state = SubsystemStatus.DISABLED
 
         desired_state = SubsystemStatus(not bool(current_state))
-
         self._extractor.set_state(desired_state, button_name)
 
     def update_disabled(self, disabled_states):
