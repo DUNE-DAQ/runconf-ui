@@ -11,7 +11,7 @@ class DaqTreeManager:
 
     def update_all_trees(self, screen: Screen):        
         """Update all tree views in the screen"""
-        logging.info("Updating all trees in the screen")
+        logging.debug("Updating all trees in the screen")
         # main_tree = DaqConfTree(self._application_controller)
         main_tree = DaqFullTree(self._application_controller)
         main_tree.generate_tree()

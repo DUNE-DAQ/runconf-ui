@@ -158,8 +158,7 @@ class SystemExtractor(MultiItemExtractor):
         if comp_config.get("separate_system", False):
             system_label = comp_config["system_label"]
             # Create and add component if not filtered
-            if extractor.tooltip:
-                self._tooltips[system_label] = extractor.tooltip
+            self._tooltips[system_label] = extractor.tooltip
         
 
         if not extractor.is_filtered():
@@ -473,6 +472,7 @@ class SystemExtractor(MultiItemExtractor):
                 "full_syst", f"Enable/Disable {self._system_name or 'System'}"
             )
         
-        return self._tooltips.get(
-            system_name, f"Enable/Disable {system_name}"
-        )
+        if self._tooltips.get(system_name):
+            return self._tooltips[system_name]
+        else:
+            return f"Enable/Disable {system_name}"
