@@ -90,7 +90,7 @@ PanelOptions:
               tooltip: "Enable/Disable random trigger"
 
       - Trigger:
-          display_full_system: False
+          display_full_system: True
           subsystem_dependent: False
           components:
             - id: ""
