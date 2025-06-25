@@ -153,14 +153,15 @@ class SystemExtractor(MultiItemExtractor):
     def _add_component(self, comp_config: Dict) -> None:
         """Add a single component to the system."""
         # Set up tooltip for separate systems
+        extractor = ComponentExtractor(self._application_controller, comp_config)
+
         if comp_config.get("separate_system", False):
             system_label = comp_config["system_label"]
-            self._tooltips[system_label] = comp_config.get(
-                "tooltip", f"Enable/Disable {system_label}"
-            )
+            # Create and add component if not filtered
+            if extractor.tooltip:
+                self._tooltips[system_label] = extractor.tooltip
         
-        # Create and add component if not filtered
-        extractor = ComponentExtractor(self._application_controller, comp_config)
+
         if not extractor.is_filtered():
             self._components.append(extractor)
 

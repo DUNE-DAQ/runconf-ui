@@ -129,7 +129,7 @@ class EnableDisablePanel(Static):
     def update_button_styles(self):
         """Update the styles of the buttons based on their current state."""
 
-        logging.debug(f"Updating button styles for {self}")
+        logging.info(f"Updating button styles for {self}")
 
         for button, information in self._button_list.items():
             button_id = button.replace(" ", "~") + "_button"

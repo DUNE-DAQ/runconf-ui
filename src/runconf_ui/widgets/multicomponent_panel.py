@@ -15,6 +15,7 @@ from typing import Dict, Optional
 from textual.visual import SupportsVisual
 from textual.widgets import Button
 import logging
+from rich.tree import Tree
 
 
 class MultiComponentEnableDisablePanel(EnableDisablePanel):
@@ -26,6 +27,7 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
         self,
         application_controller: ShifterInterfaceState,
         object_list: Dict = {},
+        build_tree: bool = True,
         content: str | SupportsVisual = "",
         *,
         expand: bool = False,
@@ -52,6 +54,7 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
         self._object_list = object_list
 
         self._disabled_items = []
+        self._build_tree = build_tree
 
         logging.debug(f"Initializing MultiComponentEnableDisablePanel {id}...")
         self._extractor = DetectorExtractor(self._application_controller, object_list)
@@ -95,12 +98,13 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
     def check_button_state(self, button: str, _) -> SubsystemStatus:
         return self._extractor.get_state(button)
 
-    def get_tree(self):
-        tree = ComponentLevelTree(
-            self._application_controller,
-            extractor=self._extractor,
-        )
-        return tree
+    def get_tree(self)->ComponentLevelTree | None:
+        if self._build_tree:
+            return  ComponentLevelTree(
+                self._application_controller,
+                extractor=self._extractor,
+            )
+        return None 
 
     def on_mount(self):
         for button in self._button_list.keys():

@@ -16,6 +16,7 @@ class ComponentLevelTree(ConfigTree):
     def __init__(self, application_controller: ShifterInterfaceState, extractor: DetectorExtractor ):
         """Initialize the ComponentLevelTree with the application controller."""
         
+        
         # Get the session
         self._application_controller = application_controller
         self._extractor = extractor

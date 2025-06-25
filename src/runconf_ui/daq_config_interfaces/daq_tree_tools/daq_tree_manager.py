@@ -11,6 +11,7 @@ class DaqTreeManager:
 
     def update_all_trees(self, screen: Screen):        
         """Update all tree views in the screen"""
+        logging.info("Updating all trees in the screen")
         # main_tree = DaqConfTree(self._application_controller)
         main_tree = DaqFullTree(self._application_controller)
         main_tree.generate_tree()
@@ -23,13 +24,17 @@ class DaqTreeManager:
                 panel.get_current_states()
             )
 
-            if isinstance(panel, MultiComponentEnableDisablePanel):
+            if isinstance(panel, MultiComponentEnableDisablePanel) and panel:
                 panel.update_disabled(disabled)
                 self.update_component_tree(screen, panel)
 
             panel.update_button_styles()
 
     def update_component_tree(self, screen, panel: MultiComponentEnableDisablePanel):
+        t = panel.get_tree()
+        if t is None:
+            return
+        
         screen.query_one(
             f"#tree_view_{panel.id.replace('_subsystem_panel', '')}"
-        ).update(panel.get_tree().print_tree())
+        ).update(t.print_tree())
