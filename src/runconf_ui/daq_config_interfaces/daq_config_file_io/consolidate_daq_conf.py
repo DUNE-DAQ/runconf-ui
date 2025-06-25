@@ -13,7 +13,6 @@ from typing import Any
 
 import sys
 import os
-import logging
 
 class ConsolidateDAQConf:
     """

@@ -21,8 +21,6 @@ from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
 from typing import Dict, Sequence, Optional, List
 import logging
 import traceback
-from collections import defaultdict
-
 
 class SystemExtractor(MultiItemExtractor):
     """

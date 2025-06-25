@@ -15,7 +15,6 @@ from typing import Dict, Optional
 from textual.visual import SupportsVisual
 from textual.widgets import Button
 import logging
-from rich.tree import Tree
 
 
 class MultiComponentEnableDisablePanel(EnableDisablePanel):

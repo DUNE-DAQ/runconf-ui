@@ -4,7 +4,6 @@ from runconf_ui.daq_config_interfaces.daq_tree_tools.daq_conf_tree import (
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import ShifterInterfaceState
 from rich.tree import Tree
 import runconf_ui.daq_config_interfaces.actions.actions as ca
-import logging
 from typing import Set, Optional
 import logging
 
@@ -37,9 +36,7 @@ class DaqFullTree(DaqConfTreeBase):
         if self._application_controller.current_daq_config is None:
             return Tree("[bold red]No DAQ configuration loaded[/bold red]")
 
-        self._tree = Tree("[bold red]Configuration: [/bold red]")
-        buffer = self._application_controller.buffer_daq_config
-        
+        self._tree = Tree("[bold red]Configuration: [/bold red]")        
         # Cache action objects
         get_sessions_action = self._get_action(ca.GetDalsOfClassAction)
         get_attribute_action = self._get_action(ca.GetAttributeAction)

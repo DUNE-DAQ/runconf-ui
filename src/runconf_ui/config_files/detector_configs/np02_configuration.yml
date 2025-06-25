@@ -90,8 +90,8 @@ PanelOptions:
               tooltip: "Enable/Disable random trigger"
 
       - Trigger:
-          subsystem_dependent: True
           display_full_system: False
+          subsystem_dependent: False
           components:
             - id: ""
               class: CTBHLT
