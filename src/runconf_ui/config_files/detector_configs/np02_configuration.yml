@@ -91,7 +91,7 @@ PanelOptions:
 
       - Trigger:
           display_full_system: False
-          subsystem_dependent: True
+          subsystem_dependent: False
           components:
             - id: ""
               class: CTBHLT
