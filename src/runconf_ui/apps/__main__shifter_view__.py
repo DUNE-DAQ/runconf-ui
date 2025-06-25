@@ -104,7 +104,7 @@ class ShifterView(App):
 
         clean_old_files(logging_path, "log")
 
-    def on_mount(self):
+def on_mount(self):
         """
         Mount App
         """
