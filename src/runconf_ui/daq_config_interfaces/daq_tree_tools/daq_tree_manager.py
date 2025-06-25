@@ -9,7 +9,7 @@ class DaqTreeManager:
     def __init__(self, application_controller: ShifterInterfaceState):
         self._application_controller = application_controller
 
-    def update_all_trees(self, screen: Screen):
+    def update_all_trees(self, screen: Screen):        
         """Update all tree views in the screen"""
         # main_tree = DaqConfTree(self._application_controller)
         main_tree = DaqFullTree(self._application_controller)

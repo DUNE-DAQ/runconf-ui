@@ -13,7 +13,7 @@ from typing import Any
 
 import sys
 import os
-
+import logging
 
 class ConsolidateDAQConf:
     """
@@ -126,7 +126,7 @@ class ConsolidateDAQConf:
             f"Consolidated from {self._current_config_name}"
         )
 
-    def __call__(self) -> Any:
+    def __call__(self) -> Any:        
         self.open_files()
         # self.populate_configuration()
         self.fill_all()

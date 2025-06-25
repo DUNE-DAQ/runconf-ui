@@ -9,6 +9,9 @@ from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
 from runconf_ui.runconf_ui_configuration.detector_config_readers.generate_enable_disable_map import (
     EnableDisableMapGen,
 )
+from runconf_ui.widgets.multicomponent_panel import (
+    MultiComponentEnableDisablePanel
+)
 from runconf_ui.widgets.file_select_panel import FilePanelWidget
 from runconf_ui.widgets.options_panel import OptionPanel
 from runconf_ui.exceptions import CiderInvalidConfigurationException
@@ -199,5 +202,5 @@ class ShifterViewScreen(Screen):
         )
 
     def on_enable_disable_panel_changed(self):
-        """Handle changes in enable/disable panels"""
+        """Handle changes in enable/disable panels"""        
         self.tree_manager.update_all_trees(self)
