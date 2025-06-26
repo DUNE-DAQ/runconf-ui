@@ -45,7 +45,7 @@ PanelOptions:
 
     Systems:
       - TPG:
-          subsystem_dependent: True
+          subsystem_dependent: False
           display_full_system: False
 
           components:
