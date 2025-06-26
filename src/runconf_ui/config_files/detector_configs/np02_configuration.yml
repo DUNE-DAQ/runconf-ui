@@ -7,6 +7,7 @@ Settings:
     - CTBHLT
     - CTBoardConf
 
+
 PanelOptions:
   Detector:
     label: "detector"
@@ -68,7 +69,7 @@ PanelOptions:
               separate_system: True
 
             - id: tp_generation_enabled
-              segments: ["pds-segment"] 
+              segments: ["pds-segment"]
               class: ReadoutApplication
               system_label: PDS
               separate_system: True
@@ -88,9 +89,9 @@ PanelOptions:
               disabled_state: []
               tooltip: "Enable/Disable random trigger"
 
-      - Trigger: 
-          display_full_system: False
+      - Trigger:
           subsystem_dependent: True
+          display_full_system: False
           components:
             - id: ""
               class: CTBHLT
@@ -110,3 +111,31 @@ PanelOptions:
             - id: ""
               class: "DFApplication"
               each_component_separate: True
+
+
+AdjustableAttributes:
+  Random Trigger Rates:
+    label: "TriggerRates"
+    Systems:
+      - object_id: "random-tc-generator"
+        object_class: RandomTCMakerConf
+        attribute_name: "trigger_rate_hz"
+        unit_label: "Hz"
+      - object_class: "CTBRandomTrigger"
+        attribute_name: "period"
+        unit_label : "ticks"
+        tooltip: 'description'
+
+
+  Prescales:
+    label: "PreScales"
+    Systems:
+      - object_class: "CTBHLT"
+        attribute_name: "prescale"
+        is_hex: True
+        unit_label: ""
+        filters:
+          - attribute: "description"
+            values: ["Spare", "spare"]
+
+        tooltip: 'description'

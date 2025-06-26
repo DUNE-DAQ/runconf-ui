@@ -1,14 +1,14 @@
-from runconf_ui.runconf_ui_configuration.detector_config_readers.extractor_interfaces import (
+from runconf_ui.runconf_ui_configuration.object_extractors.extractor_interfaces import (
     MultiItemExtractor,
     SubsystemExtractor,
 )
-from runconf_ui.runconf_ui_configuration.detector_config_readers.attribute_extractor import (
+from runconf_ui.runconf_ui_configuration.object_extractors.attribute_extractor import (
     AttributeExtractor,
 )
-from runconf_ui.runconf_ui_configuration.detector_config_readers.component_extractor import (
+from runconf_ui.runconf_ui_configuration.object_extractors.component_extractor import (
     ComponentExtractor,
 )
-from runconf_ui.runconf_ui_configuration.detector_config_readers.relationship_extractor import (
+from runconf_ui.runconf_ui_configuration.object_extractors.relationship_extractor import (
     RelationshipExtractor,
 )
 from runconf_ui.utils.subsystem_status import SubsystemStatus

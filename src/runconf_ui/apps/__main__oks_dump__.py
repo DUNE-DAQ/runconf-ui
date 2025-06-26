@@ -1,6 +1,6 @@
-'''
+"""
 HW: Recreation of https://github.com/DUNE-DAQ/oks/blob/develop/apps/oks_dump.cxx in python
-'''
+"""
 
 import oks
 import click
@@ -8,7 +8,7 @@ from pprint import pprint
 
 
 @click.command()
-@click.argument('file_name', type=click.Path(exists=True))
+@click.argument("file_name", type=click.Path(exists=True))
 def main(file_name: str):
     """
     Main function to dump the contents of an OKS file.
@@ -21,13 +21,11 @@ def main(file_name: str):
     oks_kernel.load_file(str(file_name))
 
     for i in oks_kernel.schema_files():
-        print(f"Schema file: {i}")  
+        print(f"Schema file: {i}")
 
-    
     for i in oks_kernel.data_files():
-        print(f"Data file: {i}")  
+        print(f"Data file: {i}")
 
-    pprint(oks_kernel.classes()['ResourceSetAND'].all_sub_classes())
-
+    pprint(oks_kernel.classes()["ResourceSetAND"].all_sub_classes())
 
     print("OKS file loaded successfully.")

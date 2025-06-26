@@ -61,7 +61,7 @@ class EnableDisablePanel(Static):
         raise NotImplementedError("Check is disabled not implemented for class")
 
     def compose(self):
-        with ScrollableContainer(id="buttons_panel"):
+        with ScrollableContainer(id="buttons_panel", classes="large_box_container"):
 
             for button, information in self._button_list.items():
 
@@ -78,9 +78,8 @@ class EnableDisablePanel(Static):
                     name_str, id=f"{id_name}_button", classes=classes
                 )
                 button_widget.tooltip = self.get_tooltip(button)
-               
-                yield button_widget
 
+                yield button_widget
 
     def on_button_pressed(self, event: Button.Pressed):
         button_name = event.button.id.replace("_button", "")
@@ -190,18 +189,12 @@ class EnableDisablePanel(Static):
         """
         if button_status == SubsystemStatus.ENABLED:
             name_str = f"{button} (Enabled)"
-            classes = (
-                "detector_subsystem_button detector_subsystem_button_enabled"
-            )
+            classes = "detector_subsystem_button detector_subsystem_button_enabled"
         elif button_status == SubsystemStatus.PARTIALLY_ENABLED:
             name_str = f"{button} (Partially Enabled)"
-            classes = (
-                "detector_subsystem_button detector_subsystem_button_partial"
-            )
+            classes = "detector_subsystem_button detector_subsystem_button_partial"
         else:
             name_str = f"{button} (Disabled)"
-            classes = (
-                "detector_subsystem_button detector_subsystem_button_disabled"
-            )
+            classes = "detector_subsystem_button detector_subsystem_button_disabled"
 
         return classes, name_str

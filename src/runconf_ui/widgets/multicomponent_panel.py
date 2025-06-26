@@ -1,5 +1,5 @@
 from runconf_ui.widgets.enable_disable_base import EnableDisablePanel
-from runconf_ui.runconf_ui_configuration.detector_config_readers.detector_extractor import (
+from runconf_ui.runconf_ui_configuration.object_extractors.detector_extractor import (
     DetectorExtractor,
 )
 from runconf_ui.utils.subsystem_status import SubsystemStatus
@@ -15,6 +15,7 @@ from typing import Dict, Optional
 from textual.visual import SupportsVisual
 from textual.widgets import Button
 import logging
+
 
 class MultiComponentEnableDisablePanel(EnableDisablePanel):
     """
@@ -71,7 +72,6 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
         # Get states
         return self._extractor.get_all_states()
 
-
     def _button_action(self, _, button_name: str) -> None:
 
         current_state = self._extractor.get_state(button_name)
@@ -116,4 +116,3 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
 
     def get_tooltip(self, button_name: str) -> str:
         return self._extractor.get_tooltip(button_name)
-
