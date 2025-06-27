@@ -26,6 +26,7 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
         self,
         application_controller: ShifterInterfaceState,
         object_list: Dict = {},
+        build_tree: bool = True,
         content: str | SupportsVisual = "",
         *,
         expand: bool = False,
@@ -52,6 +53,7 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
         self._object_list = object_list
 
         self._disabled_items = []
+        self._build_tree = build_tree
 
         logging.debug(f"Initializing MultiComponentEnableDisablePanel {id}...")
         self._extractor = DetectorExtractor(self._application_controller, object_list)
@@ -73,7 +75,6 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
         return self._extractor.get_all_states()
 
     def _button_action(self, _, button_name: str) -> None:
-
         current_state = self._extractor.get_state(button_name)
         if current_state == SubsystemStatus.STATE_NOT_DEFINED:
             logging.error(f"State not defined for {button_name}")
@@ -87,7 +88,6 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
             current_state = SubsystemStatus.DISABLED
 
         desired_state = SubsystemStatus(not bool(current_state))
-
         self._extractor.set_state(desired_state, button_name)
 
     def update_disabled(self, disabled_states):
@@ -97,12 +97,13 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
     def check_button_state(self, button: str, _) -> SubsystemStatus:
         return self._extractor.get_state(button)
 
-    def get_tree(self):
-        tree = ComponentLevelTree(
-            self._application_controller,
-            extractor=self._extractor,
-        )
-        return tree
+    def get_tree(self)->ComponentLevelTree | None:
+        if self._build_tree:
+            return  ComponentLevelTree(
+                self._application_controller,
+                extractor=self._extractor,
+            )
+        return None 
 
     def on_mount(self):
         for button in self._button_list.keys():

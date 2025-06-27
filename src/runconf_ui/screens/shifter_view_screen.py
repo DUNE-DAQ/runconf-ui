@@ -125,7 +125,7 @@ class ShifterViewScreen(Screen):
                 )
 
             self.popups.show(
-                f"[white]Invalid configuration[/white] [bold grey3]{self._application_controller.current_daq_config}:{self._application_controller.session_name}[/bold grey3] [white]passed, please check with the experts!"
+                f"[white]Invalid configuration[/white] [bold grey3]{self._application_controller.current_daq_config} passed. please check with the experts! This is likely a daq-software/configuration version mismatch or a corrupted file."
             )
             logging.error(f"Error: {traceback.format_exc()}")
 
@@ -199,5 +199,5 @@ class ShifterViewScreen(Screen):
         )
 
     def on_enable_disable_panel_changed(self):
-        """Handle changes in enable/disable panels"""
+        """Handle changes in enable/disable panels"""        
         self.tree_manager.update_all_trees(self)

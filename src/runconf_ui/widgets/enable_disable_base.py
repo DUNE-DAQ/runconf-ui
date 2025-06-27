@@ -54,9 +54,6 @@ class EnableDisablePanel(Static):
             k: self.check_button_state(k, b) for k, b in self._button_list.items()
         }
 
-        # Update everything else!
-        self.post_message(self.Changed())
-
     def check_button_state(self, *args, **kwargs) -> bool:
         raise NotImplementedError("Check is disabled not implemented for class")
 
@@ -172,7 +169,6 @@ class EnableDisablePanel(Static):
 
     class Changed(Message):
         """Custom message to notify when a button is pressed."""
-
         ...
 
     def get_tooltip(self, button_name: str) -> str:

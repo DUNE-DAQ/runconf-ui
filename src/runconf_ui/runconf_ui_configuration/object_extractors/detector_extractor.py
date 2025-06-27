@@ -155,7 +155,6 @@ class DetectorExtractor(MultiItemExtractor):
 
             except CiderBadActionException:
                 logging.debug(f"Could not get all states for {system.system_name}")
-                logging.debug(f"{traceback.format_exc()}")
             except Exception as e:
                 logging.error(f"{traceback.format_exc()}")
                 logging.error(

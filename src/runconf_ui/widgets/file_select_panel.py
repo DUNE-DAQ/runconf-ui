@@ -326,8 +326,6 @@ class FilePanelWidget(Static):
             self._application_controller.current_daq_config = selected_configuration
             self.post_message(self.FileNotFound(selected_configuration))
 
-        self.post_message(self.FileSelected())
-
     def _open_file(self, configuration: Path):
         daq_config_file = self._management_interface.open_file(configuration)
         self._application_controller.current_daq_config = daq_config_file.file_name

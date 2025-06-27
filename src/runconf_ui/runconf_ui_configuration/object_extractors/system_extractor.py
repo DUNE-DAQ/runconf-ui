@@ -18,360 +18,459 @@ from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
     ShifterInterfaceState,
 )
 
-
-from typing import Dict, Sequence, Optional
+from typing import Dict, Sequence, Optional, List
 import logging
 import traceback
 
-
 class SystemExtractor(MultiItemExtractor):
+    """
+    Extracts and manages system state including attributes, components, and subsystems.
+    
+    Handles hierarchical system structures where systems can contain multiple subsystems,
+    and provides methods to enable/disable systems and query their states.
+    """
+
     def __init__(
         self,
         application_controller: ShifterInterfaceState,
         system_name: Optional[str],
         system: Optional[Dict],
-        disabled_dals=[],
+        disabled_dals: List = None,
     ):
         """
-        :param daq_configuration: daq_configuration object
-        :param session: Name of session
+        Initialize SystemExtractor.
+        
+        :param application_controller: Application controller interface
         :param system_name: Name of system
         :param system: Dictionary containing system information
         :param disabled_dals: List of disabled dals, defaults to []
-
-        System is of form
-
-        "System_Name": {
-            subsystem_dependent: bool, # If all subsystems are disabled, disable this system
-            attributes: [ <list of attribute subsystems> ],
-            components: [ <list of component subsystems> ]
+        
+        System structure:
+        {
+            "subsystem_dependent": bool,  # If all subsystems are disabled, disable this system
+            "attributes": [<list of attribute subsystems>],
+            "components": [<list of component subsystems>],
+            "relationships": [<list of relationship subsystems>]
         }
-
-
         """
-
-        # List of attributes to enable/disable in the system
-        self._attributes = []
-        # List of componets to enable/disable in the system
-        self._components = []
-        # If the system contains multiple systems, we need to know what they are for example TPC may contain multiple CRPs
-        self._system_names = []
-
-        # The system name for the full sysystem
+        # Initialize collections
+        self._attributes: List[AttributeExtractor] = []
+        self._components: List[ComponentExtractor] = []
+        self._system_names: List[str] = []
+        
+        # System configuration
         self._system_name = system_name
+        self._subsystem_dependent = False
         self._display_full_system = True
+        
+        # Caching for performance
+        self._tooltips: Dict[str, str] = {}
+        self._subsystems: Dict[str, List] = {}
+        self._component_cache: Dict[str, List] = {}
+        self._attribute_cache: Dict[str, List] = {}
+        
+        # Initialize tooltip for main system
+        if self._system_name:
+            self._tooltips["full_syst"] = f"Enable/disable {self._system_name}"
+        
+        super().__init__(application_controller, system, disabled_dals or [])
 
-        self._tooltips = {"full_syst": f"Enable/disable {self._system_name}"}
-
-        super().__init__(application_controller, system, disabled_dals)
-
-    def read_system(self, system: Dict, system_name: Optional[str] = None):
+    def read_system(self, system: Dict, system_name: Optional[str] = None) -> bool:
         """
-        Read dictionary containing system information. This is used to extract the state of the system.
+        Read dictionary containing system information and extract state.
+        
+        :param system: System configuration dictionary
+        :param system_name: Optional override for system name
+        :return: True if system was read successfully
         """
-        # Just to allow this to be run at start up
         if not super().read_system(system):
-            logging.error(
-                f"System with name {system_name} is not valid, cannot read system."
-            )
-            return
+            logging.error(f"System with name {system_name} is not valid, cannot read system.")
+            return False
 
-        self._system_name = (
-            system_name if system_name is not None else self._system_name
-        )
+        # Update system name if provided
+        if system_name is not None:
+            self._system_name = system_name
 
         logging.debug(f"Reading system {self._system_name}")
 
-        self._attributes = [
-            AttributeExtractor(self._application_controller, s)
-            for s in system.get("attributes", [])
-        ]
-
-        self._attributes.extend(
-            RelationshipExtractor(self._application_controller, s)
-            for s in system.get("relationships", [])
-        )
-
-        self.extract_components(system)
-
-        self._system_names = list(
-            set(
-                [
-                    s.system_name
-                    for s in self._attributes + self._components
-                    if s.is_system
-                ]
-            )
-        )
-
-        for s in self._system_names:
-            self._tooltips[s] = [*self.get_components(s), *self.get_attributes()][
-                0
-            ].tooltip
-
-        if self._system_name is not None:
-            self._system_names.append(self._system_name)
-        else:
-            # If the system name is not defined, we assume this is the root system
-            self._system_names.append("root")
-
+        # Extract system configuration
         self._subsystem_dependent = system.get("subsystem_dependent", False)
         self._display_full_system = system.get("display_full_system", True)
 
-        logging.debug(f"System names: {self._system_names}")
+        # Process attributes and relationships
+        self._extract_attributes(system)
+        self._extract_components(system)
+        self._build_system_structure()
+        
+        return True
 
-    def extract_components(self, system: Dict):
-        self._components = []
-        for s in system.get("components", []):
-            if s.get("each_component_separate", False):
-                # If the component is not a separate component, we can just add it as a subsystem
-                self.__extract_multi_comp(s)
-            # If the component is a separate component, we need to which contain the ID as the substring + are the right class
-            else:
-                self.__add_component(s)
-
-    def __extract_multi_comp(self, sub_syst: Dict):
-        comp_names = self.find_components_with_wildcard(
-            sub_syst["id"], sub_syst["class"]
-        )
-        for comp in comp_names:
-            s_copy = sub_syst.copy()
-            # Swap the id around to ensure uniqueness
-            s_copy["id"] = comp
-
-            # If the component is not a separate system, we need to set the system label and separate_system
-            # this gives us buttons for each component in the system
-            if not s_copy.get("separate_system", False):
-                s_copy["system_label"] = comp
-                s_copy["separate_system"] = True
-
-            self.__add_component(s_copy)
-
-    def __add_component(self, system: Dict):
-        if system.get("separate_system", False):
-            self._tooltips[system["system_label"]] = system.get(
-                "tooltip", f"Enable/Disable {system['system_label']}"
+    def _extract_attributes(self, system: Dict) -> None:
+        """Extract attributes and relationships from system configuration."""
+        self._attributes = []
+        
+        # Add regular attributes
+        for attr_config in system.get("attributes", []):
+            self._attributes.append(
+                AttributeExtractor(self._application_controller, attr_config)
+            )
+        
+        # Add relationships
+        for rel_config in system.get("relationships", []):
+            self._attributes.append(
+                RelationshipExtractor(self._application_controller, rel_config)
             )
 
-        ext = ComponentExtractor(self._application_controller, system)
-        if not ext.is_filtered():
-            self._components.append(ext)
+    def _extract_components(self, system: Dict) -> None:
+        """Extract components from system configuration."""
+        self._components = []
+        
+        for comp_config in system.get("components", []):
+            if comp_config.get("each_component_separate", False):
+                self._extract_multi_component(comp_config)
+            else:
+                self._add_component(comp_config)
+
+    def _extract_multi_component(self, comp_config: Dict) -> None:
+        """Extract multiple components from a wildcard configuration."""
+        component_names = self.find_components_with_wildcard(
+            comp_config["id"], comp_config["class"]
+        )
+        
+        for comp_name in component_names:
+            # Create a copy and modify for this specific component
+            modified_config = comp_config.copy()
+            modified_config["id"] = comp_name
+            
+            # Set up separate system if needed
+            if not modified_config.get("separate_system", False):
+                modified_config["system_label"] = comp_name
+                modified_config["separate_system"] = True
+            
+            self._add_component(modified_config)
+
+    def _add_component(self, comp_config: Dict) -> None:
+        """Add a single component to the system."""
+        # Set up tooltip for separate systems
+        extractor = ComponentExtractor(self._application_controller, comp_config)
+
+        if comp_config.get("separate_system", False):
+            system_label = comp_config["system_label"]
+            # Create and add component if not filtered
+            self._tooltips[system_label] = extractor.tooltip
+        
+
+        if not extractor.is_filtered():
+            self._components.append(extractor)
+
+    def _build_system_structure(self) -> None:
+        """Build the internal system structure and caches."""
+        # Get all system names from subsystems
+        all_subsystems = self._attributes + self._components
+        self._system_names = list({
+            subsystem.system_name 
+            for subsystem in all_subsystems 
+            if subsystem.is_system
+        })
+        
+        # Add main system name
+        if self._system_name:
+            self._system_names.append(self._system_name)
+        else:
+            self._system_names.append("root")
+        
+        # Build subsystem mappings
+        self._subsystems = {}
+        for system_name in self._system_names:
+            components = self._get_components_for_system(system_name)
+            attributes = self._get_attributes_for_system(system_name)
+            self._subsystems[system_name] = [components, attributes]
+        
+        # Build tooltips for subsystems
+        for system_name in self._system_names:
+            if system_name not in self._tooltips:
+                # Get first available tooltip from components or attributes
+                all_items = [*self._get_components_for_system(system_name), 
+                           *self._get_attributes_for_system(system_name)]
+                if all_items:
+                    self._tooltips[system_name] = all_items[0].tooltip
+        
+        # Clear caches after rebuild
+        self._component_cache.clear()
+        self._attribute_cache.clear()
+        
+        logging.debug(f"System names: {self._system_names}")
+
+    def _get_components_for_system(self, system_name: str) -> List:
+        """Get components for a specific system."""
+        return [
+            comp for comp in self._components
+            if self._subsystem_matches(comp, system_name)
+        ]
+
+    def _get_attributes_for_system(self, system_name: str) -> List:
+        """Get attributes for a specific system."""
+        return [
+            attr for attr in self._attributes
+            if self._subsystem_matches(attr, system_name)
+        ]
+
+    def _subsystem_matches(self, subsystem: SubsystemExtractor, system_name: str) -> bool:
+        """Check if a subsystem belongs to the specified system."""
+        if system_name in [None, self._system_name]:
+            return True
+        return subsystem.system_name == system_name
+
+    def extract_components(self, system: Dict) -> None:
+        """Legacy method name - delegates to _extract_components for compatibility."""
+        self._extract_components(system)
 
     @property
     def system_names(self) -> Sequence[str]:
+        """Get all system names in this extractor."""
         return self._system_names
 
     @property
-    def system_name(self) -> str | None:
+    def system_name(self) -> Optional[str]:
+        """Get the main system name."""
         return self._system_name
 
-    def _check_subsystem_cond(
-        self, subsystem: SubsystemExtractor, system_name: str | None
-    ):
-        if system_name is None or system_name == self._system_name:
-            return True
-        else:
-            return subsystem.system_name == system_name
-
-    def _get_state(self, system_name: Optional[str] = None) -> SubsystemStatus | None:
+    def _get_state(self, system_name: Optional[str] = None) -> Optional[SubsystemStatus]:
         """
-        Get state of the system. This is used to check if the system is enabled/disabled
-        :param system_name: Name of the (sub)system to check, defaults to None
+        Get state of the system or subsystem.
+        
+        :param system_name: Name of the system to check, defaults to main system
+        :return: Current state or None if not available
         """
+        target_system = system_name or self._system_name
+        
+        # Check for top-level disabling
+        if self._is_top_level_disabled(system_name):
+            return SubsystemStatus.TOP_LEVEL_DISABLED
+        
+        # Handle subsystem-dependent systems
+        if target_system == self._system_name and self._subsystem_dependent:
+            subsystem_state = self._get_subsystem_state()
+            if subsystem_state != SubsystemStatus.STATE_NOT_DEFINED:
+                return subsystem_state
+        
+        # Get states for the target system
+        return self._calculate_system_state(target_system)
 
-        # If the top level is disabled disable all lower level stuff
-        if system_name != self._system_name:
-            if (
-                self.get_state(self.system_name)
-                in [SubsystemStatus.DISABLED, SubsystemStatus.TOP_LEVEL_DISABLED]
-                and not self._subsystem_dependent
-            ):
-                return SubsystemStatus.TOP_LEVEL_DISABLED
+    def _is_top_level_disabled(self, system_name: Optional[str]) -> bool:
+        """Check if system is disabled at top level."""
+        if system_name == self._system_name or not self._subsystem_dependent:
+            return False
+        
+        main_state = self._calculate_system_state(self._system_name)
+        return main_state in [SubsystemStatus.DISABLED, SubsystemStatus.TOP_LEVEL_DISABLED]
 
-        # Get the state of all subsystems in the system
-        states = [
-            s.get_state()
-            for s in self._attributes + self._components
-            if self._check_subsystem_cond(s, system_name)
-            and s.get_state() is not SubsystemStatus.STATE_NOT_DEFINED
-        ]
-
-        if len(states) == 0:
-            logging.debug(f"No states found for {system_name}")
+    def _calculate_system_state(self, system_name: str) -> SubsystemStatus:
+        """Calculate the current state of a system based on its subsystems."""
+        subsystem_groups = self._subsystems.get(system_name, [])
+        
+        # Flatten and filter valid states
+        all_states = []
+        for group in subsystem_groups:
+            for subsystem in group:
+                state = subsystem.get_state()
+                if state != SubsystemStatus.STATE_NOT_DEFINED:
+                    all_states.append(state)
+        
+        if not all_states:
+            logging.debug(f"No valid states found for {system_name}")
             return SubsystemStatus.STATE_NOT_DEFINED
-
-        # If we depend on subsystem behaviour
-        if system_name in [None, self._system_name] and self._subsystem_dependent:
-            # If the system is not defined, we assume this is the root system
-            state = self._get_subsystem_state()
-            if state != SubsystemStatus.STATE_NOT_DEFINED:
-                return state
-
-        # Otherwise we check the states of the system itself
-        if (
-            all([s == states[0] for s in states])
-            and states[0] is not SubsystemStatus.STATE_NOT_DEFINED
-        ):
-            return states[0]
-
-        logging.debug(
-            f"States are not the same for {system_name}, returning PARTIALLY_ENABLED"
-        )
+        
+        # Check if all states are the same
+        if len(set(all_states)) == 1:
+            return all_states[0]
+        
+        logging.debug(f"Mixed states found for {system_name}, returning PARTIALLY_ENABLED")
         return SubsystemStatus.PARTIALLY_ENABLED
 
     def _get_subsystem_state(self) -> SubsystemStatus:
-        subsyst_states = [
-            s.get_state()
-            for s in self._attributes + self._components
-            if s.get_state() is not SubsystemStatus.STATE_NOT_DEFINED and s.is_system
+        """Get the collective state of all system-level subsystems."""
+        system_subsystems = [
+            subsystem for subsystem in self._attributes + self._components
+            if subsystem.is_system and subsystem.get_state() != SubsystemStatus.STATE_NOT_DEFINED
         ]
-
-        if not len(subsyst_states):
+        
+        if not system_subsystems:
             return SubsystemStatus.STATE_NOT_DEFINED
+        
+        states = [subsystem.get_state() for subsystem in system_subsystems]
+        
+        # Return uniform state or partially enabled
+        return states[0] if len(set(states)) == 1 else SubsystemStatus.PARTIALLY_ENABLED
 
-        if all([s == subsyst_states[0] for s in subsyst_states]):
-            return subsyst_states[0]
-
-        else:
-            return SubsystemStatus.PARTIALLY_ENABLED
-
-    def _set_state(self, state: SubsystemStatus, system_name: Optional[str]):
-        # Basically if there are no non-system systems we assume this is a control for all subsystems!
+    def _set_state(self, state: SubsystemStatus, system_name: Optional[str]) -> None:
+        """Set state for a system and its subsystems."""
+        target_system = system_name or self._system_name
+        
+        # Handle subsystem-dependent behavior
         if self._subsystem_dependent:
-            self._set_full_system_state(state, system_name)
+            self._set_full_system_state(state, target_system)
+        
+        # Set state for all subsystems in the target system
+        subsystem_groups = self._subsystems.get(target_system, [])
+        for group in subsystem_groups:
+            for subsystem in group:
+                subsystem.set_state(state)
 
-        for s in self._attributes + self._components:
-            if self._check_subsystem_cond(s, system_name):
-                s.set_state(state)
-
-    def _set_full_system_state(self, state: SubsystemStatus, system_name: str | None):
+    def _set_full_system_state(self, state: SubsystemStatus, system_name: Optional[str]) -> None:
         """
-        Set state of non-subsystem comps
-
-        Logic is as follows:
-            1. If the system is not defined, we assume this is the root system and ignore
-            2. We look at the state of all subsystems that AREN'T the root system or the one we're about to set
-            3. If everything else is different to the state we're about to set, we set the state to PARTIALLY_ENABLED
-            4. If everything else is the same, we set the state to the state we're about to set
-
-        This means we can enable/disable global components at will. This is painful logic but it works.
-
+        Set state for non-subsystem components based on subsystem dependencies.
+        
+        This handles the complex logic of enabling/disabling global components
+        based on the state of other subsystems.
         """
-        if system_name is None:
+        if not system_name:
             return
-
-        subsystem_states = [
-            s.get_state()
-            for s in self._attributes + self._components
-            if s.get_state() is not SubsystemStatus.STATE_NOT_DEFINED
-            and s.is_system
-            and s.system_name != system_name
+        
+        # Get states of other subsystems
+        other_system_states = [
+            subsystem.get_state()
+            for subsystem in self._attributes + self._components
+            if (subsystem.is_system and 
+                subsystem.get_state() != SubsystemStatus.STATE_NOT_DEFINED and
+                subsystem.system_name != system_name)
         ]
+        
+        # Determine the effective state for non-system components
+        effective_state = state
+        if other_system_states and not all(s == state for s in other_system_states):
+            effective_state = SubsystemStatus.ENABLED
+        
+        # Apply state to non-system components
+        for subsystem in self._attributes + self._components:
+            if not subsystem.is_system:
+                subsystem.set_state(effective_state)
 
-        if (
-            all([s == subsystem_states[0] for s in subsystem_states])
-            and subsystem_states[0] == state
-        ):
-            ...
-        else:
-            state = SubsystemStatus.ENABLED
-
-        for st in self._attributes + self._components:
-            if not st.is_system:
-                st.set_state(state)
-
-        if state == SubsystemStatus.PARTIALLY_ENABLED:
-            return
-
-        else:
-            for s in self._attributes + self._components:
-                if not s.is_system:
-                    s.set_state(state)
-
-    def get_all_states(self):
+    def get_all_states(self) -> Dict[str, SubsystemStatus]:
         """
         Get the state of the system and any nested subsystems.
+        
+        :return: Dictionary mapping system names to their states
         """
-        # Just to allow this to be run at start up
-        if (
-            self._application_controller.session_name is None
-            or self._application_controller.buffer_daq_config is None
-        ):
-            return
+        if (not self._application_controller.session_name or 
+            not self._application_controller.buffer_daq_config):
+            return {}
 
-        return_dict = {}
-
-        if self._display_full_system:
-            return_dict[self._system_name] = self.get_state()
-
-        # Grab the other systems
-        for s in sorted(self._system_names):
-            if s in [None, self._system_name]:
+        result = {}
+        
+        # Add main system state if configured to display
+        if self._display_full_system and self._system_name:
+            main_state = self.get_state()
+            if main_state is not None:
+                result[self._system_name] = main_state
+        
+        # Add subsystem states
+        for system_name in sorted(self._system_names):
+            if system_name in [None, self._system_name]:
                 continue
-
             try:
-                state = self.get_state(s)
+                state = self.get_state(system_name)
                 if state is not None:
-                    return_dict.update({s: self.get_state(s)})
-
+                    result[system_name] = state
             except CiderBadActionException:
-                logging.debug(f"Could not get state for {s} in {self.system_name}")
+                logging.debug(f"Could not get state for {system_name} in {self.system_name}")
             except Exception as e:
-                logging.error(f"{traceback.format_exc()}")
-                logging.error(f"Could not get state for {s} due to {e}")
+                logging.error(f"Error getting state for {system_name}: {e}")
+                logging.error(traceback.format_exc())
+        
+        return result
 
-        return return_dict
-
-    def get_components(self, system_name: Optional[str] = None):
-        return [
-            s for s in self._components if self._check_subsystem_cond(s, system_name)
+    def get_components(self, system_name: Optional[str] = None) -> List:
+        """
+        Get components for a specific system.
+        
+        :param system_name: System name to filter by, defaults to all
+        :return: List of matching components
+        """
+        # Use cache if available
+        cache_key = system_name or "all"
+        if cache_key in self._component_cache:
+            return self._component_cache[cache_key]
+        
+        # Calculate and cache result
+        result = [
+            comp for comp in self._components
+            if self._subsystem_matches(comp, system_name)
         ]
+        self._component_cache[cache_key] = result
+        return result
 
-    def get_attributes(self, system_name: Optional[str] = None):
-        # Get list of attributes in system
-        return [
-            s for s in self._attributes if self._check_subsystem_cond(s, system_name)
+    def get_attributes(self, system_name: Optional[str] = None) -> List:
+        """
+        Get attributes for a specific system.
+        
+        :param system_name: System name to filter by, defaults to all
+        :return: List of matching attributes
+        """
+        # Use cache if available
+        cache_key = system_name or "all"
+        if cache_key in self._attribute_cache:
+            return self._attribute_cache[cache_key]
+        
+        # Calculate and cache result
+        result = [
+            attr for attr in self._attributes
+            if self._subsystem_matches(attr, system_name)
         ]
+        self._attribute_cache[cache_key] = result
+        return result
 
-    def set_disabled_dals(self, disabled_dals):
-        # Set the disabled dals for the system and all subsystems
+    def set_disabled_dals(self, disabled_dals: List) -> None:
+        """
+        Set disabled DALs for the system and all subsystems.
+        
+        :param disabled_dals: List of disabled DAL identifiers
+        """
         super().set_disabled_dals(disabled_dals)
-        for s in self._attributes + self._components:
-            s.set_disabled_dals(disabled_dals)
+        
+        # Propagate to all subsystems
+        for subsystem in self._attributes + self._components:
+            subsystem.set_disabled_dals(disabled_dals)
 
-    def find_components_with_wildcard(self, wildcard: str, class_name: str):
+    def find_components_with_wildcard(self, wildcard: str, class_name: str) -> List[str]:
         """
-        Find components with a wildcard in the system.
-        :param wildcard: Wildcard to search for
-        :param system_name: Name of the system to search in, defaults to None
-        :return: List of components that match the wildcard
+        Find components with a wildcard pattern in the system.
+        
+        :param wildcard: Wildcard pattern to search for
+        :param class_name: Class name to filter by
+        :return: List of component IDs that match the wildcard
         """
+        # Get all DALs of the specified class
         dals = ca.GetDalsOfClassAction(self._application_controller.buffer_daq_config)(
             class_name
         )
+        
         if not dals:
             return []
-
-        return [
-            ca.GetAttributeAction(self._application_controller.buffer_daq_config)(
-                d, "id"
+        
+        # Filter by wildcard pattern
+        matching_components = []
+        for dal in dals:
+            component_id = ca.GetAttributeAction(self._application_controller.buffer_daq_config)(
+                dal, "id"
             )
-            for d in dals
-            if wildcard
-            in ca.GetAttributeAction(self._application_controller.buffer_daq_config)(
-                d, "id"
-            )
-        ]
+            if wildcard in component_id:
+                matching_components.append(component_id)
+        
+        return matching_components
 
-    def get_tooltip(self, system_name: Optional[str] = None):
+    def get_tooltip(self, system_name: Optional[str] = None) -> str:
         """
         Get the tooltip for the system or subsystem.
-        :param system_name: Name of the system to get the tooltip for, defaults to None
-        :return: Tooltip for the system or subsystem
+        
+        :param system_name: Name of the system to get tooltip for
+        :return: Tooltip text
         """
         if system_name is None:
             return self._tooltips.get(
-                "full_syst", f"Enable/Disable {self._system_name}"
+                "full_syst", f"Enable/Disable {self._system_name or 'System'}"
             )
-
-        return self._tooltips.get(system_name, f"Enable/Disable {system_name}")
+        
+        if self._tooltips.get(system_name):
+            return self._tooltips[system_name]
+        else:
+            return f"Enable/Disable {system_name}"
