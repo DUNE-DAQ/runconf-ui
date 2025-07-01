@@ -156,7 +156,8 @@ class EnableDisablePanel(Static):
                 button_widget.add_class("detector_subsystem_button_partial")
                 button_widget.label = f"{button} (Partially Enabled)"
             elif button_state == SubsystemStatus.TOP_LEVEL_DISABLED:
-                button_widget.disabled = True
+                if (self.id != "TPG_subsystem_panel"):
+                    button_widget.disabled = True
                 button_widget.add_class("detector_subsystem_button_disabled")
                 button_widget.label = f"{button} (Disabled)"
             elif SubsystemStatus.STATE_NOT_DEFINED:
