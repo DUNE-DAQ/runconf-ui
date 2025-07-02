@@ -30,9 +30,20 @@ PanelOptions:
               separate_system: True
 
       - PDS:
+          subsystem_dependent: True
           components:
             - id: pds-segment
               class: Segment
+
+            - id: membrane-segment
+              class: Segment
+              system_label: Membrane
+              separate_system: True
+
+            - id: cathode-segment
+              class: Segment
+              system_label: Cathode
+              separate_system: True
 
       - CTB:
           components:
