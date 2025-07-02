@@ -56,8 +56,8 @@ PanelOptions:
 
     Systems:
       - TPG:
-          subsystem_dependent: False
-          display_full_system: False
+          subsystem_dependent: True
+          display_full_system: True
 
           components:
             - id: tc-maker-tpc
