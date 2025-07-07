@@ -96,3 +96,12 @@ PanelOptions:
               system_label: PDS
               separate_system: True
 
+AdjustableAttributes:
+  Random Trigger Rates:
+    label: "TriggerRates"
+    Systems:
+      - object_id: "random-tc-generator"
+        object_class: RandomTCMakerConf
+        attribute_name: "trigger_rate_hz"
+        unit_label: "Hz"
+
