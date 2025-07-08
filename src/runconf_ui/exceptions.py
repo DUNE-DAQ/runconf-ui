@@ -30,3 +30,9 @@ class CiderInvalidRepoException(CiderException):
     # When the file is not valid
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+
+class CiderOutOfBoundsException(CiderException):
+    # When the value is out of bounds
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)

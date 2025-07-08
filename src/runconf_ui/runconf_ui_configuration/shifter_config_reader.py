@@ -41,7 +41,7 @@ class ShifterConfigReader:
         self._operation_url = path_or_env_check(
             general_settings.get("operation_url", None)
         )
-        
+
         # Get settings from the detector config
         detector_config_settings = self._detector_config.get("Settings", {})
         self._classes_to_show = detector_config_settings.get("classes_to_show", [])
@@ -93,6 +93,14 @@ class ShifterConfigReader:
     @property
     def panel_options(self):
         return self._detector_config.get("PanelOptions", {})
+
+    @property
+    def adjustable_attributes(self):
+        """
+        Get the adjustable attributes from the detector config.
+        This is a dictionary of attributes that can be adjusted in the UI.
+        """
+        return self._detector_config.get("AdjustableAttributes", {})
 
     @property
     def classes_to_show(self):

@@ -2,7 +2,7 @@ from runconf_ui.daq_config_interfaces.actions.workflows.get_set_session_attribut
     SetAttributeValueSessionAction,
     GetAttributeValueSessionAction,
 )
-from runconf_ui.runconf_ui_configuration.detector_config_readers.extractor_interfaces import (
+from runconf_ui.runconf_ui_configuration.object_extractors.extractor_interfaces import (
     SubsystemExtractor,
 )
 import runconf_ui.daq_config_interfaces.actions.actions as ca
