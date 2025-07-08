@@ -1,4 +1,4 @@
-from runconf_ui.runconf_ui_configuration.detector_config_readers.extractor_interfaces import (
+from runconf_ui.runconf_ui_configuration.object_extractors.extractor_interfaces import (
     SubsystemExtractor,
 )
 import runconf_ui.daq_config_interfaces.actions.actions as ca
@@ -75,17 +75,13 @@ class ComponentExtractor(SubsystemExtractor):
 
         for filter in subsystem_filters:
             attribute = filter.get("attribute")
-            values = filter.get("value", [])
+            values = filter.get("values", [])
 
             try:
-                for value in values:
-                    if (
-                        ca.GetAttributeAction(
+                return ca.GetAttributeAction(
                             self._application_controller.buffer_daq_config
-                        )(self.get_dal(), attribute)
-                        == value
-                    ):
-                        return True
+                        )(self.get_dal(), attribute) in values                    
+                
 
             except CiderBadActionException:
                 # If the attribute does not exist, we ignore it

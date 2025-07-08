@@ -1,4 +1,4 @@
-from runconf_ui.runconf_ui_configuration.detector_config_readers.attribute_extractor import (
+from runconf_ui.runconf_ui_configuration.object_extractors.attribute_extractor import (
     AttributeExtractor,
 )
 import runconf_ui.daq_config_interfaces.actions.actions as ca
@@ -34,15 +34,9 @@ class RelationshipExtractor(AttributeExtractor):
         """
         if disabled_dals is None:
             disabled_dals = []
-
-        logging.info("Initializing RelationshipExtractor...")
         super().__init__(application_controller, subsystem, disabled_dals)
 
         self._relationship_class = subsystem.get("relationship_class")
-        logging.info(
-            f"Initializing RelationshipExtractor for class: {self._relationship_class}"
-        )
-
         # Initialize states
         self.enabled_state = self._find_enable_disable_state(self.enabled_state)
         self.disabled_state = self._find_enable_disable_state(self.disabled_state)

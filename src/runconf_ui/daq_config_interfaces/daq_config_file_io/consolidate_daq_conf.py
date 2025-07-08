@@ -14,7 +14,6 @@ from typing import Any
 import sys
 import os
 
-
 class ConsolidateDAQConf:
     """
     File consolidator. Moves all objects in a session into a single .data.xml database
@@ -126,7 +125,7 @@ class ConsolidateDAQConf:
             f"Consolidated from {self._current_config_name}"
         )
 
-    def __call__(self) -> Any:
+    def __call__(self) -> Any:        
         self.open_files()
         # self.populate_configuration()
         self.fill_all()

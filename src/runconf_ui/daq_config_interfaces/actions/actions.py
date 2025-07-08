@@ -167,7 +167,7 @@ class GetRelatedDalsAction(ActionInterface):
 
         relations_list = []
         # HW : HACK to make sure we get all relations
-        if contains:= getattr(dal, "contains", None):
+        if contains := getattr(dal, "contains", None):
             relations["contains"] = contains
 
         # Loop over relations
@@ -180,7 +180,6 @@ class GetRelatedDalsAction(ActionInterface):
             relations_list.append(
                 {rel: [v for v in rel_val if v is not None], "rel_info": rel_info}
             )
-
 
         return relations_list
 
@@ -236,3 +235,15 @@ class CheckIsDisabledAction(ActionInterface):
         disabled_items = attr_getter(session_dal, "disabled")
 
         return dal in disabled_items
+
+
+class GetConfigAttributePropertiesAction(ActionInterface):
+    """
+    Get the properties of a configuration attribute
+    """
+
+    def action(self, class_name: str, attribute_name: str):
+        """
+        Get the properties of an attribute in a DAL class
+        """
+        return self._daq_configuration.attributes(class_name, True)[attribute_name]

@@ -4,12 +4,14 @@ from runconf_ui.runconf_ui_controllers.runconf_ui_state import ShifterInterfaceS
 import logging
 from runconf_ui.daq_config_interfaces.daq_tree_tools.daq_full_tree import DaqFullTree
 
+
 class DaqTreeManager:
     def __init__(self, application_controller: ShifterInterfaceState):
         self._application_controller = application_controller
 
-    def update_all_trees(self, screen: Screen):
+    def update_all_trees(self, screen: Screen):        
         """Update all tree views in the screen"""
+        logging.debug("Updating all trees in the screen")
         # main_tree = DaqConfTree(self._application_controller)
         main_tree = DaqFullTree(self._application_controller)
         main_tree.generate_tree()
@@ -22,13 +24,17 @@ class DaqTreeManager:
                 panel.get_current_states()
             )
 
-            if isinstance(panel, MultiComponentEnableDisablePanel):
+            if isinstance(panel, MultiComponentEnableDisablePanel) and panel:
                 panel.update_disabled(disabled)
                 self.update_component_tree(screen, panel)
 
             panel.update_button_styles()
 
     def update_component_tree(self, screen, panel: MultiComponentEnableDisablePanel):
+        t = panel.get_tree()
+        if t is None:
+            return
+        
         screen.query_one(
             f"#tree_view_{panel.id.replace('_subsystem_panel', '')}"
-        ).update(panel.get_tree().print_tree())
+        ).update(t.print_tree())

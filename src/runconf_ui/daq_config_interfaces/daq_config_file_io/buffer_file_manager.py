@@ -27,7 +27,7 @@ class BufferFileManager:
         """Handle loading and consolidating the DAQ configuration"""
         self.TMP_CONFIG.parent.mkdir(parents=True, exist_ok=True)
 
-        logging.info(f"Session name {self._application_controller.session_name}")
+        logging.debug(f"Session name {self._application_controller.session_name}")
         ConsolidateDAQConf(
             self._application_controller.current_daq_config,
             self._application_controller.session_name,
