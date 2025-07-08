@@ -272,4 +272,3 @@ class MultiItemExtractor(ItemExtractor):
             return False
 
         return True
-

@@ -128,9 +128,6 @@ class ShifterView(App):
 
     def action_quit(self):
         """Quit the application."""
-
-        logging.info(self.screen.__class__)
-
         if isinstance(self.screen, QuitScreen):
             self.pop_screen()
 

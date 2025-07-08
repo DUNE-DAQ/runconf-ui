@@ -99,7 +99,7 @@ class SaveFileHandler:
                 file.write(f"\n{system}\n")
                 file.write(f"{'-' * len(system)}\n")
                 for key, value in state.items():
-                    file.write(f"{key} : {value.name}\n")
+                    file.write(f"{key} : {str(value)}\n")
 
     def __call__(self):
         logging.debug("Saving configuration")
