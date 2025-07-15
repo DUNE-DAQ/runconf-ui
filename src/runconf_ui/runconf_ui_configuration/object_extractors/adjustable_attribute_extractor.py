@@ -26,8 +26,8 @@ class AdjustableAttributeManager:
         )  # Default scale factor for conversion
         self._unit_label = kwargs.get("unit_label", "")  # Default unit label
         self._filter_by = kwargs.get(
-            "filter_by", None
-        )  # Filter by a specific attribute value if needed
+            "filters", None
+        ) 
 
         self._object_list = []
         self._object_ids = []
@@ -52,11 +52,16 @@ class AdjustableAttributeManager:
 
         # Means we can use the attribute class to get the object list
         if object_id is None or "":
+            logging.info(f"HERE {self._object_class}")
+            
             unfliltered_list = ca.GetDalsOfClassAction(
                 self._application_controller.buffer_daq_config
             )(self._object_class)
-
+            
+            logging.info(f"Unfiltered object list: {unfliltered_list}")
+            
             self._object_list = [obj for obj in unfliltered_list if self._filter(obj)]
+            logging.info(f"Object list filtered by filter_by attribute. {self._object_list}")
 
         else:
             self._object_ids = [object_id]
@@ -66,6 +71,7 @@ class AdjustableAttributeManager:
                     object_id, self._object_class
                 )
                 for object_id in self._object_ids
+
                 if self._filter(
                     ca.GetDalObjectAction(
                         self._application_controller.buffer_daq_config
@@ -306,12 +312,12 @@ class AdjustableAttributeManager:
         """
         if not self._filter_by:
             return True
+        
 
-        for filter in self._filter_by.items():
-
+            
+        for filter in self._filter_by:                    
             attr_name = filter["attribute"]
-            values = filter["value"]
-
+            values = filter["values"]
             if (
                 ca.GetAttributeAction(self._application_controller.buffer_daq_config)(
                     obj, attr_name
@@ -319,5 +325,6 @@ class AdjustableAttributeManager:
                 in values
             ):
                 return False
+                
 
         return True
