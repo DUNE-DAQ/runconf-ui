@@ -1,9 +1,12 @@
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import ShifterInterfaceState
 import runconf_ui.daq_config_interfaces.actions.actions as ca
 from runconf_ui.exceptions import CiderOutOfBoundsException
+from collections import OrderedDict
+
 
 import logging
 from typing import Tuple, Union
+import re
 
 class AdjustableAttributeManager:
     def __init__(self, application_controller: ShifterInterfaceState, **kwargs):
@@ -172,11 +175,17 @@ class AdjustableAttributeManager:
 
     def get_all_states(self) -> dict:
         """
-        Get state of the attribute for all objects in the object list.
+        Get state of the attribute for all objects in the object list, sorted by object ID (natural sort).
         """
+
+        def natural_key(s):
+            # Split string into list of strings and integers for natural sorting
+            return [int(text) if text.isdigit() else text for text in re.split(r'(\d+)', s)]
+
+        sorted_ids = sorted(self._object_ids, key=natural_key)
         return {
             obj: {"state": self.get_state(obj), "attribute": self._attribute_name}
-            for obj in self._object_ids
+            for obj in sorted_ids
         }
 
     def get_tooltip(self, object_id) -> str | None:
