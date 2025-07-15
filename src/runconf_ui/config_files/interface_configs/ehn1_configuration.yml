@@ -1,6 +1,6 @@
 General:
   # Environment variables
-  default_config: "SESSION_FILE"
+  session_config: "SESSION_FILE"
   download_directory: "CONFIG_DIR"
   session_name: "SESSION_NAME"
 
