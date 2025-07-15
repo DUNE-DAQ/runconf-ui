@@ -1,8 +1,6 @@
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import ShifterInterfaceState
 import runconf_ui.daq_config_interfaces.actions.actions as ca
 from runconf_ui.exceptions import CiderOutOfBoundsException
-from collections import OrderedDict
-
 
 import logging
 from typing import Tuple, Union
