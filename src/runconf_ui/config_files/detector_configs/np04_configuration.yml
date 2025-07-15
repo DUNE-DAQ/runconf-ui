@@ -10,7 +10,7 @@ Settings:
     - CTBHLT
     - DFApplication
     - CTBoardConf
-
+    - DetectorStream
 
 PanelOptions:
   Detector:

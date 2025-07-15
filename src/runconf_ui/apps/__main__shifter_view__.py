@@ -37,7 +37,7 @@ class ShifterView(App):
         c
                 kwargs:
                     - apparatus: str - The apparatus to use
-                    - default_config: str - The default configuration file to use
+                    - session_config: str - The default top level DAQ configuration file to use
                     - download_directory - default download directory
                     - session_name - tmux session name
 
@@ -86,6 +86,7 @@ class ShifterView(App):
         )
 
         self._init_logger(kwargs.get("log_level", "INFO"))
+
 
     def _init_logger(self, log_level):
         # Grab from config reader
@@ -163,10 +164,10 @@ class ShifterView(App):
 )
 @click.option(
     "-s",
-    "--shifter-interface-config",
-    "default_config",
+    "--session-config",
+    "session_config",
     required=False,
-    help="Set default yaml config for this interface",
+    help="Set default top level DAQ config for this interface",
 )
 @click.option(
     "-d",
@@ -207,7 +208,7 @@ class ShifterView(App):
 )
 def main(
     apparatus,
-    default_config,
+    session_config,
     download_directory,
     session_name,
     base_url,
@@ -218,7 +219,7 @@ def main(
     # Slghtly complicated here, as we need to remove unused args
     cli_args = {
         "apparatus": apparatus,
-        "default_config": default_config,
+        "session_config": session_config,
         "download_directory": download_directory,
         "session_name": session_name,
         "base_url": base_url,

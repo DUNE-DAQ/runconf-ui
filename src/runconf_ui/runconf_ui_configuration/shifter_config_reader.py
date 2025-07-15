@@ -2,6 +2,7 @@ from runconf_ui.utils.path_or_env_check import path_or_env_check
 
 import yaml
 import os
+import logging
 
 
 # Class for reading a YAML config and producing panels
@@ -25,7 +26,7 @@ class ShifterConfigReader:
         )
         # Generic settings
         self._default_config = path_or_env_check(
-            general_settings.get("default_config", None)
+            general_settings.get("session_config", None)
         )
         if self._default_config is None:
             raise ValueError("No default configuration file specified")
@@ -42,7 +43,7 @@ class ShifterConfigReader:
             general_settings.get("operation_url", None)
         )
 
-        # Get settings from the detector config
+        # Get settings from the detector config 
         detector_config_settings = self._detector_config.get("Settings", {})
         self._classes_to_show = detector_config_settings.get("classes_to_show", [])
 

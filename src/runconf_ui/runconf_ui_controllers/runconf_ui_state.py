@@ -29,7 +29,7 @@ class ShifterInterfaceState:
     session_name: Optional[str] = None
     # Currently open configuration
     buffer_daq_config: Optional[DaqConfigurationWrapper] = None
-    # Configuration name we're going to save
+    # Configuration name we're going to save 
     saved_configuration: Optional[str] = None
     # current state of objects
     current_state: dict = field(default_factory=lambda: {})
