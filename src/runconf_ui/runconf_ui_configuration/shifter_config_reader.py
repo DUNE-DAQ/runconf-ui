@@ -2,7 +2,6 @@ from runconf_ui.utils.path_or_env_check import path_or_env_check
 
 import yaml
 import os
-import logging
 
 
 # Class for reading a YAML config and producing panels
