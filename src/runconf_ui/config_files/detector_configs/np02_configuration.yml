@@ -85,7 +85,7 @@ PanelOptions:
               system_label: PDS
               separate_system: True
 
-  TPG:
+  Trigger:
     label: "trigger"
     view_panel: "Trigger View"
     Systems:
@@ -132,6 +132,12 @@ AdjustableAttributes:
         object_class: RandomTCMakerConf
         attribute_name: "trigger_rate_hz"
         unit_label: "Hz"
+
+      - object_id: "LLT_0"
+        object_class: "CTBRandomTrigger"
+        attribute_name: "period"
+        unit_label : "ticks"
+        tooltip: 'description'
 
   Prescales:
     label: "PreScales"

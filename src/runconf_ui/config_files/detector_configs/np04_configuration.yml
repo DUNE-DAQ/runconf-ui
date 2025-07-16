@@ -61,9 +61,9 @@ PanelOptions:
               class: "DFApplication"
               each_component_separate: True
 
-  Trigger:
-    label: "trigger"
-    view_panel: "Trigger View"
+  TPG:
+    label: "tpg"
+    view_panel: "TPG View"
 
     Systems:
       - TPG:
