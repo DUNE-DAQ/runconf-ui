@@ -47,6 +47,8 @@ class RemoteDaqConfManager(ManagementInterface):
                 operation_url=self.application_controller.shifter_interface_config.operation_url,
                 base_url=self.application_controller.shifter_interface_config.base_url,
             )
+            
+            
         except Exception:
             logging.error(traceback.format_exc())
             self.reset()

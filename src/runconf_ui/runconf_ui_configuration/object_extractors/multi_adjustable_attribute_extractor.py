@@ -6,6 +6,7 @@ import logging
 from traceback import format_exc
 
 
+
 class MultiAdjustableAttributeExtractor:
     def __init__(self, application_controller, **kwargs):
         """

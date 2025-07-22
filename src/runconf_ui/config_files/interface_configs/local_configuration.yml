@@ -1,7 +1,7 @@
 ---
 General:
   # Default .data.xml configuration file
-  default_config: "np02-session.data.xml"
+  session_config: "np02-session.data.xml"
   # Default download directory for DAQ configuration files OR local directory containing configurations
   download_directory: "shifter_view_configs"
   # Name of TMUX session
