@@ -39,12 +39,17 @@ class RemoteDaqConfManager(ManagementInterface):
                 "Apparatus not set! Please set the APPARATUS in your env or use the --apparatus flag"
             )
         try:
+            url = ""
+            if self.application_controller.apparatus == "np02" :
+                url = "https://gitlab.cern.ch/dune-daq/online/np02-configs-operation.git"
+            if self.application_controller.apparatus ==	"np04" :
+                url = "https://gitlab.cern.ch/dune-daq/online/np04-configs-operation.git"
             self.conf_pool = ConfPool(
                 str(
                     self.application_controller.shifter_interface_config.download_directory
                 ),
                 apparatus=self.application_controller.apparatus,
-                operation_url=self.application_controller.shifter_interface_config.operation_url,
+                operation_url=url,
                 base_url=self.application_controller.shifter_interface_config.base_url,
             )
             
