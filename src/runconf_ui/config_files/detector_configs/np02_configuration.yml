@@ -29,6 +29,12 @@ PanelOptions:
               system_label: CRP5
               separate_system: True
 
+            - id: crp23-segment
+              class: Segment
+              system_label: TDE
+              separate_system: True
+              tooltip: "TDE"
+
       - PDS:
           subsystem_dependent: True
           components:
@@ -49,6 +55,7 @@ PanelOptions:
           components:
             - id: ctb-segment
               class: Segment
+      
 
   TPG:
     label: "TPG"
@@ -68,15 +75,39 @@ PanelOptions:
 
           attributes:
             - id: tp_generation_enabled
-              segments: ["tpc-segment"]
+              segments: ["crp4-segment"]
               class: ReadoutApplication
-              system_label: TPC
+              system_label: CRP4
               separate_system: True
 
             - id: ta_generation_enabled
-              segments: ["tpc-segment", "crp4-segment", "crp5-segment"]
+              segments: ["crp4-segment"]
               class: ReadoutApplication
-              system_label: TPC
+              system_label: CRP4
+              separate_system: True
+
+            - id : tp_generation_enabled
+              segments: ["crp5-segment"]
+              class: ReadoutApplication
+              system_label: CRP5
+              separate_system: True
+            
+            - id : ta_generation_enabled
+              segments: ["crp5-segment"]
+              class: ReadoutApplication
+              system_label: CRP5
+              separate_system: True
+
+            - id : tp_generation_enabled
+              segments: ["crp23-segment"]
+              class: ReadoutApplication
+              system_label: TDE
+              separate_system: True
+            
+            - id : ta_generation_enabled
+              segments: ["crp23-segment"]
+              class: NP02ReadoutApplication
+              system_label: TDE
               separate_system: True
 
             - id: tp_generation_enabled
