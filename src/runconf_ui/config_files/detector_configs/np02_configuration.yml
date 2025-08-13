@@ -74,39 +74,39 @@ PanelOptions:
               class: TPStreamWriterApplication
 
           attributes:
-            - id: tp_generation_enabled_crp4
+            - id: tp_generation_enabled
               segments: ["crp4-segment"]
               class: ReadoutApplication
               system_label: CRP4
               separate_system: True
 
-            - id: ta_generation_enabled_crp4
+            - id: ta_generation_enabled
               segments: ["crp4-segment"]
               class: ReadoutApplication
               system_label: CRP4
               separate_system: True
 
-            - id : tp_generation_enabled_crp5
+            - id : tp_generation_enabled
               segments: ["crp5-segment"]
               class: ReadoutApplication
               system_label: CRP5
               separate_system: True
             
-            - id : ta_generation_enabled_crp5
+            - id : ta_generation_enabled
               segments: ["crp5-segment"]
               class: ReadoutApplication
               system_label: CRP5
               separate_system: True
 
-            - id : tp_generation_enabled_crp23
+            - id : tp_generation_enabled
               segments: ["crp23-segment"]
               class: ReadoutApplication
               system_label: TDE
               separate_system: True
             
-            - id : ta_generation_enabled_crp23
+            - id : ta_generation_enabled
               segments: ["crp23-segment"]
-              class: ReadoutApplication
+              class: NP02ReadoutApplication
               system_label: TDE
               separate_system: True
 
