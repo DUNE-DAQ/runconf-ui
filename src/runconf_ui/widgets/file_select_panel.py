@@ -235,9 +235,13 @@ class FilePanelWidget(Static):
             )
             self._daq_version_message = "Select database in local DAQ Repository"
         else:
-            self._management_interface = RemoteDaqConfManager(
-                self._application_controller
-            )
+            try:
+                self._management_interface = RemoteDaqConfManager(
+                    self._application_controller
+                )
+            except CiderInvalidRepoException:
+                self.post_message(self.RepoCorrupted())
+
             self._daq_version_message = "Select DAQ configuration version"
 
     def compose(self):
