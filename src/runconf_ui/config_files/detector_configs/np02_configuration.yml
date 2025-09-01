@@ -100,7 +100,7 @@ PanelOptions:
 
             - id : tp_generation_enabled
               segments: ["crp23-segment"]
-              class: ReadoutApplication
+              class: NP02ReadoutApplication
               system_label: TDE
               separate_system: True
             
