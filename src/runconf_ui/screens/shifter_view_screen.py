@@ -139,7 +139,7 @@ class ShifterViewScreen(Screen):
     @on(FilePanelWidget.RepoCorrupted)
     async def repo_corrupted(self):
         self.popups.show(
-            "[white]Configuration git repo found to be corrupted, please check the status of the Gitlab repo", timer=10.0
+            "[white]Configuration git repo corrupted, resetting", timer=10.0
         )
 
     @on(AdjustableAttributePanel.AttributeOutOfBounds)

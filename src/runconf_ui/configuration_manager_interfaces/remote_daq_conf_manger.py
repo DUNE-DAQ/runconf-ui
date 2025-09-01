@@ -49,11 +49,9 @@ class RemoteDaqConfManager(ManagementInterface):
             )
             
             
-        except Exception as e:
+        except Exception:
             logging.error(traceback.format_exc())
             self.reset()
-            raise CiderInvalidRepoException("Couldn't open, This is likely an issue with gitlab, please check the repo itself is okay!") from e
-            
 
     def get_daq_versions(self) -> list[str]:
         """
