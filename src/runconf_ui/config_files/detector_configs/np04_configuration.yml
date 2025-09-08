@@ -44,10 +44,16 @@ PanelOptions:
               system_label: APA4
               separate_system: True
 
+      - DQM:
+          components:
+            - id: dqm-segment
+              class: Segment
+
       - PDS:
           components:
             - id: pds-segment
               class: Segment
+
 
   # Dataflow
   Dataflow:

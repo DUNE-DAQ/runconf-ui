@@ -55,7 +55,12 @@ PanelOptions:
           components:
             - id: ctb-segment
               class: Segment
-      
+
+      - DQM:
+          components:
+            - id: dqm-segment
+              class: Segment
+
 
   TPG:
     label: "TPG"
