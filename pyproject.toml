@@ -1,0 +1,37 @@
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = ["setuptools>=61.0"]
+
+[project]
+name = "runconf_ui"
+description = "A text user interface (TUI) designed to be used to enable/disable elements of the detector"
+version = "5.2.7"
+readme = "docs/README.md"
+requires-python = ">=3.10"
+dependencies = [
+	     "click",
+	     "textual",
+	     "textual_dev",
+	     "rich",
+	     ]
+
+[project.optional-dependencies]
+develop = [
+    "ipdb",
+    "ipython",
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+include-package-data = true
+
+[tool.setuptools.packages.find]
+namespaces = true
+where = ["src"]
+
+[tool.setuptools.package-data]
+"*" = ["*"]
+
+[project.scripts]
+runconf-shifter-ui = "runconf_ui.apps.__main__shifter_view__:main"
+py_oks_dump = "runconf_ui.apps.__main__oks_dump__:main"
