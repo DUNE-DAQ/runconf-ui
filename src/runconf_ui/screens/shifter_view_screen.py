@@ -24,6 +24,7 @@ from runconf_ui.daq_config_interfaces.daq_tree_tools.daq_tree_manager import (
 )
 from runconf_ui.screens.popup_manager import PopupManager
 from runconf_ui.widgets.adjustable_attribute_panel import AdjustableAttributePanel
+from runconf_ui.widgets.enable_disable_base import EnableDisablePanel
 from runconf_ui.runconf_ui_configuration.detector_config_readers.generate_adjustable_attribute_map import (
     AdjustableAttributeMapGen,
 )
@@ -48,18 +49,20 @@ class ShifterViewScreen(Screen):
 
     def compose(self):
         """Generate the screen layout"""
-        enable_disable_generator = EnableDisableMapGen(self._application_controller)
-        adjustable_attribute_panel = AdjustableAttributeMapGen(
-            self._application_controller
-        )
-
+        # Do not generate detector-dependent panels here. Create placeholder
+        # containers which will be populated after a detector configuration is
+        # loaded. This avoids requiring a detector config to exist at
+        # compose-time.
         with ScrollableContainer(id="main_container"):
             yield FilePanelWidget(self._application_controller, classes="file_io_panel")
 
             with Grid(id="enable_disable_panel_container"):
+                # selection tabs placeholder - enable/disable panels will be
+                # mounted here after a config is loaded. Provide an empty
+                # TabPane so Textual doesn't attempt to wrap a `None` child.
                 with TabbedContent(id="selection_tabs"):
-                    for panel in enable_disable_generator.panel_list:
-                        yield panel
+                    with TabPane("Selection", id="selection_tab_placeholder"):
+                        yield Static("", id="selection_tab_placeholder_static")
 
                 with TabbedContent(
                     "Map Views",
@@ -72,16 +75,13 @@ class ShifterViewScreen(Screen):
                             id="systematic_map_tabs",
                             classes="systematic_map_tabs",
                         ):
-
                             with TabPane("System View", id="full_system_map_tab"):
                                 yield ScrollableContainer(
                                     Static("", id="tree_view_full"),
                                     id="tree_view_full_container",
                                     classes="tree_view_full_container",
                                 )
-                            for panel in enable_disable_generator.map_list:
-                                if panel is not None:
-                                    yield panel
+                            # map panels will be mounted into systematic_map_tabs
 
                     with TabPane("Adjustable Rates", id="detector_map_tab"):
                         with TabbedContent(
@@ -89,10 +89,9 @@ class ShifterViewScreen(Screen):
                             id="attribute_map_tabs",
                             classes="systematic_map_tabs multi_view_tabs",
                         ):
-
-                            for panel in adjustable_attribute_panel.panel_list:
-                                if panel is not None:
-                                    yield panel
+                            # attribute panels will be mounted into attribute_map_tabs
+                            with TabPane("Attributes", id="attribute_tab_placeholder"):
+                                yield Static("", id="attribute_tab_placeholder_static")
 
             yield OptionPanel(
                 application_controller=self._application_controller,
@@ -108,7 +107,7 @@ class ShifterViewScreen(Screen):
     async def select_new_file(self):
         """Handle new file selection"""
         try:
-            self._load_new_configuration()
+            await self._load_new_configuration()
         except CiderInvalidConfigurationException:
             self.popups.show(
                 f"[white]Invalid configuration[/white] [bold grey3]{self._application_controller.shifter_interface_config} set up incorrectly!"
@@ -152,13 +151,15 @@ class ShifterViewScreen(Screen):
             timer=5.0,
         )
 
-    def _load_new_configuration(self):
-        """Handle loading a new configuration file"""
+    async def _load_new_configuration(self):
+        """Handle loading a new configuration file (async wrapper)."""
         logging.info(
             f"Opening new file: {self._application_controller.session_name}:{self._application_controller.current_daq_config}"
         )
 
+        # load configuration (synchronous operation in BufferFileManager)
         self.file_service.load_configuration()
+        # update option panel UI
         self.query_one(OptionPanel).open_new_session()
 
         if not (
@@ -168,35 +169,148 @@ class ShifterViewScreen(Screen):
             logging.info("No session or configuration")
             return
 
-        self._update_ui_after_config_load()
+        await self._update_ui_after_config_load()
 
-    def _update_ui_after_config_load(self):
-        """Update UI components after loading a new configuration"""
+    async def _update_ui_after_config_load(self):
+        """Update UI components after loading a new configuration.
+
+        This generates detector-dependent panels and mounts them into the
+        placeholder containers created during compose().
+        """
+        logging.debug("Generating and mounting enable/disable & attribute panels")
+
+        # instantiate generators now that the detector config is available
+        enable_disable_generator = EnableDisableMapGen(self._application_controller)
+        adjustable_attribute_panel = AdjustableAttributeMapGen(
+            self._application_controller
+        )
+
+        # locate placeholder containers by id
+        selection_tabs = self.query_one("#selection_tabs", TabbedContent)
+        systematic_map_tabs = self.query_one(
+            "#systematic_map_tabs", TabbedContent
+        )
+        attribute_map_tabs = self.query_one("#attribute_map_tabs", TabbedContent)
+
+        # remove any previously mounted generator panels to avoid duplicates
+        # on reload. We remove by id to avoid removing built-in placeholder
+        # panes (for example the 'full_system_map_tab' that contains the
+        # main tree view).
+        for panel_tab in enable_disable_generator.panel_list:
+            if panel_tab is None:
+                continue
+            try:
+                logging.debug(f"Attempting to remove existing enable/disable pane with id='{panel_tab.id}'")
+                # Use TabbedContent.remove_pane to remove both the Tab and the pane
+                await selection_tabs.remove_pane(panel_tab.id)
+                logging.debug(f"Removed existing pane '{panel_tab.id}'")
+            except Exception:
+                logging.debug(f"No existing pane '{panel_tab.id}' to remove")
+                pass
+
+        for map_tab in enable_disable_generator.map_list:
+            if map_tab is None:
+                continue
+            try:
+                logging.debug(f"Attempting to remove existing map pane with id='{map_tab.id}'")
+                await systematic_map_tabs.remove_pane(map_tab.id)
+                logging.debug(f"Removed existing map pane '{map_tab.id}'")
+            except Exception:
+                logging.debug(f"No existing map pane '{map_tab.id}' to remove")
+                pass
+
+        for attr_tab in adjustable_attribute_panel.panel_list:
+            if attr_tab is None:
+                continue
+            try:
+                logging.debug(f"Attempting to remove existing attribute pane with id='{attr_tab.id}'")
+                await attribute_map_tabs.remove_pane(attr_tab.id)
+                logging.debug(f"Removed existing attribute pane '{attr_tab.id}'")
+            except Exception:
+                logging.debug(f"No existing attribute pane '{attr_tab.id}' to remove")
+                pass
+
+        # mount selection panels. The generators return TabPane objects; mount
+        # them directly into the `selection_tabs` container so TabbedContent
+        # creates tab entries accordingly.
+        for panel_tab in enable_disable_generator.panel_list:
+            if panel_tab is None:
+                continue
+
+            logging.debug(f"Adding enable/disable TabPane id='{panel_tab.id}' into selection_tabs")
+            await selection_tabs.add_pane(panel_tab)
+            logging.debug(f"Added enable/disable TabPane id='{panel_tab.id}'")
+
+        # remove the placeholder selection tab if it exists now we've added real panes
+        try:
+            await selection_tabs.remove_pane("selection_tab_placeholder")
+            logging.debug("Removed selection_tab_placeholder")
+        except Exception:
+            logging.debug("No selection_tab_placeholder to remove")
+
+        # mount map views (TabPane objects)
+        for map_tab in enable_disable_generator.map_list:
+            if map_tab is None:
+                continue
+
+            logging.debug(f"Adding map TabPane id='{map_tab.id}' into systematic_map_tabs")
+            await systematic_map_tabs.add_pane(map_tab)
+            logging.debug(f"Added map TabPane id='{map_tab.id}'")
+
+            # Debug: list children of the newly added pane and check for expected tree Static
+            try:
+                pane = systematic_map_tabs.get_child_by_id(map_tab.id)
+                child_ids = [getattr(c, "id", None) for c in pane.walk_children()]
+                logging.debug(f"map_tab '{map_tab.id}' child ids: {child_ids}")
+                # expected tree static id uses label: derive label from panel id patterns
+                label = map_tab.id.replace("_tabs", "")
+                expected_tree_id = f"tree_view_{label}"
+                try:
+                    self.query_one(f"#{expected_tree_id}")
+                    logging.debug(f"Found expected tree static '{expected_tree_id}' in DOM")
+                except Exception:
+                    logging.warning(f"Expected tree static '{expected_tree_id}' not found in DOM after mounting map_tab '{map_tab.id}'")
+            except Exception:
+                logging.debug(f"Could not inspect children of map_tab '{map_tab.id}'")
+
+        # mount adjustable attribute panels (TabPane objects)
+        for attr_tab in adjustable_attribute_panel.panel_list:
+            if attr_tab is None:
+                continue
+
+            logging.debug(f"Adding attribute TabPane id='{attr_tab.id}' into attribute_map_tabs")
+            await attribute_map_tabs.add_pane(attr_tab)
+            logging.debug(f"Added attribute TabPane id='{attr_tab.id}'")
+
+        # now refresh panels and update controller state
         logging.debug("Updating enable/disable panels")
-        for panel in self.query("EnableDisablePanel"):
+        for panel in self.query(EnableDisablePanel):
             panel.open_new_session()
             panel.refresh(recompose=True)
             panel.update_button_styles()
             self._application_controller.current_state = {
-                p.id: p.get_current_states() for p in self.query("EnableDisablePanel")
+                p.id: p.get_current_states() for p in self.query(EnableDisablePanel)
             }
 
-        for panel in self.query("AdjustableAttributePanel"):
+        for panel in self.query(AdjustableAttributePanel):
             panel.open_new_session()
             panel.refresh(recompose=True)
             self._application_controller.current_state = {
                 p.id: p.get_current_states()
-                for p in self.query("AdjustableAttributePanel")
+                for p in self.query(AdjustableAttributePanel)
             }
 
         self.tree_manager.update_all_trees(self)
-        self.query_one("FilePanelWidget").update_file_info()
+
+        self.query_one(FilePanelWidget).update_file_info()
 
         self.popups.show(
             f"[white]Successfully opened new configuration[/white] [bold white]{self._application_controller.current_daq_config}",
             timer=5.0,
             success=True,
         )
+
+
 
     def on_enable_disable_panel_changed(self):
         """Handle changes in enable/disable panels"""        

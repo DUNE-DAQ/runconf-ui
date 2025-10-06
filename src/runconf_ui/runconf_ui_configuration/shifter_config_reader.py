@@ -6,10 +6,7 @@ import os
 
 # Class for reading a YAML config and producing panels
 class ShifterConfigReader:
-    def __init__(self, settings_config_file: str, detector_config_file: str, **kwargs):
-
-        with open(detector_config_file, "r") as f:
-            self._detector_config = yaml.safe_load(f)
+    def __init__(self, settings_config_file: str, **kwargs):
 
         with open(settings_config_file, "r") as f:
             self._settings_config = yaml.safe_load(f)
@@ -43,8 +40,20 @@ class ShifterConfigReader:
         )
 
         # Get settings from the detector config 
+        self._detector_config = {}
+        self._classes_to_show = []
+        self.detector_config_settings =  {}
+
+
+    def open_detector_config(self, detector_config_file: str):
+        with open(detector_config_file, "r") as f:
+            self._detector_config = yaml.safe_load(f)
         detector_config_settings = self._detector_config.get("Settings", {})
         self._classes_to_show = detector_config_settings.get("classes_to_show", [])
+
+    @property
+    def detector_config(self):
+        return self._detector_config
 
     @property
     def output_directory(self):
