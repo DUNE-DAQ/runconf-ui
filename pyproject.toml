@@ -42,7 +42,7 @@ develop = [
 ]
 
 [tool.pytest.ini_options]
-addopts = "-v --tb=short --cov=integrationtest --cov=src/integrationtest tests/"  # omitted --cov-report=html to avoid suppressing table to stdout
+addopts = "-v --tb=short --cov=runconf_ui --cov=src/runconf_ui tests/"  # omitted --cov-report=html to avoid suppressing table to stdout
 
 [tool.coverage.run]
 source = ["runconf_ui"]
