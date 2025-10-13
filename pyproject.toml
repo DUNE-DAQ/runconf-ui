@@ -15,12 +15,6 @@ dependencies = [
 	     "rich",
 	     ]
 
-[project.optional-dependencies]
-develop = [
-    "ipdb",
-    "ipython",
-]
-
 [tool.setuptools]
 package-dir = {"" = "src"}
 include-package-data = true
@@ -42,12 +36,16 @@ dev = [
     "pytest",
     "pytest-cov",
 ]
+develop = [
+    "ipdb",
+    "ipython",
+]
 
 [tool.pytest.ini_options]
 addopts = "-v --tb=short --cov=integrationtest --cov=src/integrationtest tests/"  # omitted --cov-report=html to avoid suppressing table to stdout
 
 [tool.coverage.run]
-source = ["integrationtest"]
+source = ["runconf_ui"]
 omit = ["tests/*", "scripts/*"]
 
 # * See https://docs.astral.sh/ruff/rules/ for details on Ruff's linting options
