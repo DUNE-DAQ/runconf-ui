@@ -52,16 +52,11 @@ class AdjustableAttributeManager:
 
         # Means we can use the attribute class to get the object list
         if object_id is None or "":
-            logging.info(f"HERE {self._object_class}")
             
             unfliltered_list = ca.GetDalsOfClassAction(
                 self._application_controller.buffer_daq_config
-            )(self._object_class)
-            
-            logging.info(f"Unfiltered object list: {unfliltered_list}")
-            
+            )(self._object_class)            
             self._object_list = [obj for obj in unfliltered_list if self._filter(obj)]
-            logging.info(f"Object list filtered by filter_by attribute. {self._object_list}")
 
         else:
             self._object_ids = [object_id]

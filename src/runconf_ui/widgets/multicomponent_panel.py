@@ -38,6 +38,12 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
         disabled: bool = False,
     ) -> None:
 
+        # Prevent the parent initializer from calling open_new_session before
+        # we have set up attributes the subclass expects (like _extractor).
+        # We use a small deferral flag that the overridden open_new_session
+        # will honour during construction.
+        self._defer_open = True
+
         super().__init__(
             application_controller,
             content,
@@ -50,14 +56,20 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
             disabled=disabled,
         )
 
+        # Now set up subclass-specific fields before running the real
+        # open_new_session implementation.
         self._object_list = object_list
-
         self._disabled_items = []
         self._build_tree = build_tree
 
         logging.debug(f"Initializing MultiComponentEnableDisablePanel {id}...")
         self._extractor = DetectorExtractor(self._application_controller, object_list)
         logging.debug(f"Extractor initialized with {self._extractor.get_all_states()}")
+
+        # Mark initialization complete and run the real open_new_session to
+        # generate the button list now that _extractor exists.
+        self._defer_open = False
+        super().open_new_session()
 
         logging.debug("MultiComponentEnableDisablePanel initialized.")
 

@@ -75,7 +75,15 @@ class RemoteDaqConfManager(ManagementInterface):
         except Exception as e:
             logging.error(traceback.format_exc())
             CiderInvalidRepoException(e)
-
+     
+     
+        detector_config_path = Path(self.application_controller.shifter_interface_config.download_directory) / 'runconf-ui-settings' / f"{self.application_controller.apparatus}.yml"
+        if not detector_config_path.exists():
+            raise FileNotFoundError(f"Detector configuration file {detector_config_path} does not exist")
+        
+        logging.info(f"Using detector configuration file {detector_config_path}")
+        
+        self.application_controller.shifter_interface_config.open_detector_config(str(detector_config_path))
         # Now we can open the file
         config_path_reader = DaqConfPathReader()
 
@@ -108,6 +116,7 @@ class RemoteDaqConfManager(ManagementInterface):
                 f"Found multiple config files with the same name: {valid_config_files}, using the first one"
             )
 
+        
         config_file = valid_config_files[0]
 
         return super().open_file(Path(config_file))

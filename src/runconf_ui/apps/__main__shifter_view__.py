@@ -52,19 +52,12 @@ class ShifterView(App):
         use_local = kwargs.get("use_local", False)
 
         if use_local:
-            interface_config = f"{Path(__file__).parent.absolute()}/../config_files/interface_configs/local_configuration.yml"
+            interface_config = f"{Path(__file__).parent.absolute()}/../config_files/local_configuration.yml"
         else:
-            interface_config = f"{Path(__file__).parent.absolute()}/../config_files/interface_configs/ehn1_configuration.yml"
+            interface_config = f"{Path(__file__).parent.absolute()}/../config_files/ehn1_configuration.yml"
 
         apparatus = kwargs.get("apparatus", os.environ.get("APPARATUS", "np02"))
 
-        # messy...
-        detector_configuration = f"{Path(__file__).parent.absolute()}/../config_files/detector_configs/{apparatus}_configuration.yml"
-
-        if not Path(detector_configuration).exists():
-            raise Exception(
-                f"Detector configuration file {detector_configuration} does not exist"
-            )
 
         if not Path(interface_config).exists():
             raise Exception(
@@ -73,7 +66,7 @@ class ShifterView(App):
 
         # Now we've done logs, we can read the configuration
         interface_config = ShifterConfigReader(
-            detector_config_file=detector_configuration,
+            # detector_config_file=detector_configuration,
             settings_config_file=interface_config,
             **kwargs,
         )

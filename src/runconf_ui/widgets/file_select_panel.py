@@ -337,6 +337,7 @@ class FilePanelWidget(Static):
         selected_configuration = self.query_one("#daq_configuration_select").value
         self.query_one("#file_io_panel_message_static").update(
             f"      [bold green]DAQ Version[/bold green]:  [deep_pink4]{self._management_interface.daq_version}[/deep_pink4]\n"
+            f"      [bold green]Apparatus[/bold green]:  [deep_pink4]{self._application_controller.apparatus}[/deep_pink4]\n"
             f"      [bold green]DAQ Config[/bold green]:  [deep_pink4]{selected_configuration}[/deep_pink4]\n"
             f"      [bold green]Current Config File[/bold green]: [deep_pink4]{self._application_controller.current_daq_config}[/deep_pink4]\n"
             f"      [bold green]Session in Config[/bold green]:  [deep_pink4]{self._application_controller.session_name}\n"

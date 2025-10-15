@@ -47,6 +47,12 @@ class EnableDisablePanel(Static):
         return self._application_controller.session_name
 
     def open_new_session(self):
+        # Allow subclasses to defer running this method during their
+        # construction by setting `_defer_open = True` before calling
+        # `super().__init__`.
+        if getattr(self, "_defer_open", False):
+            return
+
         self._button_list = self.generate_button_list()
 
         # Need default initial states

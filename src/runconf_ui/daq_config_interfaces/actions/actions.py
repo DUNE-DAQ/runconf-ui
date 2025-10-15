@@ -139,15 +139,12 @@ class DisableDalAction(ActionInterface):
         session = GetDalObjectAction(self._daq_configuration)(session_name, "Session")
         disabled_objects = getattr(session, "disabled")
 
-        logging.info(f"Disabled before {disabled_objects}, {dal}")
         if disable:
             disabled_objects.append(dal)
         elif dal in disabled_objects:
             disabled_objects.remove(dal)
 
         setattr(session, "disabled", list(set(disabled_objects)))
-        logging.info(f"Disabled after {disabled_objects}, {dal}")
-
         
         return session
 
