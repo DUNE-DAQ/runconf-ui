@@ -51,6 +51,7 @@ class ManagementInterface(ABC):
 
     @classmethod
     def find_session(cls, file_name: str):
+        
         config_file = DaqConfigurationWrapper(file_name)
         file_sessions = ca.GetDalsOfClassAction(config_file)("Session")
         if file_sessions:

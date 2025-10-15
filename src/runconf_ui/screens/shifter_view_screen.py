@@ -152,12 +152,12 @@ class ShifterViewScreen(Screen):
         )
 
     async def _load_new_configuration(self):
-        """Handle loading a new configuration file (async wrapper)."""
+        """Handle loading a new configuration file."""
         logging.info(
             f"Opening new file: {self._application_controller.session_name}:{self._application_controller.current_daq_config}"
         )
 
-        # load configuration (synchronous operation in BufferFileManager)
+        # load configuration 
         self.file_service.load_configuration()
         # update option panel UI
         self.query_one(OptionPanel).open_new_session()
@@ -200,34 +200,25 @@ class ShifterViewScreen(Screen):
             if panel_tab is None:
                 continue
             try:
-                logging.debug(f"Attempting to remove existing enable/disable pane with id='{panel_tab.id}'")
                 # Use TabbedContent.remove_pane to remove both the Tab and the pane
                 await selection_tabs.remove_pane(panel_tab.id)
-                logging.debug(f"Removed existing pane '{panel_tab.id}'")
             except Exception:
-                logging.debug(f"No existing pane '{panel_tab.id}' to remove")
                 pass
 
         for map_tab in enable_disable_generator.map_list:
             if map_tab is None:
                 continue
             try:
-                logging.debug(f"Attempting to remove existing map pane with id='{map_tab.id}'")
                 await systematic_map_tabs.remove_pane(map_tab.id)
-                logging.debug(f"Removed existing map pane '{map_tab.id}'")
             except Exception:
-                logging.debug(f"No existing map pane '{map_tab.id}' to remove")
                 pass
 
         for attr_tab in adjustable_attribute_panel.panel_list:
             if attr_tab is None:
                 continue
             try:
-                logging.debug(f"Attempting to remove existing attribute pane with id='{attr_tab.id}'")
                 await attribute_map_tabs.remove_pane(attr_tab.id)
-                logging.debug(f"Removed existing attribute pane '{attr_tab.id}'")
             except Exception:
-                logging.debug(f"No existing attribute pane '{attr_tab.id}' to remove")
                 pass
 
         # mount selection panels. The generators return TabPane objects; mount
@@ -236,54 +227,42 @@ class ShifterViewScreen(Screen):
         for panel_tab in enable_disable_generator.panel_list:
             if panel_tab is None:
                 continue
-
-            logging.debug(f"Adding enable/disable TabPane id='{panel_tab.id}' into selection_tabs")
+            
             await selection_tabs.add_pane(panel_tab)
-            logging.debug(f"Added enable/disable TabPane id='{panel_tab.id}'")
 
         # remove the placeholder selection tab if it exists now we've added real panes
         try:
             await selection_tabs.remove_pane("selection_tab_placeholder")
-            logging.debug("Removed selection_tab_placeholder")
         except Exception:
-            logging.debug("No selection_tab_placeholder to remove")
+            pass
 
         # mount map views (TabPane objects)
         for map_tab in enable_disable_generator.map_list:
             if map_tab is None:
                 continue
 
-            logging.debug(f"Adding map TabPane id='{map_tab.id}' into systematic_map_tabs")
             await systematic_map_tabs.add_pane(map_tab)
-            logging.debug(f"Added map TabPane id='{map_tab.id}'")
 
             # Debug: list children of the newly added pane and check for expected tree Static
             try:
-                pane = systematic_map_tabs.get_child_by_id(map_tab.id)
-                child_ids = [getattr(c, "id", None) for c in pane.walk_children()]
-                logging.debug(f"map_tab '{map_tab.id}' child ids: {child_ids}")
                 # expected tree static id uses label: derive label from panel id patterns
                 label = map_tab.id.replace("_tabs", "")
                 expected_tree_id = f"tree_view_{label}"
                 try:
                     self.query_one(f"#{expected_tree_id}")
-                    logging.debug(f"Found expected tree static '{expected_tree_id}' in DOM")
                 except Exception:
-                    logging.warning(f"Expected tree static '{expected_tree_id}' not found in DOM after mounting map_tab '{map_tab.id}'")
+                    pass
             except Exception:
-                logging.debug(f"Could not inspect children of map_tab '{map_tab.id}'")
+                pass
 
         # mount adjustable attribute panels (TabPane objects)
         for attr_tab in adjustable_attribute_panel.panel_list:
             if attr_tab is None:
                 continue
 
-            logging.debug(f"Adding attribute TabPane id='{attr_tab.id}' into attribute_map_tabs")
             await attribute_map_tabs.add_pane(attr_tab)
-            logging.debug(f"Added attribute TabPane id='{attr_tab.id}'")
 
         # now refresh panels and update controller state
-        logging.debug("Updating enable/disable panels")
         for panel in self.query(EnableDisablePanel):
             panel.open_new_session()
             panel.refresh(recompose=True)

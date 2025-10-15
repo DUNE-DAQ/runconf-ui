@@ -58,13 +58,6 @@ class ShifterView(App):
 
         apparatus = kwargs.get("apparatus", os.environ.get("APPARATUS", "np02"))
 
-        # messy...
-        # detector_configuration = f"{Path(__file__).parent.absolute()}/../config_files/detector_configs/{apparatus}_configuration.yml"
-
-        # if not Path(detector_configuration).exists():
-        #     raise Exception(
-        #         f"Detector configuration file {detector_configuration} does not exist"
-        #     )
 
         if not Path(interface_config).exists():
             raise Exception(
