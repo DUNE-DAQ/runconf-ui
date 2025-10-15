@@ -52,9 +52,9 @@ class ShifterView(App):
         use_local = kwargs.get("use_local", False)
 
         if use_local:
-            interface_config = f"{Path(__file__).parent.absolute()}/../config_files/interface_configs/local_configuration.yml"
+            interface_config = f"{Path(__file__).parent.absolute()}/../config_files/local_configuration.yml"
         else:
-            interface_config = f"{Path(__file__).parent.absolute()}/../config_files/interface_configs/ehn1_configuration.yml"
+            interface_config = f"{Path(__file__).parent.absolute()}/../config_files/ehn1_configuration.yml"
 
         apparatus = kwargs.get("apparatus", os.environ.get("APPARATUS", "np02"))
 
