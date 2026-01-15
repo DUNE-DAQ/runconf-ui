@@ -17,8 +17,7 @@ class GetDalObjectAction(ActionInterface):
         """
         Gets DAL object from configuration
         """
-        conf_obj = self._daq_configuration.get_dal(conf_obj_class, conf_obj_id)
-        return conf_obj
+        return self._daq_configuration.get_dal(conf_obj_class, conf_obj_id)
 
 
 class ChangeAttributeAction(ActionInterface):

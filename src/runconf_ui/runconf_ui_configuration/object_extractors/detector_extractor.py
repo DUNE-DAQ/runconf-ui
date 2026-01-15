@@ -36,8 +36,8 @@ class DetectorExtractor(MultiItemExtractor):
         Detector config is of the form
 
         "Detector System Name": {
-            - label: str     # Name of the system for labelling widgets
-            - panel_type:    # multi-system OR single system
+            - label: str # Name of the system for labelling widgets
+            - panel_type: # multi-system OR single system
             - Systems [
                 {systsem_a},
                 {system_b},
@@ -66,16 +66,16 @@ class DetectorExtractor(MultiItemExtractor):
         logging.debug(f"Detector config: {self._detector_config}")
 
         extracted_systems = detector_config.get("Systems", [])
-        system_name = list(detector_config.keys())[0]
+        system_name = next(list(detector_config.keys()))
 
         logging.debug(f"Reading system {system_name}")
 
         for s in extracted_systems:
             logging.debug(f"Extracting system {s}")
             try:
-                system_name = list(s.keys())[0]
+                system_name = next(list(s.keys()))
 
-                system_info = list(s.values())[0]
+                system_info = next(list(s.values()))
 
                 self._system_extractors.append(
                     SystemExtractor(

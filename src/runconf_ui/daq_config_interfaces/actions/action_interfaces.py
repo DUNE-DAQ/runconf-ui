@@ -29,8 +29,7 @@ class ActionInterface(ABC):
 
     def __call__(self, *args, **kwargs) -> Any:
         try:
-            a = self.action(*args, **kwargs)
-            return a
+            return self.action(*args, **kwargs)
         except Exception:
             raise CiderBadActionException(traceback.format_exc())
 

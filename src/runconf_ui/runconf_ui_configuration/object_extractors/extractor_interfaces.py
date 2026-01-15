@@ -12,8 +12,7 @@ from runconf_ui.utils.subsystem_status import SubsystemStatus
 
 """
 Base classes for extracting the state of a subsystem. 
-
- Logic
+Logic
     1. Input dict defined as
 
         System A:

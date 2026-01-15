@@ -101,6 +101,7 @@ class MultiAdjustableAttributeExtractor:
                 and attribute_name == manager.attribute_name
             ):
                 return manager.get_value_label(object_id)
+        return None
 
     def get_tooltip(self, object_id: str, attribute_name: str) -> str | None:
         """
@@ -115,6 +116,7 @@ class MultiAdjustableAttributeExtractor:
                 and attribute_name == manager.attribute_name
             ):
                 return manager.get_tooltip(object_id)
+        return None
 
     def lower_limit(self, object_id: str, attribute_name: str) -> float | None:
         """
@@ -129,6 +131,7 @@ class MultiAdjustableAttributeExtractor:
                 and attribute_name == manager.attribute_name
             ):
                 return manager.lower_limit
+        return None
 
     def upper_limit(self, object_id: str, attribute_name: str) -> float | None:
         """
@@ -143,6 +146,7 @@ class MultiAdjustableAttributeExtractor:
                 and attribute_name == manager.attribute_name
             ):
                 return manager.upper_limit
+        return None
 
     def reset_value(self, object_id: str, attribute_name: str):
         """
@@ -159,3 +163,4 @@ class MultiAdjustableAttributeExtractor:
                 logging.debug(
                     f"Object ID {object_id} not found in adjustable attributes."
                 )
+        return None

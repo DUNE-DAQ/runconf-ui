@@ -7,6 +7,7 @@ import os
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
+from typing import ClassVar
 
 import click
 import pkg_resources
@@ -30,7 +31,7 @@ class ShifterView(App):
     """
 
     CSS_PATH = "shifter_view.tcss"
-    BINDINGS = [("ctrl+q", "quit", "Quit")]
+    BINDINGS: ClassVar = [("ctrl+q", "quit", "Quit")]
 
     def __init__(self, *args, **kwargs):
         """Constructor for the ShifterView class.

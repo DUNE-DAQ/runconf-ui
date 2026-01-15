@@ -95,7 +95,7 @@ class ConsolidateDAQConf:
 
         relation_list = []
         for r in related_objs:
-            for dal_list in list(r.values())[0]:
+            for dal_list in next(iter(r.values())):
                 if not isinstance(dal_list, list):
                     dal_list = [dal_list]
 
@@ -104,10 +104,10 @@ class ConsolidateDAQConf:
 
                 for d in dal_list:
                     relation_list.append(d)
-                    relation_list += list(
+                    relation_list += next([
                         self.__populate_configuration(configuration, d)
-                        for d in dal_list
-                    )[0]
+                        for d in dal_list]
+                    )
 
         return relation_list
 

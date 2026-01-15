@@ -166,6 +166,8 @@ class AdjustableAttributeManager:
 
                 return attr_value
 
+        return None
+
     def get_object_list(self) -> list[str]:
         """
         Get the list of object IDs for which the attribute can be set.
@@ -198,11 +200,9 @@ class AdjustableAttributeManager:
         dal_obj = ca.GetDalObjectAction(self._application_controller.buffer_daq_config)(
             object_id, self._object_class
         )
-        tooltip_val = ca.GetAttributeAction(
+        return ca.GetAttributeAction(
             self._application_controller.buffer_daq_config
         )(dal_obj, self._tooltip_var)
-
-        return tooltip_val
 
     def get_value_label(self, object_id: str) -> str:
         """

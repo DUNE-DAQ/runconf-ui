@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 
 import runconf_ui.daq_config_interfaces.actions.actions as ca
 from runconf_ui.daq_config_interfaces.daq_config_file_io.daq_config_wrapper import (
@@ -21,7 +22,7 @@ class RelationshipExtractor(AttributeExtractor):
         self,
         application_controller: ShifterInterfaceState,
         subsystem: dict,
-        disabled_dals: list[str] = None,
+        disabled_dals: Optional[list[str]] = None,
     ):
         """
         Initialize the RelationshipExtractor.
