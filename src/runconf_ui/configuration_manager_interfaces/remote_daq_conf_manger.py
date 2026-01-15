@@ -8,23 +8,22 @@ except Exception:
         "Could not import runconftool or config_management. Please install runconftools or config_management"
     )
 
-from runconf_ui.daq_config_interfaces.daq_config_file_io.daq_conf_path_reader import (
-    DaqConfPathReader,
-)
-from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
-    ShifterInterfaceState,
-)
+import logging
+import re
+import shutil
+import traceback
+from pathlib import Path
+
 from runconf_ui.configuration_manager_interfaces.management_interface import (
     ManagementInterface,
 )
-
-import re
-from pathlib import Path
-import logging
-import traceback
-import shutil
-
+from runconf_ui.daq_config_interfaces.daq_config_file_io.daq_conf_path_reader import (
+    DaqConfPathReader,
+)
 from runconf_ui.exceptions import CiderInvalidRepoException
+from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
+    ShifterInterfaceState,
+)
 
 
 class RemoteDaqConfManager(ManagementInterface):

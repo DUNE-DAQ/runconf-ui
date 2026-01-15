@@ -1,26 +1,27 @@
-from runconf_ui.runconf_ui_configuration.object_extractors.extractor_interfaces import (
-    MultiItemExtractor,
-    SubsystemExtractor,
-)
+import logging
+import traceback
+from collections.abc import Sequence
+
+import runconf_ui.daq_config_interfaces.actions.actions as ca
+from runconf_ui.exceptions import CiderBadActionException
 from runconf_ui.runconf_ui_configuration.object_extractors.attribute_extractor import (
     AttributeExtractor,
 )
 from runconf_ui.runconf_ui_configuration.object_extractors.component_extractor import (
     ComponentExtractor,
 )
+from runconf_ui.runconf_ui_configuration.object_extractors.extractor_interfaces import (
+    MultiItemExtractor,
+    SubsystemExtractor,
+)
 from runconf_ui.runconf_ui_configuration.object_extractors.relationship_extractor import (
     RelationshipExtractor,
 )
-from runconf_ui.utils.subsystem_status import SubsystemStatus
-from runconf_ui.exceptions import CiderBadActionException
-import runconf_ui.daq_config_interfaces.actions.actions as ca
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
     ShifterInterfaceState,
 )
+from runconf_ui.utils.subsystem_status import SubsystemStatus
 
-from typing import Dict, Sequence, Optional, List
-import logging
-import traceback
 
 class SystemExtractor(MultiItemExtractor):
     """
@@ -33,9 +34,9 @@ class SystemExtractor(MultiItemExtractor):
     def __init__(
         self,
         application_controller: ShifterInterfaceState,
-        system_name: Optional[str],
-        system: Optional[Dict],
-        disabled_dals: List = None,
+        system_name: str | None,
+        system: dict | None,
+        disabled_dals: list = None,
     ):
         """
         Initialize SystemExtractor.
@@ -54,9 +55,9 @@ class SystemExtractor(MultiItemExtractor):
         }
         """
         # Initialize collections
-        self._attributes: List[AttributeExtractor] = []
-        self._components: List[ComponentExtractor] = []
-        self._system_names: List[str] = []
+        self._attributes: list[AttributeExtractor] = []
+        self._components: list[ComponentExtractor] = []
+        self._system_names: list[str] = []
         
         # System configuration
         self._system_name = system_name
@@ -64,10 +65,10 @@ class SystemExtractor(MultiItemExtractor):
         self._display_full_system = True
         
         # Caching for performance
-        self._tooltips: Dict[str, str] = {}
-        self._subsystems: Dict[str, List] = {}
-        self._component_cache: Dict[str, List] = {}
-        self._attribute_cache: Dict[str, List] = {}
+        self._tooltips: dict[str, str] = {}
+        self._subsystems: dict[str, list] = {}
+        self._component_cache: dict[str, list] = {}
+        self._attribute_cache: dict[str, list] = {}
         
         # Initialize tooltip for main system
         if self._system_name:
@@ -75,7 +76,7 @@ class SystemExtractor(MultiItemExtractor):
         
         super().__init__(application_controller, system, disabled_dals or [])
 
-    def read_system(self, system: Dict, system_name: Optional[str] = None) -> bool:
+    def read_system(self, system: dict, system_name: str | None = None) -> bool:
         """
         Read dictionary containing system information and extract state.
         
@@ -104,7 +105,7 @@ class SystemExtractor(MultiItemExtractor):
         
         return True
 
-    def _extract_attributes(self, system: Dict) -> None:
+    def _extract_attributes(self, system: dict) -> None:
         """Extract attributes and relationships from system configuration."""
         self._attributes = []
         
@@ -120,7 +121,7 @@ class SystemExtractor(MultiItemExtractor):
                 RelationshipExtractor(self._application_controller, rel_config)
             )
 
-    def _extract_components(self, system: Dict) -> None:
+    def _extract_components(self, system: dict) -> None:
         """Extract components from system configuration."""
         self._components = []
         
@@ -130,7 +131,7 @@ class SystemExtractor(MultiItemExtractor):
             else:
                 self._add_component(comp_config)
 
-    def _extract_multi_component(self, comp_config: Dict) -> None:
+    def _extract_multi_component(self, comp_config: dict) -> None:
         """Extract multiple components from a wildcard configuration."""
         component_names = self.find_components_with_wildcard(
             comp_config["id"], comp_config["class"]
@@ -148,7 +149,7 @@ class SystemExtractor(MultiItemExtractor):
             
             self._add_component(modified_config)
 
-    def _add_component(self, comp_config: Dict) -> None:
+    def _add_component(self, comp_config: dict) -> None:
         """Add a single component to the system."""
         # Set up tooltip for separate systems
         extractor = ComponentExtractor(self._application_controller, comp_config)
@@ -200,14 +201,14 @@ class SystemExtractor(MultiItemExtractor):
         
         logging.debug(f"System names: {self._system_names}")
 
-    def _get_components_for_system(self, system_name: str) -> List:
+    def _get_components_for_system(self, system_name: str) -> list:
         """Get components for a specific system."""
         return [
             comp for comp in self._components
             if self._subsystem_matches(comp, system_name)
         ]
 
-    def _get_attributes_for_system(self, system_name: str) -> List:
+    def _get_attributes_for_system(self, system_name: str) -> list:
         """Get attributes for a specific system."""
         return [
             attr for attr in self._attributes
@@ -220,7 +221,7 @@ class SystemExtractor(MultiItemExtractor):
             return True
         return subsystem.system_name == system_name
 
-    def extract_components(self, system: Dict) -> None:
+    def extract_components(self, system: dict) -> None:
         """Legacy method name - delegates to _extract_components for compatibility."""
         self._extract_components(system)
 
@@ -230,11 +231,11 @@ class SystemExtractor(MultiItemExtractor):
         return self._system_names
 
     @property
-    def system_name(self) -> Optional[str]:
+    def system_name(self) -> str | None:
         """Get the main system name."""
         return self._system_name
 
-    def _get_state(self, system_name: Optional[str] = None) -> Optional[SubsystemStatus]:
+    def _get_state(self, system_name: str | None = None) -> SubsystemStatus | None:
         """
         Get state of the system or subsystem.
         
@@ -256,7 +257,7 @@ class SystemExtractor(MultiItemExtractor):
         # Get states for the target system
         return self._calculate_system_state(target_system)
 
-    def _is_top_level_disabled(self, system_name: Optional[str]) -> bool:
+    def _is_top_level_disabled(self, system_name: str | None) -> bool:
         """Check if system is disabled at top level."""
         if system_name == self._system_name or not self._subsystem_dependent:
             return False
@@ -302,7 +303,7 @@ class SystemExtractor(MultiItemExtractor):
         # Return uniform state or partially enabled
         return states[0] if len(set(states)) == 1 else SubsystemStatus.PARTIALLY_ENABLED
 
-    def _set_state(self, state: SubsystemStatus, system_name: Optional[str]) -> None:
+    def _set_state(self, state: SubsystemStatus, system_name: str | None) -> None:
         """Set state for a system and its subsystems."""
         target_system = system_name or self._system_name
         
@@ -316,7 +317,7 @@ class SystemExtractor(MultiItemExtractor):
             for subsystem in group:
                 subsystem.set_state(state)
 
-    def _set_full_system_state(self, state: SubsystemStatus, system_name: Optional[str]) -> None:
+    def _set_full_system_state(self, state: SubsystemStatus, system_name: str | None) -> None:
         """
         Set state for non-subsystem components based on subsystem dependencies.
         
@@ -345,7 +346,7 @@ class SystemExtractor(MultiItemExtractor):
             if not subsystem.is_system:
                 subsystem.set_state(effective_state)
 
-    def get_all_states(self) -> Dict[str, SubsystemStatus]:
+    def get_all_states(self) -> dict[str, SubsystemStatus]:
         """
         Get the state of the system and any nested subsystems.
         
@@ -379,7 +380,7 @@ class SystemExtractor(MultiItemExtractor):
         
         return result
 
-    def get_components(self, system_name: Optional[str] = None) -> List:
+    def get_components(self, system_name: str | None = None) -> list:
         """
         Get components for a specific system.
         
@@ -399,7 +400,7 @@ class SystemExtractor(MultiItemExtractor):
         self._component_cache[cache_key] = result
         return result
 
-    def get_attributes(self, system_name: Optional[str] = None) -> List:
+    def get_attributes(self, system_name: str | None = None) -> list:
         """
         Get attributes for a specific system.
         
@@ -419,7 +420,7 @@ class SystemExtractor(MultiItemExtractor):
         self._attribute_cache[cache_key] = result
         return result
 
-    def set_disabled_dals(self, disabled_dals: List) -> None:
+    def set_disabled_dals(self, disabled_dals: list) -> None:
         """
         Set disabled DALs for the system and all subsystems.
         
@@ -431,7 +432,7 @@ class SystemExtractor(MultiItemExtractor):
         for subsystem in self._attributes + self._components:
             subsystem.set_disabled_dals(disabled_dals)
 
-    def find_components_with_wildcard(self, wildcard: str, class_name: str) -> List[str]:
+    def find_components_with_wildcard(self, wildcard: str, class_name: str) -> list[str]:
         """
         Find components with a wildcard pattern in the system.
         
@@ -458,7 +459,7 @@ class SystemExtractor(MultiItemExtractor):
         
         return matching_components
 
-    def get_tooltip(self, system_name: Optional[str] = None) -> str:
+    def get_tooltip(self, system_name: str | None = None) -> str:
         """
         Get the tooltip for the system or subsystem.
         
@@ -472,5 +473,4 @@ class SystemExtractor(MultiItemExtractor):
         
         if self._tooltips.get(system_name):
             return self._tooltips[system_name]
-        else:
-            return f"Enable/Disable {system_name}"
+        return f"Enable/Disable {system_name}"

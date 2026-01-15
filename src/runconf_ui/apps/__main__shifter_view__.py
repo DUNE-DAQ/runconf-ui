@@ -2,8 +2,17 @@
 Main application for the shifter view interface.
 """
 
-from runconf_ui.screens.shifter_view_screen import ShifterViewScreen
-from runconf_ui.utils.file_cleaner import clean_old_files
+import logging
+import os
+from dataclasses import dataclass
+from datetime import datetime
+from pathlib import Path
+
+import click
+import pkg_resources
+from rich import print
+from textual.app import App
+
 from runconf_ui.runconf_ui_configuration.shifter_config_reader import (
     ShifterConfigReader,
 )
@@ -11,17 +20,9 @@ from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
     ShifterInterfaceState,
 )
 from runconf_ui.screens.quit_screen import QuitScreen
+from runconf_ui.screens.shifter_view_screen import ShifterViewScreen
+from runconf_ui.utils.file_cleaner import clean_old_files
 
-from textual.app import App
-import click
-from rich import print
-from dataclasses import dataclass
-import os
-from pathlib import Path
-import logging
-from datetime import datetime
-import pkg_resources
-from typing import Optional
 
 class ShifterView(App):
     """
@@ -149,18 +150,17 @@ class ShifterView(App):
 
 @dataclass
 class CliArgs:
-    apparatus: Optional[str] = None
-    session_config: Optional[str] = None
-    daq_config_directory: Optional[str] = None
-    session_name: Optional[str] = None
-    base_url: Optional[str] = None
-    operation_url: Optional[str] = None
+    apparatus: str | None = None
+    session_config: str | None = None
+    daq_config_directory: str | None = None
+    session_name: str | None = None
+    base_url: str | None = None
+    operation_url: str | None = None
     log_level: str = "INFO"
-    local_config: Optional[str] = None
+    local_config: str | None = None
 
     def as_kwargs(self):
         return {k: v for k, v in vars(self).items() if v is not None}
-
 
 @click.command()
 @click.option(

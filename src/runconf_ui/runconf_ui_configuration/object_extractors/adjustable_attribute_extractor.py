@@ -1,10 +1,10 @@
-from runconf_ui.runconf_ui_controllers.runconf_ui_state import ShifterInterfaceState
+import logging
+import re
+
 import runconf_ui.daq_config_interfaces.actions.actions as ca
 from runconf_ui.exceptions import CiderOutOfBoundsException
+from runconf_ui.runconf_ui_controllers.runconf_ui_state import ShifterInterfaceState
 
-import logging
-from typing import Tuple, Union
-import re
 
 class AdjustableAttributeManager:
     def __init__(self, application_controller: ShifterInterfaceState, **kwargs):
@@ -250,8 +250,7 @@ class AdjustableAttributeManager:
         # Convert a hexadecimal string to an integer
         if value.startswith("0x"):
             return int(value, 16)
-        else:
-            raise ValueError(f"Invalid hexadecimal value: {value}")
+        raise ValueError(f"Invalid hexadecimal value: {value}")
 
     def to_dec(self, value: str) -> int:
         return int(value, 16)
@@ -283,7 +282,7 @@ class AdjustableAttributeManager:
     def class_name(self) -> str | None:
         return self._object_class
 
-    def _range(self) -> Union[Tuple[float, float], Tuple[None, None]]:
+    def _range(self) -> tuple[float, float] | tuple[None, None]:
         """
         Get the range of the attribute.
         Returns a tuple of (lower_limit, upper_limit).

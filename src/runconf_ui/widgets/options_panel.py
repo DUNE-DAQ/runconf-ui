@@ -1,16 +1,16 @@
-from runconf_ui.screens.quit_screen import QuitScreen
-from runconf_ui.screens.help_screen import HelpScreen
+import logging
+
+from textual.containers import ScrollableContainer
+from textual.message import Message
+from textual.visual import SupportsVisual
+from textual.widgets import Button, Static
+
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
     ShifterInterfaceState,
 )
+from runconf_ui.screens.help_screen import HelpScreen
 from runconf_ui.screens.popup_manager import PopupManager
-
-from textual.containers import ScrollableContainer
-from textual.visual import SupportsVisual
-from textual.widgets import Button, Static
-from textual.message import Message
-
-import logging
+from runconf_ui.screens.quit_screen import QuitScreen
 
 
 class OptionPanel(Static):

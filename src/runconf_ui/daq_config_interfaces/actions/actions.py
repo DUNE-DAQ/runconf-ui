@@ -1,9 +1,9 @@
+import shutil
+
 from runconf_ui.daq_config_interfaces.actions.action_interfaces import ActionInterface
 from runconf_ui.daq_config_interfaces.daq_config_file_io.daq_config_wrapper import (
     DaqConfigurationWrapper,
 )
-import shutil
-import logging
 
 """
 A collection of simple actions on a configuration. These should take a single configuration
@@ -38,7 +38,7 @@ class UnloadConfigurationAction(ActionInterface):
         Unload configuration
         """
         self._daq_configuration.unload()
-        return None
+        return
 
 
 class UpdateDalAction(ActionInterface):
@@ -57,7 +57,7 @@ class DestroyDalAction(ActionInterface):
         Delete object from configuration
         """
         self._daq_configuration.destroy_dal(dal)
-        return None
+        return
 
 
 class RenameDalAction(ActionInterface):
@@ -202,7 +202,7 @@ class CommitConfigurationAction(ActionInterface):
 
     def action(self, save_message: str = ""):
         self._daq_configuration.commit(save_message)
-        return None
+        return
 
 
 # Actions for getting information

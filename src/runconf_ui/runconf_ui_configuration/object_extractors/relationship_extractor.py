@@ -1,14 +1,13 @@
-from runconf_ui.runconf_ui_configuration.object_extractors.attribute_extractor import (
-    AttributeExtractor,
-)
+import logging
+
 import runconf_ui.daq_config_interfaces.actions.actions as ca
-from runconf_ui.runconf_ui_controllers.runconf_ui_state import ShifterInterfaceState
 from runconf_ui.daq_config_interfaces.daq_config_file_io.daq_config_wrapper import (
     DaqConfigurationWrapper,
 )
-
-from typing import Dict, List, Optional, Union
-import logging
+from runconf_ui.runconf_ui_configuration.object_extractors.attribute_extractor import (
+    AttributeExtractor,
+)
+from runconf_ui.runconf_ui_controllers.runconf_ui_state import ShifterInterfaceState
 
 
 class RelationshipExtractor(AttributeExtractor):
@@ -21,8 +20,8 @@ class RelationshipExtractor(AttributeExtractor):
     def __init__(
         self,
         application_controller: ShifterInterfaceState,
-        subsystem: Dict,
-        disabled_dals: List[str] = None,
+        subsystem: dict,
+        disabled_dals: list[str] = None,
     ):
         """
         Initialize the RelationshipExtractor.
@@ -42,8 +41,8 @@ class RelationshipExtractor(AttributeExtractor):
         self.disabled_state = self._find_enable_disable_state(self.disabled_state)
 
     def _get_states(
-        self, state: Union[str, List[str]], configuration: DaqConfigurationWrapper
-    ) -> Union[object, List[object]]:
+        self, state: str | list[str], configuration: DaqConfigurationWrapper
+    ) -> object | list[object]:
         """
         Get DAL objects for the given state(s).
 
@@ -63,8 +62,8 @@ class RelationshipExtractor(AttributeExtractor):
         ]
 
     def _find_enable_disable_state(
-        self, state: Union[str, List[str]]
-    ) -> Optional[Union[object, List[object]]]:
+        self, state: str | list[str]
+    ) -> object | list[object] | None:
         """
         Get DALs to set relationship enable/disable state.
 
@@ -107,5 +106,5 @@ class RelationshipExtractor(AttributeExtractor):
             )
 
         except Exception as e:
-            logging.error(f"Failed to find enable/disable state: {str(e)}")
+            logging.error(f"Failed to find enable/disable state: {e!s}")
             return None

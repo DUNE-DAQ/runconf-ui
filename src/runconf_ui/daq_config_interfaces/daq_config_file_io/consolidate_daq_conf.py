@@ -1,18 +1,18 @@
+import os
+import sys
+from typing import Any
+
+from runconf_ui.daq_config_interfaces.actions.actions import (
+    CommitConfigurationAction,
+    CopyDalAction,
+    GetAllDalsAction,
+    GetDalObjectAction,
+    GetRelatedDalsAction,
+)
 from runconf_ui.daq_config_interfaces.daq_config_file_io.daq_config_wrapper import (
     DaqConfigurationWrapper,
 )
 
-from runconf_ui.daq_config_interfaces.actions.actions import (
-    GetDalObjectAction,
-    CopyDalAction,
-    GetRelatedDalsAction,
-    GetAllDalsAction,
-    CommitConfigurationAction,
-)
-from typing import Any
-
-import sys
-import os
 
 class ConsolidateDAQConf:
     """
@@ -100,7 +100,7 @@ class ConsolidateDAQConf:
                     dal_list = [dal_list]
 
                 if len(dal_list) == 0:
-                    return
+                    return None
 
                 for d in dal_list:
                     relation_list.append(d)

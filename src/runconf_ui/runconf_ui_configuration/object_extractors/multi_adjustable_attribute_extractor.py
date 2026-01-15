@@ -1,10 +1,9 @@
-from runconf_ui.runconf_ui_configuration.object_extractors.adjustable_attribute_extractor import (
-    AdjustableAttributeManager,
-)
-
 import logging
 from traceback import format_exc
 
+from runconf_ui.runconf_ui_configuration.object_extractors.adjustable_attribute_extractor import (
+    AdjustableAttributeManager,
+)
 
 
 class MultiAdjustableAttributeExtractor:

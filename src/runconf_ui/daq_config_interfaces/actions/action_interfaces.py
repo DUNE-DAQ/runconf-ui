@@ -1,11 +1,11 @@
+import traceback
+from abc import ABC, abstractmethod
+from typing import Any
+
 from runconf_ui.daq_config_interfaces.daq_config_file_io.daq_config_wrapper import (
     DaqConfigurationWrapper,
 )
 from runconf_ui.exceptions import CiderBadActionException
-
-from abc import ABC, abstractmethod
-from typing import Any
-import traceback
 
 # The idea here is to define an interface for actions on a configuration,
 # currently this is very simple but there is scope to add some complexity

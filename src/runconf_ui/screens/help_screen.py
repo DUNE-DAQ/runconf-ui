@@ -1,8 +1,8 @@
-from textual.widgets import Button, Static
+from textwrap import dedent
+
 from textual.containers import ScrollableContainer
 from textual.screen import Screen
-
-from textwrap import dedent
+from textual.widgets import Button, Static
 
 
 class HelpScreen(Screen):

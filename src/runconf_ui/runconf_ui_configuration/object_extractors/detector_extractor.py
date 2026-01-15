@@ -1,31 +1,29 @@
+import logging
+import re
+import traceback
+from collections import OrderedDict
+
+from runconf_ui.exceptions import (
+    CiderBadActionException,
+    CiderInvalidConfigurationException,
+)
 from runconf_ui.runconf_ui_configuration.object_extractors.extractor_interfaces import (
     MultiItemExtractor,
 )
 from runconf_ui.runconf_ui_configuration.object_extractors.system_extractor import (
     SystemExtractor,
 )
-from runconf_ui.exceptions import (
-    CiderBadActionException,
-    CiderInvalidConfigurationException,
-)
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
     ShifterInterfaceState,
 )
-
 from runconf_ui.utils.subsystem_status import SubsystemStatus
-
-from typing import Dict, Optional
-import logging
-import traceback
-from collections import OrderedDict
-import re
 
 
 class DetectorExtractor(MultiItemExtractor):
     def __init__(
         self,
         application_controller: ShifterInterfaceState,
-        detector_config: Optional[Dict],
+        detector_config: dict | None,
         disabled_dals=[],
     ):
         """
@@ -56,7 +54,7 @@ class DetectorExtractor(MultiItemExtractor):
         logging.debug(f"Detector configuration {detector_config}")
         super().__init__(application_controller, detector_config, disabled_dals)
 
-    def read_system(self, detector_config: Dict):
+    def read_system(self, detector_config: dict):
         # Read system dict
         if not super().read_system(detector_config):
             logging.error("Detector config is not valid, cannot read systems.")

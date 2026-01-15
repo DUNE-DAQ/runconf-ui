@@ -1,11 +1,12 @@
+import logging
+
+from rich.tree import Tree
+
+import runconf_ui.daq_config_interfaces.actions.actions as ca
 from runconf_ui.daq_config_interfaces.daq_tree_tools.daq_conf_tree import (
     DaqConfTreeBase,
 )
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import ShifterInterfaceState
-from rich.tree import Tree
-import runconf_ui.daq_config_interfaces.actions.actions as ca
-from typing import Set, Optional
-import logging
 
 
 class DaqFullTree(DaqConfTreeBase):
@@ -68,7 +69,7 @@ class DaqFullTree(DaqConfTreeBase):
         dal_obj, 
         is_disabled: bool = False, 
         session_name: str = ""
-    ) -> Optional[Tree]:
+    ) -> Tree | None:
         """ tree building with reduced string operations and caching."""
         # Use cached actions
         get_class_name_action = self._get_action(ca.GetClassNameAction)
@@ -134,7 +135,7 @@ class DaqFullTree(DaqConfTreeBase):
                 )
 
     @property
-    def disabled_objs(self) -> Set:
+    def disabled_objs(self) -> set:
         """Get the set of disabled objects."""
         return set(self._disabled_objs)
 

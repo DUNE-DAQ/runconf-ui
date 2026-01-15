@@ -1,11 +1,11 @@
+import logging
+
+import runconf_ui.daq_config_interfaces.actions.actions as ca
+from runconf_ui.exceptions import CiderBadActionException
 from runconf_ui.runconf_ui_configuration.object_extractors.extractor_interfaces import (
     SubsystemExtractor,
 )
-import runconf_ui.daq_config_interfaces.actions.actions as ca
-from runconf_ui.exceptions import CiderBadActionException
 from runconf_ui.utils.subsystem_status import SubsystemStatus
-
-import logging
 
 
 class ComponentExtractor(SubsystemExtractor):
@@ -104,5 +104,4 @@ class ComponentExtractor(SubsystemExtractor):
 
         if self._is_system:
             return f"Enable/disable {self._system_name} component"
-        else:
-            return f"Enable/disable {self._system_id} component"
+        return f"Enable/disable {self._system_id} component"

@@ -1,25 +1,25 @@
-from typing import Iterable, Any, List
-from textual.message import Message
-from textual.visual import SupportsVisual
-from textual.widgets import Button, Static, Select
-from textual.containers import Grid, ScrollableContainer
-from textual.widgets._select import NoSelection
+import logging
+import traceback
+from collections.abc import Iterable
+from pathlib import Path
+from typing import Any
+
 from rich.console import ConsoleRenderable, RichCast
 from textual import on
+from textual.containers import Grid, ScrollableContainer
+from textual.message import Message
+from textual.visual import SupportsVisual
+from textual.widgets import Button, Select, Static
+from textual.widgets._select import NoSelection
 
-
-from runconf_ui.exceptions import CiderInvalidRepoException
 from runconf_ui.configuration_manager_interfaces.local_daq_conf_manager import (
     LocalDaqConfManager,
 )
 from runconf_ui.configuration_manager_interfaces.remote_daq_conf_manger import (
     RemoteDaqConfManager,
 )
+from runconf_ui.exceptions import CiderInvalidRepoException
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import ShifterInterfaceState
-
-from pathlib import Path
-import logging
-import traceback
 
 
 class DAQSelectMenu(Select):
@@ -192,7 +192,7 @@ class SelectDAQConfiguration(DAQSelectMenu):
     def on_select_changed(self, event: Select.Changed) -> None:
         self.post_message(self.DAQConfigurationSelected(event.value))
 
-    def set_options(self, options: List[str]):
+    def set_options(self, options: list[str]):
         options = [(str(Path(m).name), m) for m in options]
         super().set_options(options)
 
