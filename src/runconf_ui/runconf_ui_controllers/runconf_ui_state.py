@@ -40,5 +40,5 @@ class ShifterInterfaceState:
         Get the path to the configuration file
         """
         return Path(
-            f"{self.shifter_interface_config.download_directory}/{self.shifter_interface_config.default_config}"
+            f"{self.shifter_interface_config.daq_config_directory}/{self.shifter_interface_config.default_config}"
         )

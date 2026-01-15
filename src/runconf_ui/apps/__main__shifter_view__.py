@@ -49,10 +49,11 @@ class ShifterView(App):
         self._exit_message = ""
 
         # Read kwargs
-        use_local = kwargs.get("use_local", False)
+        local_config = kwargs.get("local_config", None)
 
-        if use_local:
+        if local_config is not None:
             interface_config = f"{Path(__file__).parent.absolute()}/../config_files/local_configuration.yml"
+            kwargs["daq_config_directory"] = local_config
         else:
             interface_config = f"{Path(__file__).parent.absolute()}/../config_files/ehn1_configuration.yml"
 
@@ -75,7 +76,7 @@ class ShifterView(App):
         self.application_controller = ShifterInterfaceState(
             apparatus=apparatus,
             shifter_interface_config=interface_config,
-            use_local=use_local,
+            use_local=local_config is not None,
         )
 
         self._init_logger(kwargs.get("log_level", "INFO"))
@@ -165,7 +166,7 @@ class ShifterView(App):
 @click.option(
     "-d",
     "--daq-config-directory",
-    "download_directory",
+    "daq_config_directory",
     required=False,
     help="Where do you want to download configs from/where are they located",
 )
@@ -194,31 +195,30 @@ class ShifterView(App):
 @click.option(
     "-l",
     "--local-config",
-    "use_local",
+    "local_config",
     required=False,
-    is_flag=True,
-    help="Use local config files instead of downloading from the github, expert use only!",
+    help="Use local config files instead of downloading from the github, should be a path to the LOCAL config repo, expert use only!",
 )
 def main(
     apparatus,
     session_config,
-    download_directory,
+    daq_config_directory,
     session_name,
     base_url,
     operation_url,
+    local_config,
     log_level,
-    use_local,
 ):
     # Slghtly complicated here, as we need to remove unused args
     cli_args = {
         "apparatus": apparatus,
         "session_config": session_config,
-        "download_directory": download_directory,
+        "daq_config_directory": daq_config_directory,
         "session_name": session_name,
         "base_url": base_url,
         "operation_url": operation_url,
         "log_level": log_level,
-        "use_local": use_local,
+        "local_config": local_config,
     }
 
     cli_args = {k: v for k, v in cli_args.items() if v is not None}

@@ -41,7 +41,7 @@ class RemoteDaqConfManager(ManagementInterface):
         try:
             self.conf_pool = ConfPool(
                 str(
-                    self.application_controller.shifter_interface_config.download_directory
+                    self.application_controller.shifter_interface_config.daq_config_directory
                 ),
                 apparatus=self.application_controller.apparatus,
                 operation_url=self.application_controller.shifter_interface_config.operation_url,
@@ -77,7 +77,7 @@ class RemoteDaqConfManager(ManagementInterface):
             CiderInvalidRepoException(e)
      
      
-        detector_config_path = Path(self.application_controller.shifter_interface_config.download_directory) / 'runconf-ui-settings' / f"{self.application_controller.apparatus}.yml"
+        detector_config_path = Path(self.application_controller.shifter_interface_config.daq_config_directory) / 'runconf-ui-settings' / f"{self.application_controller.apparatus}.yml"
         if not detector_config_path.exists():
             raise FileNotFoundError(f"Detector configuration file {detector_config_path} does not exist")
         
@@ -92,7 +92,7 @@ class RemoteDaqConfManager(ManagementInterface):
             return super().open_file(self.application_controller.direct_config_path)
 
         config_list = config_path_reader(
-            self.application_controller.shifter_interface_config.download_directory
+            self.application_controller.shifter_interface_config.daq_config_directory
         )
 
         valid_config_files = [
@@ -138,11 +138,11 @@ class RemoteDaqConfManager(ManagementInterface):
             self.conf_pool.repo.close()
 
         shutil.rmtree(
-            self.application_controller.shifter_interface_config.download_directory
+            self.application_controller.shifter_interface_config.daq_config_directory
         )
 
         Path(
-            self.application_controller.shifter_interface_config.download_directory
+            self.application_controller.shifter_interface_config.daq_config_directory
         ).mkdir(parents=True, exist_ok=True)
 
         self.__init__(self.application_controller)

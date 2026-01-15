@@ -17,8 +17,8 @@ class ShifterConfigReader:
         # Update with any user args
         general_settings.update(kwargs)
 
-        self._download_directory = path_or_env_check(
-            general_settings.get("download_directory", f"{os.getcwd()}/configs")
+        self._daq_config_directory = path_or_env_check(
+            general_settings.get("daq_config_directory", f"{os.getcwd()}/configs")
         )
         # Generic settings
         self._default_config = path_or_env_check(
@@ -68,12 +68,12 @@ class ShifterConfigReader:
         self._default_config = path_or_env_check(value)
 
     @property
-    def download_directory(self):
-        return self._download_directory
+    def daq_config_directory(self):
+        return self._daq_config_directory
 
-    @download_directory.setter
-    def download_directory(self, value):
-        self._download_directory = path_or_env_check(value)
+    @daq_config_directory.setter
+    def daq_config_directory(self, value):
+        self._daq_config_directory = path_or_env_check(value)
 
     @property
     def session_name(self):
