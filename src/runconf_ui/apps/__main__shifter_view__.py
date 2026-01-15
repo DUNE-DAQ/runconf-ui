@@ -15,13 +15,13 @@ from runconf_ui.screens.quit_screen import QuitScreen
 from textual.app import App
 import click
 from rich import print
-
+from dataclasses import dataclass
 import os
 from pathlib import Path
 import logging
 from datetime import datetime
 import pkg_resources
-
+from typing import Optional
 
 class ShifterView(App):
     """
@@ -147,6 +147,21 @@ class ShifterView(App):
         return self._exit_message
 
 
+@dataclass
+class CliArgs:
+    apparatus: Optional[str] = None
+    session_config: Optional[str] = None
+    daq_config_directory: Optional[str] = None
+    session_name: Optional[str] = None
+    base_url: Optional[str] = None
+    operation_url: Optional[str] = None
+    log_level: str = "INFO"
+    local_config: Optional[str] = None
+
+    def as_kwargs(self):
+        return {k: v for k, v in vars(self).items() if v is not None}
+
+
 @click.command()
 @click.option(
     "-a",
@@ -199,34 +214,13 @@ class ShifterView(App):
     required=False,
     help="Use local config files instead of downloading from the github, should be a path to the LOCAL config repo, expert use only!",
 )
-def main(
-    apparatus,
-    session_config,
-    daq_config_directory,
-    session_name,
-    base_url,
-    operation_url,
-    local_config,
-    log_level,
-):
+def main(**kwargs):
     # Slghtly complicated here, as we need to remove unused args
-    cli_args = {
-        "apparatus": apparatus,
-        "session_config": session_config,
-        "daq_config_directory": daq_config_directory,
-        "session_name": session_name,
-        "base_url": base_url,
-        "operation_url": operation_url,
-        "log_level": log_level,
-        "local_config": local_config,
-    }
+    cli_args = CliArgs(**kwargs)
 
-    cli_args = {k: v for k, v in cli_args.items() if v is not None}
-
-    app = ShifterView(**cli_args)
+    app = ShifterView(**cli_args.as_kwargs())
     app.run()
     print(app.exit_message())
-
 
 if __name__ == "__main__":
     main()
