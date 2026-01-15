@@ -25,8 +25,8 @@ optionally the following CLI flags exist for custom paths:
   -s, --shifter-interface-config  Set default yaml config for this interface
   
   -d, --daq-config-directory      Where do you want to download configs
-                                  from/where are they located
-  
+                                  to 
+
   --session-name                  Name of daq session
   
   --base-url                      Base URL for the interface, not used for
@@ -38,8 +38,7 @@ optionally the following CLI flags exist for custom paths:
   --debug                         Set the debug log level
 
   -l, --local-config              Use local config files instead of
-                                  downloading from the github, expert use
-                                  only! [flag option]
+                                  downloading. Should be a path to wherever your local configs are kept
 
   --help                          Show help
 ```
