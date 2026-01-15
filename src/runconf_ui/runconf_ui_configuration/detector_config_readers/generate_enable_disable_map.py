@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 from textual.containers import ScrollableContainer
 from textual.widgets import Static
 
@@ -5,7 +7,7 @@ from runconf_ui.runconf_ui_configuration.detector_config_readers.detector_map_re
     DetectorMapReaderBase,
 )
 from runconf_ui.widgets.multicomponent_panel import MultiComponentEnableDisablePanel
-from typing import ClassVar
+
 
 class EnableDisableMapGen(DetectorMapReaderBase):
     _panel_list: ClassVar[list] = []
@@ -33,7 +35,7 @@ class EnableDisableMapGen(DetectorMapReaderBase):
             classes="detector_subsystem",
         )
 
-    panel_tab = self.initialise_system(panel_name, opts, panel)
+        panel_tab = self.initialise_system(panel_name, opts, panel)
 
         map = ScrollableContainer(
             Static(

@@ -163,4 +163,3 @@ class MultiAdjustableAttributeExtractor:
                 logging.debug(
                     f"Object ID {object_id} not found in adjustable attributes."
                 )
-        return None

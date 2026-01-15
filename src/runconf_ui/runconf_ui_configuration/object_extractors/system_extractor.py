@@ -1,7 +1,6 @@
 import logging
 import traceback
 from collections.abc import Sequence
-from typing import Optional
 
 import runconf_ui.daq_config_interfaces.actions.actions as ca
 from runconf_ui.exceptions import CiderBadActionException
@@ -37,7 +36,7 @@ class SystemExtractor(MultiItemExtractor):
         application_controller: ShifterInterfaceState,
         system_name: str | None,
         system: dict | None,
-        disabled_dals: Optional[list] = None,
+        disabled_dals: list[str] | None = None,
     ):
         """
         Initialize SystemExtractor.

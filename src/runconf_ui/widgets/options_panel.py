@@ -108,4 +108,6 @@ class OptionPanel(Static):
             logging.debug("Quit button pressed")
             return self.app.action_quit()
 
+        return None
+
     class ResetPressed(Message): ...
