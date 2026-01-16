@@ -1,16 +1,16 @@
-from runconf_ui.screens.quit_screen import QuitScreen
-from runconf_ui.screens.help_screen import HelpScreen
+import logging
+
+from textual.containers import ScrollableContainer
+from textual.message import Message
+from textual.visual import SupportsVisual
+from textual.widgets import Button, Static
+
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
     ShifterInterfaceState,
 )
+from runconf_ui.screens.help_screen import HelpScreen
 from runconf_ui.screens.popup_manager import PopupManager
-
-from textual.containers import ScrollableContainer
-from textual.visual import SupportsVisual
-from textual.widgets import Button, Static
-from textual.message import Message
-
-import logging
+from runconf_ui.screens.quit_screen import QuitScreen
 
 
 class OptionPanel(Static):
@@ -71,7 +71,7 @@ class OptionPanel(Static):
         self.query_one("#create_button").disabled = disable_buttons
         self.query_one("#undo_changes_button").disabled = disable_buttons
 
-    def on_button_pressed(self, event: Button.Pressed):
+    def on_button_pressed(self, event: Button.Pressed)->None:
         if event.button.id == "help_button":
             self.app.push_screen(HelpScreen(classes="pop_up_screen"))
         elif event.button.id == "create_button":
@@ -95,7 +95,7 @@ class OptionPanel(Static):
                     timer=4.0,
                     success=False,
                 )
-
+            
         # Resets to base config provided
         elif event.button.id == "undo_changes_button":
             # Reset everything!
@@ -107,5 +107,7 @@ class OptionPanel(Static):
         elif event.button.id == "quit_button":
             logging.debug("Quit button pressed")
             return self.app.action_quit()
+
+        return None
 
     class ResetPressed(Message): ...

@@ -1,33 +1,26 @@
+import logging
+import re
+import traceback
+from collections import OrderedDict
+
+from runconf_ui.exceptions import (
+    CiderBadActionException,
+    CiderInvalidConfigurationException,
+)
 from runconf_ui.runconf_ui_configuration.object_extractors.extractor_interfaces import (
     MultiItemExtractor,
 )
 from runconf_ui.runconf_ui_configuration.object_extractors.system_extractor import (
     SystemExtractor,
 )
-from runconf_ui.exceptions import (
-    CiderBadActionException,
-    CiderInvalidConfigurationException,
-)
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
     ShifterInterfaceState,
 )
-
 from runconf_ui.utils.subsystem_status import SubsystemStatus
-
-from typing import Dict, Optional
-import logging
-import traceback
-from collections import OrderedDict
-import re
 
 
 class DetectorExtractor(MultiItemExtractor):
-    def __init__(
-        self,
-        application_controller: ShifterInterfaceState,
-        detector_config: Optional[Dict],
-        disabled_dals=[],
-    ):
+    def __init__(self, application_controller: ShifterInterfaceState, detector_config: dict | None, disabled_dals=[]):
         """
         Extracts the states of ALL systems present in the detector config for a given top level system (i.e. trigger).
         :param daq_configuration: daq_configuration object
@@ -38,15 +31,14 @@ class DetectorExtractor(MultiItemExtractor):
         Detector config is of the form
 
         "Detector System Name": {
-            - label: str     # Name of the system for labelling widgets
-            - panel_type:    # multi-system OR single system
+            - label: str # Name of the system for labelling widgets
+            - panel_type: # multi-system OR single system
             - Systems [
                 {systsem_a},
                 {system_b},
                 ...
             ]
         }
-
         """
         # Config file
         self._detector_config = {}
@@ -56,7 +48,7 @@ class DetectorExtractor(MultiItemExtractor):
         logging.debug(f"Detector configuration {detector_config}")
         super().__init__(application_controller, detector_config, disabled_dals)
 
-    def read_system(self, detector_config: Dict):
+    def read_system(self, detector_config: dict):
         # Read system dict
         if not super().read_system(detector_config):
             logging.error("Detector config is not valid, cannot read systems.")
@@ -68,16 +60,16 @@ class DetectorExtractor(MultiItemExtractor):
         logging.debug(f"Detector config: {self._detector_config}")
 
         extracted_systems = detector_config.get("Systems", [])
-        system_name = list(detector_config.keys())[0]
+        system_name = next(list(detector_config.keys()))
 
         logging.debug(f"Reading system {system_name}")
 
         for s in extracted_systems:
             logging.debug(f"Extracting system {s}")
             try:
-                system_name = list(s.keys())[0]
+                system_name = next(list(s.keys()))
 
-                system_info = list(s.values())[0]
+                system_info = next(list(s.values()))
 
                 self._system_extractors.append(
                     SystemExtractor(

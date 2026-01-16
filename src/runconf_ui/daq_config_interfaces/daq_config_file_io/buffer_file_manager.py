@@ -1,3 +1,7 @@
+import logging
+import os
+from pathlib import Path
+
 from runconf_ui.daq_config_interfaces.daq_config_file_io.consolidate_daq_conf import (
     ConsolidateDAQConf,
 )
@@ -7,9 +11,6 @@ from runconf_ui.daq_config_interfaces.daq_config_file_io.daq_config_wrapper impo
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
     ShifterInterfaceState,
 )
-from pathlib import Path
-import os
-import logging
 
 
 class BufferFileManager:

@@ -1,18 +1,18 @@
+import os
+import sys
+from typing import Any
+
+from runconf_ui.daq_config_interfaces.actions.actions import (
+    CommitConfigurationAction,
+    CopyDalAction,
+    GetAllDalsAction,
+    GetDalObjectAction,
+    GetRelatedDalsAction,
+)
 from runconf_ui.daq_config_interfaces.daq_config_file_io.daq_config_wrapper import (
     DaqConfigurationWrapper,
 )
 
-from runconf_ui.daq_config_interfaces.actions.actions import (
-    GetDalObjectAction,
-    CopyDalAction,
-    GetRelatedDalsAction,
-    GetAllDalsAction,
-    CommitConfigurationAction,
-)
-from typing import Any
-
-import sys
-import os
 
 class ConsolidateDAQConf:
     """
@@ -95,19 +95,19 @@ class ConsolidateDAQConf:
 
         relation_list = []
         for r in related_objs:
-            for dal_list in list(r.values())[0]:
+            for dal_list in next(iter(r.values())):
                 if not isinstance(dal_list, list):
                     dal_list = [dal_list]
 
                 if len(dal_list) == 0:
-                    return
+                    return None
 
                 for d in dal_list:
                     relation_list.append(d)
-                    relation_list += list(
+                    relation_list += next([
                         self.__populate_configuration(configuration, d)
-                        for d in dal_list
-                    )[0]
+                        for d in dal_list]
+                    )
 
         return relation_list
 

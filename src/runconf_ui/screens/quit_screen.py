@@ -1,9 +1,11 @@
-from textual.widgets import Button, Label
-from textual.containers import Grid
-from textual.screen import Screen
 import logging
 import os
 from pathlib import Path
+
+from textual.containers import Grid
+from textual.screen import Screen
+from textual.widgets import Button, Label
+
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
     ShifterInterfaceState,
 )

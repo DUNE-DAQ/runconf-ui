@@ -1,12 +1,11 @@
+import logging
+import os
+from pathlib import Path
+
 import runconf_ui.daq_config_interfaces.actions.actions as ca
 from runconf_ui.daq_config_interfaces.daq_config_file_io.daq_config_wrapper import (
     DaqConfigurationWrapper,
 )
-
-from pathlib import Path
-from typing import List
-import os
-import logging
 
 
 class DaqConfPathReader:
@@ -36,7 +35,7 @@ class DaqConfPathReader:
             return 0
 
     # FILE STUFF
-    def __call__(self, config_directories) -> List[Path]:
+    def __call__(self, config_directories) -> list[Path]:
         """Generates a list of file options from the given directories."""
 
         self.config_directories = config_directories

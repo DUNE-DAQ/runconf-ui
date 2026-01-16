@@ -2,8 +2,18 @@
 Main application for the shifter view interface.
 """
 
-from runconf_ui.screens.shifter_view_screen import ShifterViewScreen
-from runconf_ui.utils.file_cleaner import clean_old_files
+import logging
+import os
+from dataclasses import dataclass
+from datetime import datetime
+from pathlib import Path
+from typing import ClassVar
+
+import click
+import pkg_resources
+from rich import print
+from textual.app import App
+
 from runconf_ui.runconf_ui_configuration.shifter_config_reader import (
     ShifterConfigReader,
 )
@@ -11,16 +21,8 @@ from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
     ShifterInterfaceState,
 )
 from runconf_ui.screens.quit_screen import QuitScreen
-
-from textual.app import App
-import click
-from rich import print
-
-import os
-from pathlib import Path
-import logging
-from datetime import datetime
-import pkg_resources
+from runconf_ui.screens.shifter_view_screen import ShifterViewScreen
+from runconf_ui.utils.file_cleaner import clean_old_files
 
 
 class ShifterView(App):
@@ -29,7 +31,7 @@ class ShifterView(App):
     """
 
     CSS_PATH = "shifter_view.tcss"
-    BINDINGS = [("ctrl+q", "quit", "Quit")]
+    BINDINGS: ClassVar = [("ctrl+q", "quit", "Quit")]
 
     def __init__(self, *args, **kwargs):
         """Constructor for the ShifterView class.
@@ -49,10 +51,11 @@ class ShifterView(App):
         self._exit_message = ""
 
         # Read kwargs
-        use_local = kwargs.get("use_local", False)
+        local_config = kwargs.get("local_config", None)
 
-        if use_local:
+        if local_config is not None:
             interface_config = f"{Path(__file__).parent.absolute()}/../config_files/local_configuration.yml"
+            kwargs["daq_config_directory"] = local_config
         else:
             interface_config = f"{Path(__file__).parent.absolute()}/../config_files/ehn1_configuration.yml"
 
@@ -75,7 +78,7 @@ class ShifterView(App):
         self.application_controller = ShifterInterfaceState(
             apparatus=apparatus,
             shifter_interface_config=interface_config,
-            use_local=use_local,
+            use_local=local_config is not None,
         )
 
         self._init_logger(kwargs.get("log_level", "INFO"))
@@ -146,6 +149,20 @@ class ShifterView(App):
         return self._exit_message
 
 
+@dataclass
+class CliArgs:
+    apparatus: str | None = None
+    session_config: str | None = None
+    daq_config_directory: str | None = None
+    session_name: str | None = None
+    base_url: str | None = None
+    operation_url: str | None = None
+    log_level: str = "INFO"
+    local_config: str | None = None
+
+    def as_kwargs(self):
+        return {k: v for k, v in vars(self).items() if v is not None}
+
 @click.command()
 @click.option(
     "-a",
@@ -165,7 +182,7 @@ class ShifterView(App):
 @click.option(
     "-d",
     "--daq-config-directory",
-    "download_directory",
+    "daq_config_directory",
     required=False,
     help="Where do you want to download configs from/where are they located",
 )
@@ -194,39 +211,17 @@ class ShifterView(App):
 @click.option(
     "-l",
     "--local-config",
-    "use_local",
+    "local_config",
     required=False,
-    is_flag=True,
-    help="Use local config files instead of downloading from the github, expert use only!",
+    help="Use local config files instead of downloading from the github, should be a path to the LOCAL config repo, expert use only!",
 )
-def main(
-    apparatus,
-    session_config,
-    download_directory,
-    session_name,
-    base_url,
-    operation_url,
-    log_level,
-    use_local,
-):
+def main(**kwargs):
     # Slghtly complicated here, as we need to remove unused args
-    cli_args = {
-        "apparatus": apparatus,
-        "session_config": session_config,
-        "download_directory": download_directory,
-        "session_name": session_name,
-        "base_url": base_url,
-        "operation_url": operation_url,
-        "log_level": log_level,
-        "use_local": use_local,
-    }
+    cli_args = CliArgs(**kwargs)
 
-    cli_args = {k: v for k, v in cli_args.items() if v is not None}
-
-    app = ShifterView(**cli_args)
+    app = ShifterView(**cli_args.as_kwargs())
     app.run()
     print(app.exit_message())
-
 
 if __name__ == "__main__":
     main()

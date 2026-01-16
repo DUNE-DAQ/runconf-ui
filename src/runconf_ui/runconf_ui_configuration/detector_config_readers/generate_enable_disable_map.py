@@ -1,14 +1,17 @@
-from runconf_ui.widgets.multicomponent_panel import MultiComponentEnableDisablePanel
+from typing import ClassVar
+
+from textual.containers import ScrollableContainer
+from textual.widgets import Static
+
 from runconf_ui.runconf_ui_configuration.detector_config_readers.detector_map_reader_base import (
     DetectorMapReaderBase,
 )
-from textual.widgets import Static
-from textual.containers import ScrollableContainer
+from runconf_ui.widgets.multicomponent_panel import MultiComponentEnableDisablePanel
 
 
 class EnableDisableMapGen(DetectorMapReaderBase):
-    _panel_list = []
-    _map_list = []
+    _panel_list: ClassVar[list] = []
+    _map_list: ClassVar[list] = []
 
     def get_opts_from_controller(self) -> dict:
         """

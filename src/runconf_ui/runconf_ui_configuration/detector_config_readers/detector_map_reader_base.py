@@ -1,12 +1,11 @@
+import logging
+from abc import ABC, abstractmethod
+
+from textual.widgets import Static, TabPane
+
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
     ShifterInterfaceState,
 )
-
-from textual.widgets import TabPane, Static
-
-from typing import Dict
-import logging
-from abc import ABC, abstractmethod
 
 
 class DetectorMapReaderBase(ABC):
@@ -28,17 +27,17 @@ class DetectorMapReaderBase(ABC):
             self.append_to_panel(name, opts)
 
     @abstractmethod
-    def get_opts_from_controller(selfs) -> Dict: ...
+    def get_opts_from_controller(selfs) -> dict: ...
 
     @abstractmethod
-    def append_to_panel(self, name: str, opts: Dict) -> None:
+    def append_to_panel(self, name: str, opts: dict) -> None:
         """
         Append a panel to the main container.
         This method should be implemented by subclasses to define how panels are added.
         """
         ...
 
-    def initialise_system(self, panel_name: str, opts: Dict, panel: Static) -> TabPane:
+    def initialise_system(self, panel_name: str, opts: dict, panel: Static) -> TabPane:
         """
         Initialise a system panel with the given options.
         """

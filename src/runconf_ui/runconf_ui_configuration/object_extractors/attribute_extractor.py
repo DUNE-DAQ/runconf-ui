@@ -1,24 +1,22 @@
-from runconf_ui.daq_config_interfaces.actions.workflows.get_set_session_attribute import (
-    SetAttributeValueSessionAction,
-    GetAttributeValueSessionAction,
-)
-from runconf_ui.runconf_ui_configuration.object_extractors.extractor_interfaces import (
-    SubsystemExtractor,
-)
+import logging
+import traceback
+
 import runconf_ui.daq_config_interfaces.actions.actions as ca
 from runconf_ui.daq_config_interfaces.actions.workflows.get_objects_in_session import (
     GetSegmentAppsListAction,
 )
+from runconf_ui.daq_config_interfaces.actions.workflows.get_set_session_attribute import (
+    GetAttributeValueSessionAction,
+    SetAttributeValueSessionAction,
+)
 from runconf_ui.exceptions import CiderBadActionException
-from runconf_ui.utils.subsystem_status import SubsystemStatus
+from runconf_ui.runconf_ui_configuration.object_extractors.extractor_interfaces import (
+    SubsystemExtractor,
+)
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
     ShifterInterfaceState,
 )
-
-
-from typing import Dict
-import logging
-import traceback
+from runconf_ui.utils.subsystem_status import SubsystemStatus
 
 
 class AttributeExtractor(SubsystemExtractor):
@@ -29,7 +27,7 @@ class AttributeExtractor(SubsystemExtractor):
     def __init__(
         self,
         application_controller: ShifterInterfaceState,
-        subsystem: Dict,
+        subsystem: dict,
         disabled_dals=[],
     ):
 
@@ -116,9 +114,8 @@ class AttributeExtractor(SubsystemExtractor):
 
             if object_state == self._disabled_dals or object_dal in self._disabled_dals:
                 return SubsystemStatus.DISABLED
-            else:
 
-                return SubsystemStatus.ENABLED
+            return SubsystemStatus.ENABLED
 
         except Exception:
             raise CiderBadActionException(

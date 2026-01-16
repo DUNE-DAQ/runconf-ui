@@ -1,10 +1,11 @@
+from textual.containers import ScrollableContainer
+from textual.message import Message
+from textual.widgets import Button, Input, Static
+
 from runconf_ui.runconf_ui_configuration.object_extractors.multi_adjustable_attribute_extractor import (
     MultiAdjustableAttributeExtractor,
 )
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import ShifterInterfaceState
-from textual.widgets import Static, Input, Button
-from textual.containers import  ScrollableContainer
-from textual.message import Message
 
 
 class AdjustableAttributePanel(Static):
