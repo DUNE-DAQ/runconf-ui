@@ -1,10 +1,10 @@
-from runconf_ui.runconf_ui_controllers.runconf_ui_state import ShifterInterfaceState
+import logging
+import re
+
 import runconf_ui.daq_config_interfaces.actions.actions as ca
 from runconf_ui.exceptions import CiderOutOfBoundsException
+from runconf_ui.runconf_ui_controllers.runconf_ui_state import ShifterInterfaceState
 
-import logging
-from typing import Tuple, Union
-import re
 
 class AdjustableAttributeManager:
     def __init__(self, application_controller: ShifterInterfaceState, **kwargs):
@@ -166,6 +166,8 @@ class AdjustableAttributeManager:
 
                 return attr_value
 
+        return None
+
     def get_object_list(self) -> list[str]:
         """
         Get the list of object IDs for which the attribute can be set.
@@ -198,11 +200,9 @@ class AdjustableAttributeManager:
         dal_obj = ca.GetDalObjectAction(self._application_controller.buffer_daq_config)(
             object_id, self._object_class
         )
-        tooltip_val = ca.GetAttributeAction(
+        return ca.GetAttributeAction(
             self._application_controller.buffer_daq_config
         )(dal_obj, self._tooltip_var)
-
-        return tooltip_val
 
     def get_value_label(self, object_id: str) -> str:
         """
@@ -250,8 +250,7 @@ class AdjustableAttributeManager:
         # Convert a hexadecimal string to an integer
         if value.startswith("0x"):
             return int(value, 16)
-        else:
-            raise ValueError(f"Invalid hexadecimal value: {value}")
+        raise ValueError(f"Invalid hexadecimal value: {value}")
 
     def to_dec(self, value: str) -> int:
         return int(value, 16)
@@ -283,7 +282,7 @@ class AdjustableAttributeManager:
     def class_name(self) -> str | None:
         return self._object_class
 
-    def _range(self) -> Union[Tuple[float, float], Tuple[None, None]]:
+    def _range(self) -> tuple[float, float] | tuple[None, None]:
         """
         Get the range of the attribute.
         Returns a tuple of (lower_limit, upper_limit).

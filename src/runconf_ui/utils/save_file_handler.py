@@ -1,13 +1,13 @@
-from datetime import datetime
+import logging
 import shutil
-from runconf_ui.utils.file_cleaner import clean_old_files
+from datetime import datetime
+from pathlib import Path
+
 import runconf_ui.daq_config_interfaces.actions.actions as ca
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
     ShifterInterfaceState,
 )
-
-from pathlib import Path
-import logging
+from runconf_ui.utils.file_cleaner import clean_old_files
 
 
 class SaveFileHandler:
@@ -99,7 +99,7 @@ class SaveFileHandler:
                 file.write(f"\n{system}\n")
                 file.write(f"{'-' * len(system)}\n")
                 for key, value in state.items():
-                    file.write(f"{key} : {str(value)}\n")
+                    file.write(f"{key} : {value!s}\n")
 
     def __call__(self):
         logging.debug("Saving configuration")

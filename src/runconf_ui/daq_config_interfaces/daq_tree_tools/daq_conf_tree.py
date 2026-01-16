@@ -1,16 +1,18 @@
 #  version focusing on caching and reduced object creation
 
+from abc import ABC, abstractmethod
+
+from rich.tree import Tree
+
 import runconf_ui.daq_config_interfaces.actions.actions as ca
+from runconf_ui.exceptions import CiderBadActionException
 from runconf_ui.runconf_ui_configuration.object_extractors.detector_extractor import (
     DetectorExtractor,
 )
-from runconf_ui.utils.subsystem_status import SubsystemStatus
-from runconf_ui.exceptions import CiderBadActionException
-from rich.tree import Tree
-from abc import ABC, abstractmethod
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
     ShifterInterfaceState,
 )
+from runconf_ui.utils.subsystem_status import SubsystemStatus
 
 
 class DaqConfTreeBase(ABC):

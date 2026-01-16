@@ -1,20 +1,18 @@
-from runconf_ui.exceptions import CiderBadActionException
+import logging
+import traceback
+from abc import ABC, abstractmethod
+from typing import Any
+
 import runconf_ui.daq_config_interfaces.actions.actions as ca
-from runconf_ui.utils.subsystem_status import SubsystemStatus
+from runconf_ui.exceptions import CiderBadActionException
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
     ShifterInterfaceState,
 )
-
-from typing import Any, Optional, Dict
-from abc import ABC, abstractmethod
-import logging
-import traceback
-
+from runconf_ui.utils.subsystem_status import SubsystemStatus
 
 """
 Base classes for extracting the state of a subsystem. 
-
- Logic
+Logic
     1. Input dict defined as
 
         System A:
@@ -192,11 +190,11 @@ class SubsystemExtractor(ItemExtractor):
             )
 
     @property
-    def tooltip(self) -> Optional[str]:
+    def tooltip(self) -> str | None:
         return self._tooltip
 
     @tooltip.setter
-    def tooltip(self, tooltip: Optional[str]):
+    def tooltip(self, tooltip: str | None):
         self._tooltip = tooltip
 
     @property
@@ -244,7 +242,7 @@ class MultiItemExtractor(ItemExtractor):
     def __init__(
         self,
         application_controller: ShifterInterfaceState,
-        system: Dict | None = None,
+        system: dict | None = None,
         disabled_dals=[],
     ):
         """
@@ -263,7 +261,7 @@ class MultiItemExtractor(ItemExtractor):
         ):
             self.read_system(system)
 
-    def read_system(self, system: Optional[Dict]):
+    def read_system(self, system: dict | None):
         if (
             system is None
             or self._application_controller.buffer_daq_config is None

@@ -1,5 +1,5 @@
-from textual.screen import Screen
 from textual.css.query import NoMatches
+from textual.screen import Screen
 
 from runconf_ui.widgets.popup_message import PopupMessage
 

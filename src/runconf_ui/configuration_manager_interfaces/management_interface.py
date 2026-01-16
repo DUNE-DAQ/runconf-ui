@@ -2,17 +2,17 @@
 Simple wrapper for talking to config-management
 """
 
+import logging
+from abc import ABC, abstractmethod
+from pathlib import Path
+
+import runconf_ui.daq_config_interfaces.actions.actions as ca
 from runconf_ui.daq_config_interfaces.daq_config_file_io.daq_config_wrapper import (
     DaqConfigurationWrapper,
 )
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
     ShifterInterfaceState,
 )
-import runconf_ui.daq_config_interfaces.actions.actions as ca
-
-import logging
-from abc import ABC, abstractmethod
-from pathlib import Path
 
 
 class ManagementInterface(ABC):
@@ -56,5 +56,4 @@ class ManagementInterface(ABC):
         file_sessions = ca.GetDalsOfClassAction(config_file)("Session")
         if file_sessions:
             return ca.GetAttributeAction(config_file)(file_sessions[0], "id")
-        else:
-            return None
+        return None

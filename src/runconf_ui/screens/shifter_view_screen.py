@@ -1,33 +1,32 @@
-from textual.screen import Screen
-from textual.containers import ScrollableContainer, Grid
-from textual.widgets import TabbedContent, TabPane, Header, Footer, Static
-from textual import on
-
-from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
-    ShifterInterfaceState,
-)
-from runconf_ui.runconf_ui_configuration.detector_config_readers.generate_enable_disable_map import (
-    EnableDisableMapGen,
-)
-from runconf_ui.widgets.file_select_panel import FilePanelWidget
-from runconf_ui.widgets.options_panel import OptionPanel
-from runconf_ui.exceptions import CiderInvalidConfigurationException
-
-
-import traceback
 import logging
+import traceback
+
+from textual import on
+from textual.containers import Grid, ScrollableContainer
+from textual.screen import Screen
+from textual.widgets import Footer, Header, Static, TabbedContent, TabPane
+
 from runconf_ui.daq_config_interfaces.daq_config_file_io.buffer_file_manager import (
     BufferFileManager,
 )
 from runconf_ui.daq_config_interfaces.daq_tree_tools.daq_tree_manager import (
     DaqTreeManager,
 )
-from runconf_ui.screens.popup_manager import PopupManager
-from runconf_ui.widgets.adjustable_attribute_panel import AdjustableAttributePanel
-from runconf_ui.widgets.enable_disable_base import EnableDisablePanel
+from runconf_ui.exceptions import CiderInvalidConfigurationException
 from runconf_ui.runconf_ui_configuration.detector_config_readers.generate_adjustable_attribute_map import (
     AdjustableAttributeMapGen,
 )
+from runconf_ui.runconf_ui_configuration.detector_config_readers.generate_enable_disable_map import (
+    EnableDisableMapGen,
+)
+from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
+    ShifterInterfaceState,
+)
+from runconf_ui.screens.popup_manager import PopupManager
+from runconf_ui.widgets.adjustable_attribute_panel import AdjustableAttributePanel
+from runconf_ui.widgets.enable_disable_base import EnableDisablePanel
+from runconf_ui.widgets.file_select_panel import FilePanelWidget
+from runconf_ui.widgets.options_panel import OptionPanel
 
 
 class ShifterViewScreen(Screen):

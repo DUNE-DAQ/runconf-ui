@@ -1,13 +1,12 @@
 # Dataclass containing application state information, is global and shared across everything
 from dataclasses import dataclass, field
-from typing import Optional
 from pathlib import Path
 
-from runconf_ui.runconf_ui_configuration.shifter_config_reader import (
-    ShifterConfigReader,
-)
 from runconf_ui.daq_config_interfaces.daq_config_file_io.daq_config_wrapper import (
     DaqConfigurationWrapper,
+)
+from runconf_ui.runconf_ui_configuration.shifter_config_reader import (
+    ShifterConfigReader,
 )
 
 
@@ -20,17 +19,17 @@ class ShifterInterfaceState:
     # YAML used to configure the interface
     shifter_interface_config: ShifterConfigReader
     # NP02/NP04
-    apparatus: Optional[str] = None
+    apparatus: str | None = None
     # Do we want to use the local configuration? Only use if you're an expert!
-    use_local: Optional[bool] = False
+    use_local: bool | None = False
     # Currently selected configuration, not necessarily the open one
-    current_daq_config: Optional[str] = None
+    current_daq_config: str | None = None
     # Name of session in config
-    session_name: Optional[str] = None
+    session_name: str | None = None
     # Currently open configuration
-    buffer_daq_config: Optional[DaqConfigurationWrapper] = None
+    buffer_daq_config: DaqConfigurationWrapper | None = None
     # Configuration name we're going to save 
-    saved_configuration: Optional[str] = None
+    saved_configuration: str | None = None
     # current state of objects
     current_state: dict = field(default_factory=lambda: {})
 
@@ -40,5 +39,5 @@ class ShifterInterfaceState:
         Get the path to the configuration file
         """
         return Path(
-            f"{self.shifter_interface_config.download_directory}/{self.shifter_interface_config.default_config}"
+            f"{self.shifter_interface_config.daq_config_directory}/{self.shifter_interface_config.default_config}"
         )

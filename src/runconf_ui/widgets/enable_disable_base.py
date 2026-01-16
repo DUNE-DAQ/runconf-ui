@@ -1,13 +1,14 @@
-from runconf_ui.utils.subsystem_status import SubsystemStatus
+import logging
 
-from textual.visual import SupportsVisual
-from textual.widgets import Static, Button
 from textual.containers import ScrollableContainer
 from textual.message import Message
+from textual.visual import SupportsVisual
+from textual.widgets import Button, Static
+
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
     ShifterInterfaceState,
 )
-import logging
+from runconf_ui.utils.subsystem_status import SubsystemStatus
 
 
 class EnableDisablePanel(Static):

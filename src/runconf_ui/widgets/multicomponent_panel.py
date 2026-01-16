@@ -1,20 +1,19 @@
-from runconf_ui.widgets.enable_disable_base import EnableDisablePanel
-from runconf_ui.runconf_ui_configuration.object_extractors.detector_extractor import (
-    DetectorExtractor,
-)
-from runconf_ui.utils.subsystem_status import SubsystemStatus
+import logging
+
+from textual.visual import SupportsVisual
+from textual.widgets import Button
 
 from runconf_ui.daq_config_interfaces.daq_tree_tools.daq_conf_tree import (
     ComponentLevelTree,
 )
+from runconf_ui.runconf_ui_configuration.object_extractors.detector_extractor import (
+    DetectorExtractor,
+)
 from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
     ShifterInterfaceState,
 )
-
-from typing import Dict, Optional
-from textual.visual import SupportsVisual
-from textual.widgets import Button
-import logging
+from runconf_ui.utils.subsystem_status import SubsystemStatus
+from runconf_ui.widgets.enable_disable_base import EnableDisablePanel
 
 
 class MultiComponentEnableDisablePanel(EnableDisablePanel):
@@ -25,16 +24,16 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
     def __init__(
         self,
         application_controller: ShifterInterfaceState,
-        object_list: Dict = {},
+        object_list: dict = {},
         build_tree: bool = True,
         content: str | SupportsVisual = "",
         *,
         expand: bool = False,
         shrink: bool = False,
         markup: bool = True,
-        name: Optional[str] = None,
-        id: Optional[str] = None,
-        classes: Optional[str] = None,
+        name: str | None = None,
+        id: str | None = None,
+        classes: str | None = None,
         disabled: bool = False,
     ) -> None:
 
@@ -73,7 +72,7 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
 
         logging.debug("MultiComponentEnableDisablePanel initialized.")
 
-    def generate_button_list(self) -> Dict | None:
+    def generate_button_list(self) -> dict | None:
         if (
             self._application_controller.session_name is None
             or self._application_controller.buffer_daq_config is None

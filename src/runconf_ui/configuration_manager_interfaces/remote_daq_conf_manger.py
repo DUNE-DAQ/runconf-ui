@@ -8,23 +8,22 @@ except Exception:
         "Could not import runconftool or config_management. Please install runconftools or config_management"
     )
 
-from runconf_ui.daq_config_interfaces.daq_config_file_io.daq_conf_path_reader import (
-    DaqConfPathReader,
-)
-from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
-    ShifterInterfaceState,
-)
+import logging
+import re
+import shutil
+import traceback
+from pathlib import Path
+
 from runconf_ui.configuration_manager_interfaces.management_interface import (
     ManagementInterface,
 )
-
-import re
-from pathlib import Path
-import logging
-import traceback
-import shutil
-
+from runconf_ui.daq_config_interfaces.daq_config_file_io.daq_conf_path_reader import (
+    DaqConfPathReader,
+)
 from runconf_ui.exceptions import CiderInvalidRepoException
+from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
+    ShifterInterfaceState,
+)
 
 
 class RemoteDaqConfManager(ManagementInterface):
@@ -41,7 +40,7 @@ class RemoteDaqConfManager(ManagementInterface):
         try:
             self.conf_pool = ConfPool(
                 str(
-                    self.application_controller.shifter_interface_config.download_directory
+                    self.application_controller.shifter_interface_config.daq_config_directory
                 ),
                 apparatus=self.application_controller.apparatus,
                 operation_url=self.application_controller.shifter_interface_config.operation_url,
@@ -77,7 +76,7 @@ class RemoteDaqConfManager(ManagementInterface):
             CiderInvalidRepoException(e)
      
      
-        detector_config_path = Path(self.application_controller.shifter_interface_config.download_directory) / 'runconf-ui-settings' / f"{self.application_controller.apparatus}.yml"
+        detector_config_path = Path(self.application_controller.shifter_interface_config.daq_config_directory) / 'runconf-ui-settings' / f"{self.application_controller.apparatus}.yml"
         if not detector_config_path.exists():
             raise FileNotFoundError(f"Detector configuration file {detector_config_path} does not exist")
         
@@ -92,7 +91,7 @@ class RemoteDaqConfManager(ManagementInterface):
             return super().open_file(self.application_controller.direct_config_path)
 
         config_list = config_path_reader(
-            self.application_controller.shifter_interface_config.download_directory
+            self.application_controller.shifter_interface_config.daq_config_directory
         )
 
         valid_config_files = [
@@ -138,11 +137,11 @@ class RemoteDaqConfManager(ManagementInterface):
             self.conf_pool.repo.close()
 
         shutil.rmtree(
-            self.application_controller.shifter_interface_config.download_directory
+            self.application_controller.shifter_interface_config.daq_config_directory
         )
 
         Path(
-            self.application_controller.shifter_interface_config.download_directory
+            self.application_controller.shifter_interface_config.daq_config_directory
         ).mkdir(parents=True, exist_ok=True)
 
         self.__init__(self.application_controller)

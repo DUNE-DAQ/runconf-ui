@@ -1,5 +1,6 @@
-from pathlib import Path
 import os
+from pathlib import Path
+
 from runconf_ui.configuration_manager_interfaces.management_interface import (
     ManagementInterface,
 )
@@ -10,7 +11,6 @@ from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
     ShifterInterfaceState,
 )
 
-import logging
 
 class LocalDaqConfManager(ManagementInterface):
     def __init__(self, application_controller: ShifterInterfaceState):
@@ -21,7 +21,7 @@ class LocalDaqConfManager(ManagementInterface):
 
         self.config_directories = [
             Path(p)
-            for p in f"{self.application_controller.shifter_interface_config.download_directory}".split(
+            for p in f"{self.application_controller.shifter_interface_config.daq_config_directory}".split(
                 ":"
             )
         ]
