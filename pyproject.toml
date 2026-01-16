@@ -18,6 +18,8 @@ dependencies = [
 [tool.setuptools]
 package-dir = {"" = "src"}
 include-package-data = true
+script-files = ["scripts/runconf_np02_env_setup.sh",
+                "scripts/runconf_np04_env_setup.sh"]
 
 [tool.setuptools.packages.find]
 namespaces = true
@@ -26,9 +28,10 @@ where = ["src"]
 [tool.setuptools.package-data]
 "*" = ["*"]
 
+
+
 [project.scripts]
 runconf-shifter-ui = "runconf_ui.apps.__main__shifter_view__:main"
-py_oks_dump = "runconf_ui.apps.__main__oks_dump__:main"
 
 [project.optional-dependencies]
 dev = [
