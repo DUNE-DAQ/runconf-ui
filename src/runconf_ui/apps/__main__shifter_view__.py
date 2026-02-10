@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import ClassVar
 
 import click
-import pkg_resources
+from importlib.metadata import version
 from rich import print
 from textual.app import App
 
@@ -112,7 +112,7 @@ class ShifterView(App):
 
         # NOTE: If you install with the -e flag, this will be the version of the package installed at that point and will not update!
         self.title = (
-            f"Shifter Interface v{pkg_resources.get_distribution('runconf_ui').version}"
+            f"Shifter Interface v{version('runconf_ui')}"
         )
 
         # Set the application controller
