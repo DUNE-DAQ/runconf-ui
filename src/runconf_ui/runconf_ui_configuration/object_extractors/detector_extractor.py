@@ -59,7 +59,10 @@ class DetectorExtractor(MultiItemExtractor):
         self._system_extractors = []
         logging.debug(f"Detector config: {self._detector_config}")
 
-        extracted_systems = detector_config.get("Systems", [])
+        extracted_systems = detector_config.get("Systems", {})
+        if not extracted_systems:
+            logging.warning(f"No Systems found in {self._detector_config}")
+        
         system_name = next(list(detector_config.keys()))
 
         logging.debug(f"Reading system {system_name}")
