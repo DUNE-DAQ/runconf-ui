@@ -6,11 +6,11 @@ import logging
 import os
 from dataclasses import dataclass
 from datetime import datetime
+from importlib.metadata import version
 from pathlib import Path
 from typing import ClassVar
 
 import click
-from importlib.metadata import version
 from rich import print
 from textual.app import App
 
