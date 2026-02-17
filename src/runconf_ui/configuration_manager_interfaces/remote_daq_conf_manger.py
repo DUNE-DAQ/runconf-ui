@@ -25,6 +25,8 @@ from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
     ShifterInterfaceState,
 )
 
+class UrlNotSetError(Exception):
+    ...
 
 class RemoteDaqConfManager(ManagementInterface):
     def __init__(self, application_controller: ShifterInterfaceState):
@@ -37,6 +39,13 @@ class RemoteDaqConfManager(ManagementInterface):
             raise ValueError(
                 "Apparatus not set! Please set the APPARATUS in your env or use the --apparatus flag"
             )
+       
+        if self.application_controller.shifter_interface_config.operation_url is None:
+            raise UrlNotSetError("Operation URL is not set! Please source the correct runconf_*_env_setup.sh script")
+
+        if self.application_controller.shifter_interface_config.base_url is None:
+            raise UrlNotSetError("Base is not set! Please source the correct runconf_*_env_setup.sh script")
+
         try:
             self.conf_pool = ConfPool(
                 str(
@@ -49,6 +58,7 @@ class RemoteDaqConfManager(ManagementInterface):
             
             
         except Exception:
+            
             logging.error(traceback.format_exc())
             self.reset()
 

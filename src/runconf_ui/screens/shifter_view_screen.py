@@ -129,8 +129,14 @@ class ShifterViewScreen(Screen):
 
     @on(FilePanelWidget.FileNotFound)
     async def file_not_found(self, event: FilePanelWidget.FileNotFound):
+        if event.msg is None:
+            event_msg = f"[white]Configuration invalid or could not be opened: {event.file_path}"
+        else:
+            event_msg = f"[white]{event.msg} (Cannot open configuration {event.file_path})"
+
+        
         self.popups.show(
-            f"[white]Configuration invalid or could not be opened: {event.file_path}",
+            event_msg,
             timer=10.0,
         )
 

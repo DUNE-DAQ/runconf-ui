@@ -2,7 +2,7 @@ import logging
 import traceback
 from collections.abc import Iterable
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 from rich.console import ConsoleRenderable, RichCast
 from textual import on
@@ -313,22 +313,17 @@ class FilePanelWidget(Static):
 
                 try:
                     self._open_file(selected_configuration)
-                except Exception:
-                    logging.error("Error opening file after reset attempt")
+                except Exception as e:
+                    logging.error(f"Error opening file {selected_configuration} after reset attempt")
                     logging.error(traceback.format_exc())
-                    
-                    raise Exception(traceback.format_exc())
-                    
-                    self.post_message(self.FileNotFound(selected_configuration))
+                    self.post_message(self.FileNotFound(selected_configuration, msg=f"{e}"))
 
-        except Exception:
-            logging.error("Error opening file")
+        except Exception as e:
+            logging.error(f"Error opening file {selected_configuration}")
             logging.error(traceback.format_exc())
             
-            raise Exception(traceback.format_exc())
-
             self._application_controller.current_daq_config = selected_configuration
-            self.post_message(self.FileNotFound(selected_configuration))
+            self.post_message(self.FileNotFound(selected_configuration, msg=f"{e}"))
 
     def _open_file(self, configuration: Path):
         daq_config_file = self._management_interface.open_file(configuration)
@@ -354,6 +349,7 @@ class FilePanelWidget(Static):
     class RepoCorrupted(Message): ...
 
     class FileNotFound(Message):
-        def __init__(self, file_path: Path):
+        def __init__(self, file_path: Path, msg: Optional[str]=None):
             super().__init__()
+            self.msg = msg
             self.file_path = file_path
