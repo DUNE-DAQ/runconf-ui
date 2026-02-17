@@ -100,14 +100,14 @@ class RemoteDaqConfManager(ManagementInterface):
             if c.name
             == self.application_controller.shifter_interface_config.default_config
         ]
-
+        
         if len(valid_config_files) == 0:
             logging.error(
-                f"Could not find config file for {daq_configuration}. Found: {config_list}"
+                f"Could not find config file for {daq_configuration} containing {self.application_controller.shifter_interface_config.default_config}. Found: {config_list}"
             )
             logging.error(traceback.format_exc())
             raise Exception(
-                f"Could not find config file for {daq_configuration}. Found: {config_list}"
+                f"Could not find config file for {daq_configuration} containing {self.application_controller.shifter_interface_config.default_config}. Found: {config_list}"
             )
 
         if len(valid_config_files) > 1:

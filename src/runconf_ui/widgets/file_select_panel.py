@@ -316,11 +316,17 @@ class FilePanelWidget(Static):
                 except Exception:
                     logging.error("Error opening file after reset attempt")
                     logging.error(traceback.format_exc())
+                    
+                    raise Exception(traceback.format_exc())
+                    
                     self.post_message(self.FileNotFound(selected_configuration))
 
         except Exception:
             logging.error("Error opening file")
             logging.error(traceback.format_exc())
+            
+            raise Exception(traceback.format_exc())
+
             self._application_controller.current_daq_config = selected_configuration
             self.post_message(self.FileNotFound(selected_configuration))
 

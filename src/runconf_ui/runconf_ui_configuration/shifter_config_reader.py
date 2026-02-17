@@ -1,10 +1,8 @@
 import os
-
 import yaml
+import logging
 
 from runconf_ui.utils.path_or_env_check import path_or_env_check
-import os
-import logging
 
 # Class for reading a YAML config and producing panels
 class ShifterConfigReader:
@@ -19,16 +17,16 @@ class ShifterConfigReader:
         # Update with any user args
         general_settings.update(kwargs)
 
-        self._daq_config_directory = general_settings.get("daq_config_directory", f"{os.getcwd()}/configs")
+        self.daq_config_directory = general_settings.get("daq_config_directory", f"{os.getcwd()}/configs")
         # Generic settings
-        self._default_config = general_settings.get("session_config", None)
+        self.default_config = general_settings.get("session_config", None)
 
-        if self._default_config is None:
+        if self.default_config is None:
             raise ValueError("No default configuration file specified")
 
         self.session_name = general_settings.get("session_name", None)
 
-        if self._session_name is None:
+        if self.session_name is None:
             raise ValueError("No session name specified")
 
         self.base_url = general_settings.get("base_url", None)
