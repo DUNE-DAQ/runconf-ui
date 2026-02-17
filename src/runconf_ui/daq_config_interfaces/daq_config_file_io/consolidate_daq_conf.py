@@ -104,9 +104,9 @@ class ConsolidateDAQConf:
 
                 for d in dal_list:
                     relation_list.append(d)
-                    relation_list += next([
+                    relation_list += next(iter([
                         self.__populate_configuration(configuration, d)
-                        for d in dal_list]
+                        for d in dal_list])
                     )
 
         return relation_list
