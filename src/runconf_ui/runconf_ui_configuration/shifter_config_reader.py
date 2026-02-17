@@ -1,6 +1,5 @@
 import os
 import yaml
-import logging
 
 from runconf_ui.utils.path_or_env_check import path_or_env_check
 
@@ -32,8 +31,7 @@ class ShifterConfigReader:
         self.base_url = general_settings.get("base_url", None)
 
         self.operation_url = general_settings.get("operation_url", None)
-        logging.info(f"Ops URL {self.operation_url}")
-        
+                
         # Get settings from the detector config
         self._detector_config = {}
         self._classes_to_show = []
