@@ -9,10 +9,10 @@ except Exception:
     )
 
 import logging
-from pathlib import Path
 import re
 import shutil
 import traceback
+from pathlib import Path
 
 from runconf_ui.configuration_manager_interfaces.management_interface import (
     ManagementInterface,
