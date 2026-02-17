@@ -3,10 +3,10 @@ import yaml
 
 from runconf_ui.utils.path_or_env_check import path_or_env_check
 
+
 # Class for reading a YAML config and producing panels
 class ShifterConfigReader:
     def __init__(self, settings_config_file: str, **kwargs):
-
         with open(settings_config_file) as f:
             self._settings_config = yaml.safe_load(f)
 
@@ -16,7 +16,9 @@ class ShifterConfigReader:
         # Update with any user args
         general_settings.update(kwargs)
 
-        self.daq_config_directory = general_settings.get("daq_config_directory", f"{os.getcwd()}/configs")
+        self.daq_config_directory = general_settings.get(
+            "daq_config_directory", f"{os.getcwd()}/configs"
+        )
         # Generic settings
         self.default_config = general_settings.get("session_config", None)
 
@@ -31,12 +33,11 @@ class ShifterConfigReader:
         self.base_url = general_settings.get("base_url", None)
 
         self.operation_url = general_settings.get("operation_url", None)
-                
+
         # Get settings from the detector config
         self._detector_config = {}
         self._classes_to_show = []
-        self.detector_config_settings =  {}
-
+        self.detector_config_settings = {}
 
     def open_detector_config(self, detector_config_file: str):
         with open(detector_config_file) as f:

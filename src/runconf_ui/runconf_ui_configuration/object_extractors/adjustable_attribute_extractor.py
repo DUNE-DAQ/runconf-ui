@@ -19,15 +19,13 @@ class AdjustableAttributeManager:
 
         self._is_hex = kwargs.get(
             "is_hex", False
-        )  # Whether to convert values to hexadecimal when saving        
-        
+        )  # Whether to convert values to hexadecimal when saving
+
         self._unit_scale = kwargs.get(
             "unit_scale", 1.0
         )  # Default scale factor for conversion
         self._unit_label = kwargs.get("unit_label", "")  # Default unit label
-        self._filter_by = kwargs.get(
-            "filters", None
-        ) 
+        self._filter_by = kwargs.get("filters", None)
 
         self._object_list = []
         self._object_ids = []
@@ -52,10 +50,9 @@ class AdjustableAttributeManager:
 
         # Means we can use the attribute class to get the object list
         if object_id is None or "":
-            
             unfliltered_list = ca.GetDalsOfClassAction(
                 self._application_controller.buffer_daq_config
-            )(self._object_class)            
+            )(self._object_class)
             self._object_list = [obj for obj in unfliltered_list if self._filter(obj)]
 
         else:
@@ -66,7 +63,6 @@ class AdjustableAttributeManager:
                     object_id, self._object_class
                 )
                 for object_id in self._object_ids
-
                 if self._filter(
                     ca.GetDalObjectAction(
                         self._application_controller.buffer_daq_config
@@ -114,14 +110,17 @@ class AdjustableAttributeManager:
 
         # Convert value to hexadecimal if required
         if self._is_hex:
-            value = self.convert_to_hex(value)        
+            value = self.convert_to_hex(value)
 
-        if self._upper_limit is not None and self._lower_limit is not None and isinstance(value, float|int):
+        if (
+            self._upper_limit is not None
+            and self._lower_limit is not None
+            and isinstance(value, float | int)
+        ):
             if value < self._lower_limit or value > self._upper_limit:
                 raise CiderOutOfBoundsException(
                     f"Value {value} exceeds bounds {self._lower_limit}, {self._upper_limit}."
                 )
-
 
         for obj in self._object_list:
             if (
@@ -132,8 +131,10 @@ class AdjustableAttributeManager:
             ):
                 continue
 
-            logging.debug(f"Setting attribute {self._attribute_name} for object {object_id} to value {value}")
-            
+            logging.debug(
+                f"Setting attribute {self._attribute_name} for object {object_id} to value {value}"
+            )
+
             ca.ChangeAttributeAction(self._application_controller.buffer_daq_config)(
                 obj, self._attribute_name, value
             )
@@ -153,7 +154,6 @@ class AdjustableAttributeManager:
                 )
                 == object_id
             ):
-
                 attr_value = ca.GetAttributeAction(
                     self._application_controller.buffer_daq_config
                 )(obj, self._attribute_name)
@@ -181,7 +181,9 @@ class AdjustableAttributeManager:
 
         def natural_key(s):
             # Split string into list of strings and integers for natural sorting
-            return [int(text) if text.isdigit() else text for text in re.split(r'(\d+)', s)]
+            return [
+                int(text) if text.isdigit() else text for text in re.split(r"(\d+)", s)
+            ]
 
         sorted_ids = sorted(self._object_ids, key=natural_key)
         return {
@@ -200,9 +202,9 @@ class AdjustableAttributeManager:
         dal_obj = ca.GetDalObjectAction(self._application_controller.buffer_daq_config)(
             object_id, self._object_class
         )
-        return ca.GetAttributeAction(
-            self._application_controller.buffer_daq_config
-        )(dal_obj, self._tooltip_var)
+        return ca.GetAttributeAction(self._application_controller.buffer_daq_config)(
+            dal_obj, self._tooltip_var
+        )
 
     def get_value_label(self, object_id: str) -> str:
         """
@@ -306,10 +308,8 @@ class AdjustableAttributeManager:
         """
         if not self._filter_by:
             return True
-        
 
-            
-        for filter in self._filter_by:                    
+        for filter in self._filter_by:
             attr_name = filter["attribute"]
             values = filter["values"]
             if (
@@ -319,6 +319,5 @@ class AdjustableAttributeManager:
                 in values
             ):
                 return False
-                
 
         return True

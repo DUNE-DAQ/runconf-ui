@@ -37,7 +37,6 @@ class DAQSelectMenu(Select):
         disabled: bool = False,
         tooltip: ConsoleRenderable | RichCast | str | None = None,
     ):
-
         # Check if the value is in the options
         # Disable the select if there's only one option
         if len(options) == 1:
@@ -95,7 +94,6 @@ class SelectDAQVersion(DAQSelectMenu):
         disabled: bool = False,
         tooltip: ConsoleRenderable | RichCast | str | None = None,
     ):
-
         options = [(str(o), o) for o in management_interface.get_daq_versions()]
         default = management_interface.get_default_version()
 
@@ -143,7 +141,6 @@ class SelectDAQConfiguration(DAQSelectMenu):
         disabled: bool = False,
         tooltip: ConsoleRenderable | RichCast | str | None = None,
     ):
-
         # Real hack
         # Correctly format options
         default_version = management_interface.get_default_version()
@@ -282,7 +279,6 @@ class FilePanelWidget(Static):
         self, event: SelectDAQConfiguration.DAQConfigurationSelected
     ) -> None:
         if event.configuration == Select.BLANK:
-
             self._application_controller.session_name = None
             self._application_controller.current_daq_config = None
             self._application_controller.buffer_daq_config = None
@@ -314,14 +310,18 @@ class FilePanelWidget(Static):
                 try:
                     self._open_file(selected_configuration)
                 except Exception as e:
-                    logging.error(f"Error opening file {selected_configuration} after reset attempt")
+                    logging.error(
+                        f"Error opening file {selected_configuration} after reset attempt"
+                    )
                     logging.error(traceback.format_exc())
-                    self.post_message(self.FileNotFound(selected_configuration, msg=f"{e}"))
+                    self.post_message(
+                        self.FileNotFound(selected_configuration, msg=f"{e}")
+                    )
 
         except Exception as e:
             logging.error(f"Error opening file {selected_configuration}")
             logging.error(traceback.format_exc())
-            
+
             self._application_controller.current_daq_config = selected_configuration
             self.post_message(self.FileNotFound(selected_configuration, msg=f"{e}"))
 
@@ -349,7 +349,7 @@ class FilePanelWidget(Static):
     class RepoCorrupted(Message): ...
 
     class FileNotFound(Message):
-        def __init__(self, file_path: Path, msg: Optional[str]=None):
+        def __init__(self, file_path: Path, msg: Optional[str] = None):
             super().__init__()
             self.msg = msg
             self.file_path = file_path

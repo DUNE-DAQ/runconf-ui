@@ -30,7 +30,6 @@ class AttributeExtractor(SubsystemExtractor):
         subsystem: dict,
         disabled_dals=[],
     ):
-
         super().__init__(application_controller, subsystem, disabled_dals)
 
         self._segments = subsystem.get("segments", ["root-segment"])

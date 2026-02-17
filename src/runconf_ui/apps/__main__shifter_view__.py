@@ -146,6 +146,7 @@ class ShifterView(App):
         """Return the exit message."""
         return self._exit_message
 
+
 @dataclass
 class CliArgs:
     apparatus: str | None = None
@@ -159,6 +160,7 @@ class CliArgs:
 
     def as_kwargs(self):
         return {k: v for k, v in vars(self).items() if v is not None}
+
 
 @click.command()
 @click.option(
@@ -212,7 +214,6 @@ class CliArgs:
     required=False,
     help="Use local config files instead of downloading from the github, should be a path to the LOCAL config repo, expert use only!",
 )
-
 def main(**kwargs):
     # Slghtly complicated here, as we need to remove unused args
     cli_args = CliArgs(**kwargs)
@@ -220,6 +221,7 @@ def main(**kwargs):
     app = ShifterView(**cli_args.as_kwargs())
     app.run()
     print(app.exit_message())
+
 
 if __name__ == "__main__":
     main()

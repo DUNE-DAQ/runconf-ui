@@ -20,7 +20,12 @@ from runconf_ui.utils.subsystem_status import SubsystemStatus
 
 
 class DetectorExtractor(MultiItemExtractor):
-    def __init__(self, application_controller: ShifterInterfaceState, detector_config: dict | None, disabled_dals=[]):
+    def __init__(
+        self,
+        application_controller: ShifterInterfaceState,
+        detector_config: dict | None,
+        disabled_dals=[],
+    ):
         """
         Extracts the states of ALL systems present in the detector config for a given top level system (i.e. trigger).
         :param daq_configuration: daq_configuration object

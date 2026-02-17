@@ -25,15 +25,21 @@ class LocalDaqConfManager(ManagementInterface):
                 ":"
             )
         ]
-        
-        # We can also immediately load in our detector config since this won't change
-        detector_config_path = Path(os.environ["DUNEDAQ_DB_DATA_ROOT"]) / 'runconf-ui-settings' / f"{self.application_controller.apparatus}.yml"
-        if not detector_config_path.exists():
-            raise FileNotFoundError(f"Detector configuration file {detector_config_path} does not exist")
-                
-        self.application_controller.shifter_interface_config.open_detector_config(str(detector_config_path))
 
-        
+        # We can also immediately load in our detector config since this won't change
+        detector_config_path = (
+            Path(os.environ["DUNEDAQ_DB_DATA_ROOT"])
+            / "runconf-ui-settings"
+            / f"{self.application_controller.apparatus}.yml"
+        )
+        if not detector_config_path.exists():
+            raise FileNotFoundError(
+                f"Detector configuration file {detector_config_path} does not exist"
+            )
+
+        self.application_controller.shifter_interface_config.open_detector_config(
+            str(detector_config_path)
+        )
 
     def get_daq_versions(self) -> list[Path]:
         """

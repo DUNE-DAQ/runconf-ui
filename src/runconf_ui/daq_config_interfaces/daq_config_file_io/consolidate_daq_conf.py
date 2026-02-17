@@ -26,7 +26,6 @@ class ConsolidateDAQConf:
         top_level_object_class: str,
         new_config_name: str,
     ):
-
         self._top_level_object_name = top_level_object_name
         self._top_level_object_class = top_level_object_class
 
@@ -90,7 +89,6 @@ class ConsolidateDAQConf:
         new_configuration.commit(f"Copied from {self._new_config_name}")
 
     def __populate_configuration(self, configuration, dal_obj):
-
         related_objs = GetRelatedDalsAction(configuration)(dal_obj)
 
         relation_list = []
@@ -104,9 +102,13 @@ class ConsolidateDAQConf:
 
                 for d in dal_list:
                     relation_list.append(d)
-                    relation_list += next(iter([
-                        self.__populate_configuration(configuration, d)
-                        for d in dal_list])
+                    relation_list += next(
+                        iter(
+                            [
+                                self.__populate_configuration(configuration, d)
+                                for d in dal_list
+                            ]
+                        )
                     )
 
         return relation_list
@@ -125,7 +127,7 @@ class ConsolidateDAQConf:
             f"Consolidated from {self._current_config_name}"
         )
 
-    def __call__(self) -> Any:        
+    def __call__(self) -> Any:
         self.open_files()
         # self.populate_configuration()
         self.fill_all()

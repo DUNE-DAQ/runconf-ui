@@ -132,9 +132,10 @@ class ShifterViewScreen(Screen):
         if event.msg is None:
             event_msg = f"[white]Configuration invalid or could not be opened: {event.file_path}"
         else:
-            event_msg = f"[white]{event.msg} (Cannot open configuration {event.file_path})"
+            event_msg = (
+                f"[white]{event.msg} (Cannot open configuration {event.file_path})"
+            )
 
-        
         self.popups.show(
             event_msg,
             timer=10.0,
@@ -162,7 +163,7 @@ class ShifterViewScreen(Screen):
             f"Opening new file: {self._application_controller.session_name}:{self._application_controller.current_daq_config}"
         )
 
-        # load configuration 
+        # load configuration
         self.file_service.load_configuration()
         # update option panel UI
         self.query_one(OptionPanel).open_new_session()
@@ -192,9 +193,7 @@ class ShifterViewScreen(Screen):
 
         # locate placeholder containers by id
         selection_tabs = self.query_one("#selection_tabs", TabbedContent)
-        systematic_map_tabs = self.query_one(
-            "#systematic_map_tabs", TabbedContent
-        )
+        systematic_map_tabs = self.query_one("#systematic_map_tabs", TabbedContent)
         attribute_map_tabs = self.query_one("#attribute_map_tabs", TabbedContent)
 
         # remove any previously mounted generator panels to avoid duplicates
@@ -232,7 +231,7 @@ class ShifterViewScreen(Screen):
         for panel_tab in enable_disable_generator.panel_list:
             if panel_tab is None:
                 continue
-            
+
             await selection_tabs.add_pane(panel_tab)
 
         # remove the placeholder selection tab if it exists now we've added real panes
@@ -294,8 +293,6 @@ class ShifterViewScreen(Screen):
             success=True,
         )
 
-
-
     def on_enable_disable_panel_changed(self):
-        """Handle changes in enable/disable panels"""        
+        """Handle changes in enable/disable panels"""
         self.tree_manager.update_all_trees(self)

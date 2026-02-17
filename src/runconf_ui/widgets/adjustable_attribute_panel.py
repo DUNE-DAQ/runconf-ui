@@ -26,7 +26,6 @@ class AdjustableAttributePanel(Static):
         self._attribute_manager = MultiAdjustableAttributeExtractor(
             application_controller, **opts
         )
-        
 
     def open_new_session(self):
         self._attribute_manager = MultiAdjustableAttributeExtractor(
@@ -40,7 +39,6 @@ class AdjustableAttributePanel(Static):
                 object_id,
                 object_value,
             ) in self._attribute_manager.get_all_states().items():
-
                 state = object_value["state"]
                 attribute = object_value["attribute"]
 
@@ -48,7 +46,6 @@ class AdjustableAttributePanel(Static):
                 with ScrollableContainer(
                     id=f"grid-{label_name}", classes="adjustable-attribute-grid"
                 ) as grid_container:
-
                     yield Static(
                         f"[bold]ID:[/bold] [bold red]{object_id}[/bold red]:\n[bold]Attribute:[/bold] [bold purple]{attribute}[/bold purple]",
                         id=f"label-{label_name}",
@@ -105,7 +102,9 @@ class AdjustableAttributePanel(Static):
             self._attribute_manager.reset_value(base_id, attribute)
             input: Input = self.query_one(f"#{input_id}")
             input.clear()
-            input.insert_text_at_cursor(str(self._attribute_manager.get_state(base_id, attribute)))
+            input.insert_text_at_cursor(
+                str(self._attribute_manager.get_state(base_id, attribute))
+            )
 
         elif "apply" in button_id:
             input_value = self.query_one(f"#{input_id}").value
@@ -113,7 +112,6 @@ class AdjustableAttributePanel(Static):
             try:
                 self._attribute_manager.set_state(base_id, attribute, input_value)
             except Exception:
-
                 message = f"Error setting attribute {attribute} for object {base_id}. Value: {input_value} is out of bounds or invalid."
                 self.post_message(self.AttributeOutOfBounds(base_id, message))
                 return

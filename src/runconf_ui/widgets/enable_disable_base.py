@@ -66,9 +66,7 @@ class EnableDisablePanel(Static):
 
     def compose(self):
         with ScrollableContainer(id="buttons_panel", classes="large_box_container"):
-
             for button, information in self._button_list.items():
-
                 button_status = self.check_button_state(button, information)
 
                 if button_status == SubsystemStatus.STATE_NOT_DEFINED:
@@ -176,6 +174,7 @@ class EnableDisablePanel(Static):
 
     class Changed(Message):
         """Custom message to notify when a button is pressed."""
+
         ...
 
     def get_tooltip(self, button_name: str) -> str:

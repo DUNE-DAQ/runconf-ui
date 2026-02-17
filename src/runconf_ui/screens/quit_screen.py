@@ -105,7 +105,6 @@ class QuitScreen(Screen):
             label = f"Are you happy with the config stored in: {self._application_controller.saved_configuration}"
 
         with Grid(id="quit_dialog", classes=grid_classes):
-
             # Button("Copy Command", variant="success", id="copy"),
             yield Label(f"[bold]{label}", id="quit_question", classes=dialogue_class)
 
