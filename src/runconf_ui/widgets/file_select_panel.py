@@ -2,7 +2,7 @@ import logging
 import traceback
 from collections.abc import Iterable
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from rich.console import ConsoleRenderable, RichCast
 from textual import on
@@ -349,7 +349,7 @@ class FilePanelWidget(Static):
     class RepoCorrupted(Message): ...
 
     class FileNotFound(Message):
-        def __init__(self, file_path: Path, msg: Optional[str] = None):
+        def __init__(self, file_path: Path, msg: str | None = None):
             super().__init__()
             self.msg = msg
             self.file_path = file_path
