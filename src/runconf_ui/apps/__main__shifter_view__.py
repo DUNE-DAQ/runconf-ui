@@ -61,7 +61,6 @@ class ShifterView(App):
 
         apparatus = kwargs.get("apparatus", os.environ.get("APPARATUS", "np02"))
 
-
         if not Path(interface_config).exists():
             raise Exception(
                 f"Interface configuration file {interface_config} does not exist"
@@ -83,10 +82,8 @@ class ShifterView(App):
 
         self._init_logger(kwargs.get("log_level", "INFO"))
 
-
     def _init_logger(self, log_level):
         # Grab from config reader
-
         logging_path = Path(
             f"{self.application_controller.shifter_interface_config.output_directory}/logs"
         )
@@ -100,6 +97,7 @@ class ShifterView(App):
         )
 
         clean_old_files(logging_path, "log")
+        logging.info("Logs made!")
 
     def on_mount(self):
         """
@@ -147,7 +145,6 @@ class ShifterView(App):
     def exit_message(self) -> str:
         """Return the exit message."""
         return self._exit_message
-
 
 @dataclass
 class CliArgs:
@@ -215,6 +212,7 @@ class CliArgs:
     required=False,
     help="Use local config files instead of downloading from the github, should be a path to the LOCAL config repo, expert use only!",
 )
+
 def main(**kwargs):
     # Slghtly complicated here, as we need to remove unused args
     cli_args = CliArgs(**kwargs)

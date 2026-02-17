@@ -4,6 +4,7 @@ import yaml
 
 from runconf_ui.utils.path_or_env_check import path_or_env_check
 import os
+import logging
 
 # Class for reading a YAML config and producing panels
 class ShifterConfigReader:
@@ -18,29 +19,24 @@ class ShifterConfigReader:
         # Update with any user args
         general_settings.update(kwargs)
 
-        self._daq_config_directory = path_or_env_check(
-            general_settings.get("daq_config_directory", f"{os.getcwd()}/configs")
-        )
+        self._daq_config_directory = general_settings.get("daq_config_directory", f"{os.getcwd()}/configs")
         # Generic settings
-        self._default_config = path_or_env_check(
-            general_settings.get("session_config", None)
-        )
+        self._default_config = general_settings.get("session_config", None)
+
         if self._default_config is None:
             raise ValueError("No default configuration file specified")
 
-        self._session_name = path_or_env_check(
-            general_settings.get("session_name", None)
-        )
+        self.session_name = general_settings.get("session_name", None)
+
         if self._session_name is None:
             raise ValueError("No session name specified")
 
-        self._base_url = os.getenv(general_settings.get("base_url", None))
+        self.base_url = general_settings.get("base_url", None)
 
-        self._operation_url = os.getenv(
-            general_settings.get("operation_url", None)
-        )
-
-        # Get settings from the detector config 
+        self.operation_url = general_settings.get("operation_url", None)
+        logging.info(f"Ops URL {self.operation_url}")
+        
+        # Get settings from the detector config
         self._detector_config = {}
         self._classes_to_show = []
         self.detector_config_settings =  {}
@@ -90,7 +86,7 @@ class ShifterConfigReader:
 
     @base_url.setter
     def base_url(self, value):
-        self._base_url = os.getenv(value)
+        self._base_url = path_or_env_check(value)
 
     @property
     def operation_url(self):
