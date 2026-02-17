@@ -90,7 +90,7 @@ class ShifterConfigReader:
 
     @base_url.setter
     def base_url(self, value):
-        self._base_url = path_or_env_check(value)
+        self._base_url = os.getenv(value)
 
     @property
     def operation_url(self):
@@ -98,7 +98,7 @@ class ShifterConfigReader:
 
     @operation_url.setter
     def operation_url(self, value):
-        self._operation_url = path_or_env_check(value)
+        self._operation_url = os.getenv(value)
 
     @property
     def panel_options(self):
