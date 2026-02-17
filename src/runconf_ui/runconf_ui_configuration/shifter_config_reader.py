@@ -3,7 +3,7 @@ import os
 import yaml
 
 from runconf_ui.utils.path_or_env_check import path_or_env_check
-
+import os
 
 # Class for reading a YAML config and producing panels
 class ShifterConfigReader:
@@ -34,9 +34,9 @@ class ShifterConfigReader:
         if self._session_name is None:
             raise ValueError("No session name specified")
 
-        self._base_url = path_or_env_check(general_settings.get("base_url", None))
+        self._base_url = os.getenv(general_settings.get("base_url", None))
 
-        self._operation_url = path_or_env_check(
+        self._operation_url = os.getenv(
             general_settings.get("operation_url", None)
         )
 
