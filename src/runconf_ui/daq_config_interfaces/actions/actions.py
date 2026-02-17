@@ -144,8 +144,9 @@ class DisableDalAction(ActionInterface):
             disabled_objects.remove(dal)
 
         setattr(session, "disabled", list(set(disabled_objects)))
-        
+
         return session
+
 
 # Non-Chainable Actions
 class GetDalsOfClassAction(ActionInterface):

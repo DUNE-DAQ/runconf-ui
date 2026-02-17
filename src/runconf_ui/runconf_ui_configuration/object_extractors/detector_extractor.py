@@ -20,7 +20,12 @@ from runconf_ui.utils.subsystem_status import SubsystemStatus
 
 
 class DetectorExtractor(MultiItemExtractor):
-    def __init__(self, application_controller: ShifterInterfaceState, detector_config: dict | None, disabled_dals=[]):
+    def __init__(
+        self,
+        application_controller: ShifterInterfaceState,
+        detector_config: dict | None,
+        disabled_dals=[],
+    ):
         """
         Extracts the states of ALL systems present in the detector config for a given top level system (i.e. trigger).
         :param daq_configuration: daq_configuration object
@@ -59,17 +64,17 @@ class DetectorExtractor(MultiItemExtractor):
         self._system_extractors = []
         logging.debug(f"Detector config: {self._detector_config}")
 
-        extracted_systems = detector_config.get("Systems", [])
-        system_name = next(list(detector_config.keys()))
+        extracted_systems = detector_config.get("Systems", {})
+        system_name = next(iter(detector_config.keys()))
 
         logging.debug(f"Reading system {system_name}")
 
         for s in extracted_systems:
             logging.debug(f"Extracting system {s}")
             try:
-                system_name = next(list(s.keys()))
+                system_name = next(iter(s.keys()))
 
-                system_info = next(list(s.values()))
+                system_info = next(iter(s.values()))
 
                 self._system_extractors.append(
                     SystemExtractor(

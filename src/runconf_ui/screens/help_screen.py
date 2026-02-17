@@ -18,8 +18,7 @@ class HelpScreen(Screen):
         yield Button("Close", id="close_help_screen", classes="help_up_button")
 
     def message(self):
-        return dedent(
-            """\
+        return dedent("""\
             [bold]Hello and welcome to the DAQ Shifter View!![/bold]
 
             To get started, please select the following from dropdown menus:
@@ -55,8 +54,7 @@ class HelpScreen(Screen):
 
             If you have any questions, please contact the DAQ shifter on duty! Enjoy your shift!! 
                 
-        """
-        )
+        """)
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "close_help_screen":

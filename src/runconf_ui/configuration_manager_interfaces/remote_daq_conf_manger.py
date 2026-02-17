@@ -26,6 +26,9 @@ from runconf_ui.runconf_ui_controllers.runconf_ui_state import (
 )
 
 
+class UrlNotSetError(Exception): ...
+
+
 class RemoteDaqConfManager(ManagementInterface):
     def __init__(self, application_controller: ShifterInterfaceState):
         """
@@ -37,6 +40,17 @@ class RemoteDaqConfManager(ManagementInterface):
             raise ValueError(
                 "Apparatus not set! Please set the APPARATUS in your env or use the --apparatus flag"
             )
+
+        if self.application_controller.shifter_interface_config.operation_url is None:
+            raise UrlNotSetError(
+                "Operation URL is not set! Please source the correct runconf_*_env_setup.sh script"
+            )
+
+        if self.application_controller.shifter_interface_config.base_url is None:
+            raise UrlNotSetError(
+                "Base is not set! Please source the correct runconf_*_env_setup.sh script"
+            )
+
         try:
             self.conf_pool = ConfPool(
                 str(
@@ -46,8 +60,7 @@ class RemoteDaqConfManager(ManagementInterface):
                 operation_url=self.application_controller.shifter_interface_config.operation_url,
                 base_url=self.application_controller.shifter_interface_config.base_url,
             )
-            
-            
+
         except Exception:
             logging.error(traceback.format_exc())
             self.reset()
@@ -74,15 +87,24 @@ class RemoteDaqConfManager(ManagementInterface):
         except Exception as e:
             logging.error(traceback.format_exc())
             CiderInvalidRepoException(e)
-     
-     
-        detector_config_path = Path(self.application_controller.shifter_interface_config.daq_config_directory) / 'runconf-ui-settings' / f"{self.application_controller.apparatus}.yml"
+
+        detector_config_path = (
+            Path(
+                self.application_controller.shifter_interface_config.daq_config_directory
+            )
+            / "runconf-ui-settings"
+            / f"{self.application_controller.apparatus}.yml"
+        )
         if not detector_config_path.exists():
-            raise FileNotFoundError(f"Detector configuration file {detector_config_path} does not exist")
-        
+            raise FileNotFoundError(
+                f"Detector configuration file {detector_config_path} does not exist"
+            )
+
         logging.info(f"Using detector configuration file {detector_config_path}")
-        
-        self.application_controller.shifter_interface_config.open_detector_config(str(detector_config_path))
+
+        self.application_controller.shifter_interface_config.open_detector_config(
+            str(detector_config_path)
+        )
         # Now we can open the file
         config_path_reader = DaqConfPathReader()
 
@@ -103,11 +125,11 @@ class RemoteDaqConfManager(ManagementInterface):
 
         if len(valid_config_files) == 0:
             logging.error(
-                f"Could not find config file for {daq_configuration}. Found: {config_list}"
+                f"Could not find config file for {daq_configuration} containing {self.application_controller.shifter_interface_config.default_config}. Found: {config_list}"
             )
             logging.error(traceback.format_exc())
             raise Exception(
-                f"Could not find config file for {daq_configuration}. Found: {config_list}"
+                f"Could not find config file for {daq_configuration} containing {self.application_controller.shifter_interface_config.default_config}. Found: {config_list}"
             )
 
         if len(valid_config_files) > 1:
@@ -115,7 +137,6 @@ class RemoteDaqConfManager(ManagementInterface):
                 f"Found multiple config files with the same name: {valid_config_files}, using the first one"
             )
 
-        
         config_file = valid_config_files[0]
 
         return super().open_file(Path(config_file))

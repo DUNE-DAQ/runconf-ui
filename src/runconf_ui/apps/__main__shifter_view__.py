@@ -61,7 +61,6 @@ class ShifterView(App):
 
         apparatus = kwargs.get("apparatus", os.environ.get("APPARATUS", "np02"))
 
-
         if not Path(interface_config).exists():
             raise Exception(
                 f"Interface configuration file {interface_config} does not exist"
@@ -83,10 +82,8 @@ class ShifterView(App):
 
         self._init_logger(kwargs.get("log_level", "INFO"))
 
-
     def _init_logger(self, log_level):
         # Grab from config reader
-
         logging_path = Path(
             f"{self.application_controller.shifter_interface_config.output_directory}/logs"
         )
@@ -100,6 +97,7 @@ class ShifterView(App):
         )
 
         clean_old_files(logging_path, "log")
+        logging.info("Logs made!")
 
     def on_mount(self):
         """
@@ -163,6 +161,7 @@ class CliArgs:
     def as_kwargs(self):
         return {k: v for k, v in vars(self).items() if v is not None}
 
+
 @click.command()
 @click.option(
     "-a",
@@ -222,6 +221,7 @@ def main(**kwargs):
     app = ShifterView(**cli_args.as_kwargs())
     app.run()
     print(app.exit_message())
+
 
 if __name__ == "__main__":
     main()

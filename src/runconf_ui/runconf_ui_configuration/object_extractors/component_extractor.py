@@ -78,10 +78,12 @@ class ComponentExtractor(SubsystemExtractor):
             values = filter.get("values", [])
 
             try:
-                return ca.GetAttributeAction(
-                            self._application_controller.buffer_daq_config
-                        )(self.get_dal(), attribute) in values                    
-                
+                return (
+                    ca.GetAttributeAction(
+                        self._application_controller.buffer_daq_config
+                    )(self.get_dal(), attribute)
+                    in values
+                )
 
             except CiderBadActionException:
                 # If the attribute does not exist, we ignore it
@@ -93,7 +95,6 @@ class ComponentExtractor(SubsystemExtractor):
 
     @property
     def tooltip(self) -> str:
-
         # We can try to get the attribute
         try:
             return ca.GetAttributeAction(

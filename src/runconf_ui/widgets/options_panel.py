@@ -71,7 +71,7 @@ class OptionPanel(Static):
         self.query_one("#create_button").disabled = disable_buttons
         self.query_one("#undo_changes_button").disabled = disable_buttons
 
-    def on_button_pressed(self, event: Button.Pressed)->None:
+    def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "help_button":
             self.app.push_screen(HelpScreen(classes="pop_up_screen"))
         elif event.button.id == "create_button":
@@ -95,7 +95,7 @@ class OptionPanel(Static):
                     timer=4.0,
                     success=False,
                 )
-            
+
         # Resets to base config provided
         elif event.button.id == "undo_changes_button":
             # Reset everything!

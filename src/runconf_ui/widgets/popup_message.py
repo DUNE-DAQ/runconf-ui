@@ -16,7 +16,7 @@ class PopupMessage(Static):
         name: str | None = None,
         id: str | None = None,
         classes: str | None = None,
-        disabled: bool = False
+        disabled: bool = False,
     ) -> None:
         super().__init__(
             content,

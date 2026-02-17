@@ -36,7 +36,6 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
         classes: str | None = None,
         disabled: bool = False,
     ) -> None:
-
         # Prevent the parent initializer from calling open_new_session before
         # we have set up attributes the subclass expects (like _extractor).
         # We use a small deferral flag that the overridden open_new_session
@@ -108,13 +107,13 @@ class MultiComponentEnableDisablePanel(EnableDisablePanel):
     def check_button_state(self, button: str, _) -> SubsystemStatus:
         return self._extractor.get_state(button)
 
-    def get_tree(self)->ComponentLevelTree | None:
+    def get_tree(self) -> ComponentLevelTree | None:
         if self._build_tree:
-            return  ComponentLevelTree(
+            return ComponentLevelTree(
                 self._application_controller,
                 extractor=self._extractor,
             )
-        return None 
+        return None
 
     def on_mount(self):
         for button in self._button_list.keys():
