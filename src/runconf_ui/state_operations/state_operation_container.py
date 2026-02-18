@@ -20,7 +20,7 @@ class StateOperationContainer(DisableOperation):
         self,
         configuration: Configuration,
         session: DalBase,
-        contained_resources: list[StateOperation] | None = None,
+        contained_resources: Sequence[StateOperation] | None = None,
         label="",
     ):
 

@@ -37,5 +37,3 @@ class LocalRepoManager(RepoManagerInterface[Path]):
             return c_full
         
         raise DaqVersionException(f"Session {config} does not exist for {self.daq_version}")
-        
-    

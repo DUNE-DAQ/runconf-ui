@@ -1,9 +1,15 @@
-from .config_utils import get_configs_with_session, open_configuration, check_config_has_session
+from .config_utils import (
+    check_config_has_session,
+    get_configs_with_session,
+    open_configuration,
+    get_class_from_segment
+)
 from .rich_utils import draw_state_operation_tree
 
 __all__=[
+    'check_config_has_session',
     'draw_state_operation_tree',
     'get_configs_with_session',
-    'check_config_has_session',
-    'open_configuration'
+    'open_configuration',
+    'get_class_from_segment'
 ]

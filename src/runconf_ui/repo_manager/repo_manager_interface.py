@@ -2,8 +2,6 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Generic, TypeVar
 
-from conffwk import Configuration
-
 from runconf_ui.exceptions import DaqVersionException, MissingRunconfUIConfigException
 
 T = TypeVar('T')

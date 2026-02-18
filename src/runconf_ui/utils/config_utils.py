@@ -3,6 +3,8 @@
 from pathlib import Path
 
 from conffwk import Configuration
+from conffwk.dal import DalBase
+
 
 from runconf_ui.exceptions import ConfigReadException
 
@@ -61,3 +63,20 @@ def get_configs_with_session(config_paths: list[Path] | Path) -> list[Path]:
             config_files += get_config_paths(path)
 
     return [c for c in config_files if check_config_has_session(c)]
+
+def get_class_from_segment(configuration: Configuration, segment_id: str, class_name: str):
+    
+    segment = configuration.get_dal('Segment', segment_id)
+    if segment is None:
+        return []
+    
+    dals_of_class = []
+    
+    rels = configuration.relationships('Segment', True)
+    for rel in rels.values():
+        rel_vals = getattr(segment, rel, [])
+        
+        if not isinstance(rel_vals, list):
+            rel_vals = [rel_vals]
+        
+        dals_of_class.extend(r for r in rel_vals if r.className()==class_name)

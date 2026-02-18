@@ -2,10 +2,10 @@ import os
 from pathlib import Path
 
 import pytest
-from conffwk import Configuration
 from daqconf.consolidate import consolidate_db
 
 from runconf_ui.utils import open_configuration
+
 
 @pytest.fixture(scope="session")
 def session_name():
@@ -21,8 +21,7 @@ def config_path()->Path:
 @pytest.fixture(scope="session")
 def tmp_config_path(tmp_path_factory):
     consolidated_config_folder=tmp_path_factory.mktemp("configs")
-    consolidated_config_path = consolidated_config_folder/"local-1x1-config.data.xml"
-    return consolidated_config_path
+    return consolidated_config_folder/"local-1x1-config.data.xml"
 
 @pytest.fixture(scope="session")
 def consolidated_config(tmp_config_path, session_name, config_path):
