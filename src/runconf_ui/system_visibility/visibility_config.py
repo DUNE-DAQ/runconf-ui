@@ -1,11 +1,9 @@
-import yaml
 from pathlib import Path
-from typing import Optional
 
+import yaml
 from conffwk import Configuration
-from conffwk.dal import DalBase
 
-from runconf_ui.system_visiblity.builders import OperationsTreeBuilder
+from runconf_ui.system_visibility.system_builders import OperationsTreeBuilder
 
 # ============================================================
 # CONFIG LAYER
@@ -19,7 +17,7 @@ class VisibilityConfig:
 
     @staticmethod
     def _load(path: Path) -> dict:
-        with open(path, "r") as f:
+        with open(path) as f:
             return yaml.safe_load(f)
 
     @property

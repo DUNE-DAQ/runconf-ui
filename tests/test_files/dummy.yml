@@ -1,0 +1,41 @@
+# Dummy config for testing purposes with daqsystem-test
+Settings:
+  classes_to_show:
+    - Segment
+    - SmartDaqApplication
+
+
+PanelOptions:
+  Detector:
+    label: "detector"
+    view_panel: "Detector View"
+
+    Systems:
+      - Readout:
+          subsystem_dependent: True
+          components:
+            - id: ru-segment
+              class: Segment
+            - id: ru-01
+              class: ReadoutApplication
+              system_label: ru-01
+              separate_system: True
+            - id: ru-02
+              class: ReadoutApplication
+              system_label: ru-02
+              separate_system: True
+
+  TPG:
+    label: "TPG"
+    view_panel: "TPG View"
+
+    Systems:
+      - TPG:
+          subsystem_dependent: False
+
+          attributes:
+            - id: tp_generation_enabled
+              segments: ["ru-segment"]
+              class: ReadoutApplication
+              separate_system: True
+              system_label: "ru-01"

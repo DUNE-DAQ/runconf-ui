@@ -3,8 +3,6 @@
 from pathlib import Path
 
 from conffwk import Configuration
-from conffwk.dal import DalBase
-
 
 from runconf_ui.exceptions import ConfigReadException
 
@@ -21,7 +19,6 @@ def open_configuration(config_path: Path) -> Configuration:
         return Configuration(f"oksconflibs:{config_path}")
     except Exception as e:
         raise ConfigReadException(f"Cannot open {config_path}") from e
-
 
 def get_number_of_sessions(configuration: Configuration) -> int:
     """Return the number of Session DALs in the given configuration."""
@@ -72,11 +69,13 @@ def get_class_from_segment(configuration: Configuration, segment_id: str, class_
     
     dals_of_class = []
     
-    rels = configuration.relationships('Segment', True)
-    for rel in rels.values():
+    rels = configuration.relations('Segment', True)
+    for rel in rels.keys():
         rel_vals = getattr(segment, rel, [])
         
         if not isinstance(rel_vals, list):
             rel_vals = [rel_vals]
         
         dals_of_class.extend(r for r in rel_vals if r.className()==class_name)
+    
+    return dals_of_class

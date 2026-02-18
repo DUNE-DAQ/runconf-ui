@@ -1,10 +1,10 @@
-from typing import Optional
+
+from conffwk import Configuration
+from conffwk.dal import DalBase
 
 from runconf_ui import state_operations
 from runconf_ui.utils import get_class_from_segment
 
-from conffwk import Configuration
-from conffwk.dal import DalBase
 
 class AttributeOperationFactory:
     @staticmethod
@@ -12,7 +12,7 @@ class AttributeOperationFactory:
         configuration: Configuration,
         session: DalBase,
         attr_config: dict,
-    ) -> Optional[state_operations.StateOperationContainerOr]:
+    ) -> state_operations.StateOperationContainerOr | None:
 
         dal_list = []
 

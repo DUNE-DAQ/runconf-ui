@@ -25,7 +25,7 @@ def test_daq_versions(tmp_config_path, local_repo_manager):
         with pytest.raises(DaqVersionException):
             local_repo_manager.select_config(Path("not a real config"))
 
-def test_find_config(local_repo_manager, runconf_ui_config):
+def test_find_config(local_repo_manager, visibility_config_path):
     local_repo_manager.apparatus = "other"
     
     with pytest.raises(MissingRunconfUIConfigException):
@@ -33,5 +33,5 @@ def test_find_config(local_repo_manager, runconf_ui_config):
 
     local_repo_manager.apparatus = "dummy"
     
-    assert local_repo_manager.get_runconf_ui_config_path() == runconf_ui_config
+    assert local_repo_manager.get_runconf_ui_config_path() == visibility_config_path
     
