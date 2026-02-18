@@ -66,7 +66,7 @@ class SubsystemRegistry:
         if not (separate and label and subsystem_dep):
             top_level_container.add_state_operation(operation)
             return
-        elif not (separate and label and not subsystem_dep):
+        if not (separate and label and not subsystem_dep):
             self.add_to_topsystem_container(top_level_container, operation)
 
         if label not in self._containers:

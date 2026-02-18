@@ -13,6 +13,8 @@ class VisibilityConfig:
     """Loads and exposes structured visibility configuration."""
 
     def __init__(self, path: Path):
+        # purly for testing
+        self.path = path
         self._raw = self._load(path)
 
     @staticmethod
