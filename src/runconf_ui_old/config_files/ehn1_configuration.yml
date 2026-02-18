@@ -1,8 +1,0 @@
-General:
-  # Environment variables
-  session_config: "SESSION_FILE"
-  download_directory: "CONFIG_DIR"
-  session_name: "SESSION_NAME"
-
-  base_url: "https://gitlab.cern.ch/dune-daq/online/ehn1-daqconfigs"
-  operation_url: "OPERATION_URL"

@@ -3,15 +3,20 @@ from .detail import (
     DisableAttribute,
     DisableResource,
 )
-
-from .state_operation_container import StateOperationContainerOr, StateOperationContainerAnd
-from .state_operation import StateOperation
+from .state_operation import DisableOperation, StateOperation
+from .state_operation_container import (
+    StateOperationContainer,
+    StateOperationContainerAnd,
+    StateOperationContainerOr,
+)
 
 __all__ = [
     "AdjustableAttribute",
     "DisableAttribute",
+    "DisableOperation",
     "DisableResource",
-    "StateOperationContainerOr",
-    "StateOperationContainerAnd",
     "StateOperation",
+    "StateOperationContainer",
+    "StateOperationContainerAnd",
+    "StateOperationContainerOr",
 ]

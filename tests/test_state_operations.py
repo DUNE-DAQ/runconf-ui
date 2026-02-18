@@ -1,8 +1,11 @@
 import pytest
+
 from runconf_ui import state_operations
-from runconf_ui.exceptions import (IncompatibleDalException,
-                                   IncorrectAttributeException,
-                                   AttributeValueException)
+from runconf_ui.exceptions import (
+    AttributeMissingException,
+    AttributeValueException,
+    IncompatibleDalException,
+)
 
 # ---------------------------------------------------------------------------
 # Helpers / constants
@@ -60,7 +63,7 @@ def generate_disable_resource_list(consolidated_config, consolidated_session):
         cfg, sess, [readout_collection, segment_op]
     )
 
-    for op in readout_ops + [segment_op]:
+    for op in [*readout_ops, segment_op]:
         op.set_state(True)
 
     return {
@@ -92,7 +95,7 @@ def test_non_resource_failure(consolidated_config, consolidated_session):
                             'local-env-ers-warning'), "Must raise an error if you try and make a non-resource disableable"
 
 def test_missing_attribute(consolidated_config, consolidated_session):
-    with pytest.raises(IncorrectAttributeException):
+    with pytest.raises(AttributeMissingException):
         assert _make_disable_attribute(consolidated_config,
                                         consolidated_session,
                                         'Variable',
@@ -115,7 +118,7 @@ def test_resource_list(generate_disable_resource_list):
     segment_op = ops["segment_op"]
     readout_segment = ops["readout_segment"]
 
-    all_ops = readout_ops + [readout_collection, segment_op, readout_segment]
+    all_ops = [*readout_ops, readout_collection, segment_op, readout_segment]
 
     # All resources start enabled
     assert all(op.get_state() for op in all_ops)
@@ -123,7 +126,7 @@ def test_resource_list(generate_disable_resource_list):
     # Disabling one readout should not yet affect the OR-collection or segment
     readout_ops[0].set_state(False)
     assert not readout_ops[0].get_state()
-    assert all(op.get_state() for op in readout_ops[1:] + [readout_collection, segment_op])
+    assert all(op.get_state() for op in [*readout_ops[1:], readout_collection, segment_op])
 
     # Disabling all readouts collapses the OR-collection and the AND-container
     for op in readout_ops[1:]:
@@ -148,6 +151,8 @@ def test_attributes(generate_disable_resource_list, generate_disable_attribute_l
         readout_segment.add_state_operation(attribute_op)
     
     readout_segment.set_state(False)
+    
+    assert not all(op.dal_enabled() for op in generate_disable_attribute_list)
     assert not all(op.get_state() for op in generate_disable_attribute_list)
 
     # Make sure are actually dealing with the same thing!
@@ -155,11 +160,31 @@ def test_attributes(generate_disable_resource_list, generate_disable_attribute_l
 
     readout_segment.add_state_operation(generate_disable_attribute_list[0])
     # Check the list length hasn't changed
-    assert len(readout_segment.contained_operations) == readout_before+len(generate_disable_attribute_list), f"Duplicates cannot be added to the list!"
+    assert len(readout_segment.contained_operations) == readout_before+len(generate_disable_attribute_list), "Duplicates cannot be added to the list!"
 
     readout_segment.set_state(True)
+    assert all(op.dal_enabled() for op in generate_disable_attribute_list)
     assert all(op.get_state() for op in generate_disable_attribute_list)
+
     
 def test_incorrect_attribute(generate_disable_attribute_list):
         with pytest.raises(AttributeValueException):
             assert generate_disable_attribute_list[0].set_state("dummy")
+
+def test_adjustable_attribute_values(consolidated_config, consolidated_session):
+    adjustable_attribute = state_operations.AdjustableAttribute(
+        consolidated_config,
+        consolidated_session,
+        consolidated_config.get_dal(
+            'Service', 'dataRequests'
+        ),
+        'port'
+    )
+    
+    adjustable_attribute.set_state(100)
+    assert adjustable_attribute.get_state() == 100
+    adjustable_attribute.set_state(0)
+
+    # Test wrong type completely
+    with pytest.raises(ValueError):
+        adjustable_attribute.set_state("not a proper value")
