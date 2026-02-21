@@ -62,12 +62,17 @@ def get_configs_with_session(config_paths: list[Path] | Path) -> list[Path]:
     return [c for c in config_files if check_config_has_session(c)]
 
 def get_class_from_segment(configuration: Configuration, segment_id: str, class_name: str):
-    
-    segment = configuration.get_dal('Segment', segment_id)
-    if segment is None:
-        return []
+    '''
+    Find all instances of a class in a segment. This includes all subclasses  (regardless of enabled status)
+    '''
+    try:
+        segment = configuration.get_dal('Segment', segment_id)
+    except RuntimeError as e:
+        raise ConfigReadException(f"Cannot find {segment_id} in {configuration!r}") from e
     
     dals_of_class = []
+    
+    classes_to_check = (*configuration.subclasses(class_name), class_name)
     
     rels = configuration.relations('Segment', True)
     for rel in rels.keys():
@@ -76,6 +81,26 @@ def get_class_from_segment(configuration: Configuration, segment_id: str, class_
         if not isinstance(rel_vals, list):
             rel_vals = [rel_vals]
         
-        dals_of_class.extend(r for r in rel_vals if r.className()==class_name)
+        
+        dals_of_class.extend(r for r in rel_vals if r.className() in classes_to_check)
     
     return dals_of_class
+
+def get_class_from_segment_list(configuration: Configuration, segment_list: list[str], class_name: str):
+    '''
+    Get all instances of a class in a list of segments (regardless of enabled status)
+    '''
+    return [
+        item
+        for seg in segment_list
+        for item in get_class_from_segment(configuration, seg, class_name)
+    ]
+    
+def class_in_config(configuration: Configuration, class_name: str):
+    return class_name in configuration.classes()
+
+def dal_in_config(configuration: Configuration, class_name: str, dal_id: str):
+    if not class_in_config(configuration, class_name):
+        return False
+    
+    return dal_id in [d.id for d in configuration.get_dals(class_name)]

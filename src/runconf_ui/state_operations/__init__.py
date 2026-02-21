@@ -8,6 +8,7 @@ from .state_operation_container import (
     StateOperationContainer,
     StateOperationContainerAnd,
     StateOperationContainerOr,
+    SystemContainer,
 )
 
 __all__ = [
@@ -19,4 +20,5 @@ __all__ = [
     "StateOperationContainer",
     "StateOperationContainerAnd",
     "StateOperationContainerOr",
+    "SystemContainer"
 ]

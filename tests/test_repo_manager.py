@@ -15,17 +15,22 @@ def local_repo_manager(tmp_config_path, consolidated_config):
                                     conf_directory = tmp_config_path.parent)
     
 def test_daq_versions(tmp_config_path, local_repo_manager):
-    
-        with pytest.raises(DaqVersionException):
-            local_repo_manager.set_daq_version(Path("dummy"))        
-        assert local_repo_manager.get_available_daq_versions() == [tmp_config_path.parent]
-        assert local_repo_manager.get_daq_sessions() == [tmp_config_path]
-        assert local_repo_manager.select_config(tmp_config_path) == tmp_config_path
-        assert local_repo_manager.select_config(tmp_config_path.name) == tmp_config_path
-        with pytest.raises(DaqVersionException):
-            local_repo_manager.select_config(Path("not a real config"))
+    with pytest.raises(DaqVersionException):
+        local_repo_manager.set_daq_version(Path("dummy"))        
+    assert local_repo_manager.get_available_daq_versions() == [tmp_config_path.parent]
+    assert local_repo_manager.get_daq_sessions() == [tmp_config_path]
+    assert local_repo_manager.select_config(tmp_config_path) == tmp_config_path
+    assert local_repo_manager.select_config(tmp_config_path.name) == tmp_config_path
+    with pytest.raises(DaqVersionException):
+        local_repo_manager.select_config(Path("not a real config"))
 
-def test_find_config(local_repo_manager, visibility_config_path):
+    # Just check having no version is correct
+    current_version = local_repo_manager.daq_version
+    local_repo_manager.set_daq_version(None)
+    assert local_repo_manager.get_daq_sessions() == []
+    local_repo_manager.set_daq_version(current_version)
+
+def test_find_config(local_repo_manager, system_config):
     local_repo_manager.apparatus = "other"
     
     with pytest.raises(MissingRunconfUIConfigException):
@@ -33,5 +38,5 @@ def test_find_config(local_repo_manager, visibility_config_path):
 
     local_repo_manager.apparatus = "dummy"
     
-    assert local_repo_manager.get_runconf_ui_config_path() == visibility_config_path
+    assert local_repo_manager.get_runconf_ui_config_path() == system_config
     

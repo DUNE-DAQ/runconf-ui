@@ -4,187 +4,290 @@ from runconf_ui import state_operations
 from runconf_ui.exceptions import (
     AttributeMissingException,
     AttributeValueException,
+    DuplicatedSubsystemException,
     IncompatibleDalException,
+    StateBindingError,
+    SubsystemLabelError,
 )
 
+'''
+Low level tests of the enable/disable framework
+'''
+
 # ---------------------------------------------------------------------------
-# Helpers / constants
+# DAL fixtures
 # ---------------------------------------------------------------------------
 
-READOUT_RESOURCES = [
-    ("ru-01", "ReadoutApplication", "tp_generation_enabled"),
-    ("ru-02", "ReadoutApplication", "tp_generation_enabled"),
-]
+def make_dal_fixture(dal_type, dal_name):
+    '''
+    Helper ¿meta-function? that will dynamically produce fixtures to avoid lots of boiler plate
+    '''
+    @pytest.fixture
+    def dal(consolidated_config):
+        return consolidated_config.get_dal(dal_type, dal_name)
+    return dal
 
+ru_01_dal = make_dal_fixture('ReadoutApplication', 'ru-01')
+ru_02_dal = make_dal_fixture('ReadoutApplication', 'ru-02')
+ru_segment_dal = make_dal_fixture('Segment', 'ru-segment')
 
-SEGMENT_CLASS = "Segment"
-SEGMENT_UID = "ru-segment"
+# We'll use this for dummy tests
+df_segment_dal = make_dal_fixture('Segment', 'df-segment')
 
-def _make_disable_resource(config, session, class_name, uid):
-    return state_operations.DisableResource(
-        config,
-        session,
-        config.get_dal(class_name, uid),
+# ---------------------------------------------------------------------------
+# Toggle fixtures
+# ---------------------------------------------------------------------------
+
+def make_resource_toggle(dal_fixture, label):
+    @pytest.fixture
+    def toggle(consolidated_config, consolidated_session, request):
+        dal = request.getfixturevalue(dal_fixture)
+        return state_operations.DisableResource(consolidated_config, consolidated_session, dal, label=label)
+    return toggle
+
+def make_attribute_toggle(dal_fixture, attribute):
+    @pytest.fixture
+    def toggle(consolidated_config, consolidated_session, request):
+        dal = request.getfixturevalue(dal_fixture)
+        return state_operations.DisableAttribute(consolidated_config, consolidated_session, dal, attribute)
+    return toggle
+
+ru_01_resource_toggle = make_resource_toggle('ru_01_dal', 'ru_01')
+ru_02_resource_toggle = make_resource_toggle('ru_02_dal', 'ru_02')
+ru_segment_toggle     = make_resource_toggle('ru_segment_dal', 'ru_segment')
+ru_01_tpg_toggle      = make_attribute_toggle('ru_01_dal', 'tp_generation_enabled')
+ru_02_tpg_toggle      = make_attribute_toggle('ru_02_dal', 'tp_generation_enabled')
+
+df_system_toggle = make_resource_toggle('df_segment_dal', 'df_segment')
+
+# ---------------------------------------------------------------------------
+# Container fixtures
+# ---------------------------------------------------------------------------
+
+@pytest.fixture
+def app_container(consolidated_config, consolidated_session, request):
+    ops = [request.getfixturevalue(f) for f in ('ru_01_resource_toggle', 'ru_02_resource_toggle')]
+    return state_operations.StateOperationContainerOr(
+        consolidated_config, consolidated_session,
+        label="applications",
+        state_operations=ops,
     )
 
-def _make_disable_attribute(config, session, class_name, uid, attribute,
-                            enabled_state=True, disabled_state=False):
+@pytest.fixture
+def readout_segment(consolidated_config, consolidated_session, app_container, ru_segment_toggle):
+    return state_operations.StateOperationContainerAnd(
+        consolidated_config, consolidated_session,
+        label="readout",
+        state_operations=[app_container, ru_segment_toggle],
+    )
 
-    return state_operations.DisableAttribute(
-            config,
-            session,
-            config.get_dal(class_name, uid),
-            attribute,
-            enabled_state,
-            disabled_state,
-        )
+@pytest.fixture
+def full_system(consolidated_config, consolidated_session, readout_segment, ru_01_tpg_toggle, ru_02_tpg_toggle):
+    system = state_operations.SystemContainer(consolidated_config, consolidated_session, 'ReadoutSubsystem')
+    system.add_to_subsystem('ru-seg', readout_segment)
+    system.add_to_subsystem('ru_01_tpg', ru_01_tpg_toggle),
     
-
-# ---------------------------------------------------------------------------
-# Fixtures
-# ---------------------------------------------------------------------------
-
-@pytest.fixture(scope="session")
-def generate_disable_resource_list(consolidated_config, consolidated_session):
-    cfg, sess = consolidated_config, consolidated_session
-
-    readout_ops = [
-        _make_disable_resource(cfg, sess, class_name, uid)
-        for uid, class_name ,_ in READOUT_RESOURCES
-    ]
-
-    readout_collection = state_operations.StateOperationContainerOr(
-        cfg, sess, readout_ops
-    )
-
-    segment_op = _make_disable_resource(cfg, sess, SEGMENT_CLASS, SEGMENT_UID)
-
-    readout_segment = state_operations.StateOperationContainerAnd(
-        cfg, sess, [readout_collection, segment_op]
-    )
-
-    for op in [*readout_ops, segment_op]:
-        op.set_state(True)
-
-    return {
-        "readout_ops": readout_ops,
-        "readout_collection": readout_collection,
-        "segment_op": segment_op,
-        "readout_segment": readout_segment,
-    }
+    # Bit silly but let's add ru_02 to our controlled objects
+    system.add_controlled_object(ru_02_tpg_toggle)
     
-@pytest.fixture(scope="session")
-def generate_disable_attribute_list(consolidated_config, consolidated_session):
-    config, session = consolidated_config, consolidated_session
-    return [
-            _make_disable_attribute(config, session, class_name, uid, attribute) 
-                for uid, class_name, attribute in READOUT_RESOURCES
-            ]
+    return system
 
 # ---------------------------------------------------------------------------
-# Tests
+# Generic Failure tests
 # ---------------------------------------------------------------------------
-
-# Generic failure modes
-def test_non_resource_failure(consolidated_config, consolidated_session):
-    '''Check if we get an error when we don't make a resource'''
-    with pytest.raises(IncompatibleDalException):
-        assert _make_disable_resource(consolidated_config,
-                            consolidated_session,
-                            'Variable',
-                            'local-env-ers-warning'), "Must raise an error if you try and make a non-resource disableable"
-
-def test_missing_attribute(consolidated_config, consolidated_session):
+def test_attribute_failures(consolidated_config, consolidated_session, ru_01_dal):
     with pytest.raises(AttributeMissingException):
-        assert _make_disable_attribute(consolidated_config,
-                                        consolidated_session,
-                                        'Variable',
-                                        'local-env-ers-warning',
-                                        'dummy_attribute'), "Must raise an error if you try and make a non-resource disableable"
+        state_operations.DisableAttribute(consolidated_config, consolidated_session, ru_01_dal, 'dummy attribute')
 
 
-def test_resource_equality(generate_disable_resource_list):
-    resource_ops = generate_disable_resource_list["readout_ops"]
+def test_adjustable_attributes(consolidated_config, consolidated_session):
+    adjustable_dal = consolidated_config.get_dal("SourceIDConf", "tp-srcid-1001")
     
-    assert resource_ops[0] == resource_ops[0]
-    assert resource_ops[1] != resource_ops[0]
-    assert resource_ops[1] == resource_ops[1]
-
-
-def test_resource_list(generate_disable_resource_list):
-    ops = generate_disable_resource_list
-    readout_ops = ops["readout_ops"]
-    readout_collection = ops["readout_collection"]
-    segment_op = ops["segment_op"]
-    readout_segment = ops["readout_segment"]
-
-    all_ops = [*readout_ops, readout_collection, segment_op, readout_segment]
-
-    # All resources start enabled
-    assert all(op.get_state() for op in all_ops)
-
-    # Disabling one readout should not yet affect the OR-collection or segment
-    readout_ops[0].set_state(False)
-    assert not readout_ops[0].get_state()
-    assert all(op.get_state() for op in [*readout_ops[1:], readout_collection, segment_op])
-
-    # Disabling all readouts collapses the OR-collection and the AND-container
-    for op in readout_ops[1:]:
-        op.set_state(False)
-    assert not any(op.get_state() for op in readout_ops)
-    assert segment_op.get_state(), "Segment should still be enabled independently"
-    assert not readout_segment.get_state(), "AND-container requires all children enabled"
-
-    # Re-enabling the segment (and implicitly verifying the full container recovers)
-    for op in readout_ops:
-        op.set_state(True)
-    assert all(op.get_state() for op in all_ops)
-
-
-def test_attributes(generate_disable_resource_list, generate_disable_attribute_list):
-    readout_segment = generate_disable_resource_list["readout_segment"]
-
-    readout_before = len(readout_segment.contained_operations)
-
-    for attribute_op in generate_disable_attribute_list:
-        attribute_op.set_state(False)
-        readout_segment.add_state_operation(attribute_op)
+    attribute_obj = state_operations.AdjustableAttribute(consolidated_config,
+                                                         consolidated_session,
+                                                         adjustable_dal, 'sid')
     
-    readout_segment.set_state(False)
+    init_state = attribute_obj.get_state()
     
-    assert not all(op.dal_enabled() for op in generate_disable_attribute_list)
-    assert not all(op.get_state() for op in generate_disable_attribute_list)
+    attribute_obj.set_state(1067)
+    assert attribute_obj.get_state() == 1067
+    
+    attribute_obj.set_state(init_state)
+    assert attribute_obj.get_state() == init_state
+    
+def test_disable_resource_failure(consolidated_config, consolidated_session):
+    
+    dummy_dal = consolidated_config.get_dal("SourceIDConf", "tp-srcid-1001")
 
-    # Make sure are actually dealing with the same thing!
-    assert len(readout_segment.contained_operations) == readout_before+len(generate_disable_attribute_list), f"List length must increase by {len(generate_disable_attribute_list)}"
+    with pytest.raises(IncompatibleDalException):
+        state_operations.DisableResource(consolidated_config, consolidated_session, dummy_dal)
+    
+# ---------------------------------------------------------------------------
+# Enable/Disable Tests
+# ---------------------------------------------------------------------------
+@pytest.mark.parametrize("toggle_fixture", ["ru_01_resource_toggle", "ru_01_tpg_toggle"])
+def test_disable_simple_operator(toggle_fixture, request, ru_02_resource_toggle):
+    '''
+    Test the enable/disable on simple operators
+    '''
+    ru_02_resource_toggle.set_state(True)
 
-    readout_segment.add_state_operation(generate_disable_attribute_list[0])
-    # Check the list length hasn't changed
-    assert len(readout_segment.contained_operations) == readout_before+len(generate_disable_attribute_list), "Duplicates cannot be added to the list!"
+    operator = request.getfixturevalue(toggle_fixture)
 
+    operator.set_state(False)
+    assert not operator.get_state()
+    # Ensure no side effects
+    assert ru_02_resource_toggle.get_state()
+
+
+    operator.set_state(True)
+    assert operator.get_state()
+    assert ru_02_resource_toggle.get_state()
+
+    with pytest.raises(AttributeValueException):
+        operator.set_state("dummy")
+
+def test_related_dal(ru_01_resource_toggle, ru_01_tpg_toggle):
+    '''
+    For attributes of a dal, check the disabling the dal disables the attributee
+    '''
+    
+    ru_01_tpg_toggle.set_state(True)
+    ru_01_resource_toggle.set_state(True)
+    assert ru_01_tpg_toggle.get_state()
+    
+    ru_01_resource_toggle.set_state(False)
+    assert not ru_01_tpg_toggle.get_state()
+
+    # Invert to test toggle back on
+    ru_01_resource_toggle.set_state(True)
+    assert ru_01_tpg_toggle.get_state()
+    
+
+def test_or_group(app_container, ru_01_resource_toggle, ru_02_resource_toggle):
+    '''
+    Test objects stored in an OR group
+    '''
+    app_container.set_state(True)
+    ru_01_resource_toggle.set_state(True)
+    ru_02_resource_toggle.set_state(True)
+    
+    
+    ru_01_resource_toggle.set_state(False)
+    assert app_container.get_state()
+    assert ru_02_resource_toggle.get_state()
+    
+    ru_02_resource_toggle.set_state(False)
+    assert not app_container.get_state()
+    
+    app_container.set_state(True)
+    assert ru_01_resource_toggle.get_state()
+    assert ru_02_resource_toggle.get_state()
+    
+    # And check toggle reverse
+    app_container.set_state(False)
+    assert not ru_01_resource_toggle.get_state()
+    assert not ru_02_resource_toggle.get_state()
+
+    # Now we know this works only need to reset here!
+    app_container.set_state(True)
+
+def test_and_group(app_container, ru_segment_toggle, readout_segment):
+    '''
+    Test objects stored in an AND group
+    '''
     readout_segment.set_state(True)
-    assert all(op.dal_enabled() for op in generate_disable_attribute_list)
-    assert all(op.get_state() for op in generate_disable_attribute_list)
-
+    app_container.set_state(True)
+    ru_segment_toggle.set_state(True)
     
-def test_incorrect_attribute(generate_disable_attribute_list):
-        with pytest.raises(AttributeValueException):
-            assert generate_disable_attribute_list[0].set_state("dummy")
-
-def test_adjustable_attribute_values(consolidated_config, consolidated_session):
-    adjustable_attribute = state_operations.AdjustableAttribute(
-        consolidated_config,
-        consolidated_session,
-        consolidated_config.get_dal(
-            'Service', 'dataRequests'
-        ),
-        'port'
-    )
+    app_container.set_state(False)
+    assert not ru_segment_toggle.get_state()
+    assert not readout_segment.get_state()
     
-    adjustable_attribute.set_state(100)
-    assert adjustable_attribute.get_state() == 100
-    adjustable_attribute.set_state(0)
+    readout_segment.set_state(True)
+    assert app_container.get_state()
+    assert ru_segment_toggle.get_state()
 
-    # Test wrong type completely
-    with pytest.raises(ValueError):
-        adjustable_attribute.set_state("not a proper value")
+def test_full_system(full_system, app_container, ru_02_tpg_toggle):
+    # First let's check the subsystem registry
+
+    assert set(full_system.subsystem_registry) == {'ru-seg', 'ru_01_tpg'}
+    
+    # Testing the actual classes is somewhat tricky, so let's check the keys correspond to the labels
+    assert set(full_system.get_nested_registry().keys()) == {'ru-seg', 
+                                                             'ru_01_tpg',
+                                                             'readout',
+                                                             'applications',
+                                                             'ru_segment',
+                                                             'ru_01',
+                                                             'ru_02'}
+    
+    # Now we can try
+    apps = full_system.get_system('applications')
+    # Test retrieval
+    assert apps == app_container
+    
+    # Check to see if can recognsise poor label formatting
+    with pytest.raises(SubsystemLabelError):
+        full_system.get_subsystem('not real!')
+    
+    with pytest.raises(SubsystemLabelError):
+        full_system.get_system('APPLICATIONS')
+    
+    # Check for binding errors
+    with pytest.raises(StateBindingError):
+        ru_02_tpg_toggle.set_state(False)
+    
+    # Reset everything
+    full_system.set_state(True)
+    assert app_container.get_state()
+    assert ru_02_tpg_toggle.get_state()
+    
+    full_system.set_state(False)
+    assert not app_container.get_state()
+    assert not ru_02_tpg_toggle.get_state()
+
+    full_system.set_state(True)
+
+    with pytest.raises(StateBindingError):
+        ru_02_tpg_toggle.bind_state(full_system)
+
+    assert ru_02_tpg_toggle.get_internal_state() == full_system.get_state()
+    
+  
+
+def test_append_objects(full_system):
+    ru_subsystem = full_system.get_subsystem('ru-seg')
+    toggle = full_system.controlled_objects[0]
+    
+    # Check we don't change things!
+    assert full_system.state_operations.count(ru_subsystem)==1
+    full_system.add_state_operation(ru_subsystem)
+    assert full_system.state_operations.count(ru_subsystem)==1
+    
+    assert full_system.controlled_objects.count(toggle) == 1
+    full_system.add_controlled_object(toggle)
+    assert full_system.controlled_objects.count(toggle) == 1
+
+def test_subsyst_defined_correctly(full_system, df_system_toggle):
+    '''
+    Check if error gets thrown if a subsystem has the same name as
+    a DAL
+    '''
+    with pytest.raises(DuplicatedSubsystemException):
+        full_system.add_to_subsystem('ru_01', df_system_toggle)
+    
+
+def test_duplicate_labels(full_system, df_system_toggle):
+    # We make a dummy dal
+    # Get a repeat key
+    used_key = next(iter(full_system.get_nested_registry()))
+    
+    df_lab = df_system_toggle.label
+    df_system_toggle.label = used_key
+    
+    with pytest.raises(DuplicatedSubsystemException):
+        full_system.add_state_operation(df_system_toggle)
+    
+    # Reset
+    df_system_toggle.label = df_lab

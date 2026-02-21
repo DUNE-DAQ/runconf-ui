@@ -3,10 +3,8 @@ import shutil
 from pathlib import Path
 
 import pytest
-from conffwk import Configuration
 from daqconf.consolidate import consolidate_db
 
-from runconf_ui.system_visibility import VisibilityConfigReader
 from runconf_ui.utils import open_configuration
 
 
@@ -40,7 +38,7 @@ def consolidated_session(consolidated_config, session_name):
     return consolidated_config.get_dal('Session', session_name)
 
 @pytest.fixture(scope="session")
-def visibility_config_path(tmp_config_path):
+def system_config(tmp_config_path):
     initial_config = Path(__file__).parent/"test_files"/"dummy.yml"
     
     config_path = tmp_config_path.parent/"runconf-ui-settings"/"dummy.yml"
@@ -49,15 +47,3 @@ def visibility_config_path(tmp_config_path):
     shutil.copy(initial_config, config_path)
     return config_path
 
-@pytest.fixture(scope="session")
-def visibility_config(visibility_config_path: Path)->VisibilityConfigReader:
-    return VisibilityConfigReader(visibility_config_path)
-
-@pytest.fixture(scope="session")
-def loaded_visibility_config(visibility_config: VisibilityConfigReader,
-                             consolidated_config: Configuration,
-                             session_name: str):
-    return visibility_config.generate_operations_tree(
-        consolidated_config,
-        session_name
-    )

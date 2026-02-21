@@ -45,7 +45,7 @@ def add_to_tree(tree, state: state_operations.StateOperation) -> None:
     """Add a state operation node (and any children) to the given tree."""
     branch = tree.add(make_tree_label(state), state.get_state())
     if isinstance(state, state_operations.StateOperationContainer):
-        for child in state.contained_operations:
+        for child in state.state_operations:
             add_to_tree(branch, child)
 
 

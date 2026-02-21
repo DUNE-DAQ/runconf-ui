@@ -3,7 +3,7 @@ from typing import Any
 from conffwk import Configuration
 from conffwk.dal import DalBase
 
-from runconf_ui.exceptions import AttributeMissingException, AttributeValueException
+from runconf_ui.exceptions import AttributeMissingException
 from runconf_ui.state_operations.state_operation import DisableOperation, StateOperation
 
 
@@ -60,22 +60,11 @@ class DisableAttribute(DisableOperation, DalAttribute):
         self.enabled_value = enabled_value
         self.disabled_value = disabled_value
 
-    def _check_value_valid(self, value):
-        if value not in (self.enabled_value, self.disabled_value):
-            raise AttributeValueException(
-                f"{self.attribute_name} in {self.dal!r} "
-                f"must be {self.enabled_value}/{self.disabled_value}, "
-                f"not {value}"
-            )
-
-    def get_state(self) -> bool:
+    def _get_state(self) -> bool:
         value = self._get_attr()
-        self._check_value_valid(value)
         return value == self.enabled_value and self.dal_enabled()
 
-    def set_state(self, state: bool) -> None:
-        self._check_value_valid(state)
-
+    def _set_state(self, state: bool) -> None:
         new_value = self.enabled_value if state else self.disabled_value
         if self._get_attr() != new_value:
             self._set_attr(new_value)

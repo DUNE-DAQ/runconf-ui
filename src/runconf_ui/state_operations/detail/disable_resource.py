@@ -17,11 +17,11 @@ class DisableResource(DisableOperation):
 
         self.dal = dal
 
-    def get_state(self) -> bool:
+    def _get_state(self) -> bool:
         # Not ideal but it'll do
         return self.dal not in self.session.disabled
 
-    def set_state(self, state: bool):
+    def _set_state(self, state: bool):
         if self.get_state() == state:
             return
 
@@ -34,12 +34,3 @@ class DisableResource(DisableOperation):
 
         self.configuration.update_dal(self.session)
         self.configuration.update_dal(self.dal)
-
-    def __eq__(self, other: "DisableResource"):
-        if not isinstance(other, DisableResource):
-            return False
-
-        """
-        We can assume (reasonably that they are the same if the ids match)
-        """
-        return other.dal.id == self.dal.id and other.session.id == self.session.id

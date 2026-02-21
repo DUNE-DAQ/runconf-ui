@@ -13,6 +13,7 @@ PanelOptions:
     Systems:
       - Readout:
           subsystem_dependent: True
+          display_full_system: True
           components:
             - id: ru-segment
               class: Segment
@@ -31,11 +32,24 @@ PanelOptions:
 
     Systems:
       - TPG:
-          subsystem_dependent: False
+          subsystem_dependent: True
+          display_full_system: True
+          components:
+            - id: tp-stream-writer
+              class: TPStreamWriterApplication
 
           attributes:
             - id: tp_generation_enabled
               segments: ["ru-segment"]
               class: ReadoutApplication
               separate_system: True
-              system_label: "ru-01"
+              system_label: "readout"
+
+AdjustableAttributes:
+  Random Trigger Rates:
+    label: "TriggerRates"
+    Systems:
+      - object_id: "random-tc-generator"
+        object_class: RandomTCMakerConf
+        attribute_name: "trigger_rate_hz"
+        unit_label: "Hz"
