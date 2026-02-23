@@ -1,5 +1,5 @@
 # The only publicly accessible interface here is the reader
-from .config_dataclasses import (
+from .dataclasses import (
                           AdjustableAttributeData,
                           DisableAttributeData,
                           DisableElementData,
@@ -7,7 +7,8 @@ from .config_dataclasses import (
                           FilterData,
                           YamlToSystemData,
 )
-from .system_config import SystemConfigReader
+
+from .config_reader import SystemConfigReader
 
 __all__ = [
                           'AdjustableAttributeData',

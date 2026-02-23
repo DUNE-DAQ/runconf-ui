@@ -7,13 +7,13 @@ from .config_utils import (
     get_configs_with_session,
     open_configuration,
 )
-from .rich_utils import draw_state_operation_tree
+from .rich_utils import draw_tree
 
 __all__=[
     'check_config_has_session',
     "class_in_config",
     "dal_in_config",
-    'draw_state_operation_tree',
+    'draw_tree',
     'get_class_from_segment',
     "get_class_from_segment_list",
     'get_configs_with_session',

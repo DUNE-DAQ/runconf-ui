@@ -29,19 +29,13 @@ class DisableElementData(SystemElementData):
 
 
 @dataclass(kw_only=True)
-class _DisableAttributeGenericData(DisableElementData, Generic[T]):
-    enabled_state: T = True
-    disabled_state: T = False
+class DisableAttributeData(DisableElementData):
+    enabled_state: Any = True
+    disabled_state: Any = False
     segments: list[str] = field(default_factory=list)
 
-
 @dataclass(kw_only=True)
-class DisableAttributeData(_DisableAttributeGenericData[Any]):
-    ...
-
-
-@dataclass(kw_only=True)
-class DisableRelationshipData(_DisableAttributeGenericData[str | list[str]]):
+class DisableRelationshipData(DisableAttributeData):
     relationship_class: str = ""
 
 

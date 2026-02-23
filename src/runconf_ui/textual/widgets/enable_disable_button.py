@@ -1,6 +1,6 @@
 from textual.widgets import Button
 
-from runconf_ui.state_operations import StateOperation
+from runconf_ui.state_tree import StateOperation
 
 
 class EnableDisbableButton(Button):

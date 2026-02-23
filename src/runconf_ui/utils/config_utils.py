@@ -65,6 +65,9 @@ def get_class_from_segment(configuration: Configuration, segment_id: str, class_
     '''
     Find all instances of a class in a segment. This includes all subclasses  (regardless of enabled status)
     '''
+    if not dal_in_config(configuration, "Segment", segment_id):
+        return []
+
     try:
         segment = configuration.get_dal('Segment', segment_id)
     except RuntimeError as e:

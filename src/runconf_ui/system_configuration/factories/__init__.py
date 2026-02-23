@@ -1,14 +1,13 @@
-from .adjustable_operation_factory import AdjustableOperationFactory
-from .attribute_operation_factory import AttributeOperationFactory
-from .component_operation_factory import ComponentOperationFactory
-from .factory_interface import FactoryInterface
-from .relationship_operation_factory import RelationshipOperationFactory
+from .adjustable_factory import AdjustableFactory
+from .attribute_factory import AttributeFactory
+from .component_factory import ComponentFactory
+from .factory_base import FactoryBase
+from .relationship_factory import RelationshipFactory
 
 __all__=[
-    'AdjustableOperationFactory',
-    "AttributeOperationFactory",
-    "ComponentOperationFactory",
-    "FactoryInterface",
-    "RelationshipOperationFactory",
-    "relationship_operation_factory"
+    'AdjustableFactory',
+    "AttributeFactory",
+    "ComponentFactory",
+    "FactoryBase",
+    "RelationshipFactory",
 ]
