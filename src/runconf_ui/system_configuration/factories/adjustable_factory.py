@@ -1,7 +1,8 @@
-from runconf_ui.state_tree import Leaf, AdjustableAttribute
+from runconf_ui.state_tree import AdjustableAttribute, Leaf
 
 from ..dataclasses import AdjustableAttributeData
 from .factory_base import FactoryBase
+
 
 class AdjustableFactory(FactoryBase):
     """

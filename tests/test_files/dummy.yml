@@ -44,6 +44,43 @@ PanelOptions:
               class: ReadoutApplication
               separate_system: True
               system_label: "readout"
+          
+  Trigger:
+    label: 'Trigger'
+    view_panel: "Trigger View"
+    Systems:
+      - RandomTrigger:
+          relationships:
+            - id: standalone_candidate_maker_confs
+              class: MLTApplication
+              segments: ['trg-segment']
+              relationship_class: RandomTCMakerConf
+              enabled_state: [random-tc-generator]
+              disabled_state: []
+              tooltip: "Enable/Disable random trigger"
+
+  NotReal:
+    label: 'NotReal'
+    view_panel: "NotReal View"
+    Systems:
+      - RandomTrigger:
+          components:
+            - id: not_real
+              class: not_a_class
+
+          attributes:
+            - id: not_real
+              segments: [not_a_segment]
+              class: not_a_class
+
+          relationships:
+            - id: not_real
+              segments: [not_a_segment]
+              class: not_a_class
+              enabled_state: [doesnt_exist]
+              disabled_state: []
+              relationship_class: not_a_class
+
 
 AdjustableAttributes:
   Random Trigger Rates:

@@ -1,9 +1,9 @@
-from .adapter import Adapter
+from conffwk import Configuration
+from conffwk.dal import DalBase
 
 from runconf_ui.exceptions import IncompatibleDalException
 
-from conffwk import Configuration
-from conffwk.dal import DalBase
+from .adapter import Adapter
 
 
 class DisableComponent(Adapter):

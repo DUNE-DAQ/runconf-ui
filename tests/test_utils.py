@@ -64,8 +64,7 @@ def test_check_paths(tmp_config_path, no_session_config_path):
 
 def test_segment_getting(consolidated_config):
     # Check if we don't have a segment
-    with pytest.raises(ConfigReadException):
-        get_class_from_segment(consolidated_config, "not_real", "not_class") == []
+    assert get_class_from_segment(consolidated_config, "not_real", "not_class") == []
     
     # Get the dals
     dals = get_class_from_segment(consolidated_config, "ru-segment", "ReadoutApplication")

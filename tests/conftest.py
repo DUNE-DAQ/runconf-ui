@@ -1,3 +1,10 @@
+"""
+Shared fixtures for integration tests that require a live conffwk configuration.
+
+Unit tests (test_adapters, test_nodes, test_traversal) use stubs and mocks
+and do not depend on any fixture defined here.
+"""
+
 import os
 import shutil
 from pathlib import Path
@@ -12,38 +19,36 @@ from runconf_ui.utils import open_configuration
 def session_name():
     return "local-1x1-config"
 
+
 @pytest.fixture(scope="session")
-def config_path()->Path:
+def config_path() -> Path:
     return Path(
         os.environ.get("DAQSYSTEMTEST_SHARE", "")
-        +"/config/daqsystemtest/example-configs.data.xml"
+        + "/config/daqsystemtest/example-configs.data.xml"
     )
+
 
 @pytest.fixture(scope="session")
 def tmp_config_path(tmp_path_factory):
-    consolidated_config_folder=tmp_path_factory.mktemp("configs")
-    return consolidated_config_folder/"local-1x1-config.data.xml"
+    folder = tmp_path_factory.mktemp("configs")
+    return folder / "local-1x1-config.data.xml"
+
 
 @pytest.fixture(scope="session")
 def consolidated_config(tmp_config_path, session_name, config_path):
-    '''
-    Consolidate the config so it only has 
-    one session to avoid poorly defined behaviour in future
-    '''
     consolidate_db(str(config_path), str(tmp_config_path), session_name)
     return open_configuration(tmp_config_path)
 
+
 @pytest.fixture(scope="session")
 def consolidated_session(consolidated_config, session_name):
-    return consolidated_config.get_dal('Session', session_name)
+    return consolidated_config.get_dal("Session", session_name)
+
 
 @pytest.fixture(scope="session")
 def system_config(tmp_config_path):
-    initial_config = Path(__file__).parent/"test_files"/"dummy.yml"
-    
-    config_path = tmp_config_path.parent/"runconf-ui-settings"/"dummy.yml"
-    
-    config_path.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copy(initial_config, config_path)
-    return config_path
-
+    initial = Path(__file__).parent / "test_files" / "dummy.yml"
+    dest    = tmp_config_path.parent / "runconf-ui-settings" / "dummy.yml"
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy(initial, dest)
+    return dest

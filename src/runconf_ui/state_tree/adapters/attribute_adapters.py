@@ -7,6 +7,7 @@ from runconf_ui.exceptions import AttributeMissingException
 
 from .adapter import Adapter
 
+
 class DisableAttribute(Adapter):
     """
     Enables/disables a DAL object by toggling a named attribute.

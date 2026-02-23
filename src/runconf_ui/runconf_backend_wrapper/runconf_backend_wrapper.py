@@ -2,35 +2,40 @@
 Backend layer for runconf-ui
 '''
 from pathlib import Path
+from dataclasses import dataclass
 
 from runconf_ui.exceptions import RunConfToolsRepoException
 from runconf_ui.repo_manager import LocalRepoManager, RemoteRepoManager
 from runconf_ui.system_configuration import SystemConfigReader
+from runconf_ui.system_configuration.config_reader import AssembledGroup
 from runconf_ui.utils import open_configuration
 
+@dataclass
+class RunconfContext:
+    apparatus: str
+    conf_directory: Path
+    use_local: bool
+    default_config: str | None = None
+    base_url: str | None = None
+    ops_url: str | None = None
 
-class RunconBackendWrapper:
-    def __init__(self, apparatus: str,
-                 conf_directory: Path,
-                 use_local: bool,
-                 default_config: str | None = None,
-                 base_url: str | None = None,
-                 ops_url: str | None = None
-                ):
+
+class RunconfBackendWrapper:
+    def __init__(self, context: RunconfContext):
         
-        if use_local:
-            self.repo_manager = LocalRepoManager(apparatus,
-                                                 conf_directory)
+        if context.use_local:
+            self.repo_manager = LocalRepoManager(context.apparatus,
+                                                 context.conf_directory)
         
         else:
-            if not any(d is None for d in (default_config, base_url, ops_url)):
+            if any(d is None for d in (context.default_config, context.base_url, context.ops_url)):
                 raise RunConfToolsRepoException("Error must set default config (blah.data.xml), base repo URL and operations repo URL to use runconftools")
             
-            self.repo_manager = RemoteRepoManager(apparatus,
-                                                  conf_directory,
-                                                  default_config,
-                                                  ops_url,
-                                                  base_url)
+            self.repo_manager = RemoteRepoManager(context.apparatus,
+                                                  context.conf_directory,
+                                                  context.default_config,
+                                                  context.ops_url,
+                                                  context.base_url)
             
         self.configuration = None
         self.system_config_reader: SystemConfigReader | None = None
@@ -58,3 +63,14 @@ class RunconBackendWrapper:
             self.configuration.get_dals('Session')[0].id
         )
     
+    def get_disableable_objects(self)->list[AssembledGroup]:
+        if self.state_operations_tree is None:
+            return []
+        
+        return self.state_operations_tree.disableable
+    
+    def get_adjustable_objects(self)->list[AssembledGroup]:
+        if self.state_operations_tree is None:
+            return []
+
+        return self.state_operations_tree.adjustable

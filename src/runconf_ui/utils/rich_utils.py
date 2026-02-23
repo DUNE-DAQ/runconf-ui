@@ -10,7 +10,7 @@ Colour scheme:
 
 from rich.tree import Tree
 
-from runconf_ui.state_tree import State, compute_state, Group, Node
+from runconf_ui.state_tree import Group, Node, State, compute_state
 
 _COLOURS: dict[State, str] = {
     State.ENABLED:         "green",

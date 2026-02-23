@@ -9,6 +9,13 @@ AssembledConfig, AssembledGroup, AssembledSystem are the typed output
 dataclasses consumed by the TUI layer.
 """
 
+from dataclasses import dataclass
+from pathlib import Path
+
+import yaml
+from conffwk import Configuration
+from conffwk.dal import DalBase
+
 from runconf_ui.state_tree import Group
 
 from .builders import AdjustableSystemBuilder, DisableSystemBuilder
@@ -17,14 +24,6 @@ from .dataclasses import (
     DisableableGroupData,
     YamlToSystemData,
 )
-
-
-from dataclasses import dataclass
-from pathlib import Path
-
-import yaml
-from conffwk import Configuration
-from conffwk.dal import DalBase
 
 # ---------------------------------------------------------------------------
 # Output dataclasses
@@ -103,8 +102,28 @@ class ConfigAssembler:
         skeleton: dict[str, DisableableGroupData],
     ) -> list[AssembledGroup]:
         builder = DisableSystemBuilder(self.configuration, self.session)
-        return [
-            AssembledGroup(
+        
+        assmbled_groups = []
+        for group_name, group_data in skeleton.items():
+            systems = []
+            for system_name, system_list in group_data.systems.items():
+                for system in system_list:
+                    root = builder.build(system, label=system_name)
+
+                    if not root.children:
+                        continue
+                    
+                    system = AssembledSystem(
+                        root=builder.build(system, label=system_name),
+                        display_full_system=system.display_full_system,
+                    )
+                    
+                    systems.append(system)
+
+            if not systems:
+                continue
+            
+            assembled_group = AssembledGroup(
                 id=group_name,
                 label=group_data.label or group_name,
                 view_panel=group_data.view_panel,
@@ -117,29 +136,45 @@ class ConfigAssembler:
                     for system in system_list
                 ],
             )
-            for group_name, group_data in skeleton.items()
-        ]
+            
+            assmbled_groups.append(assembled_group)
+            
+        return assmbled_groups
 
+        
     def assemble_adjustable(
         self,
         skeleton: dict[str, AdjustableGroupData],
     ) -> list[AssembledGroup]:
         builder = AdjustableSystemBuilder(self.configuration, self.session)
-        return [
-            AssembledGroup(
+        
+        assmbled_groups = []
+        for group_name, group_data in skeleton.items():
+            systems = []
+            for system_name, attrs in group_data.systems.items():
+                root = builder.build(attrs, label=system_name)
+                if not root.children:
+                    continue
+                system = AssembledSystem(
+                           root=builder.build(attrs, label=system_name),
+                            display_full_system=False,
+                        )
+                
+                systems.append(system)
+            
+            if not systems:
+                continue
+            
+            assmbled_group = AssembledGroup(
                 id=group_name,
                 label=group_data.label or group_name,
                 view_panel="",
-                systems=[
-                    AssembledSystem(
-                        root=builder.build(attrs, label=system_name),
-                        display_full_system=False,
-                    )
-                    for system_name, attrs in group_data.systems.items()
-                ],
+                systems=systems
             )
-            for group_name, group_data in skeleton.items()
-        ]
+            
+            assmbled_groups.append(assmbled_group)
+        
+        return assmbled_groups
 
 
 # ---------------------------------------------------------------------------
@@ -166,3 +201,5 @@ class SystemConfigReader:
             disableable=assembler.assemble_disableable(self.config.disableable_skeleton),
             adjustable=assembler.assemble_adjustable(self.config.adjustable_skeleton),
         )
+        
+    

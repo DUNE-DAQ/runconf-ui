@@ -1,12 +1,12 @@
-from runconf_ui.state_tree import Group
-
 from conffwk.dal import DalBase
 
+from runconf_ui.state_tree import Group
+
+from ..dataclasses import DisableRelationshipData
 from .attribute_factory import (
     AttributeFactory,
 )
 
-from ..dataclasses import DisableRelationshipData
 
 class RelationshipFactory(AttributeFactory):
     """

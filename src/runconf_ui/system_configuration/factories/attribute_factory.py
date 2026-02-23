@@ -1,10 +1,10 @@
 
-from runconf_ui.utils import get_class_from_segment_list
 from runconf_ui.state_tree import (
     DisableAttribute,
     Group,
     Leaf,
 )
+from runconf_ui.utils import get_class_from_segment_list
 
 from ..dataclasses import DisableAttributeData
 from .factory_base import FactoryBase

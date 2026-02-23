@@ -3,68 +3,77 @@ Dataclasses for systems in the configuration. Much neater than passing dicts
 '''
 
 from dataclasses import dataclass, field
-from typing import Any, Generic, TypeVar
+from typing import Any, TypeVar
 
 T = TypeVar('T')
 
 
 @dataclass(kw_only=True)
 class FilterData:
-    attribute: str
-    values: list[Any]
+    '''For the Filters attribute'''
+    attribute: str    # Name of the attribute to filter on
+    values: list[Any] # Values of the attribute to filter out
 
 
 @dataclass(kw_only=True)
 class SystemElementData:
-    class_name: str
-    id: str = ""
-    system_label: str = ""
-    filters: list[FilterData] = field(default_factory=list)
+    '''Any "system element" will use this info'''
+    class_name: str   # Class of the DAL object in the system
+    id: str = ""      # id of the system element
+    system_label: str = ""  # Label of the system element
+    filters: list[FilterData] = field(default_factory=list) # Any filters
 
 
 @dataclass(kw_only=True)
 class DisableElementData(SystemElementData):
-    separate_system: bool = False
-    each_component_separate: bool = False
+    '''Anything that can be disabled also has this'''
+    each_component_separate: bool = False # Is each component a separate subsystem
+    separate_system: bool = False # Does this by itself comprise a seperate subsystem
 
 
 @dataclass(kw_only=True)
 class DisableAttributeData(DisableElementData):
-    enabled_state: Any = True
-    disabled_state: Any = False
-    segments: list[str] = field(default_factory=list)
+    '''Attributes that can be disabled use this'''
+    enabled_state: Any = True # Enabled value
+    disabled_state: Any = False # Disabled value 
+    segments: list[str] = field(default_factory=list)  # Segments to search
 
 @dataclass(kw_only=True)
 class DisableRelationshipData(DisableAttributeData):
-    relationship_class: str = ""
+    '''Relationships also need to know the class of the related object(s)
+        For relationships the enabled/disabled states should be (lists of) dal object ids
+    '''
+    relationship_class: str = "" # Class of disabled/enabled DAL objects
 
 
 @dataclass(kw_only=True)
 class AdjustableAttributeData(SystemElementData):
-    attribute_name: str = ""
-    unit_label: str = ""
+    '''Adjustable attributes have some "funky" features'''
+    attribute_name: str = "" # Name of the attribute
+    unit_label: str = ""     # Units of the attribute (Hz, ticks, etc.)
 
 
 @dataclass
 class DisableableSystemData:
-    subsystem_dependent: bool
-    display_full_system: bool
-    components: list[DisableElementData]
-    attributes: list[DisableAttributeData]
-    relationships: list[DisableRelationshipData]
+    '''Systems of disabled elements'''
+    subsystem_dependent: bool  # Does this system depend soley on its subsystems
+    display_full_system: bool  # Do you want to display the top-level-system?
+    components: list[DisableElementData] # Components in the system
+    attributes: list[DisableAttributeData] # Attributes in the system
+    relationships: list[DisableRelationshipData] # Relationships in the system
 
 
 @dataclass
 class DisableableGroupData:
-    label: str
-    view_panel: str
-    systems: dict[str, list[DisableableSystemData]]
+    label: str # Internal label of the group
+    view_panel: str # Tag for the view panel
+    systems: dict[str, list[DisableableSystemData]] # Any internal systems
 
 
 @dataclass
 class AdjustableGroupData:
-    label: str
-    systems: dict[str, list[AdjustableAttributeData]]
+    label: str # Label of the group
+    systems: dict[str, list[AdjustableAttributeData]] # Any internal systems
 
 
 @dataclass

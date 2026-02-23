@@ -1,3 +1,5 @@
-from .runconf_backend_wrapper import RunconBackendWrapper
+from .runconf_backend_wrapper import (RunconfBackendWrapper,
+                                      RunconfContext)
 
-__all__ = ['RunconBackendWrapper']
+__all__ = ['RunconfBackendWrapper',
+           'RunconfContext']

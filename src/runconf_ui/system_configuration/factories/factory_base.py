@@ -4,7 +4,6 @@ from conffwk import Configuration
 from conffwk.dal import DalBase
 
 from runconf_ui.state_tree import Node
-
 from runconf_ui.utils import class_in_config, dal_in_config
 
 from ..dataclasses import FilterData
@@ -41,4 +40,3 @@ class FactoryBase(ABC):
             if getattr(dal, f.attribute) in f.values:
                 return True
         return False
-

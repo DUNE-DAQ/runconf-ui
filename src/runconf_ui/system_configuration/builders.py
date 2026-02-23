@@ -16,14 +16,17 @@ Flag conventions used throughout:
                                  enable/disable tree. Never set via Group.set().
 """
 
+from conffwk import Configuration
+from conffwk.dal import DalBase
+
 from runconf_ui.state_tree import Group
 
 from .dataclasses import (
     AdjustableAttributeData,
+    DisableableSystemData,
     DisableAttributeData,
     DisableElementData,
     DisableRelationshipData,
-    DisableableSystemData,
 )
 from .factories import (
     AdjustableFactory,
@@ -31,11 +34,6 @@ from .factories import (
     ComponentFactory,
     RelationshipFactory,
 )
-
-from conffwk import Configuration
-from conffwk.dal import DalBase
-
-
 
 # ---------------------------------------------------------------------------
 # Disable system builder
