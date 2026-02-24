@@ -6,9 +6,9 @@ DAQ environment. The mock consolidated_session tracks disabled DALs the same way
 real consolidated_session does.
 """
 
-from unittest.mock import MagicMock
 
 import pytest
+from confmodel_dal import component_disabled, disable_component, enable_component
 
 from runconf_ui.exceptions import AttributeMissingException, IncompatibleDalException
 from runconf_ui.state_tree import (
@@ -16,7 +16,6 @@ from runconf_ui.state_tree import (
     DisableAttribute,
     DisableComponent,
 )
-from confmodel_dal import enable_component, disable_component, component_disabled
 
 # ---------------------------------------------------------------------------
 # Fixtures

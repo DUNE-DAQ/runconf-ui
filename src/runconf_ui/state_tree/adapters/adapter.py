@@ -5,6 +5,7 @@ from conffwk import Configuration
 from conffwk.dal import DalBase
 from confmodel_dal import component_disabled
 
+
 class Adapter(ABC):
     """
     Reads and writes state for a single DAL object.

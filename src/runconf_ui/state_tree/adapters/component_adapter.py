@@ -1,9 +1,11 @@
-from .adapter import Adapter
-from runconf_ui.exceptions import IncompatibleDalException
-
 from conffwk import Configuration
 from conffwk.dal import DalBase
-from confmodel_dal import enable_component, disable_component
+from confmodel_dal import disable_component, enable_component
+
+from runconf_ui.exceptions import IncompatibleDalException
+
+from .adapter import Adapter
+
 
 class DisableComponent(Adapter):
     def __init__(

@@ -37,13 +37,14 @@ from .nodes import Group, Leaf, Node
 
 class State(Enum):
     '''The state of a node'''
-    ENABLED         = auto() # Node is enabled
-    DISABLED        = auto() # Node is disabled
-    PARENT_DISABLED = auto() # Node's parent is disabled
+    ENABLED         = auto()  # Node is enabled
+    DISABLED        = auto()  # Node is disabled
+    PARENT_DISABLED = auto()  # Node's parent is disabled
+
 
 @dataclass(frozen=True)
 class NodeStatus:
-    '''A full node'''
+    '''A full node status, carrying the node, its computed state, and its parent.'''
     node:   Node
     state:  State
     parent: Group | None
@@ -54,15 +55,41 @@ class NodeStatus:
         return self.state != State.PARENT_DISABLED
 
     @property
-    def unique_path(self)->tuple[str, str]:
+    def is_enabled(self) -> bool:
+        """True only when the node is fully enabled."""
+        return self.state == State.ENABLED
+
+    @property
+    def unique_path(self) -> tuple[str, str]:
         '''
         For NOW we assume 1 layer of nesting!
         '''
         if self.parent is None:
             return ('', self.node.label)
-        
         return (self.parent.label, self.node.label)
-        
+
+    def toggle(self) -> 'NodeStatus':
+        """
+        Flip the node's state and return a fresh NodeStatus reflecting the
+        result. No-op (returns self) if the node is not interactive.
+        """
+        if not self.is_interactive:
+            return self
+        self.node.set(not self.node.get())
+        return self.refresh()
+
+    def refresh(self) -> 'NodeStatus':
+        """
+        Return a new NodeStatus reflecting the node's current state,
+        recomputing from the live adapter values.
+        """
+        return NodeStatus(
+            node=self.node,
+            state=compute_state(self.node, self.parent),
+            parent=self.parent,
+        )
+
+
 # ---------------------------------------------------------------------------
 # State computation
 # ---------------------------------------------------------------------------
@@ -122,6 +149,7 @@ def _walk(node: Node, parent: Group | None) -> Iterator[NodeStatus]:
 # ---------------------------------------------------------------------------
 # Filtered views
 # ---------------------------------------------------------------------------
+
 def labelled(root: Node) -> Iterator[NodeStatus]:
     """Yields NodeStatus for all nodes with non-empty labels."""
     for status in walk(root):
@@ -150,7 +178,7 @@ def build_index(root: Node) -> dict[str, Node]:
     tree structure changes (only happens at startup).
     """
     index: dict[str, Node] = {}
-    
+
     for status in labelled(root):
         label = status.node.label
         if label in index:

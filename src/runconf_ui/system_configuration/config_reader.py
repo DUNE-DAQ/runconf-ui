@@ -39,8 +39,8 @@ class AssembledSystem:
 class AssembledGroup:
     id:         str
     label:      str
-    view_panel: str
-    systems:    list[AssembledSystem]
+    systems:    list[AssembledSystem] 
+    view_panel: str = ""
 
 
 @dataclass(frozen=True)

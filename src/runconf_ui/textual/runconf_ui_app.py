@@ -23,7 +23,3 @@ class RunconfShifterUI(App):
         '''
         super().__init__(*args,**kwargs)
         self.backend = RunconfUI(context)
-        
-             
-def build_enable_display(backend: RunconfUI):
-    
