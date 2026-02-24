@@ -14,6 +14,11 @@ Flag conventions used throughout:
                                  Replaces the old controlled_objects mechanism.
   votes=False, propagate=False — adjustable child; fully independent of the
                                  enable/disable tree. Never set via Group.set().
+
+Root strategy:
+  subsystem_dependent=False — strategy=all (system is on iff ALL components are on)
+  subsystem_dependent=True  — strategy=any (system is on if ANY subsystem is on;
+                               equivalently, off only when ALL subsystems are off)
 """
 
 from conffwk import Configuration
@@ -43,9 +48,13 @@ class DisableSystemBuilder:
     """
     Builds a Group tree from a DisableableSystemData instance.
 
-    The root Group uses AND semantics (system is on iff all voting children
-    are on). Subsystems created via at() use OR semantics (a subsystem is on
-    if any of its components are on).
+    When subsystem_dependent=False the root uses AND semantics: the system is
+    on iff every voting child is on.
+
+    When subsystem_dependent=True the root uses OR semantics: the system is on
+    if any named subsystem is on, and goes off only when every subsystem is off.
+    Subsystems created via at() always use OR semantics (a subsystem is on if
+    any of its components are on).
     """
 
     def __init__(self, configuration: Configuration, session: DalBase):
@@ -55,7 +64,10 @@ class DisableSystemBuilder:
         self.relationship_factory = RelationshipFactory(*args)
 
     def build(self, system: DisableableSystemData, label: str) -> Group:
-        root = Group(label=label, strategy=all)
+        # subsystem_dependent=True  → OR root: off only when ALL subsystems are off
+        # subsystem_dependent=False → AND root: off when any component is off
+        root_strategy = any if system.subsystem_dependent else all
+        root = Group(label=label, strategy=root_strategy)
 
         for comp in system.components:
             self._add_component(root, comp, system.subsystem_dependent)
