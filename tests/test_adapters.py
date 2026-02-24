@@ -30,7 +30,7 @@ def resource_dal(consolidated_config):
     return consolidated_config.get_dal("ReadoutApplication", "ru-01")
 
 # ---------------------------------------------------------------------------
-# DisableComponent§
+# DisableComponent
 # ---------------------------------------------------------------------------
 
 class TestDisableComponent:
@@ -74,13 +74,6 @@ class TestDisableComponent:
 # ---------------------------------------------------------------------------
 
 class TestDisableAttribute:
-
-    # @pytest.fixture
-    # def dal_with_attr(self, consolidated_session):
-    #     dal = MagicMock()
-    #     dal.className.return_value = "ReadoutApplication"
-    #     dal.tp_generation_enabled = True
-    #     return dal
 
     @pytest.fixture
     def adapter(self, consolidated_config, consolidated_session, resource_dal):

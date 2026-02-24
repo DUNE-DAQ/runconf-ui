@@ -177,7 +177,6 @@ class TestWalk:
 # labelled()
 # ---------------------------------------------------------------------------
 class TestLabelled:
-
     def test_anonymous_nodes_excluded(self):
         root = Group("root", strategy=all)
         root.add(leaf(label=""))   # anonymous
@@ -207,7 +206,7 @@ class TestLabelled:
 # disabled_children()
 # ---------------------------------------------------------------------------
 
-class TestDisabledChildren:
+class TestDisabledChildNodes:
     def test_returns_voting_children_that_are_off(self):
         on  = leaf(True,  label="on")
         off = leaf(False, label="off")
@@ -229,7 +228,7 @@ class TestDisabledChildren:
         g.add(leaf(True)).add(leaf(True))
         assert disabled_child_nodes(g) == []
 
-    def test_returns_multiple_disabled_children(self):
+    def test_returns_multiple_disabled_child_nodes(self):
         a = leaf(False, label="a")
         b = leaf(False, label="b")
         g = Group(strategy=all)

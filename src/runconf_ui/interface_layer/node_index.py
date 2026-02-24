@@ -143,10 +143,6 @@ def get_value(index: NodeIndex, widget_id: str):
     Raises TypeError if called on a DISABLE node.
     """
     entry = index[widget_id]
-    if entry.kind is not NodeKind.ADJUSTABLE:
-        raise TypeError(
-            f"get_value called on DISABLE node {widget_id!r} — use toggle_node instead"
-        )
     return entry.node.get()
 
 
@@ -156,9 +152,5 @@ def set_value(index: NodeIndex, widget_id: str, value) -> IndexEntry:
     Raises TypeError if called on a DISABLE node.
     """
     entry = index[widget_id]
-    if entry.kind is not NodeKind.ADJUSTABLE:
-        raise TypeError(
-            f"set_value called on DISABLE node {widget_id!r} — use toggle_node instead"
-        )
     entry.node.set(value)
     return entry.refresh()

@@ -18,7 +18,6 @@ from .node_index import (
     IndexEntry,
     GroupedIndex,
     NodeIndex,
-    NodeKind,
     build_disable_index,
     build_adjustable_index,
     build_node_index,
@@ -93,11 +92,14 @@ class RunconfUI:
             self._adjustable_index = None
             self._tree_views = None
 
-    def select_config(self, config):
+    def get_daq_versions(self):
+        return self.repo_manager.get_available_daq_versions()
+
+    def select_session(self, session):
         if self.system_config_reader is None:
             raise RunConfToolsRepoException("No DAQ configuration setup, please select version first")
 
-        self.configuration = open_configuration(self.repo_manager.select_config(config))
+        self.configuration = open_configuration(self.repo_manager.select_config(session))
 
         self._assembled = self.system_config_reader.assemble_config(
             self.configuration,
@@ -111,6 +113,9 @@ class RunconfUI:
 
         # Build initial tree views
         self.refresh_information()
+
+    def get_sessions(self):
+        return self.repo_manager.get_daq_sessions()
 
     # ------------------------------------------------------------------ #
     # Refresh                                                              #
