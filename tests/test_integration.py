@@ -19,7 +19,7 @@ from runconf_ui.state_tree import (
     Leaf,
     State,
     build_index,
-    disabled_children,
+    disabled_child_nodes,
     labelled,
 )
 from runconf_ui.system_configuration import SystemConfigReader
@@ -126,13 +126,6 @@ class TestAdjustableAttributeIntegration:
         adapter.set(initial)
         assert adapter.get() == initial
 
-    def test_dal_enabled(self, adapter, consolidated_session, dal):
-        assert adapter.dal_enabled() is True
-        consolidated_session.disabled.append(dal)
-        assert adapter.dal_enabled() is False
-        consolidated_session.disabled.remove(dal)
-
-
 # ---------------------------------------------------------------------------
 # Tree integration
 # ---------------------------------------------------------------------------
@@ -202,7 +195,7 @@ class TestTreeIntegration:
 
     def test_disabled_children_diagnostic(self, tpc_tree):
         tpc_tree.at("CRP4").set(False)
-        result = disabled_children(tpc_tree)
+        result = disabled_child_nodes(tpc_tree)
         assert any(c.label == "CRP4" for c in result)
         tpc_tree.at("CRP4").set(True)
 

@@ -14,7 +14,7 @@ from runconf_ui.state_tree import (
     State,
     build_index,
     compute_state,
-    disabled_children,
+    disabled_child_nodes,
     labelled,
     walk,
 )
@@ -212,7 +212,7 @@ class TestDisabledChildren:
         off = leaf(False, label="off")
         g = Group(strategy=all)
         g.add(on).add(off)
-        result = disabled_children(g)
+        result = disabled_child_nodes(g)
         assert result == [off]
 
     def test_ignores_non_voting_children(self):
@@ -220,20 +220,20 @@ class TestDisabledChildren:
         off_nonvoter = leaf(False, label="nonvoter")
         g = Group(strategy=all)
         g.add(on_voter, votes=True).add(off_nonvoter, votes=False)
-        result = disabled_children(g)
+        result = disabled_child_nodes(g)
         assert result == []
 
     def test_returns_empty_when_all_enabled(self):
         g = Group(strategy=all)
         g.add(leaf(True)).add(leaf(True))
-        assert disabled_children(g) == []
+        assert disabled_child_nodes(g) == []
 
     def test_returns_multiple_disabled_children(self):
         a = leaf(False, label="a")
         b = leaf(False, label="b")
         g = Group(strategy=all)
         g.add(a).add(b)
-        assert set(disabled_children(g)) == {a, b}
+        assert set(disabled_child_nodes(g)) == {a, b}
 
 
 # ---------------------------------------------------------------------------
