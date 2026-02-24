@@ -62,7 +62,7 @@ class Node(ABC):
     @abstractmethod
     def set(self, value: Any) -> None:
         '''Set the value of the node'''
-
+        
 
 # ---------------------------------------------------------------------------
 # Leaf

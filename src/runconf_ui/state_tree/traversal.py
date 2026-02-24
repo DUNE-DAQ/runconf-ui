@@ -21,6 +21,8 @@ The three states:
 
 If a node is both internally disabled and parent/DAL-disabled, DISABLED is
 returned — the node's own state is the more informative signal.
+
+This code ALL assumes just 1 layer of nesting!
 """
 
 from collections.abc import Iterator
@@ -51,7 +53,16 @@ class NodeStatus:
         """False when the node is greyed out due to parent or DAL state."""
         return self.state != State.PARENT_DISABLED
 
-
+    @property
+    def unique_path(self)->tuple[str, str]:
+        '''
+        For NOW we assume 1 layer of nesting!
+        '''
+        if self.parent is None:
+            return ('', self.node.label)
+        
+        return (self.parent.label, self.node.label)
+        
 # ---------------------------------------------------------------------------
 # State computation
 # ---------------------------------------------------------------------------

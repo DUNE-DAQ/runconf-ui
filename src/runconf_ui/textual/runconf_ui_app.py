@@ -5,7 +5,7 @@ Textual application for controlling runconf-shifter-ui
 from textual.app import App
 from typing import ClassVar
 
-from runconf_ui.runconf_backend_wrapper import (RunconfBackendWrapper,
+from runconf_ui.interface_layer import (RunconfUI,
                                                 RunconfContext)
 
     
@@ -22,8 +22,8 @@ class RunconfShifterUI(App):
         Main application, takes RunconfContext as an argument, initialises the application and takes context
         '''
         super().__init__(*args,**kwargs)
-        self.backend = RunconfBackendWrapper(context)
+        self.backend = RunconfUI(context)
         
              
-def build_enable_display(backend: RunconfBackendWrapper):
+def build_enable_display(backend: RunconfUI):
     

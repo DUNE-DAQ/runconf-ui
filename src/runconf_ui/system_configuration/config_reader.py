@@ -176,7 +176,6 @@ class ConfigAssembler:
         
         return assmbled_groups
 
-
 # ---------------------------------------------------------------------------
 # SystemConfigReader
 # ---------------------------------------------------------------------------
@@ -201,5 +200,3 @@ class SystemConfigReader:
             disableable=assembler.assemble_disableable(self.config.disableable_skeleton),
             adjustable=assembler.assemble_adjustable(self.config.adjustable_skeleton),
         )
-        
-    

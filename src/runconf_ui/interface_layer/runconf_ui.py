@@ -1,5 +1,6 @@
 '''
-Backend layer for runconf-ui
+Wraps around runconf-ui, this "hides" most of the implementation details and handles the operations
+required for file loading/openining 
 '''
 from pathlib import Path
 from dataclasses import dataclass
@@ -9,10 +10,13 @@ from runconf_ui.repo_manager import LocalRepoManager, RemoteRepoManager
 from runconf_ui.system_configuration import SystemConfigReader
 from runconf_ui.system_configuration.config_reader import AssembledGroup
 from runconf_ui.utils import open_configuration
-from runconf_ui.state_tree import labelled, Node, State
+from runconf_ui.state_tree import Node, State, labelled
 
 @dataclass
 class RunconfContext:
+    '''
+    Basic context runconf-ui needs
+    '''
     apparatus: str
     conf_directory: Path
     use_local: bool
@@ -22,7 +26,12 @@ class RunconfContext:
 
 AddressBookEntry= list[tuple[Node, State]]
 
-class RunconfBackendWrapper:
+
+
+class RunconfUI:
+    '''
+    Wrapper layer around RunConf-UI, this hides most of the operational details
+    '''
     def __init__(self, context: RunconfContext):
         
         if context.use_local:
@@ -66,27 +75,18 @@ class RunconfBackendWrapper:
             self.configuration,
             self.configuration.get_dals('Session')[0].id
         )
-        
-        self.generate_address_book()
-    
-    
-    def generate_address_book(self):
+
+    def _make_id_map(self, group: list[AssembledGroup]):
         '''
-        Build the nested address book
-        |panel -> buttons -> nodes|
-        
+        Gets a unique mapping from the group
         '''
-        if self.state_operations_tree is None:
-            self.address_book = {'disableable': [], 'adjustable': []}
+        if group is None:
+            return {}
+
+        return_dict = {}
+        for top_syst in group:
+            return_dict[top_syst.label] = {}
+            for syst in top_syst.systems:
+                return_dict[syst] = [l.node.label for l in labelled(syst.root)]
         
-        else:
-            self.address_book =  {'disableable' : self._generate_address_book(self.state_operations_tree.disableable),
-                                  'adjustable'  : self._generate_address_book(self.state_operations_tree.adjustable)}
-        
-        
-    def _generate_address_book(self, assembled_groups: list[AssembledGroup])->dict[str, AddressBookEntry]:
-        addresses = {}
-        for group in assembled_groups:
-            addresses[group.label] = [(n.node, n.state) for system in group.systems for n in labelled(system.root)]
-        
-        return addresses
+        return return_dict
