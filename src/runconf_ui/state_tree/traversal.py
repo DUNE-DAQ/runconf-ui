@@ -34,13 +34,14 @@ from .nodes import Group, Leaf, Node
 # ---------------------------------------------------------------------------
 
 class State(Enum):
-    ENABLED         = auto()
-    DISABLED        = auto()
-    PARENT_DISABLED = auto()
-
+    '''The state of a node'''
+    ENABLED         = auto() # Node is enabled
+    DISABLED        = auto() # Node is disabled
+    PARENT_DISABLED = auto() # Node's parent is disabled
 
 @dataclass(frozen=True)
 class NodeStatus:
+    '''A full node'''
     node:   Node
     state:  State
     parent: Group | None
@@ -110,7 +111,6 @@ def _walk(node: Node, parent: Group | None) -> Iterator[NodeStatus]:
 # ---------------------------------------------------------------------------
 # Filtered views
 # ---------------------------------------------------------------------------
-
 def labelled(root: Node) -> Iterator[NodeStatus]:
     """Yields NodeStatus for all nodes with non-empty labels."""
     for status in walk(root):
@@ -118,7 +118,7 @@ def labelled(root: Node) -> Iterator[NodeStatus]:
             yield status
 
 
-def disabled_children(group: Group) -> list[Node]:
+def disabled_child_nodes(group: Group) -> list[Node]:
     """
     Returns the voting children that are causing this group to be disabled.
     Useful for diagnostic tooltips: "TPC is off because CRP4 is off."
@@ -139,6 +139,7 @@ def build_index(root: Node) -> dict[str, Node]:
     tree structure changes (only happens at startup).
     """
     index: dict[str, Node] = {}
+    
     for status in labelled(root):
         label = status.node.label
         if label in index:

@@ -1,10 +1,9 @@
-from conffwk import Configuration
-from conffwk.dal import DalBase
-
+from .adapter import Adapter
 from runconf_ui.exceptions import IncompatibleDalException
 
-from .adapter import Adapter
-
+from conffwk import Configuration
+from conffwk.dal import DalBase
+from confmodel_dal import enable_component, disable_component
 
 class DisableComponent(Adapter):
     def __init__(
@@ -22,10 +21,10 @@ class DisableComponent(Adapter):
         return self.dal_enabled()
 
     def set(self, value: bool) -> None:
-        if value and self.dal in self.session.disabled:
-            self.session.disabled.remove(self.dal)
-        elif not value and self.dal not in self.session.disabled:
-            self.session.disabled.append(self.dal)
+        if value:
+            enable_component(self.configuration._obj, self.session.id, self.dal.id)
+        else:
+            disable_component(self.configuration._obj, self.session.id, self.dal.id)
+        
         self.configuration.update_dal(self.session)
         self.configuration.update_dal(self.dal)
-

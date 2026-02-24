@@ -9,6 +9,7 @@ from runconf_ui.repo_manager import LocalRepoManager, RemoteRepoManager
 from runconf_ui.system_configuration import SystemConfigReader
 from runconf_ui.system_configuration.config_reader import AssembledGroup
 from runconf_ui.utils import open_configuration
+from runconf_ui.state_tree import labelled, Node, State
 
 @dataclass
 class RunconfContext:
@@ -19,6 +20,7 @@ class RunconfContext:
     base_url: str | None = None
     ops_url: str | None = None
 
+AddressBookEntry= list[tuple[Node, State]]
 
 class RunconfBackendWrapper:
     def __init__(self, context: RunconfContext):
@@ -40,6 +42,7 @@ class RunconfBackendWrapper:
         self.configuration = None
         self.system_config_reader: SystemConfigReader | None = None
         self.state_operations_tree = None
+        self.address_book = None
         
     # Wrapper to make life easier
     def set_daq_version(self, version):
@@ -48,10 +51,11 @@ class RunconfBackendWrapper:
             self.system_config_reader = SystemConfigReader(self.repo_manager.get_runconf_ui_config_path())
         else:
             self.system_config_reader = None
+            self.configuration = None 
+            self.state_operations_tree = None
+            self.address_book = None
 
-        self.configuration = None 
-        self.state_operations_tree = None
-    
+
     def select_config(self, config):
         if self.system_config_reader is None:
             raise RunConfToolsRepoException("No DAQ configuration setup, please select version first")
@@ -62,15 +66,27 @@ class RunconfBackendWrapper:
             self.configuration,
             self.configuration.get_dals('Session')[0].id
         )
-    
-    def get_disableable_objects(self)->list[AssembledGroup]:
-        if self.state_operations_tree is None:
-            return []
         
-        return self.state_operations_tree.disableable
+        self.generate_address_book()
     
-    def get_adjustable_objects(self)->list[AssembledGroup]:
+    
+    def generate_address_book(self):
+        '''
+        Build the nested address book
+        |panel -> buttons -> nodes|
+        
+        '''
         if self.state_operations_tree is None:
-            return []
-
-        return self.state_operations_tree.adjustable
+            self.address_book = {'disableable': [], 'adjustable': []}
+        
+        else:
+            self.address_book =  {'disableable' : self._generate_address_book(self.state_operations_tree.disableable),
+                                  'adjustable'  : self._generate_address_book(self.state_operations_tree.adjustable)}
+        
+        
+    def _generate_address_book(self, assembled_groups: list[AssembledGroup])->dict[str, AddressBookEntry]:
+        addresses = {}
+        for group in assembled_groups:
+            addresses[group.label] = [(n.node, n.state) for system in group.systems for n in labelled(system.root)]
+        
+        return addresses

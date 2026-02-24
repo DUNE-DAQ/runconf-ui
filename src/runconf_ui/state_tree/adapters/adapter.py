@@ -3,7 +3,7 @@ from typing import Any
 
 from conffwk import Configuration
 from conffwk.dal import DalBase
-
+from confmodel_dal import component_disabled
 
 class Adapter(ABC):
     """
@@ -32,5 +32,5 @@ class Adapter(ABC):
         it is a secondary check — the DAL may be resource-disabled independently
         of the attribute value or the tree structure.
         """
-        return self.dal not in self.session.disabled
+        return not component_disabled(self.configuration._obj, self.session.id, self.dal.id)
 

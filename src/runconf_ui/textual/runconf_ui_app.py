@@ -8,6 +8,8 @@ from typing import ClassVar
 from runconf_ui.runconf_backend_wrapper import (RunconfBackendWrapper,
                                                 RunconfContext)
 
+    
+
 class RunconfShifterUI(App):
     BINDINGS: ClassVar = [("ctrl+q", "quit", "Quit")]
 
@@ -22,3 +24,6 @@ class RunconfShifterUI(App):
         super().__init__(*args,**kwargs)
         self.backend = RunconfBackendWrapper(context)
         
+             
+def build_enable_display(backend: RunconfBackendWrapper):
+    

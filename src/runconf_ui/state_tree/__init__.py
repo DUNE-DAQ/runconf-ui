@@ -6,7 +6,7 @@ from .traversal import (
     State,
     build_index,
     compute_state,
-    disabled_children,
+    disabled_child_nodes,
     labelled,
     walk,
 )
@@ -25,7 +25,7 @@ __all__ = [
     "State",
     "build_index",
     "compute_state",
-    "disabled_children",
+    "disabled_child_nodes",
     "labelled",
     "walk",
 ]
