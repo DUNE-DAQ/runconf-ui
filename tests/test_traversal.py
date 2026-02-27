@@ -73,7 +73,7 @@ class TestComputeState:
         child = leaf(False)
         parent = Group(strategy=all)
         parent.add(other).add(child)
-        assert compute_state(child, parent) == State.DISABLED
+        assert compute_state(child, parent) == State.PARENT_DISABLED
 
     def test_dal_resource_disabled_returns_parent_disabled(self):
         child = leaf(True, dal_enabled=False)
@@ -85,7 +85,7 @@ class TestComputeState:
         parent = Group(strategy=all)
         other = leaf(False)
         parent.add(other).add(child)
-        assert compute_state(child, parent) == State.DISABLED
+        assert compute_state(child, parent) == State.PARENT_DISABLED
 
     def test_group_node_enabled(self):
         g = Group(strategy=all)

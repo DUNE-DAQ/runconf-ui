@@ -59,7 +59,8 @@ class AssembledConfig:
         self.adjustable_nodes  = {group.id: group.nodes for group in self.adjustable}
         
         self.all_nodes = {**self.adjustable_nodes, **self.disableable_nodes}
-        
+
+
     
 
 # ---------------------------------------------------------------------------

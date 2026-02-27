@@ -9,7 +9,7 @@ from rich.tree import Tree
 
 from runconf_ui.exceptions import RunConfToolsRepoException, NodeNotFound
 from runconf_ui.repo_manager import LocalRepoManager, RemoteRepoManager
-from runconf_ui.state_tree import NodeStatus
+from runconf_ui.state_tree import NodeStatus, walk
 from runconf_ui.system_configuration import SystemConfigReader
 from runconf_ui.system_configuration.config_reader import AssembledConfig
 from runconf_ui.utils import open_configuration
@@ -95,21 +95,57 @@ class RunconfUI:
     # ------------------------------------------------------------------ #
     # Refresh                                                              #
     # ------------------------------------------------------------------ #
-
     def refresh_information(self) -> None:
         """
-        Recompute the state of every node in the tree and rebuild the tree views.
+        Recompute state snapshots and rebuild flattened node indexes and tree views.
         """
         if self._assembled is None:
             return
 
+        # Rebuild disableable groups
         for group in self._assembled.disableable:
-            for node_status in group.nodes.values():
-                node_status.refresh_state()
-                
-        self._tree_views = self._build_tree_views(self._assembled)
-        
-    # ------------------------------------------------------------------ #
+            group.nodes = {}
+
+            for system in group.systems:
+                system.nodes = {
+                    status.path: status
+                    for status in walk(system.root)
+                    if status.path is not None
+                }
+
+                group.nodes.update(system.nodes)
+
+        # Rebuild adjustable groups
+        for group in self._assembled.adjustable:
+            group.nodes = {}
+
+            for system in group.systems:
+                system.nodes = {
+                    status.path: status
+                    for status in walk(system.root)
+                    if status.path is not None
+                }
+
+                group.nodes.update(system.nodes)
+
+        # Rebuild top-level indexes
+        self._assembled.disableable_nodes = {
+            group.id: group.nodes
+            for group in self._assembled.disableable
+        }
+
+        self._assembled.adjustable_nodes = {
+            group.id: group.nodes
+            for group in self._assembled.adjustable
+        }
+
+        self._assembled.all_nodes = {
+            **self._assembled.adjustable_nodes,
+            **self._assembled.disableable_nodes,
+        }
+
+        # Rebuild tree views
+        self._tree_views = self._build_tree_views(self._assembled)    # ------------------------------------------------------------------ #
     # Public API — disable                                                 #
     # ------------------------------------------------------------------ #
 
@@ -247,7 +283,7 @@ class RunconfUI:
     # Public API — tree views                                              #
     # ------------------------------------------------------------------ #
 
-    def get_values(self) -> dict[str, dict[str, tuple]]:
+    def get_values(self) -> dict[str, dict[str, NodeStatus]]:
         """
         Return the current value and enabled state for every node in the
         configuration.
@@ -258,7 +294,7 @@ class RunconfUI:
         for group_label, group in self._assembled.all_nodes.items():
             result[group_label] = {}
             for widget_id, node_status in group.items():
-                result[group_label][widget_id] = (node_status.node.get(), node_status.is_enabled, node_status.is_interactive)
+                result[group_label][widget_id] = node_status
         return result  
 
     def get_tree_views(self) -> TreeViews:

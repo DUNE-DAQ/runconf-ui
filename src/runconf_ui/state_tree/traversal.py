@@ -24,8 +24,7 @@ returned — the node's own state is the more informative signal.
 
 This code ALL assumes just 1 layer of nesting!
 """
-
-from collections.abc import Iterator
+from typing import Optional, Iterator
 from dataclasses import dataclass
 from enum import Enum, auto
 
@@ -90,57 +89,48 @@ class NodeStatus:
 # ---------------------------------------------------------------------------
 # State computation
 # ---------------------------------------------------------------------------
-
-def compute_state(node: Node, parent: Group | None) -> State:
+def compute_state(node: Node, parent: Optional[Group]) -> State:
     """
-    Compute the visible state of a node given its parent.
-    Pure function — does not modify any node.
+    Compute the visible state of a node, immutable snapshot.
 
-    Checks in order:
-      1. Node's own get() — if False, DISABLED regardless of anything else.
-      2. Parent group state — if parent is off, PARENT_DISABLED.
-      3. DAL resource state (Leaf nodes only) — if the underlying DAL is
-         resource-disabled in the session, PARENT_DISABLED.
-         This covers adjustable nodes whose DAL may be disabled independently
-         of the tree structure, and DisableAttribute nodes whose DAL may be
-         resource-disabled without that being reflected in the attribute value.
+    Precedence:
+      1. Parent gating (highest)
+      2. Node internal value
+      3. Leaf DAL state
     """
-    own = node.get()
-
-    if not own:
-        return State.DISABLED
-
-    if parent is not None and not parent.get():
+    # Parent gating: parent aggregate off → PARENT_DISABLED
+    if parent is not None and not parent.get():  
         return State.PARENT_DISABLED
 
+    # Node internal flag (for disableable voting nodes)
+    if isinstance(node, Leaf) or isinstance(node, Group):
+        if not node.get():
+            return State.DISABLED
+
+    # Leaf DAL gating
     if isinstance(node, Leaf) and not node.adapter.dal_enabled():
         return State.PARENT_DISABLED
 
+    # Fully enabled
     return State.ENABLED
-
 
 # ---------------------------------------------------------------------------
 # Traversal
 # ---------------------------------------------------------------------------
 
-def walk(root: Node) -> Iterator[NodeStatus]:
-    """
-    Depth-first traversal of the full tree.
-    Yields NodeStatus for every node, root first.
-    """
-    yield NodeStatus(node=root, state=compute_state(root, None), parent=None)
-    yield from _walk(root, parent=None)
+def walk(root: Node, parent: Optional[Group] = None, ancestor_disabled=False):
+    state = compute_state(root, parent if not ancestor_disabled else None)
+    if ancestor_disabled:
+        state = State.PARENT_DISABLED
+    yield NodeStatus(root, state, parent)
+
+    if isinstance(root, Group):
+        for child, _, _ in root:
+            child_ancestor_disabled = ancestor_disabled or state == State.PARENT_DISABLED
+            yield from walk(child, parent=root, ancestor_disabled=child_ancestor_disabled)
 
 
-def _walk(node: Node, parent: Group | None) -> Iterator[NodeStatus]:
-    if isinstance(node, Group):
-        for child, _, _ in node:
-            yield NodeStatus(
-                node=child,
-                state=compute_state(child, parent=node),
-                parent=node,
-            )
-            yield from _walk(child, parent=node)
+#             yield from _walk(child, parent=node, ancestor_disabled=child_ancestor_disabled)
 
 
 # ---------------------------------------------------------------------------

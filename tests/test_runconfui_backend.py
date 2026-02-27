@@ -1,5 +1,7 @@
 import pytest
 from runconf_ui import RunconfContext, RunconfUI
+from runconf_ui.state_tree import State
+
 
 @pytest.fixture(scope="session")
 def initialised_ui(tmp_config_path):
@@ -61,21 +63,38 @@ def test_get_values_snapshot(initialised_ui):
     initialised_ui.set_value('Detector', 'Readout', True)
     vals = initialised_ui.get_values()
     assert isinstance(vals, dict)
-    assert vals['Detector']['Readout'] == (True, True, True)
-    assert vals['Detector']['Readout__ru-01'] == (True, True, True)
-    assert vals['Detector']['Readout__ru-02'] == (True, True, True)
+    assert vals['Detector']['Readout'].is_enabled == True
+    assert vals['Detector']['Readout'].is_interactive == True
+    assert vals['Detector']['Readout__ru-01'].is_enabled == True
+    assert vals['Detector']['Readout__ru-01'].is_interactive == True
+    assert vals['Detector']['Readout__ru-02'].is_enabled == True
+    assert vals['Detector']['Readout__ru-02'].is_interactive == True
 
     # toggle one child off and verify both raw value and enabled flag
     initialised_ui.toggle('Detector', 'Readout__ru-02')
     vals = initialised_ui.get_values()
-    assert vals['Detector']['Readout__ru-01'] == (True, True, True)
-    assert vals['Detector']['Readout__ru-02'] == (False, False, True)
-    assert vals['Detector']['Readout'] == (True, True, True)
-
+    assert vals['Detector']['Readout__ru-01'].is_enabled == True
+    assert vals['Detector']['Readout__ru-01'].is_interactive == True
+    assert vals['Detector']['Readout__ru-02'].is_enabled == False
+    assert vals['Detector']['Readout__ru-02'].is_interactive == True
+    assert vals['Detector']['Readout'].is_enabled == True
+    assert vals['Detector']['Readout'].is_interactive == True
 
     initialised_ui.toggle('Detector', 'Readout__ru-01')
     vals = initialised_ui.get_values()
-    assert vals['Detector']['Readout__ru-01'] == (False, False, False)
-    assert vals['Detector']['Readout__ru-02'] == (False, False, False)
-    assert vals['Detector']['Readout'] == (False, False, True)
-
+    assert vals['Detector']['Readout__ru-01'].is_enabled == False
+    assert vals['Detector']['Readout__ru-01'].is_interactive == False
+    assert vals['Detector']['Readout__ru-02'].is_enabled == False
+    assert vals['Detector']['Readout__ru-02'].is_interactive == False
+    assert vals['Detector']['Readout'].is_enabled == False
+    assert vals['Detector']['Readout'].is_interactive == True
+    
+    # Finally we can re-enable the parent to restore the children to their last raw value (False) but enabled state (True)
+    initialised_ui.toggle('Detector', 'Readout')
+    vals = initialised_ui.get_values()
+    assert vals['Detector']['Readout'].is_enabled == True
+    assert vals['Detector']['Readout'].is_interactive == True
+    assert vals['Detector']['Readout__ru-01'].is_enabled == True
+    assert vals['Detector']['Readout__ru-01'].is_interactive == True
+    assert vals['Detector']['Readout__ru-02'].is_enabled == True
+    assert vals['Detector']['Readout__ru-01'].is_interactive == True
