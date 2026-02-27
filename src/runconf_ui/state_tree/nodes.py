@@ -182,7 +182,7 @@ class Group(Node):
         """
         Propagate state to all children where propagate=True.
         Adjustable nodes (propagate=False) are never touched.
-        """
+        """ 
         for child in self._children:
             if child.propagate:
                 child.node.set(value)

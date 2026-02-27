@@ -41,8 +41,7 @@ class State(Enum):
     DISABLED        = auto()  # Node is disabled
     PARENT_DISABLED = auto()  # Node's parent is disabled
 
-
-@dataclass(frozen=True)
+@dataclass
 class NodeStatus:
     '''A full node status, carrying the node, its computed state, and its parent.'''
     node:   Node
@@ -60,34 +59,32 @@ class NodeStatus:
         return self.state == State.ENABLED
 
     @property
-    def unique_path(self) -> tuple[str, str]:
-        '''
-        For NOW we assume 1 layer of nesting!
-        '''
+    def path(self) -> str | None:
+        """The full path to this node, e.g. "CRP4__TPC".
+        __ denotes nesting. This notation is used for compatibility
+        with Textual's ID system, which only allows flat strings.
+        """
+        if not self.node.label:
+            return None
+        
         if self.parent is None:
-            return ('', self.node.label)
-        return (self.parent.label, self.node.label)
+            return self.node.label or None
+        else:
+            return f"{self.parent.label}__{self.node.label}"
 
-    def toggle(self) -> 'NodeStatus':
+    def toggle(self) -> None:
         """
         Flip the node's state and return a fresh NodeStatus reflecting the
         result. No-op (returns self) if the node is not interactive.
         """
-        if not self.is_interactive:
-            return self
         self.node.set(not self.node.get())
-        return self.refresh()
+        self.refresh_state()
 
-    def refresh(self) -> 'NodeStatus':
+    def refresh_state(self) -> None:
         """
-        Return a new NodeStatus reflecting the node's current state,
-        recomputing from the live adapter values.
+        Update the node's state in place, recomputing from the live adapter values.
         """
-        return NodeStatus(
-            node=self.node,
-            state=compute_state(self.node, self.parent),
-            parent=self.parent,
-        )
+        self.state = compute_state(self.node, self.parent)
 
 
 # ---------------------------------------------------------------------------

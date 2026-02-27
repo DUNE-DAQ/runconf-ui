@@ -226,8 +226,11 @@ class TestSystemConfigReaderIntegration:
         return reader.assemble_config(consolidated_config, session_name)
 
     def test_assembled_config_has_disableable_and_adjustable(self, assembled):
+        print(assembled.disableable)
+        print(assembled.adjustable)
         assert assembled.disableable is not None
         assert assembled.adjustable is not None
+
 
     def test_detector_group_structure(self, assembled):
         detector = next(g for g in assembled.disableable if g.id == "Detector")

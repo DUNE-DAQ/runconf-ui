@@ -1,7 +1,7 @@
-from .button_with_node import ButtonWithNode
-from .widget_builders import generate_disable_buttons
+from .enable_disable_panel import EnableDisablePanel
+from .options_panel import OptionsPanel
 
 __all__ = [
-           'ButtonWithNode',
-           'generate_disable_buttons',
+    "EnableDisablePanel",
+    "OptionsPanel",
 ]

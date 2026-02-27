@@ -1,4 +1,4 @@
-from .interface_layer import RunconfUI, RunconfContext
+from .backend import RunconfUI, RunconfContext
 
 __all__ = [
     "RunconfUI", "RunconfContext"

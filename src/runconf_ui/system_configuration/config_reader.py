@@ -17,6 +17,7 @@ from conffwk import Configuration
 from conffwk.dal import DalBase
 
 from runconf_ui.state_tree import Group
+from runconf_ui.state_tree import NodeStatus, walk
 
 from .builders import AdjustableSystemBuilder, DisableSystemBuilder
 from .dataclasses import (
@@ -28,26 +29,38 @@ from .dataclasses import (
 # ---------------------------------------------------------------------------
 # Output dataclasses
 # ---------------------------------------------------------------------------
-
-@dataclass(frozen=True)
+@dataclass()
 class AssembledSystem:
     root:                Group
     display_full_system: bool
+    def __post_init__(self):
+        '''Flattens the tree into a list of nodes: node for easy lookup in the TUI layer.'''
+        self.nodes: dict[str, NodeStatus] = {status.path: status for status in walk(self.root) if status.path is not None}
 
-
-@dataclass(frozen=True)
+@dataclass()
 class AssembledGroup:
     id:         str
     label:      str
     systems:    list[AssembledSystem] 
     view_panel: str = ""
-
-
-@dataclass(frozen=True)
+    def __post_init__(self):
+        '''Flattens the tree into a list of nodes: node for easy lookup in the TUI layer.'''
+        self.nodes: dict[str, NodeStatus] = {}
+        for system in self.systems:
+            self.nodes.update(system.nodes)
+    
+@dataclass
 class AssembledConfig:
     disableable: list[AssembledGroup]
     adjustable:  list[AssembledGroup]
-
+    
+    def __post_init__(self):
+        self.disableable_nodes = {group.id: group.nodes for group in self.disableable}        
+        self.adjustable_nodes  = {group.id: group.nodes for group in self.adjustable}
+        
+        self.all_nodes = {**self.adjustable_nodes, **self.disableable_nodes}
+        
+    
 
 # ---------------------------------------------------------------------------
 # SystemConfig
@@ -156,7 +169,7 @@ class ConfigAssembler:
                 if not root.children:
                     continue
                 system = AssembledSystem(
-                           root=builder.build(attrs, label=system_name),
+                            root=builder.build(attrs, label=system_name),
                             display_full_system=False,
                         )
                 
