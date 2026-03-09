@@ -65,6 +65,14 @@ class NodeStatus:
             return self.node.label or None
         return f"{self.parent.label}__{self.node.label}"
 
+    @property
+    def value(self):
+        return self.node.get()
+
+    @property
+    def label(self):
+        return self.node.label
+
     def toggle(self) -> None:
         """
         Flip the node's state and return a fresh NodeStatus reflecting the
@@ -78,7 +86,6 @@ class NodeStatus:
         Update the node's state in place, recomputing from the live adapter values.
         """
         self.state = compute_state(self.node, self.parent)
-
 
 # ---------------------------------------------------------------------------
 # State computation

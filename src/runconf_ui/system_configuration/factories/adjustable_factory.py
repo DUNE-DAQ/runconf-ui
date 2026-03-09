@@ -30,7 +30,7 @@ class AdjustableFactory(FactoryBase):
                     dal,
                     data.attribute_name,
                 ),
-                label=dal.id,
+                label=f"{dal.id} - {data.attribute_name}",
             )
             for dal in dals
             if not self.is_filtered(dal, data.filters)

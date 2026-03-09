@@ -5,7 +5,7 @@ from textual.app import ComposeResult
 from textual.widget import Widget
 from textual.widgets import TabbedContent, TabPane
 
-_TEXTUAL_UNSAFE = re.compile(r"[^-a-zA-Z0-9_]")
+_TEXTUAL_UNSAFE = re.compile(r"[^-a-zA-Z0-9_:]")
 
 
 def textual_safe_id(input_id: str) -> str:

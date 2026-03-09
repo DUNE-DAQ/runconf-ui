@@ -11,7 +11,7 @@ from runconf_ui.backend import RunconfContext, RunconfUI
 from runconf_ui.textual import messages as runconf_msg
 from runconf_ui.textual.screens import MainScreen
 from runconf_ui.textual.screens.popup_screens import LoadingScreen
-from runconf_ui.textual.widgets import EnableDisableTabs, RichTreeTabbed, FileSelect
+from runconf_ui.textual.widgets import EnableDisableTabs, RichTreeTabbed, FileSelect, AdjustableAttributeTabs
 
 
 class RunconfUIApp(App):
@@ -31,11 +31,14 @@ class RunconfUIApp(App):
 
     def refresh_enabled_info(self):
         dis_info   = self.backend.get_disableable_values()
+        adj_info   = self.backend.get_adjustable_values()
         tree_views = self.backend.get_tree_views()
         for panel in self.query(EnableDisableTabs):
-            panel.update(dis_info)       # in-place, no tab jump
+            panel.load(dis_info)         # full rebuild, new config
+        for panel in self.query(AdjustableAttributeTabs):
+            panel.load(adj_info)
         for tree in self.query(RichTreeTabbed):
-            tree.update(tree_views)      # in-place, no tab jump
+            tree.load(tree_views)        # full rebuild, new config
 
     def _init_file_selects(self) -> None:
         versions = self.backend.get_daq_versions()
@@ -78,22 +81,12 @@ class RunconfUIApp(App):
 
     @work(thread=True)
     def _load_config_worker(self) -> None:
-        try:
-            self.backend.open_selected_session()
-            self.app.call_from_thread(self._on_config_loaded)
-        except Exception as e:
-            import traceback
-            error_msg = traceback.format_exc()
-            self.app.call_from_thread(self._on_config_failed, error_msg)
+        self.backend.open_selected_session()
+        self.app.call_from_thread(self._on_config_loaded)
 
     def _on_config_loaded(self) -> None:
         self.pop_screen()
-        dis_info   = self.backend.get_disableable_values()
-        tree_views = self.backend.get_tree_views()
-        for panel in self.query(EnableDisableTabs):
-            panel.load(dis_info)         # full rebuild, new config
-        for tree in self.query(RichTreeTabbed):
-            tree.load(tree_views)        # full rebuild, new config
+        self.refresh_enabled_info()
         self.refresh()
 
     def _on_config_failed(self, error_msg: str) -> None:
