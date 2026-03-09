@@ -16,8 +16,7 @@ import yaml
 from conffwk import Configuration
 from conffwk.dal import DalBase
 
-from runconf_ui.state_tree import Group
-from runconf_ui.state_tree import NodeStatus, walk
+from runconf_ui.state_tree import Group, NodeStatus, walk
 
 from .builders import AdjustableSystemBuilder, DisableSystemBuilder
 from .dataclasses import (
@@ -25,6 +24,7 @@ from .dataclasses import (
     DisableableGroupData,
     YamlToSystemData,
 )
+
 
 # ---------------------------------------------------------------------------
 # Output dataclasses

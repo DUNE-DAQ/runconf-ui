@@ -1,28 +1,33 @@
 # runconf-ui
-from ..widgets import generate_disable_buttons, ButtonWithNode
-from runconf_ui.system_configuration.config_reader import AssembledGroup, AssembledSystem
 
 # Textual imports
-from textual.screen import ModalScreen
-from textual.widgets import TabbedContent, TabPane, Button, Static
-from textual.containers import ScrollableContainer
 from textual import on
+from textual.containers import Grid, ScrollableContainer
+from textual.screen import ModalScreen
+from textual.widgets import Footer, Header, TabbedContent
 
-class ButtonPanel(Static):
-    def compose(self, group: AssembledGroup):
-        yield ScrollableContainer(*(b for b in generate_disable_buttons(group)))
-    
-    
-    # @on(Button.Pressed)
-    # def a
-    
-class OptionsPanel(ButtonPanel):
-    ...
-    
-class DisablePanel(ButtonPanel):
-    def compose(self, object_group: AssembledSystem):
-        
-    
+from ..widgets import (
+    EnableDisableTabs,
+    FileSelect,
+    OptionsPanel,
+    RichTreeTabbed,
+)
+
+from ..messages import RefreshMessage
 
 class MainScreen(ModalScreen):
-    ...
+    def compose(self):
+        with ScrollableContainer(id="main-screen-container"):
+            with ScrollableContainer(id="file-select-container"):
+                yield FileSelect(id="file-select-panel")
+            
+            with Grid(id="main-content-grid"):
+                yield EnableDisableTabs(id="enable-disable-tabs")
+                
+                with TabbedContent("Map View", id="multi_view_tabs", classes="multi_view_tabs"):
+                    yield RichTreeTabbed(id="rich-tree-tabbed")
+                
+            yield OptionsPanel(id="options-panel")
+        
+        yield Header()
+        yield Footer()

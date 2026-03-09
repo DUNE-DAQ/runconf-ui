@@ -1,20 +1,20 @@
 from .application_messages import (
     ApplicationMessage,
+    HelpMessage,
+    LoadConfigMessage,
     QuitMessage,
     ResetMessage,
-    LoadConfigMessage,
     SaveConfigMessage,
-    HelpMessage
+    RefreshMessage,
 )
-
 from .state_messages import (
-    StateChangeMessage,
     ConfigLoadedMessage,
     ConfigLoadFailedMessage,
-    NodeToggledMessage,
-    ValueChangedMessage,
-    DaqVersionSelectedMessage,
     DaqSessionSelectedMessage,
+    DaqVersionSelectedMessage,
+    NodeToggledMessage,
+    StateChangeMessage,
+    ValueChangedMessage,
 )
 
 __all__ = [
@@ -25,6 +25,7 @@ __all__ = [
     "LoadConfigMessage",
     "SaveConfigMessage",
     "HelpMessage",
+    "RefreshMessage",
     # State change messages
     "StateChangeMessage",
     "ConfigLoadedMessage",

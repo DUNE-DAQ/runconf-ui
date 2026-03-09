@@ -1,4 +1,4 @@
-from .runconf_ui import RunconfUI, RunconfContext
+from .runconf_ui import RunconfContext, RunconfUI
 
 __all__ = [
     # Core

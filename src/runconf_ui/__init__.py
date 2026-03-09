@@ -1,5 +1,6 @@
-from .backend import RunconfUI, RunconfContext
+from .backend import RunconfContext, RunconfUI
 
 __all__ = [
-    "RunconfUI", "RunconfContext"
+    "RunconfContext",
+    "RunconfUI"
 ]

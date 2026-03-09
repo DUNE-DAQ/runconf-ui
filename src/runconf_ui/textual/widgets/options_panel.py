@@ -1,33 +1,27 @@
 from textual import on
-from textual.widgets import Button
 from textual.containers import ScrollableContainer
+from textual.widgets import Button
 
-from ..messages import QuitMessage, SaveConfigMessage, ResetMessage, HelpMessage
+from ..messages import HelpMessage, QuitMessage, ResetMessage, SaveConfigMessage
+
 
 class OptionsPanel(ScrollableContainer):
     '''
     Container for options (create, help, reset, quit)
     '''
     BUTTONS = [
-        ("Create Run Configuration", "create_run_config", "primary"),
-        ("Help", "help", "secondary"),
+        ("Create Run Configuration", "create_run_config", "success"),
+        ("Help", "help", "primary"),
         ("Reset to Default", "reset", "warning"),
         ("Quit", "quit", "error"),
     ]
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.buttons = []
-        self.generate_buttons()
-        
-    def generate_buttons(self):
-        '''
-        Generate buttons based on the predefined BUTTONS list
-        '''
-        for label, id_, cls in self.BUTTONS:
-            button = Button(label=label, id=id_, classes=cls)
-            self.buttons.append(button)
-            self.mount(button)
-    
+
+    def compose(self):
+        for label, button_id, style in self.BUTTONS:
+            yield Button(label, id=button_id, variant=style)
+
     @on(Button.Pressed)
     def handle_button_pressed(self, event: Button.Pressed):
         '''

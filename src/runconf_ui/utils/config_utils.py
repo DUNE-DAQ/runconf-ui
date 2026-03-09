@@ -3,6 +3,7 @@
 from pathlib import Path
 
 from conffwk import Configuration
+from daqconf.consolidate import consolidate_files
 
 from runconf_ui.exceptions import ConfigReadException
 
@@ -19,6 +20,10 @@ def open_configuration(config_path: Path) -> Configuration:
         return Configuration(f"oksconflibs:{config_path}")
     except Exception as e:
         raise ConfigReadException(f"Cannot open {config_path}") from e
+
+def copy_and_open_config(original_config, buffer_file):
+    consolidate_files(str(buffer_file), str(original_config))    
+    return open_configuration(buffer_file)
 
 def get_number_of_sessions(configuration: Configuration) -> int:
     """Return the number of Session DALs in the given configuration."""
@@ -107,3 +112,6 @@ def dal_in_config(configuration: Configuration, class_name: str, dal_id: str):
         return False
     
     return dal_id in [d.id for d in configuration.get_dals(class_name)]
+
+
+

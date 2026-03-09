@@ -6,6 +6,7 @@ from .config_utils import (
     get_class_from_segment_list,
     get_configs_with_session,
     open_configuration,
+    copy_and_open_config
 )
 from .rich_utils import draw_tree
 
@@ -18,4 +19,5 @@ __all__=[
     "get_class_from_segment_list",
     'get_configs_with_session',
     'open_configuration',
+    'copy_and_open_config'
 ]

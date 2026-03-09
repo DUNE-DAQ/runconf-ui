@@ -4,6 +4,7 @@ Messages related to the application itself.
 
 from textual.message import Message
 
+
 class ApplicationMessage(Message):
     """Base class for messages related to application state changes."""
     ...
@@ -30,3 +31,5 @@ class SaveConfigMessage(ApplicationMessage):
     """Message emitted when the current configuration should be saved."""
     ...
     
+class RefreshMessage(ApplicationMessage):
+    ...

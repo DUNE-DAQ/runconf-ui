@@ -24,7 +24,7 @@ returned — the node's own state is the more informative signal.
 
 This code ALL assumes just 1 layer of nesting!
 """
-from typing import Optional, Iterator
+from collections.abc import Iterator
 from dataclasses import dataclass
 from enum import Enum, auto
 
@@ -68,8 +68,7 @@ class NodeStatus:
         
         if self.parent is None:
             return self.node.label or None
-        else:
-            return f"{self.parent.label}__{self.node.label}"
+        return f"{self.parent.label}__{self.node.label}"
 
     def toggle(self) -> None:
         """
@@ -89,7 +88,7 @@ class NodeStatus:
 # ---------------------------------------------------------------------------
 # State computation
 # ---------------------------------------------------------------------------
-def compute_state(node: Node, parent: Optional[Group]) -> State:
+def compute_state(node: Node, parent: Group | None) -> State:
     """
     Compute the visible state of a node, immutable snapshot.
 
@@ -118,7 +117,7 @@ def compute_state(node: Node, parent: Optional[Group]) -> State:
 # Traversal
 # ---------------------------------------------------------------------------
 
-def walk(root: Node, parent: Optional[Group] = None, ancestor_disabled=False):
+def walk(root: Node, parent: Group | None = None, ancestor_disabled=False):
     state = compute_state(root, parent if not ancestor_disabled else None)
     if ancestor_disabled:
         state = State.PARENT_DISABLED
