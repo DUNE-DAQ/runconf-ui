@@ -59,14 +59,9 @@ class NodeStatus:
 
     @property
     def path(self) -> str | None:
-        """The full path to this node, e.g. "CRP4__TPC".
-        __ denotes nesting. This notation is used for compatibility
-        with Textual's ID system, which only allows flat strings.
-        """
         if not self.node.label:
             return None
-        
-        if self.parent is None:
+        if self.parent is None or not self.parent.label:
             return self.node.label or None
         return f"{self.parent.label}__{self.node.label}"
 

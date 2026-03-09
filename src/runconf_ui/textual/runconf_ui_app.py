@@ -4,22 +4,22 @@ Textual application for controlling runconf-shifter-ui
 
 from typing import ClassVar
 
-from textual import on
+from textual import on, work
 from textual.app import App
+import traceback
+
 
 from runconf_ui.backend import RunconfContext, RunconfUI
 from runconf_ui.textual import messages as runconf_msg
 from runconf_ui.textual.screens import MainScreen
+from runconf_ui.textual.screens.popup_screens import LoadingScreen
 from runconf_ui.textual.widgets import EnableDisableTabs, RichTreeTabbed, FileSelect
 
 
 class RunconfUIApp(App):
-    '''
-    Main textual application for runconf-ui
-    '''
 
     CSS_PATH = "runconf_shifter_ui.tcss"
-    BINDINGS: ClassVar = [("ctrl+q", "quit", "Quit")]
+    BINDINGS = [("ctrl+q", "quit", "Quit")]
     SCREENS = {"main": MainScreen}
 
     def __init__(self, context: RunconfContext, *args, **kwargs):
@@ -31,13 +31,10 @@ class RunconfUIApp(App):
         self.call_after_refresh(self._init_file_selects)
 
     def refresh_enabled_info(self):
-        '''Reload all panels from current backend state.'''
         dis_info   = self.backend.get_disableable_values()
         tree_views = self.backend.get_tree_views()
-
         for panel in self.query(EnableDisableTabs):
             panel.load(dis_info)
-
         for tree in self.query(RichTreeTabbed):
             tree.load(tree_views)
 
@@ -47,9 +44,9 @@ class RunconfUIApp(App):
             file_select.update_versions(versions)
             file_select.refresh()
 
-    # ------------------------------------------------------------------------
+    # ------------------------------------------------------------------ #
     # Message handling
-    # ------------------------------------------------------------------------
+    # ------------------------------------------------------------------ #
     @on(runconf_msg.NodeToggledMessage)
     def handle_node_toggled(self, event: runconf_msg.NodeToggledMessage):
         self.backend.toggle(event.group_id, event.widget_id)
@@ -71,10 +68,53 @@ class RunconfUIApp(App):
 
     @on(runconf_msg.LoadConfigMessage)
     def handle_load_config(self, event: runconf_msg.LoadConfigMessage) -> None:
-        self.backend.open_selected_session()
-        self.refresh_enabled_info()
+        try:
+            self.push_screen(LoadingScreen())
+        except Exception as e:
+            import traceback
+            self.notify(traceback.format_exc(), title="Screen Push Failed", severity="error", timeout=30)
+            return
+        self._load_config_worker()
+
+
+    @work(thread=True)
+    def _load_config_worker(self) -> None:
+        try:
+            self.backend.open_selected_session()
+            self.app.call_from_thread(self._on_config_loaded)
+        except Exception as e:
+            import traceback
+            error_msg = traceback.format_exc()
+            self.app.call_from_thread(self._on_config_failed, error_msg)
+
+    def _on_config_loaded(self) -> None:
+        self.pop_screen()
+        # Log what we're about to load so we can see if data is malformed
+        import logging
+        logging.basicConfig(filename="/tmp/runconf_debug.log", level=logging.DEBUG)
+        try:
+            dis_info = self.backend.get_disableable_values()
+            logging.debug(f"dis_info keys: {list(dis_info.keys())}")
+            for group_id, nodes in dis_info.items():
+                logging.debug(f"  group: {group_id!r}")
+                for node_id, node in nodes.items():
+                    logging.debug(f"    node_id={node_id!r}  label={node.node.label!r}  type(node)={type(node)}")
+
+            tree_views = self.backend.get_tree_views()
+            logging.debug(f"tree_views keys: {list(tree_views.keys())}")
+
+            for panel in self.query(EnableDisableTabs):
+                panel.load(dis_info)
+            for tree in self.query(RichTreeTabbed):
+                tree.load(tree_views)
+        except Exception:
+            logging.exception("Error in _on_config_loaded")
+            raise
         self.refresh()
 
+    def _on_config_failed(self, error_msg: str) -> None:
+        self.pop_screen()
+        self.notify(error_msg, title="Config Load Failed", severity="error", timeout=30)
 
 if __name__ == "__main__":
     from pathlib import Path

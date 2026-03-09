@@ -33,9 +33,15 @@ from .dataclasses import (
 class AssembledSystem:
     root:                Group
     display_full_system: bool
+
     def __post_init__(self):
         '''Flattens the tree into a list of nodes: node for easy lookup in the TUI layer.'''
-        self.nodes: dict[str, NodeStatus] = {status.path: status for status in walk(self.root) if status.path is not None}
+        self.nodes: dict[str, NodeStatus] = {
+            status.path: status
+            for status in walk(self.root)
+            if status.path is not None
+            and (status.parent is None or bool(status.parent.label))
+        }
 
 @dataclass()
 class AssembledGroup:

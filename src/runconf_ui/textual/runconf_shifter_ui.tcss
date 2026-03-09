@@ -52,7 +52,7 @@ SelectCurrent {
 /* === Main Content Grid === */
 #main-content-grid {
     layout: grid;
-    grid-size: 20 1;
+    grid-size: 21 1;
     grid-gutter: 1;
     column-span: 5;
     row-span: 6;

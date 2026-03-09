@@ -38,8 +38,7 @@ class AttributeFactory(FactoryBase):
                             data.id,
                             data.enabled_state,
                             data.disabled_state,
-                        ),
-                        label=dal.id,
+                        )
                     )
                 )
 

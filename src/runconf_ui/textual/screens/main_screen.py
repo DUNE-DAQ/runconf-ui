@@ -12,18 +12,14 @@ from ..widgets import (
     RichTreeTabbed,
 )
 
-
 class MainScreen(ModalScreen):
     def compose(self):
         with ScrollableContainer(id="main-screen-container"):
             with ScrollableContainer(id="file-select-container"):
                 yield FileSelect(id="file-select-panel")
-
             with Grid(id="main-content-grid"):
                 yield EnableDisableTabs(id="enable-disable-tabs")
                 yield RichTreeTabbed(id="rich-tree-tabbed")
-
             yield OptionsPanel(id="options-panel")
-
         yield Header()
         yield Footer()
