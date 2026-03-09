@@ -39,17 +39,13 @@ class RunconfUI:
                 context.default_config, context.ops_url, context.base_url,
             )
 
-
         buffer_id = os.environ.get("SESSION_NAME", os.getlogin())
-
-        # Path for buffer
         self._config_buffer_path = Path(f"/tmp/shifter_configs-{buffer_id}")
-        
+
         self._assembled: AssembledConfig | None = None
         self._tree_views: TreeViews = {}
         self.system_config_reader: SystemConfigReader | None = None
-
-        self._selected_session: str| Path | None = None
+        self._selected_session: str | Path | None = None
 
     # ------------------------------------------------------------------ #
     # Setup                                                                #
@@ -70,39 +66,33 @@ class RunconfUI:
             self.system_config_reader = None
             self._assembled = None
             self._tree_views = {}
-            
-    def set_daq_session(self, session: str| Path | None)->None:
+
+    def set_daq_session(self, session: str | Path | None) -> None:
         if session not in self.get_sessions():
             raise RunConfToolsRepoException(f"Cannot find session {session}")
-        
         self._selected_session = session
-        
 
     def open_selected_session(self) -> None:
         if self.system_config_reader is None:
             raise RunConfToolsRepoException("Select a DAQ version before selecting a session")
-        
+
         if self._selected_session is None:
-            raise RunConfToolsRepoException(f"No session selected!")
-        
+            raise RunConfToolsRepoException("No session selected!")
+
         init_config_path = self.repo_manager.select_config(self._selected_session)
-        
-        tmp_config_path  = self._config_buffer_path/f"cfg_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.data.xml"
+
+        tmp_config_path = self._config_buffer_path / f"cfg_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.data.xml"
         self.configuration = copy_and_open_config(init_config_path, tmp_config_path)
-        
-        # We now copy the config in session        
+
         self._assembled = self.system_config_reader.assemble_config(
             self.configuration, self.configuration.get_dals('Session')[0].id
         )
         self._rebuild_indexes()
-        
+
     def save_config(self, save_path: Path):
-        '''
-        Save configuration to buffer file then copy the config to the save path
-        '''
+        '''Save configuration to buffer file then copy the config to the save path.'''
         if self.configuration is None:
             raise FileExistsError("Configuration file not found!")
-        
         self.configuration.commit()
         copy_and_open_config(Path(self.configuration.active_database), save_path)
 
@@ -121,11 +111,30 @@ class RunconfUI:
         self._rebuild_indexes()
 
     def get_values(self) -> dict[str, dict[str, NodeStatus]]:
+        '''Returns all nodes (adjustable + disableable).'''
         if self._assembled is None:
             return {}
         return {
             group_label: dict(nodes)
             for group_label, nodes in self._assembled.all_nodes.items()
+        }
+
+    def get_disableable_values(self) -> dict[str, dict[str, NodeStatus]]:
+        '''Returns only disableable nodes — used by the controls panel.'''
+        if self._assembled is None:
+            return {}
+        return {
+            group_label: dict(nodes)
+            for group_label, nodes in self._assembled.disableable_nodes.items()
+        }
+
+    def get_adjustable_values(self) -> dict[str, dict[str, NodeStatus]]:
+        '''Returns only adjustable nodes.'''
+        if self._assembled is None:
+            return {}
+        return {
+            group_label: dict(nodes)
+            for group_label, nodes in self._assembled.adjustable_nodes.items()
         }
 
     def get_tree_views(self) -> TreeViews:
@@ -136,7 +145,6 @@ class RunconfUI:
     # ------------------------------------------------------------------ #
 
     def _resolve(self, group: str, node_id: str, collection: str = "all") -> NodeStatus:
-        """Look up a node by group + id. collection is 'all', 'disableable', or 'adjustable'."""
         if self._assembled is None:
             raise NodeNotFound("No configuration loaded")
 
@@ -157,7 +165,6 @@ class RunconfUI:
         return node
 
     def _rebuild_indexes(self) -> None:
-        """Recompute all node indexes and tree views from current assembled config."""
         a = self._assembled
         if a is None:
             return
@@ -172,8 +179,9 @@ class RunconfUI:
         a.adjustable_nodes  = {g.id: g.nodes for g in a.adjustable}
         a.all_nodes = {**a.adjustable_nodes, **a.disableable_nodes}
 
+        # Key by group.id (clean string) rather than group.view_panel (may contain spaces)
         self._tree_views = {
-            group.view_panel: self._build_panel_tree(group)
+            group.id: self._build_panel_tree(group)
             for group in a.disableable
             if group.view_panel
         }

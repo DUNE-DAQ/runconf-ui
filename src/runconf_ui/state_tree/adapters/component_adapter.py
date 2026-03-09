@@ -9,14 +9,13 @@ from .adapter import Adapter
 
 class DisableComponent(Adapter):
     def __init__(
-        self, configuration: Configuration, session: DalBase, dal: DalBase, label=""
+        self, configuration: Configuration, session: DalBase, dal: DalBase, label: str = ""
     ):
-        super().__init__(configuration, session, label)
         if "Resource" not in configuration.superclasses(dal.className(), all=True):
             raise IncompatibleDalException(
                 f"{dal!r} is not of class 'Resource' this means it cannot be trivially enabled/disabled"
             )
-
+        self.label = label
         super().__init__(configuration, session, dal)
 
     def get(self) -> bool:

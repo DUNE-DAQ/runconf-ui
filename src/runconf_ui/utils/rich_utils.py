@@ -28,10 +28,14 @@ def _render(branch, node: Node, parent: Group | None) -> None:
     if not isinstance(node, Group):
         return
     for child, _, _ in node:
-        state = compute_state(child, parent=node)
-        label = child.label or "<anonymous>"
-        sub   = branch.add(_format_label(label, state))
-        _render(sub, child, parent=node)
+        if child.label:
+            state = compute_state(child, parent=node)
+            
+            label = child.label or "<anonymous>"
+            sub   = branch.add(_format_label(label, state))
+            _render(sub, child, parent=node)
+        else:
+            _render(branch, child, parent=node)
 
 
 def draw_tree(label: str, root: Node) -> Tree:
