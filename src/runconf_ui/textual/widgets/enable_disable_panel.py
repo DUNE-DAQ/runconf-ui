@@ -3,27 +3,20 @@ import re
 from textual import on
 from textual.containers import ScrollableContainer
 from textual.widgets import Button
-from textual.css.query import NoMatches
-
 from runconf_ui.state_tree import NodeStatus
 
 from ..messages import NodeToggledMessage
-from .dynamic_panel import DynamicTabbedContent
+from .dynamic_panel import DynamicTabbedContent, textual_safe_id
 
 
 class EnableDisablePanel(ScrollableContainer):
-    '''
-    Scrollable container holding one Button per disableable node.
-    '''
-    def __init__(self, runconf_nodes: dict[str, NodeStatus], *args, **kwargs):
+    def __init__(self, group_id: str, nodes: dict[str, NodeStatus], *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._runconf_nodes = runconf_nodes
+        self._group_id = group_id
+        self._runconf_nodes = nodes
 
     def compose(self):
         for node_id, node in self._runconf_nodes.items():
-            # Skip nodes with IDs that start with __ (anonymous parent path)
-            if node_id.startswith("_"):
-                continue
             cls     = "node_enabled" if node.is_enabled else "node_disabled"
             enabled = node.is_interactive
             yield Button(
@@ -35,11 +28,32 @@ class EnableDisablePanel(ScrollableContainer):
 
     @on(Button.Pressed)
     def handle_button_pressed(self, event: Button.Pressed):
-        self.post_message(NodeToggledMessage(group_id=self.id, widget_id=event.button.id))
+        self.post_message(NodeToggledMessage(group_id=self._group_id, widget_id=event.button.id))
+
+
+    def update_buttons(self, nodes: dict[str, NodeStatus]) -> None:
+        for node_id, node in nodes.items():
+            results = self.query(f"#{node_id}")
+            if not results:
+                continue
+            button = results.first(Button)
+            button.remove_class("node_enabled", "node_disabled")
+            button.add_class("node_enabled" if node.is_enabled else "node_disabled")
+            button.disabled = not node.is_interactive
 
 
 class EnableDisableTabs(DynamicTabbedContent):
     panel_prefix = "enable_disable_panel"
 
     def _make_pane_content(self, group_id: str, data: dict[str, NodeStatus], panel_id: str) -> EnableDisablePanel:
-        return EnableDisablePanel(data, id=panel_id)
+        return EnableDisablePanel(group_id, data, id=panel_id)
+
+    def _update_panes(self, data: dict) -> None:
+        for group_id, nodes in data.items():
+            group_id_safe = textual_safe_id(group_id)
+            panel_id      = self._panel_id(group_id_safe)
+            results = self.query(f"#{panel_id}")
+            if not results:
+                continue
+            panel = results.first(EnableDisablePanel)
+            panel.update_buttons(nodes)

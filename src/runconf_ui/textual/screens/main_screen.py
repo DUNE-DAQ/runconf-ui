@@ -1,9 +1,9 @@
 # runconf-ui
 
 from textual import on
-from textual.containers import Grid, ScrollableContainer
+from textual.containers import Grid
 from textual.screen import ModalScreen
-from textual.widgets import Footer, Header, Label
+from textual.widgets import Footer, Header
 
 from ..widgets import (
     EnableDisableTabs,
@@ -12,14 +12,14 @@ from ..widgets import (
     RichTreeTabbed,
 )
 
+
 class MainScreen(ModalScreen):
     def compose(self):
-        with ScrollableContainer(id="main-screen-container"):
-            with ScrollableContainer(id="file-select-container"):
-                yield FileSelect(id="file-select-panel")
-            with Grid(id="main-content-grid"):
-                yield EnableDisableTabs(id="enable-disable-tabs")
-                yield RichTreeTabbed(id="rich-tree-tabbed")
-            yield OptionsPanel(id="options-panel")
         yield Header()
+        with Grid(id="main_container"):
+            yield FileSelect(id="file-select-panel")
+            with Grid(id="enable_disable_panel_container"):
+                yield EnableDisableTabs(id="selection_tabs")
+                yield RichTreeTabbed(id="buttons_panel")
+            yield OptionsPanel(id="option_panel_main")
         yield Footer()

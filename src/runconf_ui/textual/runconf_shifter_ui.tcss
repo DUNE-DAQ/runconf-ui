@@ -2,7 +2,7 @@
 MainScreen {
 }
 
-#main-screen-container {
+#main_container {
     layout: grid;
     grid-size: 5 8;
     grid-rows: 1fr;
@@ -12,13 +12,8 @@ MainScreen {
     margin-top: 1;
 }
 
-/* === File Select Panel === */
-#file-select-container {
-    column-span: 5;
-    row-span: 2;
-}
-
-#file-select-grid {
+/* === File IO Panel === */
+#file_io_panel_grid {
     grid-size: 5 2;
     width: 100%;
     column-span: 5;
@@ -26,14 +21,13 @@ MainScreen {
     align: left middle;
 }
 
+.file_select {
+    column-span: 2;
+}
+
 FileSelect {
     column-span: 5;
     row-span: 2;
-}
-
-VersionSelect,
-SessionSelect {
-    column-span: 2;
 }
 
 SelectOverlay {
@@ -49,31 +43,23 @@ SelectCurrent {
     color: ansi_white 100%;
 }
 
-/* === Main Content Grid === */
-#main-content-grid {
-    layout: grid;
-    grid-size: 21 1;
-    grid-gutter: 1;
-    column-span: 5;
-    row-span: 6;
-}
-
 /* === Enable/Disable Panel === */
-#enable-disable-tabs {
-    column-span: 6;
-    row-span: 6;
+#enable_disable_panel_container {
+    grid-size: 20;
     border: ascii lightgrey;
-}
-
-#enable-disable-outer {
-    column-span: 6;
+    grid-gutter: 3;
+    column-span: 4;
     row-span: 6;
 }
 
-#enable-disable-placeholder-label {
-    color: $text-muted;
-    content-align: center middle;
-    width: 100%;
+#selection_tabs {
+    column-span: 6;
+    height: 100%;
+}
+
+#buttons_panel {
+    column-span: 14;
+    background: $background-darken-1;
     height: 100%;
 }
 
@@ -97,24 +83,8 @@ EnableDisablePanel {
     background: $success;
 }
 
-/* === Map / Rich Tree Panel === */
-#multi_view_tabs {
-    column-span: 14;
-}
-
-#map-placeholder-label {
-    color: $text-muted;
-    content-align: center middle;
-    width: 100%;
-    height: 100%;
-}
-
-RichTreePanel {
-    overflow-y: auto;
-}
-
 /* === Options Panel === */
-#options-panel {
+#option_panel_main {
     margin-top: 2;
     margin-right: 2;
     margin-left: 1;
@@ -210,7 +180,6 @@ RichTreePanel {
     align-horizontal: right;
 }
 
-/* === Notification Popups === */
 .popup {
     dock: bottom;
     width: 100%;

@@ -34,9 +34,9 @@ class RunconfUIApp(App):
         dis_info   = self.backend.get_disableable_values()
         tree_views = self.backend.get_tree_views()
         for panel in self.query(EnableDisableTabs):
-            panel.load(dis_info)
+            panel.update(dis_info)       # in-place, no tab jump
         for tree in self.query(RichTreeTabbed):
-            tree.load(tree_views)
+            tree.update(tree_views)      # in-place, no tab jump
 
     def _init_file_selects(self) -> None:
         versions = self.backend.get_daq_versions()
@@ -89,27 +89,12 @@ class RunconfUIApp(App):
 
     def _on_config_loaded(self) -> None:
         self.pop_screen()
-        # Log what we're about to load so we can see if data is malformed
-        import logging
-        logging.basicConfig(filename="/tmp/runconf_debug.log", level=logging.DEBUG)
-        try:
-            dis_info = self.backend.get_disableable_values()
-            logging.debug(f"dis_info keys: {list(dis_info.keys())}")
-            for group_id, nodes in dis_info.items():
-                logging.debug(f"  group: {group_id!r}")
-                for node_id, node in nodes.items():
-                    logging.debug(f"    node_id={node_id!r}  label={node.node.label!r}  type(node)={type(node)}")
-
-            tree_views = self.backend.get_tree_views()
-            logging.debug(f"tree_views keys: {list(tree_views.keys())}")
-
-            for panel in self.query(EnableDisableTabs):
-                panel.load(dis_info)
-            for tree in self.query(RichTreeTabbed):
-                tree.load(tree_views)
-        except Exception:
-            logging.exception("Error in _on_config_loaded")
-            raise
+        dis_info   = self.backend.get_disableable_values()
+        tree_views = self.backend.get_tree_views()
+        for panel in self.query(EnableDisableTabs):
+            panel.load(dis_info)         # full rebuild, new config
+        for tree in self.query(RichTreeTabbed):
+            tree.load(tree_views)        # full rebuild, new config
         self.refresh()
 
     def _on_config_failed(self, error_msg: str) -> None:

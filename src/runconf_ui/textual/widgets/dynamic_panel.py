@@ -1,6 +1,7 @@
 import re
 from abc import abstractmethod
 
+from textual.app import ComposeResult
 from textual.widget import Widget
 from textual.widgets import TabbedContent, TabPane
 
@@ -8,14 +9,14 @@ _TEXTUAL_UNSAFE = re.compile(r"[^-a-zA-Z0-9_]")
 
 
 def textual_safe_id(input_id: str) -> str:
-    '''Replaces unsafe characters in a Textual CSS ID with underscores.'''
     return _TEXTUAL_UNSAFE.sub("_", input_id)
 
 
-class DynamicTabbedContent(TabbedContent):
+class DynamicTabbedContent(Widget):
     '''
-    Base class for TabbedContent widgets populated via compose().
-    Call load(data) to update data and recompose.
+    Wrapper widget that owns a TabbedContent and rebuilds it from scratch
+    on load() by recomposing this outer container — not the TabbedContent
+    itself, which is unsafe to recompose.
     '''
 
     panel_prefix: str = "panel"
@@ -26,21 +27,30 @@ class DynamicTabbedContent(TabbedContent):
 
     @abstractmethod
     def _make_pane_content(self, group_id: str, data, panel_id: str) -> Widget:
-        '''Create the inner widget for a tab. Must pass panel_id to Widget.__init__.'''
+        ...
+
+    @abstractmethod
+    def _update_panes(self, data: dict) -> None:
+        '''Update existing pane contents in place.'''
         ...
 
     def _panel_id(self, group_id_safe: str) -> str:
         return f"{self.panel_prefix}_{group_id_safe}"
 
-    def compose(self):
-        for group_id, group_data in self._data.items():
-            group_id_safe = textual_safe_id(group_id)
-            panel_id      = self._panel_id(group_id_safe)
-            # ID must be passed at construction time, not set afterwards
-            panel = self._make_pane_content(group_id, group_data, panel_id)
-            yield TabPane(group_id, panel, id=group_id_safe)
+    def compose(self) -> ComposeResult:
+        with TabbedContent():
+            for group_id, group_data in self._data.items():
+                group_id_safe = textual_safe_id(group_id)
+                panel_id      = self._panel_id(group_id_safe)
+                panel         = self._make_pane_content(group_id, group_data, panel_id)
+                yield TabPane(group_id, panel, id=group_id_safe)
 
     def load(self, data: dict) -> None:
-        '''Store new data and recompose.'''
+        '''Full rebuild — only call when tabs themselves change (new config).'''
         self._data = data
         self.refresh(recompose=True)
+
+    def update(self, data: dict) -> None:
+        '''Update existing pane contents without rebuilding tabs.'''
+        self._data = data
+        self._update_panes(data)
