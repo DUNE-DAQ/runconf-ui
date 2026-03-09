@@ -20,7 +20,7 @@ class OptionsPanel(ScrollableContainer):
 
     def compose(self):
         for label, button_id, style in self.BUTTONS:
-            yield Button(label, id=button_id, variant=style)
+            yield Button(label, id=button_id, variant=style, classes="options_button")
 
     @on(Button.Pressed)
     def handle_button_pressed(self, event: Button.Pressed):

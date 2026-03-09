@@ -52,12 +52,16 @@ SelectCurrent {
     row-span: 6;
 }
 
-#selection_tabs {
+#selection_adjust_tabs {
     column-span: 6;
     height: 100%;
 }
 
-#buttons_panel {
+#selection_tabs {
+    width: 100%;
+}
+
+#control_maps_tabs {
     column-span: 14;
     background: $background-darken-1;
     height: 100%;
@@ -87,7 +91,7 @@ EnableDisablePanel {
 #option_panel_main {
     margin-top: 2;
     margin-right: 2;
-    margin-left: 1;
+    margin-left: 2;
     column-span: 1;
     row-span: 6;
     padding: 1;
@@ -95,7 +99,7 @@ EnableDisablePanel {
 }
 
 .options_button {
-    width: 100%;
+    width: 80%;
     height: auto;
     padding: 1 1;
     margin: 1 0;
@@ -196,4 +200,32 @@ EnableDisablePanel {
 
 .popup_success {
     background: $success;
+}
+
+/* === Loading Screen === */
+LoadingScreen {
+    align: center middle;
+    background: black 10%;
+}
+
+
+#loading-box {
+    width: 30;
+    height: 6;
+    border: round $primary;
+    background: $primary-background;
+    align: center middle;
+    layout: vertical;
+    padding: 1 2;
+}
+
+#loading-label {
+    width: 100%;
+    content-align: center middle;
+    color: $text;
+}
+
+LoadingScreen LoadingIndicator {
+    height: 1;
+    background: transparent;
 }

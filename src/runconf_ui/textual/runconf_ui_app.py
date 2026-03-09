@@ -2,11 +2,9 @@
 Textual application for controlling runconf-shifter-ui
 '''
 
-from typing import ClassVar
 
 from textual import on, work
 from textual.app import App
-import traceback
 
 
 from runconf_ui.backend import RunconfContext, RunconfUI
@@ -27,6 +25,7 @@ class RunconfUIApp(App):
         self.backend = RunconfUI(context)
 
     def on_mount(self) -> None:
+        self.theme = "catppuccin-latte"
         self.push_screen("main")
         self.call_after_refresh(self._init_file_selects)
 
