@@ -61,11 +61,63 @@ SelectCurrent {
     width: 100%;
 }
 
+/* === Adjustable Attribute Panel === */
+
+AdjustableAttributeTabs {
+    height: 100%;
+}
+
+AdjustableAttributePanel {
+    height: 100%;
+    padding: 1 2;
+}
+
+AdjustableAttributeContainer {
+    height: auto;
+    margin: 1 0;
+    border: ascii $primary-background-darken-3;
+    padding: 1;
+}
+
+.adjustable_container {
+    layout: grid;
+    grid-size: 6 1;
+    grid-gutter: 1;
+    height: auto;
+    width: 100%;
+}
+
+.adjustable-attribute-label {
+    column-span: 2;
+    padding: 1 0;
+    color: $text;
+}
+
+.adjustable-attribute-input {
+    column-span: 2;
+    height: auto;
+}
+
+.adjustable-attribute-button {
+    column-span: 1;
+    height: auto;
+}
+
+
 #control_maps_tabs {
     column-span: 14;
     background: $background-darken-1;
     height: 100%;
 }
+
+#control_maps_tabs ContentSwitcher {
+    height: 1fr;
+}
+
+#control_maps_tabs TabPane {
+    height: 100%;
+}
+
 
 EnableDisablePanel {
     layout: vertical;

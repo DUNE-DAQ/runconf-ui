@@ -42,8 +42,9 @@ class DynamicTabbedContent(Widget):
             for group_id, group_data in self._data.items():
                 group_id_safe = textual_safe_id(group_id)
                 panel_id      = self._panel_id(group_id_safe)
+                pane_id       = f"{self.panel_prefix}_{group_id_safe}_pane"  # namespaced
                 panel         = self._make_pane_content(group_id, group_data, panel_id)
-                yield TabPane(group_id, panel, id=group_id_safe)
+                yield TabPane(group_id, panel, id=pane_id)
 
     def load(self, data: dict) -> None:
         '''Full rebuild — only call when tabs themselves change (new config).'''

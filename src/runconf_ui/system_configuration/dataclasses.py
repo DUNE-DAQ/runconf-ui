@@ -145,11 +145,11 @@ class YamlToSystemData:
         return {
             name: AdjustableGroupData(
                 label=data.get("label", ""),
-                systems=cls._build_adjustable_systems(data.get("Systems", [])),
+                systems=cls._build_adjustable_systems(data.get("Systems", []), name),
             )
             for name, data in raw.items()
         }
-
+        
     @staticmethod
     def build_settings(raw: dict) -> SettingsData:
         return SettingsData(classes_to_show=raw.get("Settings", {}).get("classes_to_show", []))
@@ -179,11 +179,7 @@ class YamlToSystemData:
         ]
 
     @staticmethod
-    def _build_adjustable_systems(raw_systems: list[dict]) -> dict[str, list[AdjustableAttributeData]]:
-        '''
-        NOTE: For adjustable attributes we add a dummy "default"
-        This is because I
-        '''
+    def _build_adjustable_systems(raw_systems: list[dict], name: str) -> dict[str, list[AdjustableAttributeData]]:
         attrs = [
             AdjustableAttributeData(
                 class_name=entry["object_class"],
@@ -194,5 +190,4 @@ class YamlToSystemData:
             )
             for entry in raw_systems
         ]
-        return {"default": attrs} if attrs else {}
-    
+        return {name: attrs} if attrs else {}

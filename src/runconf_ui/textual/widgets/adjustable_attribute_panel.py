@@ -26,7 +26,7 @@ class AdjustableAttributeContainer(Static):
 
         with ScrollableContainer(id=f"{self.id}_container", classes="adjustable_container",):
             yield Static(
-                f"[bold]ID:[/bold] [bold red]{node_label}[  /bold red]:\n[bold]Attribute:[/bold]",
+                f"[bold]ID:[/bold] [bold red]{node_label}[/bold red]:",
                 id="label",
                 classes="adjustable-attribute-label adjustable-attribute-name",
                 disabled = not self.interactive
