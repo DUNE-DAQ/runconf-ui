@@ -1,24 +1,33 @@
 '''
 Textual application for controlling runconf-shifter-ui
 '''
-
+from typing import ClassVar
 
 from textual import on, work
 from textual.app import App
 
-
 from runconf_ui.backend import RunconfContext, RunconfUI
 from runconf_ui.textual import messages as runconf_msg
-from runconf_ui.textual.screens import MainScreen
+from runconf_ui.textual.screens import CreateScreen, MainScreen, QuitScreen
 from runconf_ui.textual.screens.popup_screens import LoadingScreen
-from runconf_ui.textual.widgets import EnableDisableTabs, RichTreeTabbed, FileSelect, AdjustableAttributeTabs
+from runconf_ui.textual.widgets import (
+    AdjustableAttributeTabs,
+    EnableDisableTabs,
+    FileSelect,
+    RichTreeTabbed,
+)
 
 
 class RunconfUIApp(App):
 
-    CSS_PATH = "runconf_shifter_ui.tcss"
-    BINDINGS = [("ctrl+q", "quit", "Quit")]
-    SCREENS = {"main": MainScreen}
+    CSS_PATH: ClassVar[str] = "runconf_shifter_ui.tcss"
+    BINDINGS: ClassVar[list[tuple]] = [("ctrl+q", "quit", "Quit")]
+    SCREENS: ClassVar[dict] = {
+        'main': MainScreen,
+        'create': CreateScreen,
+        'quit': QuitScreen,
+        'load': LoadingScreen
+    }
 
     def __init__(self, context: RunconfContext, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -26,7 +35,7 @@ class RunconfUIApp(App):
 
     def on_mount(self) -> None:
         self.theme = "catppuccin-latte"
-        self.push_screen("main")
+        self.push_screen('main')
         self.call_after_refresh(self._init_file_selects)
 
     def _refresh_enabled_info(self, load_fresh: bool = False):
@@ -71,16 +80,42 @@ class RunconfUIApp(App):
         for file_select in self.query(FileSelect):
             file_select.enable_open_button()
 
+    # ------------------------------------------------------------------ #
+    # Quit Screen Message Handling
+    # ------------------------------------------------------------------ #
+    @on(runconf_msg.OpenQuitMenuMessage)
+    def handle_open_quit(self):
+        self.push_screen('quit')
+
+    @on(runconf_msg.OpenCreateMenuMessage)
+    def handle_open_create(self):
+        self.push_screen('create')
+
+    @on(runconf_msg.QuitAndSaveMessage)
+    def handle_quit_save(self):
+        self.backend.save_config()
+        self.exit()
+
+    @on(runconf_msg.QuitAndScrapMessage)
+    def handle_quit_save(self):
+        self.exit()
+    
+    @on(runconf_msg.CancelQuitMessage)
+    def handle_cancel_quit(self):
+        self.pop_screen()
+    
+    # ------------------------------------------------------------------ #
+    # Config loading
+    # ------------------------------------------------------------------ #
     @on(runconf_msg.LoadConfigMessage)
-    def handle_load_config(self, event: runconf_msg.LoadConfigMessage) -> None:
+    def handle_load_config(self, _: runconf_msg.LoadConfigMessage) -> None:
         try:
-            self.push_screen(LoadingScreen())
-        except Exception as e:
+            self.push_screen('load')
+        except Exception:
             import traceback
             self.notify(traceback.format_exc(), title="Screen Push Failed", severity="error", timeout=30)
             return
         self._load_config_worker()
-
 
     @work(thread=True)
     def _load_config_worker(self) -> None:
@@ -97,9 +132,10 @@ class RunconfUIApp(App):
         self.notify(error_msg, title="Config Load Failed", severity="error", timeout=30)
 
 if __name__ == "__main__":
-    from pathlib import Path
     import os
     import shutil
+    from pathlib import Path
+
     from daqconf.consolidate import consolidate_db
 
     test_conf = Path(

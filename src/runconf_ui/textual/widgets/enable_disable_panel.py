@@ -1,8 +1,8 @@
-import re
 
 from textual import on
 from textual.containers import ScrollableContainer
 from textual.widgets import Button
+
 from runconf_ui.state_tree import NodeStatus
 
 from ..messages import NodeToggledMessage

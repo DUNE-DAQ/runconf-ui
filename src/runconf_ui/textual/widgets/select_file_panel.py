@@ -2,15 +2,16 @@ from pathlib import Path
 
 from textual import on
 from textual.containers import Grid
-from textual.widgets import Button, Select, Static
 from textual.types import NoSelection
+from textual.widgets import Button, Select, Static
 
 from ..messages import (
     DaqSessionSelectedMessage,
     DaqVersionSelectedMessage,
     LoadConfigMessage,
 )
-        
+
+
 class VersionSelect(Select):
     @on(Select.Changed)
     def handle_selection_changed(self, event: Select.Changed):

@@ -1,16 +1,15 @@
 # runconf-ui
 
-from textual import on
 from textual.containers import Grid
 from textual.screen import ModalScreen
-from textual.widgets import Footer, Header, TabPane, TabbedContent
+from textual.widgets import Footer, Header, TabbedContent, TabPane
 
 from ..widgets import (
-    EnableDisableTabs,
     AdjustableAttributeTabs,
-    RichTreeTabbed,
+    EnableDisableTabs,
     FileSelect,
     OptionsPanel,
+    RichTreeTabbed,
 )
 
 

@@ -1,7 +1,7 @@
-from dataclasses import dataclass
-from pathlib import Path
 import os
+from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
 
 from rich.tree import Tree
 
@@ -10,8 +10,9 @@ from runconf_ui.repo_manager import LocalRepoManager, RemoteRepoManager
 from runconf_ui.state_tree import NodeStatus, walk
 from runconf_ui.system_configuration import SystemConfigReader
 from runconf_ui.system_configuration.config_reader import AssembledConfig
-from runconf_ui.utils import open_configuration, copy_and_open_config
+from runconf_ui.utils import copy_and_open_config
 from runconf_ui.utils.rich_utils import draw_tree
+
 
 @dataclass
 class RunconfContext:
@@ -21,6 +22,7 @@ class RunconfContext:
     default_config: str | None = None
     base_url: str | None = None
     ops_url: str | None = None
+    output_directory: Path = Path("shifter-configs")
 
 TreeViews = dict[str, Tree]
 
@@ -41,11 +43,13 @@ class RunconfUI:
 
         buffer_id = os.environ.get("SESSION_NAME", os.getlogin())
         self._config_buffer_path = Path(f"/tmp/shifter_configs-{buffer_id}")
+        self._save_path = context.output_directory
 
         self._assembled: AssembledConfig | None = None
         self._tree_views: TreeViews = {}
         self.system_config_reader: SystemConfigReader | None = None
         self._selected_session: str | Path | None = None
+        
 
     # ------------------------------------------------------------------ #
     # Setup                                                                #
@@ -89,12 +93,16 @@ class RunconfUI:
         )
         self._rebuild_indexes()
 
-    def save_config(self, save_path: Path):
+    def save_config(self):
         '''Save configuration to buffer file then copy the config to the save path.'''
         if self.configuration is None:
             raise FileExistsError("Configuration file not found!")
         self.configuration.commit()
-        copy_and_open_config(Path(self.configuration.active_database), save_path)
+        
+        self._save_path.mkdir(parents=True, exist_ok=True)
+        config_path = Path(self.configuration.active_database)
+        
+        copy_and_open_config(config_path, self._save_path/config_path.name)
 
     # ------------------------------------------------------------------ #
     # Public API                                                           #

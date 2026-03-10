@@ -13,6 +13,11 @@ class OpenQuitMenuMessage(ApplicationMessage):
     """Message emitted when the application should quit."""
     ...
 
+class OpenCreateMenuMessage(ApplicationMessage):
+    """Message emitted when the application should quit."""
+    ...
+
+
 class QuitMessage(ApplicationMessage):
     """Message emitted when the application should quit."""
     ...
@@ -37,7 +42,7 @@ class LoadConfigMessage(ApplicationMessage):
         super().__init__()
         self.config_path = config_path
 
-class HelpMessage(ApplicationMessage):
+class OpenHelpMenuMessage(ApplicationMessage):
     """Message emitted when the user requests help."""
     ...
 

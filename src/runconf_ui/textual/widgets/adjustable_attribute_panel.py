@@ -1,11 +1,12 @@
+from textual import on
 from textual.containers import ScrollableContainer
 from textual.widgets import Button, Input, Static
-from textual import on
 
 from runconf_ui.state_tree import NodeStatus
-from .dynamic_panel import DynamicTabbedContent, textual_safe_id
 
 from ..messages import ValueChangedMessage
+from .dynamic_panel import DynamicTabbedContent, textual_safe_id
+
 
 class AdjustableAttributeContainer(Static):
     '''
@@ -38,7 +39,7 @@ class AdjustableAttributeContainer(Static):
             yield Input(
                 value=f"{curr_val}",
                 placeholder=f"{curr_val}",
-                id=f"input",
+                id="input",
                 classes="adjustable-attribute-input",
                 disabled=not self.interactive,
             )
@@ -62,7 +63,7 @@ class AdjustableAttributeContainer(Static):
     def _handle_value_changed(self, new_value):
         self.post_message(ValueChangedMessage(self._adjust_node.path, new_value))
 
-    @on(Button.Pressed, f"#reset")
+    @on(Button.Pressed, "#reset")
     def handle_reset(self, _):
         input = self.query_one(Input)        
         input.clear()
@@ -101,7 +102,7 @@ class AdjustableAttributePanel(ScrollableContainer):
             yield AdjustableAttributeContainer(
                 node,
                 id=textual_safe_id(node_id),
-                classes=f"adjustable_attribute",
+                classes="adjustable_attribute",
             )
 
     def update_containers(self, nodes: dict[str, NodeStatus])->None:

@@ -1,13 +1,18 @@
-from textual.app import ComposeResult
-from textual.screen import ModalScreen
-from textual.widgets import Label, LoadingIndicator, Button
-from textual.containers import Vertical, Grid
-from textual import on
 from dataclasses import dataclass
-from ..messages import (QuitMessage, 
-                        QuitAndSaveMessage,
-                        QuitAndScrapMessage,
-                        CancelQuitMessage)
+
+from textual import on
+from textual.app import ComposeResult
+from textual.containers import Grid, Vertical
+from textual.screen import ModalScreen
+from textual.widgets import Button, Label, LoadingIndicator
+
+from ..messages import (
+    CancelQuitMessage,
+    QuitAndSaveMessage,
+    QuitAndScrapMessage,
+    QuitMessage,
+)
+
 
 class LoadingScreen(ModalScreen):
     '''Blocking modal shown while a config is being opened.'''
