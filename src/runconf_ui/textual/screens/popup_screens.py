@@ -32,25 +32,32 @@ class ButtonTemplate:
     message: QuitMessage
     
     @classmethod
-    def make(cls, label: str, variant: str, button_id: str, message: QuitMessage) -> 'ButtonTemplate':
-        return cls(Button(label=label, variant=variant, id=button_id), message)
+    def make(cls, label: str, variant: str, button_id: str, message: QuitMessage, disabled: bool=False) -> 'ButtonTemplate':
+        return cls(Button(label=label, variant=variant, id=button_id, classes="pop_up_button", disabled=disabled), message)
 
 
 class ButtonPopup(ModalScreen):
     '''Pop-up screen with a label and a set of buttons, each mapped to a message.'''
 
     def __init__(self, buttons: list[ButtonTemplate], info_str: str, css_classes: str):
-        super().__init__()
+        super().__init__(classes="pop_up_screen")
         self._buttons = {t.button.id: t for t in buttons}
         self._info_str = info_str
         self._css_classes = css_classes
 
     def compose(self):
         with Grid(id="pop_grid", classes=self._css_classes):
-            yield Label(self._info_str, classes="popup_info")
+            yield Label(self._info_str, classes="quit_question")
             for template in self._buttons.values():
                 yield template.button
+    
+    def on_mount(self):
+        num_buttons = len(self._buttons)
+        grid = self.query_one("#pop_grid")
+        grid.styles.grid_size_columns = num_buttons
+        self.query_one(".quit_question").styles.column_span = num_buttons
 
+    
     @on(Button.Pressed)
     def handle_button_press(self, event: Button.Pressed):
         template = self._buttons.get(event.button.id)
@@ -58,15 +65,15 @@ class ButtonPopup(ModalScreen):
             self.post_message(template.message)
 
 class QuitScreen(ButtonPopup):
-    def __init__(self):
+    def __init__(self, can_create: bool):
         super().__init__(
             buttons=[
-                ButtonTemplate.make("Create Config and Quit",       "success", "create_quit_button", QuitAndSaveMessage()),
+                ButtonTemplate.make("Create Config and Quit",       "success", "create_quit_button", QuitAndSaveMessage(), disabled=not can_create),
                 ButtonTemplate.make("Quit Without Creating Config?", "warning", "quit_scrap_button",  QuitAndScrapMessage()),
                 ButtonTemplate.make("Cancel and Continue Editing",   "error",   "cancel_button",      CancelQuitMessage()),
             ],
             info_str="Quit Runconf-UI?",
-            css_classes="quit_grid",
+            css_classes="pop_up quit_pop_up_grid",
         )
 
 class CreateScreen(ButtonPopup):
@@ -77,5 +84,5 @@ class CreateScreen(ButtonPopup):
                 ButtonTemplate.make("Cancel and Continue Editing",   "error",   "cancel_button",      CancelQuitMessage()),
             ],
             info_str="Quit Runconf-UI?",
-            css_classes="quit_grid",
+            css_classes="pop_up quit_pop_up_grid",
         )

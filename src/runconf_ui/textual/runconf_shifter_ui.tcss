@@ -1,5 +1,9 @@
-/* === Main Screen === */
-MainScreen {
+/* ============================================================
+   Main Screen
+   ============================================================ */
+
+MainScreen,
+ShifterViewScreen {
 }
 
 #main_container {
@@ -8,11 +12,14 @@ MainScreen {
     grid-rows: 1fr;
     grid-columns: 1fr;
     grid-gutter: 1;
-    margin-bottom: 1;
-    margin-top: 1;
+    margin: 1 0;
 }
 
-/* === File IO Panel === */
+
+/* ============================================================
+   File IO Panel
+   ============================================================ */
+
 #file_io_panel_grid {
     grid-size: 5 2;
     width: 100%;
@@ -21,11 +28,17 @@ MainScreen {
     align: left middle;
 }
 
+#file_io_panel_message {
+    margin-top: 1;
+    column-span: 4;
+}
+
 .file_select {
     column-span: 2;
 }
 
-FileSelect {
+FileSelect,
+FilePanelWidget {
     column-span: 5;
     row-span: 2;
 }
@@ -43,7 +56,11 @@ SelectCurrent {
     color: ansi_white 100%;
 }
 
-/* === Enable/Disable Panel === */
+
+/* ============================================================
+   Enable / Disable Panel
+   ============================================================ */
+
 #enable_disable_panel_container {
     grid-size: 20;
     border: ascii lightgrey;
@@ -58,10 +75,66 @@ SelectCurrent {
 }
 
 #selection_tabs {
+    column-span: 6;
     width: 100%;
 }
 
-/* === Adjustable Attribute Panel === */
+#control_maps_tabs,
+.multi_view_tabs {
+    column-span: 14;
+    background: $background-darken-1;
+    height: 100%;
+}
+
+#control_maps_tabs ContentSwitcher {
+    height: 1fr;
+}
+
+#control_maps_tabs TabPane {
+    height: 100%;
+}
+
+#buttons_panel {
+    column-span: 10;
+    background: $background-darken-1;
+}
+
+.systematic_map_tabs {
+    width: 100%;
+    align-horizontal: right;
+}
+
+EnableDisablePanel {
+    layout: vertical;
+    overflow-y: auto;
+}
+
+.enable_disable_button,
+.detector_subsystem_button {
+    width: 100%;
+    align: center middle;
+    margin: 1 3;
+    color: white;
+}
+
+.node_enabled,
+.detector_subsystem_button_enabled {
+    background: $success;
+}
+
+.node_disabled,
+.detector_subsystem_button_disabled {
+    background: $panel-darken-2;
+}
+
+.detector_subsystem_button_partial {
+    background: $warning-lighten-2;
+}
+
+
+/* ============================================================
+   Adjustable Attribute Panel
+   ============================================================ */
 
 AdjustableAttributeTabs {
     height: 100%;
@@ -79,71 +152,50 @@ AdjustableAttributeContainer {
     padding: 1;
 }
 
-.adjustable_container {
+#adjustable_attribute_container {
     layout: grid;
-    grid-size: 6 1;
+    grid-size: 1;
+    grid-gutter: 1;
+    grid-rows: 6;
+}
+
+.adjustable_container,
+.adjustable-attribute-grid {
+    layout: grid;
+    grid-size: 14 1;
     grid-gutter: 1;
     height: auto;
     width: 100%;
 }
 
 .adjustable-attribute-label {
-    column-span: 2;
+    column-span: 4;
     padding: 1 0;
     color: $text;
 }
 
+.adjustable-attribute-name {
+    column-span: 1;
+}
+
 .adjustable-attribute-input {
+    column-span: 3;
+}
+
+.adjustable-attribute-button {
     column-span: 2;
     height: auto;
 }
 
-.adjustable-attribute-button {
-    column-span: 1;
-    height: auto;
-}
 
+/* ============================================================
+   Options Panel
+   ============================================================ */
 
-#control_maps_tabs {
-    column-span: 14;
-    background: $background-darken-1;
-    height: 100%;
-}
-
-#control_maps_tabs ContentSwitcher {
-    height: 1fr;
-}
-
-#control_maps_tabs TabPane {
-    height: 100%;
-}
-
-
-EnableDisablePanel {
-    layout: vertical;
-    overflow-y: auto;
-}
-
-.enable_disable_button {
-    width: 100%;
-    align: center middle;
-    margin: 1 3;
-    color: white;
-}
-
-.node_disabled {
-    background: $panel-darken-2;
-}
-
-.node_enabled {
-    background: $success;
-}
-
-/* === Options Panel === */
 #option_panel_main {
     margin-top: 2;
     margin-right: 2;
-    margin-left: 2;
+    margin-left: 1;
     column-span: 1;
     row-span: 6;
     padding: 1;
@@ -151,30 +203,42 @@ EnableDisablePanel {
 }
 
 .options_button {
-    width: 80%;
+    width: 100%;
     height: auto;
     padding: 1 1;
     margin: 1 0;
 }
 
-#help {
+#help,
+#help_button {
     background: $primary-darken-2;
 }
 
-#create_run_config {
+#create_run_config,
+#create_button {
     background: $success;
 }
 
-#reset {
+#save_to_database_button {
+    background: $success-darken-1;
+}
+
+#reset,
+#undo_changes_button {
     background: $warning-darken-1;
     color: black;
 }
 
-#quit {
+#quit,
+#quit_button {
     background: $error-darken-1;
 }
 
-/* === Pop-up Screens === */
+
+/* ============================================================
+   Pop-up Screens
+   ============================================================ */
+
 .pop_up_screen {
     align: center middle;
     background: black 40%;
@@ -193,13 +257,6 @@ EnableDisablePanel {
     grid-rows: 1fr 3;
 }
 
-.quit_pop_up_grid_small {
-    grid-size: 2;
-}
-
-.quit_pop_up_grid_full {
-    grid-size: 3;
-}
 
 .quit_question {
     height: 1fr;
@@ -220,7 +277,11 @@ EnableDisablePanel {
     width: 100%;
 }
 
-/* === Help Screen === */
+
+/* ============================================================
+   Help Screen
+   ============================================================ */
+
 .help_message {
     color: white;
 }
@@ -235,6 +296,11 @@ EnableDisablePanel {
     color: white;
     align-horizontal: right;
 }
+
+
+/* ============================================================
+   Notification Popups
+   ============================================================ */
 
 .popup {
     dock: bottom;
@@ -254,12 +320,22 @@ EnableDisablePanel {
     background: $success;
 }
 
-/* === Loading Screen === */
+
+.quit_grid {
+    width: 60%;   /* Increased width */
+    height: 30%;  /* Increased height */
+    grid-gutter: 1 2;
+    grid-rows: 1fr 3;
+}
+
+/* ============================================================
+   Loading Screen
+   ============================================================ */
+
 LoadingScreen {
     align: center middle;
     background: black 10%;
 }
-
 
 #loading-box {
     width: 30;

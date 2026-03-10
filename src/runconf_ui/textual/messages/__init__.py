@@ -9,7 +9,6 @@ from .application_messages import (
     QuitAndScrapMessage,
     QuitMessage,
     RefreshMessage,
-    ResetMessage,
     SaveConfigMessage,
 )
 from .state_messages import (
@@ -39,7 +38,6 @@ __all__ = [
     "QuitAndScrapMessage",
     "QuitMessage",
     "RefreshMessage",
-    "ResetMessage",
     "SaveConfigMessage",
     # State change messages
     "StateChangeMessage",

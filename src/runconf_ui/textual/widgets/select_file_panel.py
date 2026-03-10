@@ -92,7 +92,7 @@ class FileSelect(Static):
         session_select: SessionSelect = self.query_one(SessionSelect)
         selected_session = session_select.value
         if selected_session is not None:
-            self.post_message(LoadConfigMessage(selected_session))
+            self.post_message(LoadConfigMessage())
             
     def _select_enabled(self, select: Select)->bool:
         v = select.value

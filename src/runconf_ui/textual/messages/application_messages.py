@@ -31,16 +31,9 @@ class QuitAndScrapMessage(QuitMessage):
 class CancelQuitMessage(QuitMessage):
     ...
     
-
-class ResetMessage(ApplicationMessage):
-    """Message emitted when the application should reset its data."""
-    ...
-
 class LoadConfigMessage(ApplicationMessage):
     """Message emitted when a new configuration should be loaded."""
-    def __init__(self, config_path: str):
-        super().__init__()
-        self.config_path = config_path
+    ...
 
 class OpenHelpMenuMessage(ApplicationMessage):
     """Message emitted when the user requests help."""

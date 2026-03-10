@@ -4,6 +4,7 @@ from datetime import datetime
 from pathlib import Path
 
 from rich.tree import Tree
+from conffwk import Configuration
 
 from runconf_ui.exceptions import NodeNotFound, RunConfToolsRepoException
 from runconf_ui.repo_manager import LocalRepoManager, RemoteRepoManager
@@ -50,6 +51,7 @@ class RunconfUI:
         self.system_config_reader: SystemConfigReader | None = None
         self._selected_session: str | Path | None = None
         
+        self.configuration: Configuration|None = None
 
     # ------------------------------------------------------------------ #
     # Setup                                                                #
@@ -62,26 +64,22 @@ class RunconfUI:
 
     def set_daq_version(self, version) -> None:
         self.repo_manager.set_daq_version(version)
-        if version is not None:
-            self.system_config_reader = SystemConfigReader(
-                self.repo_manager.get_runconf_ui_config_path()
-            )
-        else:
-            self.system_config_reader = None
-            self._assembled = None
-            self._tree_views = {}
-
     def set_daq_session(self, session: str | Path | None) -> None:
-        if session not in self.get_sessions():
-            raise RunConfToolsRepoException(f"Cannot find session {session}")
         self._selected_session = session
 
     def open_selected_session(self) -> None:
-        if self.system_config_reader is None:
+        if self.repo_manager.get_runconf_ui_config_path() is None:
             raise RunConfToolsRepoException("Select a DAQ version before selecting a session")
 
         if self._selected_session is None:
             raise RunConfToolsRepoException("No session selected!")
+
+        if self._selected_session not in self.get_sessions():
+            raise RunConfToolsRepoException(f"Cannot find session {self._selected_session}")
+
+        self.system_config_reader = SystemConfigReader(
+            self.repo_manager.get_runconf_ui_config_path()
+        )
 
         init_config_path = self.repo_manager.select_config(self._selected_session)
 

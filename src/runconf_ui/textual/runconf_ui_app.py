@@ -15,6 +15,7 @@ from runconf_ui.textual.widgets import (
     EnableDisableTabs,
     FileSelect,
     RichTreeTabbed,
+    OptionsPanel
 )
 
 
@@ -85,7 +86,7 @@ class RunconfUIApp(App):
     # ------------------------------------------------------------------ #
     @on(runconf_msg.OpenQuitMenuMessage)
     def handle_open_quit(self):
-        self.push_screen('quit')
+        self.push_screen(QuitScreen(self.backend.configuration is not None))
 
     @on(runconf_msg.OpenCreateMenuMessage)
     def handle_open_create(self):
@@ -94,15 +95,16 @@ class RunconfUIApp(App):
     @on(runconf_msg.QuitAndSaveMessage)
     def handle_quit_save(self):
         self.backend.save_config()
-        self.exit()
+        self.app.exit()
 
     @on(runconf_msg.QuitAndScrapMessage)
-    def handle_quit_save(self):
-        self.exit()
+    def handle_quit_scrap(self):
+        self.app.exit()
     
     @on(runconf_msg.CancelQuitMessage)
     def handle_cancel_quit(self):
         self.pop_screen()
+    
     
     # ------------------------------------------------------------------ #
     # Config loading
@@ -116,7 +118,8 @@ class RunconfUIApp(App):
             self.notify(traceback.format_exc(), title="Screen Push Failed", severity="error", timeout=30)
             return
         self._load_config_worker()
-
+        
+    
     @work(thread=True)
     def _load_config_worker(self) -> None:
         self.backend.open_selected_session()
@@ -126,6 +129,14 @@ class RunconfUIApp(App):
         self.pop_screen()
         self._refresh_enabled_info(True)
         self.refresh()
+        opts_panel = self.query(OptionsPanel)
+        if not opts_panel:
+            return
+        
+        if self.backend.configuration is None:
+            opts_panel.first().disable_selected()
+        else:
+            opts_panel.first().enable_all()
 
     def _on_config_failed(self, error_msg: str) -> None:
         self.pop_screen()
