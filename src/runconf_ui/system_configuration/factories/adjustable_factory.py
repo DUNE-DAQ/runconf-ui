@@ -8,13 +8,9 @@ class AdjustableFactory(FactoryBase):
     """
     Creates Leaf(AdjustableAttribute) nodes.
 
-    These are added to the tree with votes=False, propagate=False by the
-    builder — they are never touched by Group.set() and do not influence
-    any parent's aggregated state.
-
-    compute_state() will report PARENT_DISABLED for these nodes when either
-    their parent group is off or their DAL is resource-disabled in the session,
-    allowing the UI to grey out the corresponding text box appropriately.
+    Each Leaf's tooltip is resolved from the DAL at construction time:
+    getattr(dal, data.tooltip, dal.id) when data.tooltip names a DAL attribute,
+    otherwise dal.id.
     """
 
     def create(self, data: AdjustableAttributeData) -> list[Leaf] | None:
@@ -31,10 +27,9 @@ class AdjustableFactory(FactoryBase):
                     data.attribute_name,
                 ),
                 label=f"{dal.id} - {data.attribute_name}",
+                tooltip=getattr(dal, data.tooltip, dal.id) if data.tooltip else dal.id,
             )
             for dal in dals
             if not self.is_filtered(dal, data.filters)
         ]
         return results or None
-
-

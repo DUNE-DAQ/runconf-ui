@@ -73,6 +73,11 @@ class NodeStatus:
     def label(self):
         return self.node.label
 
+    @property
+    def tooltip(self) -> str:
+        """Tooltip text for this node, sourced from the node itself."""
+        return self.node.tooltip
+
     def toggle(self) -> None:
         """
         Flip the node's state and return a fresh NodeStatus reflecting the
@@ -129,9 +134,6 @@ def walk(root: Node, parent: Group | None = None, ancestor_disabled=False):
         for child, _, _ in root:
             child_ancestor_disabled = ancestor_disabled or state == State.PARENT_DISABLED
             yield from walk(child, parent=root, ancestor_disabled=child_ancestor_disabled)
-
-
-#             yield from _walk(child, parent=node, ancestor_disabled=child_ancestor_disabled)
 
 
 # ---------------------------------------------------------------------------

@@ -23,22 +23,24 @@ class AdjustableAttributeContainer(Static):
         if isinstance(curr_val, float):
             curr_val = f"{curr_val:3f}"
 
+        label_widget = Static(
+            f"[bold]ID:[/bold] [bold red]{node_label}[/bold red]:",
+            id="label",
+            classes="adjustable-attribute-label adjustable-attribute-name",
+            disabled=not self.interactive,
+        )
+        if self._adjust_node.tooltip:
+            label_widget.tooltip = self._adjust_node.tooltip
 
         with ScrollableContainer(id=f"{self.id}_container", classes="adjustable_container",):
-            yield Static(
-                f"[bold]ID:[/bold] [bold red]{node_label}[/bold red]:",
-                id="label",
-                classes="adjustable-attribute-label adjustable-attribute-name",
-                disabled = not self.interactive
-            )
+            yield label_widget
             
             yield Input(
                 value=f"{curr_val}",
                 placeholder=f"{curr_val}",
                 id=f"input",
                 classes="adjustable-attribute-input",
-                disabled = not self.interactive
-
+                disabled=not self.interactive,
             )
 
             yield Button(
@@ -46,7 +48,7 @@ class AdjustableAttributeContainer(Static):
                 id="apply",
                 classes="adjustable-attribute-button",
                 variant="primary",
-                disabled = not self.interactive
+                disabled=not self.interactive,
             )
 
             yield Button(
@@ -54,7 +56,7 @@ class AdjustableAttributeContainer(Static):
                 id="reset",
                 classes="adjustable-attribute-button",
                 variant="warning",
-                disabled = not self.interactive
+                disabled=not self.interactive,
             )
             
     def _handle_value_changed(self, new_value):
@@ -104,7 +106,8 @@ class AdjustableAttributePanel(ScrollableContainer):
 
     def update_containers(self, nodes: dict[str, NodeStatus])->None:
         for node_id in nodes:
-            results = self.query(f"#{node_id}")
+            safe_id = textual_safe_id(node_id)
+            results = self.query(f"#{safe_id}")
             if not results:
                 continue
             container = results.first(AdjustableAttributeContainer)

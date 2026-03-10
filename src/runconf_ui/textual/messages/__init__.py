@@ -3,6 +3,10 @@ from .application_messages import (
     HelpMessage,
     LoadConfigMessage,
     QuitMessage,
+    QuitAndSaveMessage,
+    QuitAndScrapMessage,
+    OpenQuitMenuMessage,
+    CancelQuitMessage,
     ResetMessage,
     SaveConfigMessage,
     RefreshMessage,
@@ -26,6 +30,12 @@ __all__ = [
     "SaveConfigMessage",
     "HelpMessage",
     "RefreshMessage",
+    "QuitAndSaveMessage",
+    "QuitAndScrapMessage",
+    "OpenQuitMenuMessage",
+    "CancelQuitMessage",
+    
+
     # State change messages
     "StateChangeMessage",
     "ConfigLoadedMessage",

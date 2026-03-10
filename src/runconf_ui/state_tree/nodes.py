@@ -13,8 +13,9 @@ report disabled regardless of their own stored state. This gating is computed
 in traversal.py, not here.
 
 Every node has:
-  label: str  — display name for rendering and index lookup.
-                Empty string means anonymous (not shown in the UI).
+  label:   str — display name for rendering and index lookup.
+                 Empty string means anonymous (not shown in the UI).
+  tooltip: str — text shown on hover in the UI. Empty string means no tooltip.
 
 Children are stored as _Child entries carrying two flags:
 
@@ -52,8 +53,13 @@ from .adapters.adapter import Adapter
 class Node(ABC):
     """Base class for all tree nodes."""
 
-    def __init__(self, label: str = ""):
+    def __init__(self, label: str = "", tooltip: str = ""):
         self.label = label
+
+        if not tooltip:
+            tooltip = label
+
+        self.tooltip = tooltip
 
     @abstractmethod
     def get(self) -> Any:
@@ -74,8 +80,8 @@ class Leaf(Node):
     Reports its own raw adapter value; gating by parent is handled in traversal.
     """
 
-    def __init__(self, adapter: Adapter, label: str = ""):
-        super().__init__(label)
+    def __init__(self, adapter: Adapter, label: str = "", tooltip: str = ""):
+        super().__init__(label, tooltip)
         self.adapter = adapter
 
     def get(self) -> Any:
@@ -130,9 +136,10 @@ class Group(Node):
     def __init__(
         self,
         label: str = "",
+        tooltip: str = "",
         strategy: Callable[[Iterable[bool]], bool] = all,
     ):
-        super().__init__(label)
+        super().__init__(label, tooltip)
         self.strategy = strategy
         self._children: list[_Child] = []
 

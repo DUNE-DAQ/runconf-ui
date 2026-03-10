@@ -1,4 +1,3 @@
-
 from runconf_ui.state_tree import (
     DisableAttribute,
     Group,
@@ -15,6 +14,10 @@ class AttributeFactory(FactoryBase):
     Creates a Group node (strategy=any) containing one Leaf per matching DAL.
     OR semantics: the attribute group is considered enabled if any DAL has
     the attribute enabled.
+
+    Each Leaf's tooltip is resolved from the DAL at construction time:
+    getattr(dal, data.tooltip, dal.id) when data.tooltip names a DAL attribute,
+    otherwise dal.id. The Group itself has no single DAL so carries no tooltip.
     """
 
     def create(self, data: DisableAttributeData) -> Group | None:
@@ -38,7 +41,8 @@ class AttributeFactory(FactoryBase):
                             data.id,
                             data.enabled_state,
                             data.disabled_state,
-                        )
+                        ),
+                        tooltip=getattr(dal, data.tooltip, dal.id) if data.tooltip else dal.id,
                     )
                 )
 

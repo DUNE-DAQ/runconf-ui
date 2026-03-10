@@ -20,6 +20,7 @@ class ComponentFactory(FactoryBase):
             Leaf(
                 DisableComponent(self.configuration, self.session, dal),
                 label=dal.id if data.each_component_separate else "",
+                tooltip=getattr(dal, data.tooltip, dal.id) if data.tooltip else dal.id,
             )
             for dal in dals
             if not self.is_filtered(dal, data.filters)

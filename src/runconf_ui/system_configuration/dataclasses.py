@@ -22,6 +22,7 @@ class SystemElementData:
     id: str = ""      # id of the system element
     system_label: str = ""  # Label of the system element
     filters: list[FilterData] = field(default_factory=list) # Any filters
+    tooltip: str = ""  # Tooltip shown on hover in the UI
 
 
 @dataclass(kw_only=True)
@@ -112,6 +113,7 @@ def _base_disable_kwargs(item: dict) -> dict:
         filters=_filters(item.get("filters"),),
         separate_system=item.get("separate_system", False),
         each_component_separate=item.get("each_component_separate", False),
+        tooltip=item.get("tooltip", ""),
     )
 
 
@@ -187,6 +189,7 @@ class YamlToSystemData:
                 filters=_filters(entry.get("filters")),
                 attribute_name=entry["attribute_name"],
                 unit_label=entry.get("unit_label", ""),
+                tooltip=entry.get("tooltip", ""),
             )
             for entry in raw_systems
         ]

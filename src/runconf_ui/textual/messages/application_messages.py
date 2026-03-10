@@ -9,9 +9,23 @@ class ApplicationMessage(Message):
     """Base class for messages related to application state changes."""
     ...
 
+class OpenQuitMenuMessage(ApplicationMessage):
+    """Message emitted when the application should quit."""
+    ...
+
 class QuitMessage(ApplicationMessage):
     """Message emitted when the application should quit."""
     ...
+
+class QuitAndSaveMessage(QuitMessage):
+    ...
+    
+class QuitAndScrapMessage(QuitMessage):
+    ...
+
+class CancelQuitMessage(QuitMessage):
+    ...
+    
 
 class ResetMessage(ApplicationMessage):
     """Message emitted when the application should reset its data."""
@@ -33,3 +47,4 @@ class SaveConfigMessage(ApplicationMessage):
     
 class RefreshMessage(ApplicationMessage):
     ...
+    

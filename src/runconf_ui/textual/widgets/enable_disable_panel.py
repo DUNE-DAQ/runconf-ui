@@ -19,17 +19,19 @@ class EnableDisablePanel(ScrollableContainer):
         for node_id, node in self._runconf_nodes.items():
             cls     = "node_enabled" if node.is_enabled else "node_disabled"
             enabled = node.is_interactive
-            yield Button(
+            btn = Button(
                 label=node.node.label,
                 id=node_id,
                 classes=f"enable_disable_button {cls}",
                 disabled=not enabled,
             )
+            if node.tooltip:
+                btn.tooltip = node.tooltip
+            yield btn
 
     @on(Button.Pressed)
     def handle_button_pressed(self, event: Button.Pressed):
         self.post_message(NodeToggledMessage(group_id=self._group_id, widget_id=event.button.id))
-
 
     def update_buttons(self, nodes: dict[str, NodeStatus]) -> None:
         for node_id, node in nodes.items():
@@ -40,6 +42,7 @@ class EnableDisablePanel(ScrollableContainer):
             button.remove_class("node_enabled", "node_disabled")
             button.add_class("node_enabled" if node.is_enabled else "node_disabled")
             button.disabled = not node.is_interactive
+            button.tooltip = node.tooltip or None
 
 
 class EnableDisableTabs(DynamicTabbedContent):

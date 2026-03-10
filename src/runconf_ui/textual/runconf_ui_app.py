@@ -29,16 +29,19 @@ class RunconfUIApp(App):
         self.push_screen("main")
         self.call_after_refresh(self._init_file_selects)
 
-    def refresh_enabled_info(self):
+    def _refresh_enabled_info(self, load_fresh: bool = False):
         dis_info   = self.backend.get_disableable_values()
         adj_info   = self.backend.get_adjustable_values()
         tree_views = self.backend.get_tree_views()
-        for panel in self.query(EnableDisableTabs):
-            panel.load(dis_info)         # full rebuild, new config
-        for panel in self.query(AdjustableAttributeTabs):
-            panel.load(adj_info)
-        for tree in self.query(RichTreeTabbed):
-            tree.load(tree_views)        # full rebuild, new config
+
+        pairs = [
+            (self.query(EnableDisableTabs),      dis_info),
+            (self.query(AdjustableAttributeTabs), adj_info),
+            (self.query(RichTreeTabbed),          tree_views),
+        ]
+        for widgets, data in pairs:
+            for widget in widgets:
+                widget.load(data) if load_fresh else widget.update(data)
 
     def _init_file_selects(self) -> None:
         versions = self.backend.get_daq_versions()
@@ -52,7 +55,7 @@ class RunconfUIApp(App):
     @on(runconf_msg.NodeToggledMessage)
     def handle_node_toggled(self, event: runconf_msg.NodeToggledMessage):
         self.backend.toggle(event.group_id, event.widget_id)
-        self.refresh_enabled_info()
+        self._refresh_enabled_info(False)
 
     @on(runconf_msg.DaqVersionSelectedMessage)
     def handle_version_selected(self, event: runconf_msg.DaqVersionSelectedMessage):
@@ -86,7 +89,7 @@ class RunconfUIApp(App):
 
     def _on_config_loaded(self) -> None:
         self.pop_screen()
-        self.refresh_enabled_info()
+        self._refresh_enabled_info(True)
         self.refresh()
 
     def _on_config_failed(self, error_msg: str) -> None:
