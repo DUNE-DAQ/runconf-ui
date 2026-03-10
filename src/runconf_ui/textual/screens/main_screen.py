@@ -10,6 +10,7 @@ from ..widgets import (
     FileSelect,
     OptionsPanel,
     RichTreeTabbed,
+    ConfigTreePanel
 )
 
 
@@ -24,6 +25,9 @@ class MainScreen(ModalScreen):
                         yield EnableDisableTabs(id="selection_tabs")
 
                 with TabbedContent("Schematic Views", id="control_maps_tabs"):
+                    with TabPane("Configuration"):
+                        yield ConfigTreePanel(id="config_tree_panel")
+
                     with TabPane("System Maps"):
                         yield RichTreeTabbed(id="maps_panel")
 

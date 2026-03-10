@@ -174,10 +174,6 @@ AdjustableAttributeContainer {
     color: $text;
 }
 
-.adjustable-attribute-name {
-    column-span: 1;
-}
-
 .adjustable-attribute-input {
     column-span: 3;
 }

@@ -211,6 +211,6 @@ class RunconfUI:
     
     def get_config_tree(self)->Tree:
         if self.config_tree_renderer is None:
-            return Tree()
+            return Tree("No Config Loaded")
         
         return self.config_tree_renderer.draw_config_tree()

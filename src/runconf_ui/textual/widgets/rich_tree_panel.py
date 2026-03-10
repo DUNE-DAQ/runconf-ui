@@ -34,3 +34,21 @@ class RichTreeTabbed(DynamicTabbedContent):
                 continue
             panel = results.first(RichTreePanel)
             panel.update_tree(tree)
+
+class ConfigTreePanel(ScrollableContainer):
+    """Displays the full DAQ configuration tree."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._tree: Tree = Tree("No Config Loaded")
+
+    def compose(self):
+        yield Static(self._tree, id="config_tree_view")
+
+    def load(self, tree: Tree) -> None:
+        self._tree = tree
+        self.refresh(recompose=True)
+
+    def update(self, tree: Tree) -> None:
+        self._tree = tree
+        self.query_one("#config_tree_view", Static).update(tree)

@@ -15,7 +15,8 @@ from runconf_ui.textual.widgets import (
     EnableDisableTabs,
     FileSelect,
     RichTreeTabbed,
-    OptionsPanel
+    OptionsPanel,
+    ConfigTreePanel
 )
 
 
@@ -43,15 +44,18 @@ class RunconfUIApp(App):
         dis_info   = self.backend.get_disableable_values()
         adj_info   = self.backend.get_adjustable_values()
         tree_views = self.backend.get_tree_views()
+        config_tree = self.backend.get_config_tree()
 
         pairs = [
-            (self.query(EnableDisableTabs),      dis_info),
+            (self.query(EnableDisableTabs),       dis_info),
             (self.query(AdjustableAttributeTabs), adj_info),
             (self.query(RichTreeTabbed),          tree_views),
+            (self.query(ConfigTreePanel),         config_tree)
         ]
         for widgets, data in pairs:
             for widget in widgets:
                 widget.load(data) if load_fresh else widget.update(data)
+
 
     def _init_file_selects(self) -> None:
         versions = self.backend.get_daq_versions()
