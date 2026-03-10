@@ -36,7 +36,8 @@ class SessionSelect(Select):
             selected_session = None
 
         self.post_message(DaqSessionSelectedMessage(daq_session=selected_session))
-        
+
+
 class FileSelect(Static):
     '''
     A panel for selecting files.
@@ -48,6 +49,7 @@ class FileSelect(Static):
             yield Button(
                 "Open", id="open_file_button", disabled=True, classes="file_io_button"
             )
+            yield Static("No Config Loaded", id="config_info")
 
     def update_versions(self, versions: list[str]):
         '''
@@ -76,7 +78,6 @@ class FileSelect(Static):
         session_select: SessionSelect = self.query_one(SessionSelect)
         session_select.disabled = not self._select_enabled(version_select)
             
-        
     def enable_open_button(self):
         '''Enable or disable the open button based on whether a session is selected.
         '''        
@@ -84,6 +85,18 @@ class FileSelect(Static):
         open_button: Button = self.query_one("#open_file_button", Button)
         open_button.disabled = not self._select_enabled(session_select)
         
+    def update_text(self, update_text: str|None):
+        text_query = self.query("#config_info")
+        if not text_query:
+            return
+        
+        text = text_query.first()
+        if update_text is None:
+            update_text = "No Config Loaded"
+        
+        text.update(update_text)
+        
+    
     @on(Button.Pressed, ".file_io_button")
     def handle_open_pressed(self, _: Button.Pressed):
         '''

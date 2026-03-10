@@ -125,7 +125,6 @@ class TestDisableAttribute:
         assert adapter.dal_enabled() is False
         enable_component(consolidated_config._obj, consolidated_session.id, resource_dal.id)
 
-
 # ---------------------------------------------------------------------------
 # AdjustableAttribute
 # ---------------------------------------------------------------------------

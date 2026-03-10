@@ -18,5 +18,5 @@ __all__ = [
     "RichTreeTabbed",
     "ConfigTreePanel",
     "SessionSelect",
-    "VersionSelect"
+    "VersionSelect",
 ]

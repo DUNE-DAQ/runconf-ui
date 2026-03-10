@@ -244,20 +244,20 @@ class TestSystemConfigReaderIntegration:
         tpg = next(g for g in assembled.disableable if g.id == "TPG")
         system = tpg.systems[0]
         index = build_index(system.root)
-        assert "readout" in index
+        assert "Readout" in index
 
     def test_adjustable_group_structure(self, assembled):
         assert len(assembled.adjustable) == 1
         group = assembled.adjustable[0]
         assert group.id == "Random Trigger Rates"
         index = build_index(group.systems[0].root)
-        assert "random-tc-generator" in index
+        assert "random-tc-generator - trigger_rate_hz" in index
 
     def test_adjustable_node_not_affected_by_set(self, assembled):
         group = assembled.adjustable[0]
         root  = group.systems[0].root
         index = build_index(root)
-        rate_node = index["random-tc-generator"]
+        rate_node = index["random-tc-generator - trigger_rate_hz"]
         initial = rate_node.get()
 
         # set() on root must not touch adjustable nodes

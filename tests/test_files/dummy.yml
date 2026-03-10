@@ -43,13 +43,14 @@ PanelOptions:
               segments: ["ru-segment"]
               class: ReadoutApplication
               separate_system: True
-              system_label: "readout"
+              system_label: "Readout"
           
   Trigger:
     label: 'Trigger'
     view_panel: "Trigger View"
     Systems:
       - RandomTrigger:
+          display_full_system: True
           relationships:
             - id: standalone_candidate_maker_confs
               class: MLTApplication

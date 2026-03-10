@@ -56,6 +56,23 @@ class RunconfUIApp(App):
             for widget in widgets:
                 widget.load(data) if load_fresh else widget.update(data)
 
+        # Now
+        opts_panel = self.query(OptionsPanel)
+        if not opts_panel:
+            return
+        
+        if self.backend.configuration is None:
+            opts_panel.first().disable_selected()
+        else:
+            opts_panel.first().enable_all()
+
+        # Now update the file_panel
+        file_select = self.query(FileSelect)
+        if file_select:        
+            file_select.first().update_text(
+                self.backend.info_text
+            )
+
 
     def _init_file_selects(self) -> None:
         versions = self.backend.get_daq_versions()
@@ -133,15 +150,7 @@ class RunconfUIApp(App):
         self.pop_screen()
         self._refresh_enabled_info(True)
         self.refresh()
-        opts_panel = self.query(OptionsPanel)
-        if not opts_panel:
-            return
         
-        if self.backend.configuration is None:
-            opts_panel.first().disable_selected()
-        else:
-            opts_panel.first().enable_all()
-
     def _on_config_failed(self, error_msg: str) -> None:
         self.pop_screen()
         self.notify(error_msg, title="Config Load Failed", severity="error", timeout=30)

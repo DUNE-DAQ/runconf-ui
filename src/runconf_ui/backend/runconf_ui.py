@@ -46,6 +46,8 @@ class RunconfUI:
         self._config_buffer_path = Path(f"/tmp/shifter_configs-{buffer_id}")
         self._save_path = context.output_directory/f"{context.apparatus}.data.xml"
 
+        self.apparatus = context.apparatus
+
         self._assembled: AssembledConfig | None = None
         self._tree_views: TreeViews = {}
         self.system_config_reader: SystemConfigReader | None = None
@@ -53,18 +55,28 @@ class RunconfUI:
         
         self.configuration: Configuration|None = None
         self.config_tree_renderer=None
+        self.config_session=None
+        
+        self.info_text="No Config Selected"
 
     # ------------------------------------------------------------------ #
     # Setup                                                                #
     # ------------------------------------------------------------------ #
     def get_daq_versions(self):
         return self.repo_manager.get_available_daq_versions()
+    
+    def get_current_version(self):
+        return self.repo_manager.daq_version
 
     def get_sessions(self):
         return self.repo_manager.get_daq_sessions()
 
+    def get_current_session(self):
+        return self._selected_session
+    
     def set_daq_version(self, version) -> None:
         self.repo_manager.set_daq_version(version)
+
     def set_daq_session(self, session: str | Path | None) -> None:
         self._selected_session = session
 
@@ -87,17 +99,25 @@ class RunconfUI:
         tmp_config_path = self._config_buffer_path / f"cfg_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.data.xml"
         self.configuration = copy_and_open_config(init_config_path, tmp_config_path)
 
-        config_session = self.configuration.get_dals('Session')[0]
+        self.config_session = self.configuration.get_dals('Session')[0]
 
         self.config_tree_renderer = ConfigTreeRenderer(self.configuration,
-                                                       config_session,
+                                                       self.config_session,
                                                        self.system_config_reader.classes_to_draw)
 
         self._assembled = self.system_config_reader.assemble_config(
-            self.configuration, config_session.id
+            self.configuration, self.config_session.id
         )
+        self.update_info_text(init_config_path)
         self._rebuild_indexes()
         
+    def update_info_text(self, init_config_path):
+    
+        self.info_text= (f"      [bold green]DAQ Version[/bold green]:  [deep_pink4]{self.get_current_version()}[/deep_pink4]\n"
+                         f"      [bold green]Apparatus[/bold green]:  [deep_pink4]{self.apparatus}[/deep_pink4]\n"
+                         f"      [bold green]DAQ Config[/bold green]: [deep_pink4]{init_config_path}[/deep_pink4]\n"
+                         f"      [bold green]Current Config File[/bold green]:  [deep_pink4]{self.configuration.active_database}[/deep_pink4]\n"
+                         f"      [bold green]Session in Config[/bold green]:  [deep_pink4]{self.config_session.id}\n")
 
     def save_config(self):
         '''Save configuration to buffer file then copy the config to the save path.'''
