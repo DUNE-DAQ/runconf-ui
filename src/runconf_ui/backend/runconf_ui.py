@@ -210,3 +210,7 @@ class RunconfUI:
         return tree
     
     def get_config_tree(self)->Tree:
+        if self.config_tree_renderer is None:
+            return Tree()
+        
+        return self.config_tree_renderer.draw_config_tree()
