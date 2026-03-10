@@ -12,7 +12,7 @@ from runconf_ui.state_tree import NodeStatus, walk
 from runconf_ui.system_configuration import SystemConfigReader
 from runconf_ui.system_configuration.config_reader import AssembledConfig
 from runconf_ui.utils import copy_and_open_config
-from runconf_ui.utils.rich_utils import draw_tree
+from runconf_ui.utils.rich_utils import draw_node_tree, ConfigTreeRenderer
 
 
 @dataclass
@@ -44,7 +44,7 @@ class RunconfUI:
 
         buffer_id = os.environ.get("SESSION_NAME", os.getlogin())
         self._config_buffer_path = Path(f"/tmp/shifter_configs-{buffer_id}")
-        self._save_path = context.output_directory
+        self._save_path = context.output_directory/f"{context.apparatus}.data.xml"
 
         self._assembled: AssembledConfig | None = None
         self._tree_views: TreeViews = {}
@@ -52,6 +52,7 @@ class RunconfUI:
         self._selected_session: str | Path | None = None
         
         self.configuration: Configuration|None = None
+        self.config_tree_renderer=None
 
     # ------------------------------------------------------------------ #
     # Setup                                                                #
@@ -86,10 +87,17 @@ class RunconfUI:
         tmp_config_path = self._config_buffer_path / f"cfg_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.data.xml"
         self.configuration = copy_and_open_config(init_config_path, tmp_config_path)
 
+        config_session = self.configuration.get_dals('Session')[0]
+
+        self.config_tree_renderer = ConfigTreeRenderer(self.configuration,
+                                                       config_session,
+                                                       self.system_config_reader.classes_to_draw)
+
         self._assembled = self.system_config_reader.assemble_config(
-            self.configuration, self.configuration.get_dals('Session')[0].id
+            self.configuration, config_session.id
         )
         self._rebuild_indexes()
+        
 
     def save_config(self):
         '''Save configuration to buffer file then copy the config to the save path.'''
@@ -97,10 +105,10 @@ class RunconfUI:
             raise FileExistsError("Configuration file not found!")
         self.configuration.commit()
         
-        self._save_path.mkdir(parents=True, exist_ok=True)
+        self._save_path.parent.mkdir(parents=True, exist_ok=True)
         config_path = Path(self.configuration.active_database)
         
-        copy_and_open_config(config_path, self._save_path/config_path.name)
+        copy_and_open_config(config_path, self._save_path)
 
     # ------------------------------------------------------------------ #
     # Public API                                                           #
@@ -198,5 +206,7 @@ class RunconfUI:
     def _build_panel_tree(group) -> Tree:
         tree = Tree(group.view_panel)
         for system in group.systems:
-            tree.children.append(draw_tree(system.root.label, system.root))
+            tree.children.append(draw_node_tree(system.root.label, system.root))
         return tree
+    
+    def get_config_tree(self)->Tree:

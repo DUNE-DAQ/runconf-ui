@@ -22,8 +22,6 @@ class MainScreen(ModalScreen):
                 with TabbedContent("Controls", id="selection_adjust_tabs"):
                     with TabPane("Enable/Disable"):
                         yield EnableDisableTabs(id="selection_tabs")
-                    # with TabPane("Adjustable"):
-                    #     yield AdjustableAttributeTabs(id="adjustable_tabs")
 
                 with TabbedContent("Schematic Views", id="control_maps_tabs"):
                     with TabPane("System Maps"):

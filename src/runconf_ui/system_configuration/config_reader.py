@@ -208,6 +208,11 @@ class SystemConfigReader:
     def __init__(self, config_path: Path):
         self.config = SystemConfig(config_path)
 
+    @property
+    def classes_to_draw(self):
+        '''Classes to display in our global config tree'''
+        return self.config.classes_to_show
+
     def assemble_config(
         self,
         configuration: Configuration,
