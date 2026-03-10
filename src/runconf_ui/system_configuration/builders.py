@@ -165,7 +165,7 @@ class AdjustableSystemBuilder:
 
     def build(self, attributes: list[AdjustableAttributeData], label: str) -> Group:
         root = Group(label=label, strategy=all)
-
+        
         for attr in attributes:
             nodes = self.factory.create(attr)
             if not nodes:

@@ -172,7 +172,9 @@ class RunconfUI:
         for group in (*a.disableable, *a.adjustable):
             group.nodes = {}
             for system in group.systems:
-                system.nodes = {s.path: s for s in walk(system.root) if s.path is not None}
+                system.nodes = {s.path: s for s in walk(system.root) if s.path is not None
+                                and (system.display_full_system or s.parent is not None)
+                                }
                 group.nodes.update(system.nodes)
 
         a.disableable_nodes = {g.id: g.nodes for g in a.disableable}
