@@ -8,7 +8,10 @@ from textual.app import App
 
 from runconf_ui.backend import RunconfContext, RunconfUI
 from runconf_ui.textual import messages as runconf_msg
-from runconf_ui.textual.screens import CreateScreen, MainScreen, QuitScreen
+from runconf_ui.textual.screens import (CreateScreen,
+                                        MainScreen,
+                                        QuitScreen,
+                                        HelpScreen)
 from runconf_ui.textual.screens.popup_screens import LoadingScreen
 from runconf_ui.textual.widgets import (
     AdjustableAttributeTabs,
@@ -28,7 +31,8 @@ class RunconfUIApp(App):
         'main': MainScreen,
         'create': CreateScreen,
         'quit': QuitScreen,
-        'load': LoadingScreen
+        'load': LoadingScreen,
+        'help': HelpScreen
     }
 
     def __init__(self, context: RunconfContext, *args, **kwargs):
@@ -126,6 +130,9 @@ class RunconfUIApp(App):
     def handle_cancel_quit(self):
         self.pop_screen()
     
+    @on(runconf_msg.OpenHelpMenuMessage)
+    def handle_help(self):
+        self.push_screen('help')
     
     # ------------------------------------------------------------------ #
     # Config loading

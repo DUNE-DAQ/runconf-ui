@@ -13,6 +13,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import yaml
+import re
 from conffwk import Configuration
 from conffwk.dal import DalBase
 
@@ -25,6 +26,22 @@ from .dataclasses import (
     YamlToSystemData,
 )
 
+# ---------------------------------------------------------------------------
+# Utility functions
+# ---------------------------------------------------------------------------
+def natural_key(s: str):
+    return [
+        int(text) if text.isdigit() else text.lower()
+        for text in re.split(r'(\d+)', s)
+    ]
+
+def node_sort_key(item: tuple[str, NodeStatus]):
+    key, node = item
+    return (
+        0 if node.is_enabled else 1,   # enabled first
+        natural_key(key)               # alphanumeric
+    )
+    
 
 # ---------------------------------------------------------------------------
 # Output dataclasses
@@ -60,12 +77,21 @@ class AssembledConfig:
     adjustable:  list[AssembledGroup]
     
     def __post_init__(self):
-        self.disableable_nodes = {group.id: group.nodes for group in self.disableable}        
-        self.adjustable_nodes  = {group.id: group.nodes for group in self.adjustable}
+        self.disableable_nodes = {
+            group.id: self._sorted_nodes(group.nodes)
+            for group in self.disableable
+        }
+
+        self.adjustable_nodes = {
+            group.id: self._sorted_nodes(group.nodes)
+            for group in self.adjustable
+        }
+
         
         self.all_nodes = {**self.adjustable_nodes, **self.disableable_nodes}
 
-
+    def _sorted_nodes(self, nodes: dict[str, NodeStatus]) -> dict[str, NodeStatus]:
+        return dict(sorted(nodes.items(), key=node_sort_key))
     
 
 # ---------------------------------------------------------------------------

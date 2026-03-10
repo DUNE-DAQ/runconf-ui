@@ -44,8 +44,8 @@ class FileSelect(Static):
     '''
     def compose(self):
         with Grid(id="file-select-grid"):
-            yield VersionSelect(id="version-select", options=[])
-            yield SessionSelect(id="session-select", options=[], disabled=True)
+            yield VersionSelect(id="version-select", options=[], classes="file_select_drop")
+            yield SessionSelect(id="session-select", options=[], disabled=True, classes="file_select_drop")
             yield Button(
                 "Open", id="open_file_button", disabled=True, classes="file_io_button"
             )
