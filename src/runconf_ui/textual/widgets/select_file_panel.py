@@ -65,6 +65,7 @@ class FileSelect(Static):
         '''
         Update the list of DAQ sessions available for selection.
         '''
+        
         opts = [(str(s.name),s) for s in sessions]
         
         session_select: SessionSelect = self.query_one(SessionSelect)

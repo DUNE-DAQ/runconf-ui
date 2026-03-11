@@ -30,23 +30,26 @@ from .dataclasses import (
 # ---------------------------------------------------------------------------
 # Utility functions
 # ---------------------------------------------------------------------------
-def natural_key(s: str):
+
+def _natural_key(s: str):
     return [
         int(text) if text.isdigit() else text.lower()
         for text in re.split(r'(\d+)', s)
     ]
 
-def node_sort_key(item: tuple[str, NodeStatus]):
+
+def _node_sort_key(item: tuple[str, NodeStatus]):
     key, node = item
     return (
-        0 if node.is_enabled else 1,   # enabled first
-        natural_key(key)               # alphanumeric
+        0 if node.is_enabled else 1,
+        _natural_key(key),
     )
-    
+
 
 # ---------------------------------------------------------------------------
 # Output dataclasses
 # ---------------------------------------------------------------------------
+
 @dataclass()
 class AssembledSystem:
     root:                Group
@@ -60,40 +63,40 @@ class AssembledSystem:
             and (status.parent is None or bool(status.parent.label))
             and (self.display_full_system or status.parent is not None)
         }
+
+
 @dataclass()
 class AssembledGroup:
     id:         str
     label:      str
-    systems:    list[AssembledSystem] 
+    systems:    list[AssembledSystem]
     view_panel: str = ""
+
     def __post_init__(self):
-        '''Flattens the tree into a list of nodes: node for easy lookup in the TUI layer.'''
         self.nodes: dict[str, NodeStatus] = {}
         for system in self.systems:
             self.nodes.update(system.nodes)
-    
+
+
 @dataclass
 class AssembledConfig:
     disableable: list[AssembledGroup]
     adjustable:  list[AssembledGroup]
-    
+
     def __post_init__(self):
         self.disableable_nodes = {
             group.id: self._sorted_nodes(group.nodes)
             for group in self.disableable
         }
-
         self.adjustable_nodes = {
             group.id: self._sorted_nodes(group.nodes)
             for group in self.adjustable
         }
-
-        
         self.all_nodes = {**self.adjustable_nodes, **self.disableable_nodes}
 
     def _sorted_nodes(self, nodes: dict[str, NodeStatus]) -> dict[str, NodeStatus]:
-        return dict(sorted(nodes.items(), key=node_sort_key))
-    
+        return dict(sorted(nodes.items(), key=_node_sort_key))
+
 
 # ---------------------------------------------------------------------------
 # SystemConfig
@@ -148,79 +151,63 @@ class ConfigAssembler:
         skeleton: dict[str, DisableableGroupData],
     ) -> list[AssembledGroup]:
         builder = DisableSystemBuilder(self.configuration, self.session)
-        
-        assmbled_groups = []
+
+        assembled_groups = []
         for group_name, group_data in skeleton.items():
             systems = []
             for system_name, system_list in group_data.systems.items():
-                for system in system_list:
-                    root = builder.build(system, label=system_name)
-
+                for system_data in system_list:
+                    # Build the tree once and reuse it — avoid running factories twice.
+                    root = builder.build(system_data, label=system_name)
                     if not root.children:
                         continue
-                    
-                    system = AssembledSystem(
-                        root=builder.build(system, label=system_name),
-                        display_full_system=system.display_full_system,
-                    )
-                    
-                    systems.append(system)
+                    systems.append(AssembledSystem(
+                        root=root,
+                        display_full_system=system_data.display_full_system,
+                    ))
 
             if not systems:
                 continue
-            
-            assembled_group = AssembledGroup(
+
+            assembled_groups.append(AssembledGroup(
                 id=group_name,
                 label=group_data.label or group_name,
                 view_panel=group_data.view_panel,
-                systems=[
-                    AssembledSystem(
-                        root=builder.build(system, label=system_name),
-                        display_full_system=system.display_full_system,
-                    )
-                    for system_name, system_list in group_data.systems.items()
-                    for system in system_list
-                ],
-            )
-            
-            assmbled_groups.append(assembled_group)
-            
-        return assmbled_groups
+                systems=systems,
+            ))
 
-        
+        return assembled_groups
+
     def assemble_adjustable(
         self,
         skeleton: dict[str, AdjustableGroupData],
     ) -> list[AssembledGroup]:
         builder = AdjustableSystemBuilder(self.configuration, self.session)
-        
-        assmbled_groups = []
+
+        assembled_groups = []
         for group_name, group_data in skeleton.items():
             systems = []
             for system_name, attrs in group_data.systems.items():
                 root = builder.build(attrs, label=system_name)
                 if not root.children:
                     continue
-                system = AssembledSystem(
-                            root=builder.build(attrs, label=system_name),
-                            display_full_system=False,
-                        )
-                
-                systems.append(system)
-            
+                systems.append(AssembledSystem(
+                    root=root,
+                    display_full_system=False,
+                ))
+
             if not systems:
                 continue
-            
-            assmbled_group = AssembledGroup(
+
+            assembled_groups.append(AssembledGroup(
                 id=group_name,
                 label=group_data.label or group_name,
                 view_panel="",
-                systems=systems
-            )
-            
-            assmbled_groups.append(assmbled_group)
-        
-        return assmbled_groups
+                systems=systems,
+            ))
+
+        return assembled_groups
+
 
 # ---------------------------------------------------------------------------
 # SystemConfigReader
@@ -237,7 +224,7 @@ class SystemConfigReader:
 
     @property
     def classes_to_draw(self):
-        '''Classes to display in our global config tree'''
+        """Classes to display in the global config tree."""
         return self.config.classes_to_show
 
     def assemble_config(

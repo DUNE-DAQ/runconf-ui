@@ -9,20 +9,18 @@ The three states:
   ENABLED         — node is on, its DAL is resource-enabled, and its parent
                     (if any) is on.
 
-  DISABLED        — node is internally off.
+  DISABLED        — node is internally off, and its parent (if any) is on.
 
-  PARENT_DISABLED — node is internally on but is considered disabled due to
-                    an external condition: either its parent group is off, or
-                    its underlying DAL is resource-disabled in the session.
+  PARENT_DISABLED — the node is considered disabled due to an external
+                    condition: either its parent group is off, or its
+                    underlying DAL is resource-disabled in the session.
+                    This takes precedence over the node's own internal state —
+                    if the parent is off, children always report PARENT_DISABLED
+                    regardless of their own stored value.
                     Renders as greyed-out and non-interactive in the UI.
-                    The two causes are not distinguished at the State level;
-                    use disabled_children() or adapter.dal_enabled() directly
-                    if diagnostic detail is needed.
 
-If a node is both internally disabled and parent/DAL-disabled, DISABLED is
-returned — the node's own state is the more informative signal.
-
-This code ALL assumes just 1 layer of nesting!
+Parent gating is checked first. A node's own internal state is only
+consulted when its parent (if any) is enabled.
 """
 from collections.abc import Iterator
 from dataclasses import dataclass
@@ -30,19 +28,21 @@ from enum import Enum, auto
 
 from .nodes import Group, Leaf, Node
 
+
 # ---------------------------------------------------------------------------
 # State
 # ---------------------------------------------------------------------------
 
 class State(Enum):
-    '''The state of a node'''
-    ENABLED         = auto()  # Node is enabled
-    DISABLED        = auto()  # Node is disabled
-    PARENT_DISABLED = auto()  # Node's parent is disabled
+    """The state of a node."""
+    ENABLED         = auto()
+    DISABLED        = auto()
+    PARENT_DISABLED = auto()
+
 
 @dataclass
 class NodeStatus:
-    '''A full node status, carrying the node, its computed state, and its parent.'''
+    """A full node status, carrying the node, its computed state, and its parent."""
     node:   Node
     state:  State
     parent: Group | None
@@ -75,65 +75,68 @@ class NodeStatus:
 
     @property
     def tooltip(self) -> str:
-        """Tooltip text for this node, sourced from the node itself."""
         return self.node.tooltip
 
     def toggle(self) -> None:
-        """
-        Flip the node's state and return a fresh NodeStatus reflecting the
-        result. No-op (returns self) if the node is not interactive.
-        """
+        """Flip the node's state. No-op if the node is not interactive."""
         self.node.set(not self.node.get())
         self.refresh_state()
 
     def refresh_state(self) -> None:
-        """
-        Update the node's state in place, recomputing from the live adapter values.
-        """
+        """Recompute state in place from live adapter values."""
         self.state = compute_state(self.node, self.parent)
+
 
 # ---------------------------------------------------------------------------
 # State computation
 # ---------------------------------------------------------------------------
+
 def compute_state(node: Node, parent: Group | None) -> State:
     """
-    Compute the visible state of a node, immutable snapshot.
+    Compute the visible state of a node.
 
-    Precedence:
-      1. Parent gating (highest)
-      2. Node internal value
-      3. Leaf DAL state
+    Precedence (highest first):
+      1. Parent gating — if the parent group is off, always PARENT_DISABLED.
+      2. DAL resource state — if the underlying DAL is resource-disabled,
+         PARENT_DISABLED (only checked for Leaf nodes).
+      3. Node internal value — ENABLED or DISABLED.
     """
-    # Parent gating: parent aggregate off → PARENT_DISABLED
-    if parent is not None and not parent.get():  
+    # 1. Parent gating takes precedence over everything.
+    if parent is not None and not parent.get():
         return State.PARENT_DISABLED
 
-    # Node internal flag (for disableable voting nodes)
-    if isinstance(node, Leaf) or isinstance(node, Group):
-        if not node.get():
-            return State.DISABLED
-
-    # Leaf DAL gating
+    # 2. Leaf DAL resource state.
     if isinstance(node, Leaf) and not node.adapter.dal_enabled():
         return State.PARENT_DISABLED
 
-    # Fully enabled
+    # 3. Node's own internal value.
+    if not node.get():
+        return State.DISABLED
+
     return State.ENABLED
+
 
 # ---------------------------------------------------------------------------
 # Traversal
 # ---------------------------------------------------------------------------
 
-def walk(root: Node, parent: Group | None = None, ancestor_disabled=False):
-    state = compute_state(root, parent if not ancestor_disabled else None)
-    if ancestor_disabled:
+def walk(root: Node, parent: Group | None = None, _ancestor_disabled: bool = False):
+    """
+    Depth-first traversal of the node tree, yielding NodeStatus for every node.
+
+    _ancestor_disabled is an internal parameter used during recursion to
+    propagate PARENT_DISABLED down through the tree when an ancestor is off.
+    It should not be passed by external callers.
+    """
+    state = compute_state(root, parent if not _ancestor_disabled else None)
+    if _ancestor_disabled:
         state = State.PARENT_DISABLED
     yield NodeStatus(root, state, parent)
 
     if isinstance(root, Group):
+        child_ancestor_disabled = _ancestor_disabled or state == State.PARENT_DISABLED
         for child, _, _ in root:
-            child_ancestor_disabled = ancestor_disabled or state == State.PARENT_DISABLED
-            yield from walk(child, parent=root, ancestor_disabled=child_ancestor_disabled)
+            yield from walk(child, parent=root, _ancestor_disabled=child_ancestor_disabled)
 
 
 # ---------------------------------------------------------------------------
