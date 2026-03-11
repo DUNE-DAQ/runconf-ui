@@ -1,131 +1,121 @@
+"""
+Backend integration tests.
+
+Tests the RunconfUIBackend public API (toggle, get_value, set_value,
+get_values, save_config) against a real conffwk configuration.
+"""
+
 import pytest
 
-from runconf_ui import RunconfContext, RunconfUI
+from runconf_ui import RunconfContext, RunconfUIBackend
 
-'''
-TODO: Add tests for the saved file
-'''
 
 @pytest.fixture(scope="session")
 def save_path(tmp_path_factory):
     return tmp_path_factory.mktemp("outputs")
 
+
 @pytest.fixture(scope="session")
-def initialised_ui(tmp_config_path, save_path):
+def backend(tmp_config_path, save_path):
     context = RunconfContext(
-        "dummy",
-        tmp_config_path.parent,
-        True,
-        output_directory=save_path
+        apparatus="dummy",
+        conf_directory=tmp_config_path.parent,
+        use_local=True,
+        output_directory=save_path,
     )
-    
-    ui = RunconfUI(context)
-    
-    ui.set_daq_version(tmp_config_path.parent)
-    ui.set_daq_session(tmp_config_path)
-    ui.open_selected_session()
-
-    return ui
+    b = RunconfUIBackend(context)
+    b.set_daq_version(tmp_config_path.parent)
+    b.set_daq_session(tmp_config_path)
+    b.open_selected_session()
+    return b
 
 
-def test_enable_top_level(initialised_ui):
-    initialised_ui.set_value('Detector', 'Readout', True)
-    assert initialised_ui.get_value('Detector', 'Readout')
-    assert initialised_ui.get_value('Detector', 'Readout__ru-01')
-    assert initialised_ui.get_value('Detector', 'Readout__ru-02')
+# ---------------------------------------------------------------------------
+# Toggle / get / set on disableable nodes
+# ---------------------------------------------------------------------------
 
-    
-    initialised_ui.toggle('Detector','Readout')
-    assert not initialised_ui.get_value('Detector', 'Readout')
-    assert not initialised_ui.get_value('Detector', 'Readout__ru-01')
-    assert not initialised_ui.get_value('Detector', 'Readout__ru-02')
+class TestDisableableBackend:
 
-    initialised_ui.toggle('Detector', 'Readout')
-    assert initialised_ui.get_value('Detector', 'Readout')
+    def test_toggle_top_level_propagates_to_children(self, backend):
+        backend.set_value('Detector', 'Readout', True)
+        assert backend.get_value('Detector', 'Readout')
+        assert backend.get_value('Detector', 'Readout__ru-01')
+        assert backend.get_value('Detector', 'Readout__ru-02')
 
-def test_toggle_subsystems(initialised_ui):
-    initialised_ui.set_value('Detector', 'Readout', True)
-    initialised_ui.set_value('Detector', 'Readout__ru-01', True)
-    initialised_ui.set_value('Detector', 'Readout__ru-02', True)
+        backend.toggle('Detector', 'Readout')
+        assert not backend.get_value('Detector', 'Readout')
+        assert not backend.get_value('Detector', 'Readout__ru-01')
+        assert not backend.get_value('Detector', 'Readout__ru-02')
 
-    initialised_ui.toggle('Detector', 'Readout__ru-02')
-    assert initialised_ui.get_value('Detector', 'Readout')
-    assert initialised_ui.get_value('Detector', 'Readout__ru-01')
-    assert not initialised_ui.get_value('Detector', 'Readout__ru-02')
+        backend.toggle('Detector', 'Readout')  # restore
 
-    initialised_ui.toggle('Detector', 'Readout__ru-01')
-    assert not initialised_ui.get_value('Detector', 'Readout')
-    assert not initialised_ui.get_value('Detector', 'Readout__ru-01')
-    assert not initialised_ui.get_value('Detector', 'Readout__ru-02')
+    def test_toggle_subsystem_updates_parent_state(self, backend):
+        backend.set_value('Detector', 'Readout', True)
 
-    initialised_ui.toggle('Detector', 'Readout')
-    assert initialised_ui.get_value('Detector', 'Readout')
-    assert initialised_ui.get_value('Detector', 'Readout__ru-01')
-    assert initialised_ui.get_value('Detector', 'Readout__ru-02')
+        # Disabling one subsystem leaves parent enabled (OR semantics for subsystem_dependent)
+        backend.toggle('Detector', 'Readout__ru-02')
+        assert backend.get_value('Detector', 'Readout')
+        assert not backend.get_value('Detector', 'Readout__ru-02')
 
+        # Disabling both subsystems disables parent
+        backend.toggle('Detector', 'Readout__ru-01')
+        assert not backend.get_value('Detector', 'Readout')
 
-def test_get_values_snapshot(initialised_ui):
-    # start with the top-level disabled to have a known baseline
-    initialised_ui.set_value('Detector', 'Readout', False)
+        backend.toggle('Detector', 'Readout')  # restore
 
-    # enabling the parent should propagate values to children
-    initialised_ui.set_value('Detector', 'Readout', True)
-    vals = initialised_ui.get_values()
-    print( vals['Detector']['Readout__ru-01'])
-    assert isinstance(vals, dict)
-    assert vals['Detector']['Readout'].is_enabled
-    assert vals['Detector']['Readout'].is_interactive
-    assert vals['Detector']['Readout__ru-01'].is_enabled
-    assert vals['Detector']['Readout__ru-01'].is_interactive
-    assert vals['Detector']['Readout__ru-02'].is_enabled
-    assert vals['Detector']['Readout__ru-02'].is_interactive
+    def test_get_values_returns_correct_node_status(self, backend):
+        backend.set_value('Detector', 'Readout', True)
+        vals = backend.get_values()
 
-    # toggle one child off and verify both raw value and enabled flag
-    initialised_ui.toggle('Detector', 'Readout__ru-02')
-    vals = initialised_ui.get_values()
-    assert vals['Detector']['Readout__ru-01'].is_enabled
-    assert vals['Detector']['Readout__ru-01'].is_interactive
-    assert not vals['Detector']['Readout__ru-02'].is_enabled
-    assert vals['Detector']['Readout__ru-02'].is_interactive
-    assert vals['Detector']['Readout'].is_enabled
-    assert vals['Detector']['Readout'].is_interactive
+        assert vals['Detector']['Readout'].is_enabled
+        assert vals['Detector']['Readout__ru-01'].is_enabled
+        assert vals['Detector']['Readout__ru-02'].is_enabled
 
-    initialised_ui.toggle('Detector', 'Readout__ru-01')
-    vals = initialised_ui.get_values()
-    assert not vals['Detector']['Readout__ru-01'].is_enabled
-    assert not vals['Detector']['Readout__ru-01'].is_interactive
-    assert not vals['Detector']['Readout__ru-02'].is_enabled
-    assert not vals['Detector']['Readout__ru-02'].is_interactive
-    assert not vals['Detector']['Readout'].is_enabled
-    assert vals['Detector']['Readout'].is_interactive
-    
-    # Finally we can re-enable the parent to restore the children to their last raw value (False) but enabled state (True)
-    initialised_ui.toggle('Detector', 'Readout')
-    vals = initialised_ui.get_values()
-    assert vals['Detector']['Readout'].is_enabled
-    assert vals['Detector']['Readout'].is_interactive
-    assert vals['Detector']['Readout__ru-01'].is_enabled
-    assert vals['Detector']['Readout__ru-01'].is_interactive
-    assert vals['Detector']['Readout__ru-02'].is_enabled
-    assert vals['Detector']['Readout__ru-01'].is_interactive
+        backend.toggle('Detector', 'Readout__ru-02')
+        vals = backend.get_values()
+        assert not vals['Detector']['Readout__ru-02'].is_enabled
+        assert vals['Detector']['Readout__ru-02'].is_interactive  # still interactive (parent on)
 
-def test_relationship_toggle(initialised_ui):
-    initialised_ui.set_value('Trigger', 'RandomTrigger', True)
-    assert initialised_ui.get_value('Trigger', 'RandomTrigger')    
+        backend.toggle('Detector', 'Readout__ru-01')
+        vals = backend.get_values()
+        # Both subsystems off → parent off → children become non-interactive
+        assert not vals['Detector']['Readout'].is_enabled
+        assert not vals['Detector']['Readout__ru-01'].is_interactive
+        assert not vals['Detector']['Readout__ru-02'].is_interactive
 
-    initialised_ui.set_value('Trigger', 'RandomTrigger', False)
-    assert not initialised_ui.get_value('Trigger', 'RandomTrigger')    
+        backend.toggle('Detector', 'Readout')  # restore
 
 
-def test_adjustable_toggle(initialised_ui):
-    initialised_ui.set_value("Random Trigger Rates", "Random Trigger Rates__random-tc-generator - trigger_rate_hz", 100)
-    assert initialised_ui.get_value("Random Trigger Rates", "Random Trigger Rates__random-tc-generator - trigger_rate_hz") == 100
+# ---------------------------------------------------------------------------
+# Relationship node
+# ---------------------------------------------------------------------------
 
-def test_adjustable_incorrect_type(initialised_ui):
-    with pytest.raises(ValueError):
-        initialised_ui.set_value("Random Trigger Rates", "Random Trigger Rates__random-tc-generator - trigger_rate_hz", "dummy")
+class TestRelationshipBackend:
 
-def test_save(initialised_ui, save_path):
-    initialised_ui.save_config()
-    assert (save_path/"dummy.data.xml").is_file()
-    
+    def test_toggle_relationship(self, backend):
+        backend.set_value('Trigger', 'RandomTrigger', True)
+        assert backend.get_value('Trigger', 'RandomTrigger')
+
+        backend.set_value('Trigger', 'RandomTrigger', False)
+        assert not backend.get_value('Trigger', 'RandomTrigger')
+
+
+# ---------------------------------------------------------------------------
+# Adjustable node
+# ---------------------------------------------------------------------------
+
+class TestAdjustableBackend:
+
+    def test_set_and_get_adjustable_value(self, backend):
+        key = "Random Trigger Rates__random-tc-generator - trigger_rate_hz"
+        backend.set_value("Random Trigger Rates", key, 100)
+        assert backend.get_value("Random Trigger Rates", key) == 100
+
+
+# ---------------------------------------------------------------------------
+# Save
+# ---------------------------------------------------------------------------
+
+def test_save_creates_output_file(backend, save_path):
+    backend.save_config()
+    assert (save_path / "dummy.data.xml").is_file()

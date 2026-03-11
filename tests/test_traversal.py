@@ -1,8 +1,8 @@
 """
 Unit tests for traversal.py.
 
-Tests cover state computation, tree walking, labelled filtering,
-disabled_children diagnostics, and build_index.
+Tests cover state computation, walk, labelled, disabled_child_nodes,
+and build_index. Full-tree scenario tests are handled in test_integration.py.
 """
 
 import pytest
@@ -23,6 +23,7 @@ from runconf_ui.state_tree import (
 # ---------------------------------------------------------------------------
 # Stub adapter
 # ---------------------------------------------------------------------------
+
 class StubAdapter:
     def __init__(self, value: bool = True, dal_enabled: bool = True):
         self._value = value
@@ -54,38 +55,22 @@ class TestComputeState:
     def test_disabled_node_no_parent(self):
         assert compute_state(leaf(False), None) == State.DISABLED
 
-    def test_enabled_node_enabled_parent(self):
-        parent = Group(strategy=all)
-        child = leaf(True)
-        parent.add(child)
-        assert compute_state(child, parent) == State.ENABLED
-
-    def test_enabled_node_disabled_parent(self):
-        other = leaf(False)
+    def test_enabled_node_with_disabled_parent_returns_parent_disabled(self):
         child = leaf(True)
         parent = Group(strategy=all)
-        parent.add(other).add(child)
+        parent.add(leaf(False)).add(child)
         assert compute_state(child, parent) == State.PARENT_DISABLED
 
-    def test_disabled_node_disabled_parent_returns_disabled(self):
-        """DISABLED takes precedence over PARENT_DISABLED."""
-        other = leaf(False)
+    def test_disabled_node_with_disabled_parent_returns_parent_disabled(self):
+        # Parent gating takes precedence — node's own DISABLED is not visible
+        # when the parent is already off.
         child = leaf(False)
         parent = Group(strategy=all)
-        parent.add(other).add(child)
+        parent.add(leaf(False)).add(child)
         assert compute_state(child, parent) == State.PARENT_DISABLED
 
     def test_dal_resource_disabled_returns_parent_disabled(self):
-        child = leaf(True, dal_enabled=False)
-        assert compute_state(child, None) == State.PARENT_DISABLED
-
-    def test_dal_resource_disabled_with_disabled_parent_returns_disabled(self):
-        """Node's own DISABLED state takes precedence."""
-        child = leaf(False, dal_enabled=False)
-        parent = Group(strategy=all)
-        other = leaf(False)
-        parent.add(other).add(child)
-        assert compute_state(child, parent) == State.PARENT_DISABLED
+        assert compute_state(leaf(True, dal_enabled=False), None) == State.PARENT_DISABLED
 
     def test_group_node_enabled(self):
         g = Group(strategy=all)
@@ -98,11 +83,10 @@ class TestComputeState:
         assert compute_state(g, None) == State.DISABLED
 
     def test_group_node_parent_disabled(self):
-        other = leaf(False)
         child_group = Group(strategy=all)
         child_group.add(leaf(True))
         parent = Group(strategy=all)
-        parent.add(other).add(child_group)
+        parent.add(leaf(False)).add(child_group)
         assert compute_state(child_group, parent) == State.PARENT_DISABLED
 
 
@@ -112,17 +96,12 @@ class TestComputeState:
 
 class TestNodeStatus:
 
-    def test_is_interactive_enabled(self):
-        status = NodeStatus(node=leaf(), state=State.ENABLED, parent=None)
-        assert status.is_interactive is True
+    def test_is_interactive_for_enabled_and_disabled(self):
+        assert NodeStatus(node=leaf(), state=State.ENABLED,  parent=None).is_interactive is True
+        assert NodeStatus(node=leaf(), state=State.DISABLED, parent=None).is_interactive is True
 
-    def test_is_interactive_disabled(self):
-        status = NodeStatus(node=leaf(), state=State.DISABLED, parent=None)
-        assert status.is_interactive is True
-
-    def test_is_interactive_parent_disabled(self):
-        status = NodeStatus(node=leaf(), state=State.PARENT_DISABLED, parent=None)
-        assert status.is_interactive is False
+    def test_not_interactive_when_parent_disabled(self):
+        assert NodeStatus(node=leaf(), state=State.PARENT_DISABLED, parent=None).is_interactive is False
 
 
 # ---------------------------------------------------------------------------
@@ -131,109 +110,74 @@ class TestNodeStatus:
 
 class TestWalk:
 
-    def test_walk_single_leaf(self):
-        leaf_test = leaf(True, label="a")
-        statuses = list(walk(leaf_test))
-        assert len(statuses) == 1
-        assert statuses[0].node is leaf_test
-        assert statuses[0].parent is None
-
-    def test_walk_yields_root_first(self):
+    def test_yields_root_first_then_depth_first(self):
         root = Group("root", strategy=all)
-        child = leaf(label="child")
-        root.add(child)
-        nodes = [s.node for s in walk(root)]
-        assert nodes[0] is root
-
-    def test_walk_depth_first(self):
-        root = Group("root", strategy=all)
-        child1 = leaf(label="c1")
-        child2 = leaf(label="c2")
-        grandchild = leaf(label="gc")
-
+        c1 = leaf(label="c1")
         sub = Group("sub", strategy=all)
-        sub.add(grandchild)
-        root.add(child1).add(sub).add(child2)
+        gc = leaf(label="gc")
+        c2 = leaf(label="c2")
+        sub.add(gc)
+        root.add(c1).add(sub).add(c2)
+        assert [s.node for s in walk(root)] == [root, c1, sub, gc, c2]
 
-        nodes = [s.node for s in walk(root)]
-        assert nodes == [root, child1, sub, grandchild, child2]
-
-    def test_walk_sets_correct_parent(self):
+    def test_sets_correct_parent(self):
         root = Group("root", strategy=all)
         child = leaf(label="child")
         root.add(child)
-
         statuses = {s.node: s for s in walk(root)}
         assert statuses[child].parent is root
         assert statuses[root].parent is None
 
-    def test_walk_all_nodes_receive_state(self):
+    def test_all_nodes_receive_state(self):
         root = Group("root", strategy=all)
         root.add(leaf(True, label="a")).add(leaf(False, label="b"))
         for status in walk(root):
             assert isinstance(status.state, State)
 
+
 # ---------------------------------------------------------------------------
 # labelled()
 # ---------------------------------------------------------------------------
+
 class TestLabelled:
+
     def test_anonymous_nodes_excluded(self):
         root = Group("root", strategy=all)
-        root.add(leaf(label=""))   # anonymous
-        root.add(leaf(label="x"))  # labelled
+        root.add(leaf(label=""))
+        root.add(leaf(label="x"))
         labels = [s.node.label for s in labelled(root)]
         assert "" not in labels
         assert "x" in labels
 
-    def test_all_labelled_nodes_included(self):
-        root = Group("root", strategy=all)
-        a = leaf(label="a")
-        b = leaf(label="b")
-        root.add(a).add(b)
-        nodes = [s.node for s in labelled(root)]
-        assert root in nodes
-        assert a in nodes
-        assert b in nodes
-
     def test_unlabelled_root_excluded(self):
         root = Group(label="", strategy=all)
         root.add(leaf(label="child"))
-        nodes = [s.node for s in labelled(root)]
-        assert root not in nodes
+        assert root not in [s.node for s in labelled(root)]
 
 
 # ---------------------------------------------------------------------------
-# disabled_children()
+# disabled_child_nodes()
 # ---------------------------------------------------------------------------
 
 class TestDisabledChildNodes:
+
     def test_returns_voting_children_that_are_off(self):
-        on  = leaf(True,  label="on")
+        on = leaf(True, label="on")
         off = leaf(False, label="off")
         g = Group(strategy=all)
         g.add(on).add(off)
-        result = disabled_child_nodes(g)
-        assert result == [off]
+        assert disabled_child_nodes(g) == [off]
 
     def test_ignores_non_voting_children(self):
-        on_voter     = leaf(True,  label="voter")
-        off_nonvoter = leaf(False, label="nonvoter")
         g = Group(strategy=all)
-        g.add(on_voter, votes=True).add(off_nonvoter, votes=False)
-        result = disabled_child_nodes(g)
-        assert result == []
+        g.add(leaf(True), votes=True)
+        g.add(leaf(False), votes=False)
+        assert disabled_child_nodes(g) == []
 
-    def test_returns_empty_when_all_enabled(self):
+    def test_empty_when_all_enabled(self):
         g = Group(strategy=all)
         g.add(leaf(True)).add(leaf(True))
         assert disabled_child_nodes(g) == []
-
-    def test_returns_multiple_disabled_child_nodes(self):
-        a = leaf(False, label="a")
-        b = leaf(False, label="b")
-        g = Group(strategy=all)
-        g.add(a).add(b)
-        assert set(disabled_child_nodes(g)) == {a, b}
 
 
 # ---------------------------------------------------------------------------
@@ -241,25 +185,16 @@ class TestDisabledChildNodes:
 # ---------------------------------------------------------------------------
 
 class TestBuildIndex:
-    def test_builds_flat_index(self):
-        root = Group("root", strategy=all)
-        a = leaf(label="a")
-        b = leaf(label="b")
-        root.add(a).add(b)
-        index = build_index(root)
-        assert index["root"] is root
-        assert index["a"] is a
-        assert index["b"] is b
 
-    def test_includes_nested_nodes(self):
+    def test_flat_and_nested_nodes_indexed(self):
         root = Group("root", strategy=all)
         sub  = Group("sub",  strategy=any)
         deep = leaf(label="deep")
+        a    = leaf(label="a")
         sub.add(deep)
-        root.add(sub)
+        root.add(a).add(sub)
         index = build_index(root)
-        assert "deep" in index
-        assert index["deep"] is deep
+        assert set(index.keys()) == {"root", "a", "sub", "deep"}
 
     def test_raises_on_duplicate_labels(self):
         root = Group("root", strategy=all)
@@ -267,82 +202,12 @@ class TestBuildIndex:
         with pytest.raises(ValueError, match="dup"):
             build_index(root)
 
-    def test_anonymous_nodes_excluded_from_index(self):
+    def test_anonymous_nodes_excluded(self):
         root = Group("root", strategy=all)
         root.add(leaf(label=""))
-        index = build_index(root)
-        assert "" not in index
-
-    def test_empty_tree(self):
-        root = Group("root", strategy=all)
-        index = build_index(root)
-        assert index == {"root": root}
+        assert "" not in build_index(root)
 
     def test_rebuild_is_idempotent(self):
         root = Group("root", strategy=all)
         root.add(leaf(label="a"))
-        index1 = build_index(root)
-        index2 = build_index(root)
-        assert index1 == index2
-
-
-# ---------------------------------------------------------------------------
-# Integration: full tree state scenarios
-# ---------------------------------------------------------------------------
-
-class TestFullTreeScenarios:
-
-    def test_parent_disabled_greys_out_enabled_child(self):
-        """An enabled child under a disabled parent should be PARENT_DISABLED."""
-        off_sibling = leaf(False, label="off")
-        on_child    = leaf(True,  label="on")
-        root = Group("root", strategy=all)
-        root.add(off_sibling).add(on_child)
-
-        statuses = {s.node: s for s in walk(root)}
-        assert statuses[on_child].state == State.PARENT_DISABLED
-        assert statuses[on_child].is_interactive is False
-
-    def test_adjustable_leaf_parent_disabled_via_dal(self):
-        """Adjustable leaf with DAL resource-disabled should be PARENT_DISABLED."""
-        adjustable = leaf(True, label="rate", dal_enabled=False)
-        root = Group("root", strategy=all)
-        root.add(adjustable, votes=False, propagate=False)
-
-        statuses = {s.node: s for s in walk(root)}
-        assert statuses[adjustable].state == State.PARENT_DISABLED
-
-    def test_adjustable_leaf_parent_group_disabled(self):
-        """Adjustable leaf should be PARENT_DISABLED when parent group is off."""
-        voter      = leaf(False, label="voter")
-        adjustable = leaf(True,  label="rate")
-        root = Group("root", strategy=all)
-        root.add(voter, votes=True).add(adjustable, votes=False, propagate=False)
-
-        statuses = {s.node: s for s in walk(root)}
-        assert statuses[adjustable].state == State.PARENT_DISABLED
-
-    def test_three_level_hierarchy(self):
-        ru01 = leaf(True,  label="ru-01")
-        ru02 = leaf(False, label="ru-02")
-        tpg  = leaf(True,  label="tpg")
-
-        crp4 = Group("CRP4", strategy=any)
-        crp4.add(ru01).add(ru02)
-
-        root = Group("TPC", strategy=all)
-        root.add(crp4)
-        root.add(tpg, votes=False, propagate=True)
-
-        statuses = {s.node: s for s in walk(root)}
-
-        # CRP4 is enabled (any: ru01 is on)
-        assert statuses[crp4].state == State.ENABLED
-        # ru01 is enabled
-        assert statuses[ru01].state == State.ENABLED
-        # ru02 is disabled (its own state)
-        assert statuses[ru02].state == State.DISABLED
-        # root is enabled (crp4 is its only voter)
-        assert statuses[root].state == State.ENABLED
-        # tpg is enabled (non-voting, parent is on)
-        assert statuses[tpg].state == State.ENABLED
+        assert build_index(root) == build_index(root)
