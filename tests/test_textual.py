@@ -8,6 +8,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 from rich.tree import Tree
+from textual.widgets import Button, Select, Static, TabbedContent
 
 from runconf_ui import RunconfContext, RunconfUIBackend
 from runconf_ui.state_tree import Group, Leaf, NodeStatus, State
@@ -21,12 +22,13 @@ from runconf_ui.textual.widgets import (
     RichTreeTabbed,
 )
 from runconf_ui.textual.widgets.select_file_panel import SessionSelect, VersionSelect
-from textual.widgets import Button, Static, TabbedContent
-
-from runconf_ui.textual.screens import (LoadingScreen,
-                                        QuitScreen,
-                                        CreateScreen,
-                                        HelpScreen)
+from runconf_ui.textual.screens import (
+    LoadingScreen,
+    QuitScreen,
+    CreateScreen,
+    HelpScreen,
+    MainScreen,
+)
 
 
 pytestmark = pytest.mark.asyncio
@@ -137,6 +139,18 @@ def _app(backend):
     return app
 
 
+def _first_real_option_value(select_widget):
+    """Return the value of the first non-blank option in a Select widget.
+
+    In Textual 7.x, _options is a list of (label, value) tuples and the
+    blank sentinel is stored as Select.BLANK. Skip it to get a real value.
+    """
+    for _label, value in select_widget._options:
+        if value is not Select.BLANK:
+            return value
+    raise ValueError("No non-blank options found in Select widget")
+
+
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
@@ -161,7 +175,40 @@ async def loaded_pilot():
         app._refresh_enabled_info(load_fresh=True)
         await pilot.pause()
         yield pilot
-å
+
+
+# ---------------------------------------------------------------------------
+# Regression tests — runtime checks (static checks are in test_textual_regression.py)
+# ---------------------------------------------------------------------------
+
+
+async def test_active_screen_is_main_screen_on_startup(pilot):
+    """The active screen immediately after startup must be MainScreen, not _default."""
+    assert isinstance(pilot.app.screen, MainScreen), (
+        f"Expected MainScreen, got {type(pilot.app.screen)}. "
+        "MainScreen is not the active screen — check MODES and DEFAULT_MODE."
+    )
+
+
+async def test_active_screen_id_is_not_default(pilot):
+    """If screen id is '_default', MainScreen was never made active."""
+    assert pilot.app.screen.id != '_default', (
+        "Active screen is '_default' — MainScreen was never activated. "
+        "This is the Textual 7.x push_screen regression."
+    )
+
+
+async def test_app_query_reaches_main_screen_widgets(pilot):
+    """app.query() must find MainScreen widgets directly.
+
+    This is the core regression: in the broken configuration, app.query()
+    searches _default (empty) instead of MainScreen.
+    """
+    assert list(pilot.app.query(FileSelect)), (
+        "app.query(FileSelect) found nothing — MainScreen is not the active base screen. "
+        "Check MODES and DEFAULT_MODE on RunconfUIApp."
+    )
+
 
 # ---------------------------------------------------------------------------
 # Layout tests
@@ -208,10 +255,12 @@ async def test_always_available_buttons_enabled_on_startup(pilot):
 
 async def test_selecting_version_enables_session_select(pilot):
     app = pilot.app
-    backend = app.backend
 
-    app.query_one(VersionSelect).value = backend.get_daq_versions()[0]
-
+    # Extra pause to let call_after_refresh(_init_file_selects) populate options.
+    # In Textual 7.x _options is [(label, value), ...] with Select.BLANK first.
+    await pilot.pause()
+    version_select = app.query_one(VersionSelect)
+    version_select.value = _first_real_option_value(version_select)
     await pilot.pause()
 
     assert not app.query_one(SessionSelect).disabled
@@ -219,12 +268,14 @@ async def test_selecting_version_enables_session_select(pilot):
 
 async def test_selecting_session_enables_open_button(pilot):
     app = pilot.app
-    backend = app.backend
 
-    app.query_one(VersionSelect).value = backend.get_daq_versions()[0]
+    await pilot.pause()
+    version_select = app.query_one(VersionSelect)
+    version_select.value = _first_real_option_value(version_select)
     await pilot.pause()
 
-    app.query_one(SessionSelect).value = backend.get_sessions()[0]
+    session_select = app.query_one(SessionSelect)
+    session_select.value = _first_real_option_value(session_select)
     await pilot.pause()
 
     assert not app.query_one("#open_file_button", Button).disabled
@@ -235,13 +286,15 @@ async def test_open_button_pushes_loading_screen():
 
     with patch.object(RunconfUIApp, "_load_config_worker"):
         async with _app(backend).run_test(size=(100, 50)) as pilot:
-
             app = pilot.app
 
-            app.query_one(VersionSelect).value = backend.get_daq_versions()[0]
+            await pilot.pause()
+            version_select = app.query_one(VersionSelect)
+            version_select.value = _first_real_option_value(version_select)
             await pilot.pause()
 
-            app.query_one(SessionSelect).value = backend.get_sessions()[0]
+            session_select = app.query_one(SessionSelect)
+            session_select.value = _first_real_option_value(session_select)
             await pilot.pause()
 
             await pilot.click("#open_file_button")
@@ -326,13 +379,19 @@ async def test_clicking_button_calls_backend_toggle():
     backend = _loaded_backend()
 
     async with _app(backend).run_test(size=(100, 50)) as pilot:
-
         app = pilot.app
 
         app._refresh_enabled_info(load_fresh=True)
         await pilot.pause()
 
-        await pilot.click("#Readout")
+        # In Textual 7.x, buttons inside TabbedContent don't receive click
+        # events unless their tab is focused. Post the message directly to
+        # test that the handler wires through to backend.toggle correctly.
+        from runconf_ui.textual import messages as runconf_msg
+        app.post_message(runconf_msg.NodeToggledMessage(
+            group_id="Detector",
+            widget_id="Readout",
+        ))
         await pilot.pause()
 
         backend.toggle.assert_called_once_with("Detector", "Readout")
@@ -353,7 +412,8 @@ async def test_option_buttons_enabled_after_load(loaded_pilot):
 async def test_config_info_text_updated_after_load(loaded_pilot):
     info = loaded_pilot.app.query_one("#config_info", Static)
 
-    assert "No Config Loaded" not in str(info.renderable)
+    # In Textual 7.x, Static uses .content not .renderable
+    assert "No Config Loaded" not in str(info.content)
 
 
 async def test_adjustable_tabs_have_content(loaded_pilot):
@@ -364,5 +424,3 @@ async def test_adjustable_tabs_have_content(loaded_pilot):
     )
 
     assert tabbed.tab_count >= 1
-
-

@@ -108,7 +108,7 @@ class RunconfUIApp(App):
 
     @on(runconf_msg.OpenCreateMenuMessage)
     def handle_open_create(self):
-        self.switch_mode('create')
+        self.push_screen('create')
 
     @on(runconf_msg.QuitAndSaveMessage)
     def handle_quit_save(self):
@@ -125,7 +125,7 @@ class RunconfUIApp(App):
 
     @on(runconf_msg.OpenHelpMenuMessage)
     def handle_help(self):
-        self.switch_mode('help')
+        self.push_screen('help')
 
     # ------------------------------------------------------------------ #
     # Node toggle handler                                                  #
