@@ -9,11 +9,11 @@ AssembledConfig, AssembledGroup, AssembledSystem are the typed output
 dataclasses consumed by the TUI layer.
 """
 
+import re
 from dataclasses import dataclass
 from pathlib import Path
 
 import yaml
-import re
 from conffwk import Configuration
 from conffwk.dal import DalBase
 
@@ -25,6 +25,7 @@ from .dataclasses import (
     DisableableGroupData,
     YamlToSystemData,
 )
+
 
 # ---------------------------------------------------------------------------
 # Utility functions

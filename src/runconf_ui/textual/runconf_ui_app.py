@@ -6,21 +6,19 @@ from typing import ClassVar
 from textual import on, work
 from textual.app import App
 
-from runconf_ui.backend import RunconfContext, RunconfUI
+from runconf_ui.backend import RunconfContext, RunconfUIBackend
 from runconf_ui.textual import messages as runconf_msg
-from runconf_ui.textual.screens import (CreateScreen,
-                                        MainScreen,
-                                        QuitScreen,
-                                        HelpScreen)
+from runconf_ui.textual.screens import CreateScreen, HelpScreen, MainScreen, QuitScreen
 from runconf_ui.textual.screens.popup_screens import LoadingScreen
 from runconf_ui.textual.widgets import (
     AdjustableAttributeTabs,
+    ConfigTreePanel,
     EnableDisableTabs,
     FileSelect,
-    RichTreeTabbed,
     OptionsPanel,
-    ConfigTreePanel
+    RichTreeTabbed,
 )
+from importlib.metadata import version
 
 
 class RunconfUIApp(App):
@@ -37,12 +35,17 @@ class RunconfUIApp(App):
 
     def __init__(self, context: RunconfContext, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.backend = RunconfUI(context)
+        self.backend = RunconfUIBackend(context)
 
     def on_mount(self) -> None:
         self.theme = "catppuccin-latte"
         self.push_screen('main')
         self.call_after_refresh(self._init_file_selects)
+        self.title = (
+            f"Runconf-Shifter-UI v{version('runconf_ui')}"
+        )
+
+
 
     def _refresh_enabled_info(self, load_fresh: bool = False):
         dis_info   = self.backend.get_disableable_values()
@@ -70,7 +73,7 @@ class RunconfUIApp(App):
         else:
             opts_panel.first().enable_all()
 
-        # Now update the file_panel
+        # Now update the file_panel
         file_select = self.query(FileSelect)
         if file_select:        
             file_select.first().update_text(

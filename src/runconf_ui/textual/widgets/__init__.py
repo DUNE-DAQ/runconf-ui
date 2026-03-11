@@ -10,13 +10,13 @@ from .select_file_panel import FileSelect, SessionSelect, VersionSelect
 __all__ = [
     "AdjustableAttributePanel",
     "AdjustableAttributeTabs",
+    "ConfigTreePanel",
     "EnableDisablePanel",
     "EnableDisableTabs",
     "FileSelect",
     "OptionsPanel",
     "RichTreePanel",
     "RichTreeTabbed",
-    "ConfigTreePanel",
     "SessionSelect",
     "VersionSelect",
 ]

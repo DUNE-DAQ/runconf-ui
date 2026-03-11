@@ -15,7 +15,7 @@ from runconf_ui.utils import check_config_has_session
 
 
 class RemoteRepoManager(RepoManagerInterface[str]):
-    def __init__(self, apparatus: str, conf_directory: Path, default_config_fle_name: str, operation_url: str, base_url: str):
+    def __init__(self, apparatus: str, conf_directory: Path, config_file_name: str, operation_url: str, base_url: str):
         super().__init__(apparatus, conf_directory)
         if operation_url is None or base_url is None:
             raise RunConfToolsRepoException(f"Operation URL ({operation_url}) or Base URL ({base_url}) not set")
@@ -27,7 +27,7 @@ class RemoteRepoManager(RepoManagerInterface[str]):
             base_url
         )
         
-        self.default_config_fle_name = default_config_fle_name
+        self.config_file_name = config_file_name
         
         if self.conf_pool is None:
             raise RunConfToolsRepoException(f"Cannot set up runconftools.ConfPool with operation url: {operation_url}, base url: {base_url}, apparatus: {apparatus}")
@@ -58,10 +58,10 @@ class RemoteRepoManager(RepoManagerInterface[str]):
         self.conf_pool.checkout_conf(conf, self.daq_version)  # type: ignore
         
         # Can save some time here
-        file_path = next(self.conf_directory.rglob(self.default_config_fle_name), None)
+        file_path = next(self.conf_directory.rglob(self.config_file_name), None)
         
         if file_path is None:
-            raise ConfigNotFoundInRepoException(f"Cannot find {self.default_config_fle_name} in {self.daq_version}")
+            raise ConfigNotFoundInRepoException(f"Cannot find {self.config_file_name} in {self.daq_version}")
         
         # Check session
         if not check_config_has_session(file_path):

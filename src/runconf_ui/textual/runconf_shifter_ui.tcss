@@ -339,8 +339,8 @@ LoadingScreen {
 #loading-box {
     width: 30;
     height: 6;
-    border: round $primary;
-    background: $primary-background;
+    border: round grey;
+    background: darkgrey;
     align: center middle;
     layout: vertical;
     padding: 1 2;

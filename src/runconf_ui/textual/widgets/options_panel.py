@@ -3,12 +3,12 @@ from textual.containers import ScrollableContainer
 from textual.widgets import Button
 
 from ..messages import (
+    LoadConfigMessage,
     OpenCreateMenuMessage,
     OpenHelpMenuMessage,
     OpenQuitMenuMessage,
-    LoadConfigMessage,
 )
-from dataclasses import dataclass
+
 
 class OptionsPanel(ScrollableContainer):
     '''

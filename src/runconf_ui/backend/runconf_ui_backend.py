@@ -3,8 +3,8 @@ from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 
-from rich.tree import Tree
 from conffwk import Configuration
+from rich.tree import Tree
 
 from runconf_ui.exceptions import NodeNotFound, RunConfToolsRepoException
 from runconf_ui.repo_manager import LocalRepoManager, RemoteRepoManager
@@ -12,7 +12,7 @@ from runconf_ui.state_tree import NodeStatus, walk
 from runconf_ui.system_configuration import SystemConfigReader
 from runconf_ui.system_configuration.config_reader import AssembledConfig
 from runconf_ui.utils import copy_and_open_config
-from runconf_ui.utils.rich_utils import draw_node_tree, ConfigTreeRenderer
+from runconf_ui.utils.rich_utils import ConfigTreeRenderer, draw_node_tree
 
 
 @dataclass
@@ -20,7 +20,7 @@ class RunconfContext:
     apparatus: str
     conf_directory: Path
     use_local: bool
-    default_config: str | None = None
+    config_file_name: str | None = None
     base_url: str | None = None
     ops_url: str | None = None
     output_directory: Path = Path("shifter-configs")
@@ -28,18 +28,18 @@ class RunconfContext:
 TreeViews = dict[str, Tree]
 
 
-class RunconfUI:
+class RunconfUIBackend:
     def __init__(self, context: RunconfContext):
         if context.use_local:
             self.repo_manager = LocalRepoManager(context.apparatus, context.conf_directory)
         else:
-            if any(v is None for v in (context.default_config, context.base_url, context.ops_url)):
+            if any(v is None for v in (context.config_file_name, context.base_url, context.ops_url)):
                 raise RunConfToolsRepoException(
                     "Must set default_config, base_url, and ops_url for remote use"
                 )
             self.repo_manager = RemoteRepoManager(
                 context.apparatus, context.conf_directory,
-                context.default_config, context.ops_url, context.base_url,
+                context.config_file_name, context.ops_url, context.base_url,
             )
 
         buffer_id = os.environ.get("SESSION_NAME", os.getlogin())

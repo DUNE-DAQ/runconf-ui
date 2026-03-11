@@ -8,9 +8,10 @@ from .config_utils import (
     get_configs_with_session,
     open_configuration,
 )
-from .rich_utils import draw_node_tree, ConfigTreeRenderer
+from .rich_utils import ConfigTreeRenderer, draw_node_tree
 
 __all__=[
+    'ConfigTreeRenderer',
     'check_config_has_session',
     "class_in_config",
     'copy_and_open_config',
@@ -19,6 +20,5 @@ __all__=[
     'get_class_from_segment',
     "get_class_from_segment_list",
     'get_configs_with_session',
-    'open_configuration',
-    'ConfigTreeRenderer'
+    'open_configuration'
 ]
