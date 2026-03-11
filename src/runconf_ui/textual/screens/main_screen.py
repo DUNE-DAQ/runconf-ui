@@ -1,7 +1,8 @@
-# runconf-ui
-
+"""
+Main screen for runconf-shifter-ui.
+"""
+from textual.screen import Screen  # NOT ModalScreen
 from textual.containers import Grid
-from textual.screen import ModalScreen
 from textual.widgets import Footer, Header, TabbedContent, TabPane
 
 from ..widgets import (
@@ -14,7 +15,7 @@ from ..widgets import (
 )
 
 
-class MainScreen(ModalScreen):
+class MainScreen(Screen):
     def compose(self):
         yield Header()
         with Grid(id="main_container"):
@@ -33,7 +34,6 @@ class MainScreen(ModalScreen):
 
                     with TabPane("Adjustable"):
                         yield AdjustableAttributeTabs(id="adjustable_tabs")
-
 
             yield OptionsPanel(id="option_panel_main")
         yield Footer()

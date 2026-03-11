@@ -20,16 +20,26 @@ from runconf_ui.textual.widgets import (
     RichTreeTabbed,
 )
 
-
 class RunconfUIApp(App):
     CSS_PATH: ClassVar[str] = "runconf_shifter_ui.tcss"
     BINDINGS: ClassVar[list[tuple]] = [("ctrl+q", "quit", "Quit")]
-    SCREENS: ClassVar[dict] = {
+
+    # In Textual 7.x, MODES + switch_mode is the correct way to make a named
+    # screen the active base screen. SCREENS + push_screen stacks on top of
+    # _default, so app.query() searches _default (empty) instead of MainScreen.
+    # MODES gives each entry its own screen stack; switch_mode makes it active
+    # and app.query() then correctly searches MainScreen's widget tree.
+    MODES: ClassVar[dict] = {
         'main':   MainScreen,
+    }
+    DEFAULT_MODE: ClassVar[str] = 'main'
+
+    # These are still registered as named screens for push/pop overlays
+    SCREENS: ClassVar[dict] = {
         'create': CreateScreen,
+        'help':   HelpScreen,
         'quit':   QuitScreen,
         'load':   LoadingScreen,
-        'help':   HelpScreen,
     }
 
     def __init__(self, context: RunconfContext, *args, **kwargs):
@@ -38,9 +48,9 @@ class RunconfUIApp(App):
 
     def on_mount(self) -> None:
         self.theme = "catppuccin-latte"
-        self.push_screen('main')
-        self.call_after_refresh(self._init_file_selects)
         self.title = f"Runconf-Shifter-UI v{version('runconf_ui')}"
+        self.switch_mode('main')
+        self.call_after_refresh(self._init_file_selects)
 
     # ------------------------------------------------------------------ #
     # File select handlers                                                 #
@@ -98,7 +108,7 @@ class RunconfUIApp(App):
 
     @on(runconf_msg.OpenCreateMenuMessage)
     def handle_open_create(self):
-        self.push_screen('create')
+        self.switch_mode('create')
 
     @on(runconf_msg.QuitAndSaveMessage)
     def handle_quit_save(self):
@@ -115,7 +125,7 @@ class RunconfUIApp(App):
 
     @on(runconf_msg.OpenHelpMenuMessage)
     def handle_help(self):
-        self.push_screen('help')
+        self.switch_mode('help')
 
     # ------------------------------------------------------------------ #
     # Node toggle handler                                                  #
@@ -162,8 +172,9 @@ class RunconfUIApp(App):
         for file_select in self.query(FileSelect):
             file_select.update_versions(versions)
             file_select.refresh()
-    
-    # ----- 
+
+    # ------------------------------------------------------------------ #
+
     def exit(self):
         rc_command = "run drunc"
         super().exit(result=f"To run drunc please launch {rc_command}")

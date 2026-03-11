@@ -161,7 +161,7 @@ async def loaded_pilot():
         app._refresh_enabled_info(load_fresh=True)
         await pilot.pause()
         yield pilot
-
+å
 
 # ---------------------------------------------------------------------------
 # Layout tests
