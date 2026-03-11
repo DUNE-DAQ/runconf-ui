@@ -46,7 +46,6 @@ class RunconfUIApp(App):
         )
 
 
-
     def _refresh_enabled_info(self, load_fresh: bool = False):
         dis_info   = self.backend.get_disableable_values()
         adj_info   = self.backend.get_adjustable_values()
