@@ -29,7 +29,7 @@ where = ["src"]
 "*" = ["*"]
 
 [project.scripts]
-runconf-shifter-ui = "runconf_ui.apps.__main__shifter_view__:main"
+runconf-shifter-ui = "runconf_ui.apps.runconf_ui_main:main"
 
 [project.optional-dependencies]
 dev = [
