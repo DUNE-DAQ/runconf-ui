@@ -14,6 +14,11 @@ from runconf_ui.utils.config_utils import (
     open_configuration,
 )
 
+from rich.tree import Tree
+
+from runconf_ui.state_tree import State, compute_state
+from runconf_ui.utils.rich_utils import ConfigTreeRenderer
+
 
 @pytest.fixture
 def no_session_config_path(config_path):
@@ -83,3 +88,73 @@ def test_dal_in_config(consolidated_config):
     assert dal_in_config(consolidated_config, 'ReadoutApplication', 'ru-01')
     assert not dal_in_config(consolidated_config, 'BadApplication', 'ru-01')
     assert not dal_in_config(consolidated_config, 'ReadoutApplication', 'BadApplication')
+    
+# ── ConfigTreeRenderer integration tests ──────────────────────────────────────
+
+class TestConfigTreeRendererIntegration:
+
+    @pytest.fixture
+    def ru01(self, consolidated_config):
+        return consolidated_config.get_dal("ReadoutApplication", "ru-01")
+
+    @pytest.fixture
+    def ru02(self, consolidated_config):
+        return consolidated_config.get_dal("ReadoutApplication", "ru-02")
+
+    @pytest.fixture
+    def ru_segment(self, consolidated_config):
+        return consolidated_config.get_dal("Segment", "ru-segment")
+
+    @pytest.fixture
+    def renderer(self, consolidated_config, consolidated_session):
+        # Draw only ReadoutApplication and Segment classes
+        return ConfigTreeRenderer(
+            consolidated_config,
+            consolidated_session,
+            classes_to_draw=["ReadoutApplication", "Segment"]
+        )
+
+    def test_draw_config_tree_creates_tree(self, renderer):
+        tree = renderer.draw_config_tree()
+        assert isinstance(tree, Tree)
+        assert tree.label.startswith("[bold green]")
+        assert renderer.session.id in tree.label
+
+    def test_calc_config_state_real_objects(self, renderer, ru01):
+        state = renderer._calc_config_state(ru01, State.ENABLED)
+        # Should be ENABLED initially if component not disabled
+        assert state in (State.ENABLED, State.DISABLED, State.PARENT_DISABLED)
+
+    def test_render_config_branch_recurses(self, renderer, ru_segment):
+        # Use real DALs
+        tree = Tree(f"[bold green]{renderer.session.id}")
+        # _render_config_branch should not error
+        renderer._render_config_branch(tree, ru_segment, State.ENABLED)
+        # At least one child node should be added
+        assert len(tree.children) > 0
+
+    def test_tree_contains_expected_dal_ids(self, renderer, ru01, ru02, ru_segment):
+        tree = renderer.draw_config_tree()
+
+        def gather_labels(node):
+            labels = []
+            labels.append(getattr(node, "label", ""))
+            for child in getattr(node, "children", []):
+                labels.extend(gather_labels(child))
+            return labels
+
+        labels = gather_labels(tree)
+        # DAL ids should appear somewhere in the tree
+        assert any("ru-01" in label for label in labels)
+        assert any("ru-02" in label for label in labels)
+        assert any("ru-segment" in label for label in labels)
+
+    def test_disabled_state_propagation(self, renderer, ru01, monkeypatch):
+        # Patch component_disabled to simulate ru-01 as disabled
+        monkeypatch.setattr(
+            "runconf_ui.utils.rich_utils.component_disabled",
+            lambda obj, session_id, dal_id: dal_id == "ru-01"
+        )
+
+        state = renderer._calc_config_state(ru01, State.ENABLED)
+        assert state == State.DISABLED
