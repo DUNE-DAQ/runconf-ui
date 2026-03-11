@@ -162,34 +162,8 @@ class RunconfUIApp(App):
         for file_select in self.query(FileSelect):
             file_select.update_versions(versions)
             file_select.refresh()
-
-
-if __name__ == "__main__":
-    import os
-    import shutil
-    from pathlib import Path
-
-    from daqconf.consolidate import consolidate_db
-
-    test_conf = Path(
-        os.environ.get("DAQSYSTEMTEST_SHARE", "")
-        + "/config/daqsystemtest/example-configs.data.xml"
-    )
-
-    tmp_path = Path("/tmp/runconf-test")
-    tmp_path.mkdir(parents=True, exist_ok=True)
-    dummy_conf = str(tmp_path / "dummy.data.xml")
-
-    consolidate_db(str(test_conf), str(dummy_conf), "local-1x1-config")
-
-    runconf_dir = tmp_path / "runconf-ui-settings"
-    runconf_dir.mkdir(parents=True, exist_ok=True)
-
-    shutil.copy(
-        Path("/home/hwallace/scratch/dune_software/daq/daq_work_areas/NFD_DEV_260205_A9/pythoncode/runconf-ui-refactor/tests/test_files/dummy.yml"),
-        runconf_dir / "dummy.yml",
-    )
-
-    context = RunconfContext(apparatus="dummy", conf_directory=tmp_path, use_local=True)
-    app = RunconfUIApp(context=context)
-    app.run()
+    
+    # ----- 
+    def exit(self):
+        rc_command = "run drunc"
+        super().exit(result=f"To run drunc please launch {rc_command}")
