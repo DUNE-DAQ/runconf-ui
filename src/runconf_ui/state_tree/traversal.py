@@ -25,6 +25,7 @@ consulted when its parent (if any) is enabled.
 from collections.abc import Iterator
 from dataclasses import dataclass
 from enum import Enum, auto
+from runconf_ui.utils.logging import get_logger
 
 from .nodes import Group, Leaf, Node
 
@@ -79,11 +80,15 @@ class NodeStatus:
     def toggle(self) -> None:
         """Flip the node's state. No-op if the node is not interactive."""
         self.node.set(not self.node.get())
+        get_logger().debug(f"Toggling {self.label}")
+        
         self.refresh_state()
 
     def refresh_state(self) -> None:
         """Recompute state in place from live adapter values."""
         self.state = compute_state(self.node, self.parent)
+        get_logger().debug(f"{self.label} now in state {self.state}")
+
 
 
 # ---------------------------------------------------------------------------

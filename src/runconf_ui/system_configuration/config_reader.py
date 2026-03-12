@@ -18,6 +18,7 @@ from conffwk import Configuration
 from conffwk.dal import DalBase
 
 from runconf_ui.state_tree import Group, NodeStatus, walk
+from runconf_ui.utils import get_logger
 
 from .builders import AdjustableSystemBuilder, DisableSystemBuilder
 from .dataclasses import (
@@ -219,6 +220,7 @@ class SystemConfigReader:
     """
 
     def __init__(self, config_path: Path):
+        get_logger().info(f"Reading config: {config_path}")
         self.config = SystemConfig(config_path)
 
     @property
@@ -231,8 +233,10 @@ class SystemConfigReader:
         configuration: Configuration,
         session_name: str,
     ) -> AssembledConfig:
+
         session   = configuration.get_dal("Session", session_name)
         assembler = ConfigAssembler(configuration, session)
+        get_logger().info(f"Assembling: {session_name} in {repr(configuration)}")
         return AssembledConfig(
             disableable=assembler.assemble_disableable(self.config.disableable_skeleton),
             adjustable=assembler.assemble_adjustable(self.config.adjustable_skeleton),

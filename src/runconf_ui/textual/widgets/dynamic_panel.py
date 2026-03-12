@@ -5,6 +5,8 @@ from textual.app import ComposeResult
 from textual.widget import Widget
 from textual.widgets import TabbedContent, TabPane
 
+from runconf_ui.utils import get_logger
+
 _TEXTUAL_UNSAFE = re.compile(r"[^-a-zA-Z0-9_:]")
 
 
@@ -38,17 +40,25 @@ class DynamicTabbedContent(Widget):
         return f"{self.panel_prefix}_{group_id_safe}"
 
     def compose(self) -> ComposeResult:
+        get_logger().debug(f"Composing DynamicTabbedContent ({self.id})")
         with TabbedContent():
             for group_id, group_data in self._data.items():
+                get_logger().debug(f"Adding {group_id}")
+
                 group_id_safe = textual_safe_id(group_id)
                 panel_id      = self._panel_id(group_id_safe)
+                get_logger().debug(f"   Adding panel {panel_id}")
+
                 pane_id       = f"{self.panel_prefix}_{group_id_safe}_pane"  # namespaced
+                get_logger().debug(f"   Adding pane {pane_id}")
                 panel         = self._make_pane_content(group_id, group_data, panel_id)
                 yield TabPane(group_id, panel, id=pane_id)
 
     def load(self, data: dict) -> None:
         '''Full rebuild — only call when tabs themselves change (new config).'''
+        get_logger().debug(f"Loading new data {data}")
         self._data = data
+
         self.refresh(recompose=True)
 
     def update(self, data: dict) -> None:

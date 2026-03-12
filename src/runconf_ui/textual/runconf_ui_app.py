@@ -19,7 +19,7 @@ from runconf_ui.textual.widgets import (
     OptionsPanel,
     RichTreeTabbed,
 )
-
+from runconf_ui.utils import get_logger
 
 class RunconfUIApp(App):
     CSS_PATH: ClassVar[str] = "runconf_shifter_ui.tcss"
@@ -46,12 +46,15 @@ class RunconfUIApp(App):
     def __init__(self, context: RunconfContext, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.backend = RunconfUIBackend(context)
+        get_logger().debug("Initialised application")
 
     def on_mount(self) -> None:
+        get_logger().debug("Mounting")
         self.theme = "catppuccin-latte"
         self.title = f"Runconf-Shifter-UI v{version('runconf_ui')}"
         self.switch_mode('main')
         self.call_after_refresh(self._init_file_selects)
+        get_logger().debug("Mounted")
 
     # ------------------------------------------------------------------ #
     # File select handlers                                                 #
@@ -60,7 +63,10 @@ class RunconfUIApp(App):
     @on(runconf_msg.DaqVersionSelectedMessage)
     def handle_version_selected(self, event: runconf_msg.DaqVersionSelectedMessage):
         self.backend.set_daq_version(event.daq_version)
+        get_logger().info(f"Selected daq version: {event.daq_version}")
         available_sessions = self.backend.get_sessions()
+        get_logger().debug(f"Available Sessions: {available_sessions}")
+
         for file_select in self.query(FileSelect):
             file_select.enable_session_select()
             file_select.update_sessions(available_sessions)
@@ -68,6 +74,7 @@ class RunconfUIApp(App):
     @on(runconf_msg.DaqSessionSelectedMessage)
     def handle_session_selected(self, event: runconf_msg.DaqSessionSelectedMessage):
         self.backend.set_daq_session(event.daq_session)
+        get_logger().info(f"Selected daq session: {event.daq_session}")
         for file_select in self.query(FileSelect):
             file_select.enable_open_button()
 
@@ -77,12 +84,9 @@ class RunconfUIApp(App):
 
     @on(runconf_msg.LoadConfigMessage)
     def handle_load_config(self, _: runconf_msg.LoadConfigMessage) -> None:
-        try:
-            self.push_screen('load')
-        except Exception:
-            import traceback
-            self.notify(traceback.format_exc(), title="Screen Push Failed", severity="error", timeout=30)
-            return
+        get_logger().debug(f"Pushing load")
+
+        self.push_screen('load')
         self._load_config_worker()
 
     @work(thread=True)
@@ -97,6 +101,7 @@ class RunconfUIApp(App):
 
     def _on_config_failed(self, error_msg: str) -> None:
         self.pop_screen()
+        get_logger().error(f"Config Load failed")
         self.notify(error_msg, title="Config Load Failed", severity="error", timeout=30)
 
     # ------------------------------------------------------------------ #
@@ -134,6 +139,8 @@ class RunconfUIApp(App):
 
     @on(runconf_msg.NodeToggledMessage)
     def handle_node_toggled(self, event: runconf_msg.NodeToggledMessage):
+        get_logger().info(f"Toggled {event.group_id} : {event.widget_id}")
+
         self.backend.toggle(event.group_id, event.widget_id)
         self._refresh_enabled_info(load_fresh=False)
 
@@ -142,6 +149,9 @@ class RunconfUIApp(App):
     # ------------------------------------------------------------------ #
 
     def _refresh_enabled_info(self, load_fresh: bool = False) -> None:
+
+        get_logger().debug(f"Refreshing enabled info")
+
         dis_info    = self.backend.get_disableable_values()
         adj_info    = self.backend.get_adjustable_values()
         tree_views  = self.backend.get_tree_views()
@@ -156,26 +166,36 @@ class RunconfUIApp(App):
         for widgets, data in pairs:
             for widget in widgets:
                 widget.load(data) if load_fresh else widget.update(data)
+                get_logger().debug(f"Loading {data} to {widget.id}")
+
 
         opts_panel = self.query(OptionsPanel)
         if opts_panel:
+            get_logger().debug(f"Loading options")
             if self.backend.configuration is None:
                 opts_panel.first().disable_selected()
+                get_logger().debug(f"Disabling Opts")
             else:
                 opts_panel.first().enable_all()
+                get_logger().debug(f"Enabling Opts")
+
 
         file_select = self.query(FileSelect)
         if file_select:
             file_select.first().update_text(self.backend.info_text)
 
+        self.refresh()
+
     def _init_file_selects(self) -> None:
         versions = self.backend.get_daq_versions()
+        get_logger().debug(f"Initialising file selects with {versions}")
         for file_select in self.query(FileSelect):
             file_select.update_versions(versions)
             file_select.refresh()
-
+            
     # ------------------------------------------------------------------ #
 
     def exit(self):
         rc_command = "run drunc"
+        get_logger().debug(f"Exiting application with command {rc_command}")
         super().exit(result=f"To run drunc please launch {rc_command}")

@@ -2,6 +2,7 @@ import os
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
+from datetime import datetime
 
 from conffwk import Configuration
 from rich.tree import Tree
@@ -13,6 +14,7 @@ from runconf_ui.system_configuration import SystemConfigReader
 from runconf_ui.system_configuration.config_reader import AssembledConfig
 from runconf_ui.utils import copy_and_open_config
 from runconf_ui.utils.rich_utils import ConfigTreeRenderer, draw_node_tree
+from runconf_ui.utils import get_logger, LogLevels, init_logger
 
 
 @dataclass
@@ -24,6 +26,7 @@ class RunconfContext:
     base_url: str | None = None
     ops_url: str | None = None
     output_directory: Path = Path("shifter-configs")
+    log_level: LogLevels = "INFO"
 
 
 TreeViews = dict[str, Tree]
@@ -37,20 +40,31 @@ class _SessionManager:
     """Owns repo interaction and config loading. No state querying here."""
 
     def __init__(self, context: RunconfContext):
+        self._logger = get_logger()
+
+        
         if context.use_local:
+            self._logger.debug("Using local repo manager")
             self.repo_manager = LocalRepoManager(context.apparatus, context.conf_directory)
         else:
             if any(v is None for v in (context.config_file_name, context.base_url, context.ops_url)):
                 raise RunConfToolsRepoException(
                     "Must set default_config, base_url, and ops_url for remote use"
                 )
+                
+            self._logger.debug("Using remote repo manager")
             self.repo_manager = RemoteRepoManager(
                 context.apparatus, context.conf_directory,
                 context.config_file_name, context.ops_url, context.base_url,
             )
 
         buffer_id = os.environ.get("SESSION_NAME", os.getlogin())
+        self._logger.debug(f"Buffer ID is {buffer_id}")
+        
         self._config_buffer_path = Path(f"/tmp/shifter_configs-{buffer_id}")
+        self._logger.debug(f"Saving configs to  {self._config_buffer_path}")
+
+
         self._selected_session: str | Path | None = None
 
     # ---- Version / session selection ----
@@ -99,6 +113,9 @@ class _SessionManager:
         )
         configuration = copy_and_open_config(init_config_path, tmp_path)
         config_session = configuration.get_dals('Session')[0]
+
+        self._logger.info(f"Loaded configuration from {init_config_path} -> {tmp_path}. With session {config_session.id}")
+        
         return configuration, config_session, init_config_path
 
 
@@ -108,8 +125,20 @@ class _SessionManager:
 
 class RunconfUIBackend:
     def __init__(self, context: RunconfContext):
+        '''
+        Full backend interface for the logical components of the interface
+        '''
+        
+        # Set up logging and save path
+        creation_time = f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
+        log_path  = context.output_directory / f"{context.apparatus}_{creation_time}.log"
+        self._save_path = context.output_directory / f"{context.apparatus}_{creation_time}.data.xml"
+
+        init_logger(log_path, context.log_level)
+
+        self._logger = get_logger()
+
         self._session_manager = _SessionManager(context)
-        self._save_path = context.output_directory / f"{context.apparatus}.data.xml"
         self.apparatus = context.apparatus
 
         self._assembled: AssembledConfig | None = None
@@ -120,6 +149,8 @@ class RunconfUIBackend:
         self.config_tree_renderer = None
         self.config_session = None
         self.info_text = "No Config Selected"
+
+        self._logger.debug("Backend instantiated")
 
     # ------------------------------------------------------------------ #
     # Session / version forwarding                                         #
@@ -148,25 +179,32 @@ class RunconfUIBackend:
     # ------------------------------------------------------------------ #
 
     def open_selected_session(self) -> None:
+        
+        self._logger.debug("Opening session")
         self.system_config_reader = SystemConfigReader(
             self._session_manager.get_runconf_ui_config_path()
         )
-
+        self._logger.debug("Loading session")
         self.configuration, self.config_session, init_config_path = (
             self._session_manager.load_session()
         )
-
+        self._logger.debug("Rendering trees")
         self.config_tree_renderer = ConfigTreeRenderer(
             self.configuration,
             self.config_session,
             self.system_config_reader.classes_to_draw,
         )
 
+        self._logger.debug("Assembling config")
         self._assembled = self.system_config_reader.assemble_config(
             self.configuration, self.config_session.id
         )
         self._update_info_text(init_config_path)
+        self._logger.debug("Rebuilding indices")
+
         self._rebuild_indexes()
+        self._logger.debug("Loaded")
+
 
     def save_config(self) -> None:
         """
@@ -174,11 +212,14 @@ class RunconfUIBackend:
         save path. copy_and_open_config is used for its consolidation side
         effect; the returned Configuration object is not needed here.
         """
+        
+        self._logger.info("Saving config to {self._save_path}")
         if self.configuration is None:
             raise FileExistsError("Configuration file not found!")
         self.configuration.commit()
         self._save_path.parent.mkdir(parents=True, exist_ok=True)
         copy_and_open_config(Path(self.configuration.active_database), self._save_path)
+        self._logger.info("Saved config to {self._save_path}")
 
     # ------------------------------------------------------------------ #
     # State queries                                                        #
@@ -252,13 +293,17 @@ class RunconfUIBackend:
         return node
 
     def _rebuild_indexes(self) -> None:
+        self._logger.debug("Rebuilding indices")
         a = self._assembled
         if a is None:
             return
 
         for group in (*a.disableable, *a.adjustable):
             group.nodes = {}
+            self._logger.debug(f"Building nodes for {group}")
+
             for system in group.systems:
+                self._logger.debug(f"   Building nodes for system: {system}")
                 system.nodes = {
                     s.path: s
                     for s in walk(system.root)
@@ -266,6 +311,7 @@ class RunconfUIBackend:
                     and (system.display_full_system or s.parent is not None)
                 }
                 group.nodes.update(system.nodes)
+                
 
         a.disableable_nodes = {g.id: g.nodes for g in a.disableable}
         a.adjustable_nodes  = {g.id: g.nodes for g in a.adjustable}

@@ -10,7 +10,7 @@ from ..messages import (
     DaqVersionSelectedMessage,
     LoadConfigMessage,
 )
-
+from runconf_ui.utils import get_logger
 
 class VersionSelect(Select):
     @on(Select.Changed)
@@ -18,6 +18,8 @@ class VersionSelect(Select):
         '''
         Handle selection change events and emit a DaqVersionSelectedMessage with the selected version.
         '''
+        
+        get_logger().debug(f"Selected version {event.value}")
         selected_version = event.value
         if isinstance(selected_version, NoSelection):
             selected_version = None
@@ -32,6 +34,7 @@ class SessionSelect(Select):
         NoSelection is replaced with None to ensure consistency with the backend
         '''
         selected_session = event.value
+        get_logger().debug(f"Selected session {event.value}")
         if isinstance(selected_session, NoSelection):
             selected_session = None
 
@@ -43,6 +46,8 @@ class FileSelect(Static):
     A panel for selecting files.
     '''
     def compose(self):
+        get_logger().debug(f"Composing File select grid")
+
         with Grid(id="file-select-grid"):
             yield VersionSelect(id="version-select", options=[], classes="file_select_drop", prompt="Select DAQ Version")
             yield SessionSelect(id="session-select", options=[], disabled=True, classes="file_select_drop", prompt="Select DAQ Session")
@@ -55,6 +60,8 @@ class FileSelect(Static):
         '''
         Update the list of DAQ versions available for selection.
         '''
+        get_logger().debug(f"Updating versions to {versions}")
+
         opts = [(str(v), v) for v in versions]
         
         version_select: VersionSelect= self.query_one(VersionSelect)
@@ -65,7 +72,8 @@ class FileSelect(Static):
         '''
         Update the list of DAQ sessions available for selection.
         '''
-        
+        get_logger().debug(f"Updating sessions to {sessions}")
+
         opts = [(str(s.name),s) for s in sessions]
         
         session_select: SessionSelect = self.query_one(SessionSelect)
@@ -75,6 +83,7 @@ class FileSelect(Static):
         '''
         Enable or disable the session select dropdown.
         '''
+        get_logger().debug(f"Enabling session selection")
         version_select: VersionSelect = self.query_one(VersionSelect)
         session_select: SessionSelect = self.query_one(SessionSelect)
         session_select.disabled = not self._select_enabled(version_select)
@@ -82,6 +91,8 @@ class FileSelect(Static):
     def enable_open_button(self):
         '''Enable or disable the open button based on whether a session is selected.
         '''        
+        get_logger().debug(f"Enabling open button")
+
         session_select: SessionSelect = self.query_one(SessionSelect)
         open_button: Button = self.query_one("#open_file_button", Button)
         open_button.disabled = not self._select_enabled(session_select)
@@ -95,6 +106,8 @@ class FileSelect(Static):
         if update_text is None:
             update_text = "No Config Loaded"
         
+        get_logger().debug(f"Updating text to {update_text}")
+
         text.update(update_text)
         
     
@@ -105,6 +118,8 @@ class FileSelect(Static):
         '''
         session_select: SessionSelect = self.query_one(SessionSelect)
         selected_session = session_select.value
+        get_logger().debug(f"Open config button pressed")
+
         if selected_session is not None:
             self.post_message(LoadConfigMessage())
             

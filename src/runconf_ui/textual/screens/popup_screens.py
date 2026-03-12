@@ -13,6 +13,7 @@ from ..messages import (
     QuitMessage,
 )
 
+from runconf_ui.utils import get_logger
 
 class LoadingScreen(ModalScreen):
     '''Blocking modal shown while a config is being opened.'''
@@ -22,6 +23,7 @@ class LoadingScreen(ModalScreen):
         self._message = message
 
     def compose(self) -> ComposeResult:
+        get_logger().debug("Loading")
         with Vertical(id="loading-box"):
             yield Label(self._message, id="loading-label")
             yield LoadingIndicator()
@@ -33,8 +35,9 @@ class ButtonTemplate:
     
     @classmethod
     def make(cls, label: str, variant: str, button_id: str, message: QuitMessage, disabled: bool=False) -> 'ButtonTemplate':
-        return cls(Button(label=label, variant=variant, id=button_id, classes="pop_up_button", disabled=disabled), message)
+        get_logger().debug(f"Making button with label={label}, variant={variant}, id={button_id}, classes='pop_up_button', disabled={disabled}), {message}")
 
+        return cls(Button(label=label, variant=variant, id=button_id, classes="pop_up_button", disabled=disabled), message)
 
 class ButtonPopup(ModalScreen):
     '''Pop-up screen with a label and a set of buttons, each mapped to a message.'''
@@ -44,6 +47,7 @@ class ButtonPopup(ModalScreen):
         self._buttons = {t.button.id: t for t in buttons}
         self._info_str = info_str
         self._css_classes = css_classes
+
 
     def compose(self):
         with Grid(id="pop_grid", classes=self._css_classes):
@@ -66,6 +70,7 @@ class ButtonPopup(ModalScreen):
 
 class QuitScreen(ButtonPopup):
     def __init__(self, can_create: bool):
+        get_logger().debug("initialising quit screen")
         super().__init__(
             buttons=[
                 ButtonTemplate.make("Create Config and Quit",       "success", "create_quit_button", QuitAndSaveMessage(), disabled=not can_create),
@@ -78,6 +83,7 @@ class QuitScreen(ButtonPopup):
 
 class CreateScreen(ButtonPopup):
     def __init__(self):
+        get_logger().debug("initialising create screen")
         super().__init__(
             buttons=[
                 ButtonTemplate.make("Create Config and Quit",       "success", "create_quit_button", QuitAndSaveMessage()),

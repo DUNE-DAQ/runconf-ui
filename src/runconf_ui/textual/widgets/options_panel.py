@@ -8,6 +8,7 @@ from ..messages import (
     OpenHelpMenuMessage,
     OpenQuitMenuMessage,
 )
+from runconf_ui.utils import get_logger
 
 
 class OptionsPanel(ScrollableContainer):
@@ -23,11 +24,14 @@ class OptionsPanel(ScrollableContainer):
         ]
 
         super().__init__(*args, **kwargs)
+        get_logger().debug(f"Options panel initialised")
+
         self._config_loaded = False
 
     def compose(self):
         for label, button_id, style, disabled in self.BUTTONS:
             yield Button(label, id=button_id, variant=style, disabled=disabled, classes="options_button")
+        get_logger().debug(f"Options panel composed")
 
     def enable_all(self):
         for button in self.query(Button):
@@ -44,6 +48,8 @@ class OptionsPanel(ScrollableContainer):
         Handle button press events and emit corresponding messages
         '''
         button_id = event.button.id
+        get_logger().debug(f"{button_id} pressed in options panel")
+
         if button_id == "quit":
             self.post_message(OpenQuitMenuMessage())
         elif button_id == "create_run_config":

@@ -25,6 +25,7 @@ from conffwk import Configuration
 from conffwk.dal import DalBase
 
 from runconf_ui.state_tree import Group
+from runconf_ui.utils import get_logger
 
 from .dataclasses import (
     AdjustableAttributeData,
@@ -58,24 +59,33 @@ class DisableSystemBuilder:
     """
 
     def __init__(self, configuration: Configuration, session: DalBase):
+        get_logger().debug(f"Initialising DisableSystemBuilder")
         args = (configuration, session)
         self.component_factory    = ComponentFactory(*args)
+        get_logger().debug(f"   - component_factory intiialised")
         self.attribute_factory    = AttributeFactory(*args)
+        get_logger().debug(f"   - attribute_factory intiialised")
         self.relationship_factory = RelationshipFactory(*args)
+        get_logger().debug(f"   - relationship_factory intiialised")
 
     def build(self, system: DisableableSystemData, label: str) -> Group:
         # subsystem_dependent=True  → OR root: off only when ALL subsystems are off
         # subsystem_dependent=False → AND root: off when any component is off
+        get_logger().debug(f"        - Making {system} with label {label}")
         root_strategy = any if system.subsystem_dependent else all
+
         root = Group(label=label, strategy=root_strategy)
 
         for comp in system.components:
+            get_logger().debug(f"            - adding component: {comp} ")
             self._add_component(root, comp, system.subsystem_dependent)
 
         for attr in system.attributes:
+            get_logger().debug(f"            - adding attribute: {attr} ")
             self._add_attribute(root, attr, system.subsystem_dependent)
 
         for rel in system.relationships:
+            get_logger().debug(f"            - adding relationship: {rel} ")
             self._add_relationship(root, rel, system.subsystem_dependent)
 
         return root
@@ -161,12 +171,18 @@ class AdjustableSystemBuilder:
     """
 
     def __init__(self, configuration: Configuration, session: DalBase):
+        get_logger().debug(f"Initialising AdjustableSystemBuilder")
+
+
         self.factory = AdjustableFactory(configuration, session)
 
     def build(self, attributes: list[AdjustableAttributeData], label: str) -> Group:
         root = Group(label=label, strategy=all)
-        
+        get_logger().debug("Building adjustable attributes")
+
         for attr in attributes:
+            get_logger().debug(f"    - Building {attr}")
+
             nodes = self.factory.create(attr)
             if not nodes:
                 continue
