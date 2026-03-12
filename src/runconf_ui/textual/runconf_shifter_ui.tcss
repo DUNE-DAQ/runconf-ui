@@ -40,10 +40,6 @@ ShifterViewScreen {
     column-span: 3;
 }
 
-.file_select {
-    column-span: 2;
-}
-
 FileSelect,
 FilePanelWidget {
     column-span: 5;
@@ -58,9 +54,9 @@ FilePanelWidget {
 
 /* ============================================================
    Enable / Disable Panel
-   ============================================================ */
+============================================================ */
 
-#enable_disable_panel_container {
+#tabbed_content_container {
     grid-size: 20;
     border: hkey grey;
     grid-gutter: 3;
@@ -71,11 +67,14 @@ FilePanelWidget {
 #selection_adjust_tabs {
     column-span: 6;
     height: 100%;
-    background: $background-lighten-1;
-
 }
 
-#selection_tabs {
+
+/* Tabbed Content */
+
+#selection_tabs
+.multi_view_tabs
+{
     column-span: 6;
     width: 100%;
 }
@@ -86,13 +85,15 @@ FilePanelWidget {
     height: 100%;
 }
 
-#control_maps_tabs ContentSwitcher {
+.content_switcher ContentSwitcher {
     height: 1fr;
-    border: darkgrey;
-
 }
 
-#control_maps_tabs TabPane {
+#control_maps_tabs ContentSwitcher {
+    border: darkgrey;
+}
+
+.top_level_tab_pane{
     height: 100%;
     background: $background-lighten-2;
 }
@@ -110,6 +111,7 @@ FilePanelWidget {
 EnableDisablePanel {
     layout: vertical;
     overflow-y: auto;
+    width: 100%;
 }
 
 .enable_disable_button,

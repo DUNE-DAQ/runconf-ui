@@ -20,13 +20,13 @@ class MainScreen(Screen):
         yield Header()
         with Grid(id="main_container"):
             yield FileSelect(id="file-select-panel")
-            with Grid(id="enable_disable_panel_container"):
-                with TabbedContent("Controls", id="selection_adjust_tabs"):
-                    with TabPane("Enable/Disable"):
+            with Grid(id="tabbed_content_container"):
+                with TabbedContent("Controls", id="selection_adjust_tabs", classes="content_switcher"):
+                    with TabPane("Enable/Disable", classes="top_level_tab_pane"):
                         yield EnableDisableTabs(id="selection_tabs")
 
-                with TabbedContent("Schematic Views", id="control_maps_tabs"):
-                    with TabPane("Configuration"):
+                with TabbedContent("Schematic Views", id="control_maps_tabs", classes="content_switcher"):
+                    with TabPane("Configuration", classes="top_level_tab_pane"):
                         yield ConfigTreePanel(id="config_tree_panel")
 
                     with TabPane("System Maps"):
