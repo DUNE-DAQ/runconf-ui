@@ -1,0 +1,74 @@
+name: Run pytest
+
+on:
+  pull_request:
+
+permissions:
+  checks: write
+  pull-requests: write
+
+jobs:
+  install_and_test:
+
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+
+    container:
+      image: ghcr.io/dune-daq/nightly-release-alma9:development_v5
+
+    steps:
+      - name: Set up dev nightly
+        if: ${{ !cancelled() }}
+        run: |
+          mkdir nightly
+          cd nightly
+          source /cvmfs/dunedaq.opensciencegrid.org/setup_dunedaq.sh
+          setup_dbt latest_v5
+          dbt-create -n last_fddaq
+          cd NFD_DEV*
+          source env.sh
+          dbt-build
+          dbt-workarea-env
+
+      - name: Install runconf-ui
+        if: success()
+        run: |
+          cd nightly/NFD_DEV* || true
+          source env.sh
+          python -m pip install --upgrade pip
+          cd sourcecode
+          echo "Cloning runconf-ui"
+          git clone https://github.com/${{ github.event.pull_request.head.repo.owner.login }}/runconf-ui.git -b ${{ github.head_ref }} ||  git clone https://github.com/DUNE-DAQ/runconf-ui.git
+          echo "Entering runconf-ui"
+          cd runconf-ui
+          echo "Installing"
+          pip install .[test]
+          echo "RUNCONF_UI_DIR=$(pwd)" >> $GITHUB_ENV
+
+      - name: Test with pytest/pytest-cov
+        if: success()
+        run: |
+          cd nightly/NFD_DEV* || true
+          source env.sh
+          cd sourcecode/runconf-ui || true
+          pip install pytest pytest-cov pytest-asyncio
+          pytest --junitxml=junit/test-results.xml --cov-report=html
+
+      - name: Publish JUnit test report
+        uses: mikepenz/action-junit-report@v5
+        if: ${{ !cancelled() }}
+        with:
+          report_paths: '${{ env.RUNCONF_UI_DIR }}/junit/test-results.xml'
+
+
+      - name: Upload coverage report (HTML)
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: html-coverage-report
+          path: ${{ env.RUNCONF_UI_DIR }}/htmlcov/
+          if-no-files-found: error
+          retention-days: 7
