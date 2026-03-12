@@ -3,16 +3,19 @@ from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from datetime import datetime
+from typing import TextIO
+import shutil
 
 from conffwk import Configuration
 from rich.tree import Tree
+from rich import print as rprint
 
 from runconf_ui.exceptions import NodeNotFound, RunConfToolsRepoException
 from runconf_ui.repo_manager import LocalRepoManager, RemoteRepoManager
 from runconf_ui.state_tree import NodeStatus, walk
 from runconf_ui.system_configuration import SystemConfigReader
 from runconf_ui.system_configuration.config_reader import AssembledConfig
-from runconf_ui.utils import copy_and_open_config
+from runconf_ui.utils import copy_and_open_config, setup_working_directory
 from runconf_ui.utils.rich_utils import ConfigTreeRenderer, draw_node_tree
 from runconf_ui.utils import get_logger, LogLevels, init_logger
 
@@ -131,8 +134,11 @@ class RunconfUIBackend:
         
         # Set up logging and save path
         creation_time = f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
-        log_path  = context.output_directory / f"{context.apparatus}_{creation_time}.log"
-        self._save_path = context.output_directory / f"{context.apparatus}_{creation_time}.data.xml"
+        
+        self.final_save_dir, self.current_save_dir = setup_working_directory(context.output_directory, creation_time)
+        
+        log_path  = self.current_save_dir / f"{context.apparatus}_{creation_time}.log"
+        self._save_path = self.current_save_dir / f"{context.apparatus}_{creation_time}.data.xml"
 
         init_logger(log_path, context.log_level)
 
@@ -213,13 +219,23 @@ class RunconfUIBackend:
         effect; the returned Configuration object is not needed here.
         """
         
-        self._logger.info("Saving config to {self._save_path}")
+        self._logger.info(f"Saving config to {self.current_save_dir}")
         if self.configuration is None:
             raise FileExistsError("Configuration file not found!")
         self.configuration.commit()
         self._save_path.parent.mkdir(parents=True, exist_ok=True)
         copy_and_open_config(Path(self.configuration.active_database), self._save_path)
-        self._logger.info("Saved config to {self._save_path}")
+
+        # Save the trees as well
+        with open(self.current_save_dir/"detector_status.txt", 'w') as f:
+            self.print_trees_to_file(f)                
+
+        # Copy everything to the correct directory
+        shutil.rmtree(self.final_save_dir)
+        shutil.copytree(self.current_save_dir, self.final_save_dir, dirs_exist_ok=True)
+
+
+        self._logger.info(f"Saved config to {self.current_save_dir}")        
 
     # ------------------------------------------------------------------ #
     # State queries                                                        #
@@ -329,3 +345,15 @@ class RunconfUIBackend:
         for system in group.systems:
             tree.children.append(draw_node_tree(system.root.label, system.root))
         return tree
+    
+    def print_trees_to_file(self, text_file: TextIO):
+        section_marker = "==============================\n"
+        
+        rprint("## Main Tree ##\n")
+        rprint(self.get_config_tree(), file=text_file)
+        rprint(section_marker, file=text_file)
+        
+        for lab, tr in  self.get_tree_views().items():
+            rprint(f"## {lab} ##\n", file=text_file)
+            rprint(tr, file=text_file)
+            rprint(section_marker, file=text_file)

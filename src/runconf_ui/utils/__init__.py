@@ -7,6 +7,7 @@ from .config_utils import (
     get_class_from_segment_list,
     get_configs_with_session,
     open_configuration,
+    setup_working_directory,
 )
 from .rich_utils import ConfigTreeRenderer, draw_node_tree
 from .logging import get_logger, init_logger, LogLevels
@@ -22,7 +23,8 @@ __all__=[
     "get_class_from_segment_list",
     'get_configs_with_session',
     'open_configuration',
+    "setup_working_directory",
     'get_logger',
     'init_logger',
-    'LogLevels'
+    'LogLevels',
 ]

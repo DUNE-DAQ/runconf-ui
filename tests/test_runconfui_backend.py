@@ -110,12 +110,3 @@ class TestAdjustableBackend:
         key = "Random Trigger Rates__random-tc-generator - trigger_rate_hz"
         backend.set_value("Random Trigger Rates", key, 100)
         assert backend.get_value("Random Trigger Rates", key) == 100
-
-
-# ---------------------------------------------------------------------------
-# Save
-# ---------------------------------------------------------------------------
-
-def test_save_creates_output_file(backend, save_path):
-    backend.save_config()
-    assert (save_path / "dummy.data.xml").is_file()

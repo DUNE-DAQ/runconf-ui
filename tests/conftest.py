@@ -13,12 +13,12 @@ import pytest
 from daqconf.consolidate import consolidate_db
 
 from runconf_ui.utils import open_configuration
+from runconf_ui.utils import init_logger
 
 
 @pytest.fixture(scope="session")
 def session_name():
     return "local-1x1-config"
-
 
 @pytest.fixture(scope="session")
 def config_path() -> Path:

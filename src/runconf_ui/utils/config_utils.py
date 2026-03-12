@@ -1,12 +1,14 @@
 """Utility functions for safely handling OKS configurations."""
 
 from pathlib import Path
+import os
+import shutil
 
 from conffwk import Configuration
 from daqconf.consolidate import consolidate_files
 
-from runconf_ui.exceptions import ConfigReadException
 
+from runconf_ui.exceptions import ConfigReadException
 
 def open_configuration(config_path: Path) -> Configuration:
     """Open and return an OKS configuration from the given path."""
@@ -113,5 +115,29 @@ def dal_in_config(configuration: Configuration, class_name: str, dal_id: str):
     
     return dal_id in [d.id for d in configuration.get_dals(class_name)]
 
-
-
+def setup_working_directory(base_path: Path, backup_dir_prefix: str):
+    '''
+    Generates a config directory and checks for sub-directories
+    '''
+    
+    
+    base_path.mkdir(exist_ok=True, parents=True)
+    
+    current_dir = base_path/"current_config"
+    if current_dir.exists():
+        # Clear it out
+        files = sorted(
+            (f for f in base_path.glob("*") if f.name != "current_config" and f.is_dir()),
+            key=os.path.getmtime
+        )
+        
+        if len(files)>5:
+            dirs = files.pop(0)
+            shutil.rmtree(dirs)
+        
+    current_dir.mkdir(exist_ok=True, parents=True)
+    
+    backup_dir = base_path/backup_dir_prefix
+    backup_dir.mkdir(parents=True, exist_ok=True)
+    
+    return current_dir, backup_dir
