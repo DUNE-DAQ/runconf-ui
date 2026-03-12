@@ -10,8 +10,11 @@ import pytest
 from confmodel_dal import component_disabled, disable_component, enable_component
 
 from runconf_ui.exceptions import AttributeMissingException, IncompatibleDalException
-from runconf_ui.state_tree import AdjustableAttribute, DisableAttribute, DisableComponent
-
+from runconf_ui.state_tree import (
+    AdjustableAttribute,
+    DisableAttribute,
+    DisableComponent,
+)
 
 # ---------------------------------------------------------------------------
 # Shared fixtures

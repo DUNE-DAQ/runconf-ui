@@ -20,6 +20,7 @@ from runconf_ui.textual.widgets import (
     RichTreeTabbed,
 )
 
+
 class RunconfUIApp(App):
     CSS_PATH: ClassVar[str] = "runconf_shifter_ui.tcss"
     BINDINGS: ClassVar[list[tuple]] = [("ctrl+q", "quit", "Quit")]

@@ -17,10 +17,8 @@ from runconf_ui.state_tree import (
     build_index,
     disabled_child_nodes,
     labelled,
-    walk,
 )
 from runconf_ui.system_configuration import SystemConfigReader
-
 
 # ---------------------------------------------------------------------------
 # Tree integration — real DALs, no YAML

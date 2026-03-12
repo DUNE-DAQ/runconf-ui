@@ -22,6 +22,7 @@ from runconf_ui.textual.screens import (
     QuitScreen,
 )
 
+
 def test_main_screen_is_not_modal():
     """MainScreen must be a plain Screen, not ModalScreen.
 

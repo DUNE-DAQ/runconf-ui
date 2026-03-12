@@ -6,7 +6,6 @@ Uses simple stub adapters — no conffwk dependency.
 
 from runconf_ui.state_tree import Group, Leaf
 
-
 # ---------------------------------------------------------------------------
 # Stub adapter
 # ---------------------------------------------------------------------------

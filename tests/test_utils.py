@@ -1,8 +1,10 @@
 from pathlib import Path
 
 import pytest
+from rich.tree import Tree
 
 from runconf_ui.exceptions import ConfigReadException
+from runconf_ui.state_tree import State
 from runconf_ui.utils.config_utils import (
     check_config_has_session,
     dal_in_config,
@@ -13,10 +15,6 @@ from runconf_ui.utils.config_utils import (
     get_number_of_sessions,
     open_configuration,
 )
-
-from rich.tree import Tree
-
-from runconf_ui.state_tree import State, compute_state
 from runconf_ui.utils.rich_utils import ConfigTreeRenderer
 
 

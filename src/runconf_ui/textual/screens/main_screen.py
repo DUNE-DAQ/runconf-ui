@@ -1,8 +1,8 @@
 """
 Main screen for runconf-shifter-ui.
 """
-from textual.screen import Screen  # NOT ModalScreen
 from textual.containers import Grid
+from textual.screen import Screen  # NOT ModalScreen
 from textual.widgets import Footer, Header, TabbedContent, TabPane
 
 from ..widgets import (

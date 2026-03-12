@@ -2,17 +2,24 @@
 Tests for the Textual TUI layer using pytest + pytest-asyncio.
 """
 
-import pytest
-import pytest_asyncio
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+import pytest
+import pytest_asyncio
 from rich.tree import Tree
 from textual.widgets import Button, Select, Static, TabbedContent
 
 from runconf_ui import RunconfContext, RunconfUIBackend
 from runconf_ui.state_tree import Group, Leaf, NodeStatus, State
 from runconf_ui.textual.runconf_ui_app import RunconfUIApp
+from runconf_ui.textual.screens import (
+    CreateScreen,
+    HelpScreen,
+    LoadingScreen,
+    MainScreen,
+    QuitScreen,
+)
 from runconf_ui.textual.widgets import (
     AdjustableAttributeTabs,
     ConfigTreePanel,
@@ -22,14 +29,6 @@ from runconf_ui.textual.widgets import (
     RichTreeTabbed,
 )
 from runconf_ui.textual.widgets.select_file_panel import SessionSelect, VersionSelect
-from runconf_ui.textual.screens import (
-    LoadingScreen,
-    QuitScreen,
-    CreateScreen,
-    HelpScreen,
-    MainScreen,
-)
-
 
 pytestmark = pytest.mark.asyncio
 

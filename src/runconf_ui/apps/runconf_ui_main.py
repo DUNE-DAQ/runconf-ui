@@ -8,7 +8,6 @@ import click
 
 from runconf_ui import RunconfContext, RunconfUIApp
 
-
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 _shared_options = [
