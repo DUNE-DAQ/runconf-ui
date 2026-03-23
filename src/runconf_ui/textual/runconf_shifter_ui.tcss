@@ -145,13 +145,10 @@ AdjustableAttributeTabs{
     height: 100%;
 }
 
-AdjustableAttributePanel {
-    height: 100%;
-    padding: 1 2;
-}
 
 AdjustableAttributeContainer {
-    height: 100%;
+    height: auto;
+    width: 100%;
     margin: 1 0;
     border: panel $primary-background-darken-3;
     padding: 1;

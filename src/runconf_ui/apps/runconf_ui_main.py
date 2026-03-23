@@ -74,4 +74,12 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    context = RunconfContext(
+        apparatus="dummy",
+        conf_directory=Path("/tmp/pytest-of-hwallace/pytest-current/configscurrent"),
+        use_local=True,
+        output_directory=Path("test-cfg"),
+        log_level="INFO",
+    )
+        
+    RunconfUIApp(context).run()
