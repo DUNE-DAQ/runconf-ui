@@ -83,4 +83,4 @@ class RemoteRepoManager(RepoManagerInterface[str]):
         os.environ["GIT_SSH_COMMAND"] = "ssh -o BatchMode=yes"
         g = Git()
         g.ls_remote(url)
-        logger.info("Repo is accessible")
+        logger.info(f"Repo {url} is accessible")

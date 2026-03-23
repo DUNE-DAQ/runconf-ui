@@ -15,7 +15,7 @@ from runconf_ui.utils import LogLevels
 @click.option('-l', '--use-local', is_flag=True, default=False)
 @click.option('-a', '--apparatus', required=True, help='DAQ apparatus to use (e.g. NP02, NP04).', envvar="APPARATUS")
 @click.option('-f', '--config-file-name', required=True, help='Config file to find in the ops repo (e.g. <X>.data.xml).', envvar="SESSION_FILE")
-@click.option('-b', '--base-url', required=True, help='URL for the BASE repository.', envvar="BASE_URL")
+@click.option('-b', '--base-url', default="ssh://git@gitlab.cern.ch:7999/dune-daq/online/ehn1-daqconfigs.git", help='URL for the BASE repository.', envvar="BASE_URL")
 @click.option('-r', '--ops-url', required=True, help='URL for the operations repository.', envvar="OPERATION_URL")
 @click.option('-d', '--log-level', default='INFO', show_default=True, help='Debug level (INFO, WARNING, DEBUG)')
 def cli(apparatus: str, config_directory: str, output_directory: str, use_local: bool, config_file_name: str, base_url: str, ops_url: str, log_level: LogLevels="INFO"):
