@@ -29,10 +29,10 @@ class MainScreen(Screen):
                     with TabPane("Configuration", classes="top_level_tab_pane"):
                         yield ConfigTreePanel(id="config_tree_panel")
 
-                    with TabPane("System Maps"):
+                    with TabPane("System Maps", classes="top_level_tab_pane"):
                         yield RichTreeTabbed(id="maps_panel")
 
-                    with TabPane("Adjustable"):
+                    with TabPane("Adjustable", classes="top_level_tab_pane"):
                         yield AdjustableAttributeTabs(id="adjustable_tabs")
 
             yield OptionsPanel(id="option_panel_main")
