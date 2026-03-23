@@ -138,9 +138,9 @@ class RunconfUIBackend:
         self.final_save_dir, self.current_save_dir = setup_working_directory(context.output_directory, creation_time)
         
         log_path  = self.current_save_dir / f"{context.apparatus}_{creation_time}.log"
+        init_logger(log_path, context.log_level)
         self._save_path = self.current_save_dir / f"{context.apparatus}_{creation_time}.data.xml"
 
-        init_logger(log_path, context.log_level)
 
         self._logger = get_logger()
 

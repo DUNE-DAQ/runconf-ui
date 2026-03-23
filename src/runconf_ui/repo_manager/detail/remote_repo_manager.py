@@ -1,5 +1,7 @@
 import re
 from pathlib import Path
+from git import Git
+from git.exc import GitCommandError
 
 from conffwk import Configuration
 from runconftools.ConfPool import ConfPool
@@ -11,14 +13,20 @@ from runconf_ui.exceptions import (
     RunConfToolsRepoException,
 )
 from runconf_ui.repo_manager.repo_manager_interface import RepoManagerInterface
-from runconf_ui.utils import check_config_has_session
+from runconf_ui.utils import check_config_has_session, get_logger
+import os
 
+logger = get_logger()
 
 class RemoteRepoManager(RepoManagerInterface[str]):
     def __init__(self, apparatus: str, conf_directory: Path, config_file_name: str, operation_url: str, base_url: str):
         super().__init__(apparatus, conf_directory)
         if operation_url is None or base_url is None:
             raise RunConfToolsRepoException(f"Operation URL ({operation_url}) or Base URL ({base_url}) not set")
+        
+        self._check_access(base_url)
+        self._check_access(operation_url)
+        
         
         self.conf_pool = ConfPool(
             str(self.conf_directory),
@@ -68,3 +76,11 @@ class RemoteRepoManager(RepoManagerInterface[str]):
             raise ConfigBrokenInRepoException(f"{file_path} does not contain a session {self.daq_version}")
         
         return file_path
+
+    @classmethod
+    def _check_access(cls, url: str):
+        # This avoids the old
+        os.environ["GIT_SSH_COMMAND"] = "ssh -o BatchMode=yes"
+        g = Git()
+        g.ls_remote(url)
+        logger.info("Repo is accessible")
