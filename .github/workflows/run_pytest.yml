@@ -1,7 +1,7 @@
 name: Run pytest
 
 on:
-  push:
+  pull_request:
 
 permissions:
   checks: write
@@ -33,16 +33,16 @@ jobs:
           dbt-build
           dbt-workarea-env
 
-      - name: Install daqpytools
+      - name: Install Runconf-ui
         if: success()
         run: |
           cd nightly/NFD_DEV* || true
           source env.sh
           python -m pip install --upgrade pip
-          cd sourcecode
-          echo "Cloning daqpytools"
-          git clone https://github.com/${{ github.repository }}.git -b ${{ github.ref_name }}          echo "Entering daqpytools"
-          cd daqpytools
+          cd pythoncode
+          echo "Cloning runconf-ui"
+          git clone https://github.com/${{ github.repository }}.git -b ${{ github.ref_name }}          echo "Entering runconf-ui"
+          cd runconf-ui
           echo "Installing"
           pip install .[test]
           echo "RUNCONF_UI_DIR=$(pwd)" >> $GITHUB_ENV
@@ -52,7 +52,7 @@ jobs:
         run: |
           cd nightly/NFD_DEV* || true
           source env.sh
-          cd sourcecode/daqpytools || true
+          cd pythoncode/runconf-ui || true
           pip install pytest pytest-cov pytest-asyncio
           pytest --junitxml=junit/test-results.xml --cov-report=html
 
