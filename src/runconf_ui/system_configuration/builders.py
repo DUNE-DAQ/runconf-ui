@@ -69,11 +69,7 @@ class DisableSystemBuilder:
         get_logger().debug(f"   - relationship_factory intiialised")
 
     def build(self, system: DisableableSystemData, label: str) -> Group:
-        # subsystem_dependent=True  → OR root: off only when ALL subsystems are off
-        # subsystem_dependent=False → AND root: off when any component is off
-        get_logger().debug(f"        - Making {system} with label {label}")
         root_strategy = any if system.subsystem_dependent else all
-
         root = Group(label=label, strategy=root_strategy)
 
         for comp in system.components:
@@ -89,9 +85,8 @@ class DisableSystemBuilder:
             self._add_relationship(root, rel, system.subsystem_dependent)
 
         return root
-
+    
     # ------------------------------------------------------------------ #
-
     def _votes(self, subsystem_dependent: bool, has_own_label: bool) -> bool:
         """
         A child votes iff the system is not subsystem_dependent, or the child
@@ -110,13 +105,22 @@ class DisableSystemBuilder:
             return
 
         for node in nodes:
-            label = comp.system_label or (node.label if comp.separate_system else "")
-            votes = self._votes(subsystem_dependent, bool(label))
-
-            if label:
-                root.at(label).add(node, votes=True, propagate=True)
+            if comp.each_component_separate:
+                # Wrap each leaf in a named container Group.
+                # The leaf's label is cleared so only the Group appears as a button.
+                # votes=False on root → root stays vacuously True, never gating siblings.
+                # propagate=True on root → toggling root still reaches all containers.
+                wrapper = Group(label=comp.system_label or node.label, strategy=any)
+                node.label = ""
+                wrapper.add(node, votes=True, propagate=True)
+                root.add(wrapper, votes=False, propagate=True)
             else:
-                root.add(node, votes=votes, propagate=True)
+                label = comp.system_label or (node.label if comp.separate_system else "")
+                votes = self._votes(subsystem_dependent, bool(label))
+                if label:
+                    root.at(label).add(node, votes=True, propagate=True)
+                else:
+                    root.add(node, votes=votes, propagate=True)
 
     def _add_attribute(
         self,

@@ -327,10 +327,9 @@ class RunconfUIBackend:
                     and (system.display_full_system or s.parent is not None)
                 }
                 group.nodes.update(system.nodes)
-                
 
-        a.disableable_nodes = {g.id: g.nodes for g in a.disableable}
-        a.adjustable_nodes  = {g.id: g.nodes for g in a.adjustable}
+        a.disableable_nodes = {g.id: a._sorted_nodes(g.nodes) for g in a.disableable}
+        a.adjustable_nodes  = {g.id: a._sorted_nodes(g.nodes) for g in a.adjustable}
         a.all_nodes = {**a.adjustable_nodes, **a.disableable_nodes}
 
         self._tree_views = {
