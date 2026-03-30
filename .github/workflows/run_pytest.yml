@@ -3,7 +3,8 @@ name: Run pytest
 on:
   pull_request:
     branches:
-      - main
+      - develop
+      - patch/*
   schedule:
     - cron: '0 0 * * 0-4'  # Every Sunday at midnight UTC
 
@@ -46,7 +47,8 @@ jobs:
           python -m pip install --upgrade pip
           cd pythoncode
           echo "Cloning runconf-ui"
-          git clone https://github.com/${{ github.repository }}.git -b ${{ github.ref_name }}          echo "Entering runconf-ui"
+          git clone https://github.com/${{ github.repository }}.git -b ${{ github.ref_name }}
+          echo "Entering runconf-ui"
           cd runconf-ui
           echo "Installing"
           pip install .[test]

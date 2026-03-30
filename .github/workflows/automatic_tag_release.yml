@@ -3,7 +3,8 @@ name: Tag new version
 on:
   push:
     branches:
-      - main
+      - develop
+      - patch/*
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

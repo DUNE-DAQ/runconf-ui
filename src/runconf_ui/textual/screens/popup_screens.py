@@ -157,5 +157,5 @@ class ExceptionScreen(ButtonPopup):
                 ),
             ],
             info_str=error_msg,
-            css_classes="pop_up exception_pop_up_grid",
+            css_classes="pop_up quit_pop_up_grid",
         )
