@@ -39,6 +39,7 @@ dev = [
     "pytest-asyncio",
     "pre-commit",
     "mypy",
+    "types-PyYAML",
 ]
 
 docs = [

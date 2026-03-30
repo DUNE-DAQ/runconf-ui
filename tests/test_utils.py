@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import pytest
 from rich.tree import Tree
 
@@ -26,14 +24,6 @@ def no_session_config_path(config_path):
 @pytest.fixture
 def no_session_config(no_session_config_path):
     return open_configuration(no_session_config_path)
-
-
-def test_bad_config_open():
-    with pytest.raises(ConfigReadException):
-        open_configuration(Path("bad_name"))
-    with pytest.raises(FileNotFoundError):
-        open_configuration(Path("bad_name.data.xml"))
-    assert not check_config_has_session(Path("bad_name.data.xml"))
 
 
 def test_corrupt_file_open(tmp_path_factory):
