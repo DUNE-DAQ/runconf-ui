@@ -182,6 +182,7 @@ async def loaded_pilot():
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.slow
 async def test_active_screen_is_main_screen_on_startup(pilot):
     """The active screen immediately after startup must be MainScreen, not _default."""
     assert isinstance(pilot.app.screen, MainScreen), (
@@ -190,6 +191,7 @@ async def test_active_screen_is_main_screen_on_startup(pilot):
     )
 
 
+@pytest.mark.slow
 async def test_active_screen_id_is_not_default(pilot):
     """If screen id is '_default', MainScreen was never made active."""
     assert pilot.app.screen.id != "_default", (
@@ -198,6 +200,7 @@ async def test_active_screen_id_is_not_default(pilot):
     )
 
 
+@pytest.mark.slow
 async def test_app_query_reaches_main_screen_widgets(pilot):
     """app.query() must find MainScreen widgets directly.
 
@@ -215,6 +218,7 @@ async def test_app_query_reaches_main_screen_widgets(pilot):
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.slow
 async def test_main_widgets_present(pilot):
     app = pilot.app
 
@@ -226,14 +230,17 @@ async def test_main_widgets_present(pilot):
     assert app.query_one(RichTreeTabbed)
 
 
+@pytest.mark.slow
 async def test_session_select_disabled_on_startup(pilot):
     assert pilot.app.query_one(SessionSelect).disabled
 
 
+@pytest.mark.slow
 async def test_open_button_disabled_on_startup(pilot):
     assert pilot.app.query_one("#open_file_button", Button).disabled
 
 
+@pytest.mark.slow
 async def test_config_buttons_disabled_on_startup(pilot):
     app = pilot.app
 
@@ -241,6 +248,7 @@ async def test_config_buttons_disabled_on_startup(pilot):
     assert app.query_one("#reset", Button).disabled
 
 
+@pytest.mark.slow
 async def test_always_available_buttons_enabled_on_startup(pilot):
     app = pilot.app
 
@@ -253,6 +261,7 @@ async def test_always_available_buttons_enabled_on_startup(pilot):
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.slow
 async def test_selecting_version_enables_session_select(pilot):
     app = pilot.app
 
@@ -266,6 +275,7 @@ async def test_selecting_version_enables_session_select(pilot):
     assert not app.query_one(SessionSelect).disabled
 
 
+@pytest.mark.slow
 async def test_selecting_session_enables_open_button(pilot):
     app = pilot.app
 
@@ -281,6 +291,7 @@ async def test_selecting_session_enables_open_button(pilot):
     assert not app.query_one("#open_file_button", Button).disabled
 
 
+@pytest.mark.slow
 async def test_open_button_pushes_loading_screen():
     backend = _make_backend()
 
@@ -308,6 +319,7 @@ async def test_open_button_pushes_loading_screen():
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.slow
 async def test_quit_opens_quit_screen(pilot):
     await pilot.click("#quit")
     await pilot.pause()
@@ -315,6 +327,7 @@ async def test_quit_opens_quit_screen(pilot):
     assert isinstance(pilot.app.screen, QuitScreen)
 
 
+@pytest.mark.slow
 async def test_help_opens_help_screen(pilot):
     await pilot.click("#help")
     await pilot.pause()
@@ -322,11 +335,13 @@ async def test_help_opens_help_screen(pilot):
     assert isinstance(pilot.app.screen, HelpScreen)
 
 
+@pytest.mark.slow
 async def test_create_enabled_after_load(loaded_pilot):
     app = loaded_pilot.app
     assert not app.query_one("#create_run_config", Button).disabled
 
 
+@pytest.mark.slow
 async def test_create_opens_screen(loaded_pilot):
     await loaded_pilot.click("#create_run_config")
     await loaded_pilot.pause()
@@ -338,6 +353,7 @@ async def test_create_opens_screen(loaded_pilot):
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.slow
 async def test_cancel_pops_quit_screen(pilot):
     await pilot.click("#quit")
     await pilot.pause()
@@ -348,6 +364,7 @@ async def test_cancel_pops_quit_screen(pilot):
     assert not isinstance(pilot.app.screen, QuitScreen)
 
 
+@pytest.mark.slow
 async def test_quit_scrap_exits_app(pilot):
     await pilot.click("#quit")
     await pilot.pause()
@@ -363,18 +380,21 @@ async def test_quit_scrap_exits_app(pilot):
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.slow
 async def test_buttons_render_after_load(loaded_pilot):
     buttons = list(loaded_pilot.app.query(".enable_disable_button"))
 
     assert len(buttons) > 0
 
 
+@pytest.mark.slow
 async def test_enabled_node_has_class(loaded_pilot):
     button = loaded_pilot.app.query_one("#Readout", Button)
 
     assert "node_enabled" in button.classes
 
 
+@pytest.mark.slow
 async def test_clicking_button_calls_backend_toggle():
     backend = _loaded_backend()
 
@@ -405,6 +425,7 @@ async def test_clicking_button_calls_backend_toggle():
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.slow
 async def test_option_buttons_enabled_after_load(loaded_pilot):
     app = loaded_pilot.app
 
@@ -412,6 +433,7 @@ async def test_option_buttons_enabled_after_load(loaded_pilot):
         assert not app.query_one(f"#{btn}", Button).disabled
 
 
+@pytest.mark.slow
 async def test_config_info_text_updated_after_load(loaded_pilot):
     info = loaded_pilot.app.query_one("#config_info", Static)
 
@@ -419,6 +441,7 @@ async def test_config_info_text_updated_after_load(loaded_pilot):
     assert "No Config Loaded" not in str(info.content)
 
 
+@pytest.mark.slow
 async def test_adjustable_tabs_have_content(loaded_pilot):
     tabbed = loaded_pilot.app.query_one(AdjustableAttributeTabs).query_one(
         TabbedContent

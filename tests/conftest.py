@@ -12,7 +12,7 @@ from pathlib import Path
 import pytest
 from daqconf.consolidate import consolidate_db
 
-from runconf_ui.utils import open_configuration
+from runconf_ui.utils import init_logger, open_configuration
 
 
 @pytest.fixture(scope="session")
@@ -35,9 +35,10 @@ def tmp_config_path(tmp_path_factory):
 
 
 @pytest.fixture(scope="session")
-def consolidated_config(tmp_config_path, session_name, config_path):
-    consolidate_db(str(config_path), str(tmp_config_path), session_name)
-    return open_configuration(tmp_config_path)
+def logger(tmp_path_factory):
+    log_file = tmp_path_factory.mktemp("logs") / "test.log"
+    init_logger(log_file)
+    return log_file
 
 
 @pytest.fixture(scope="session")
@@ -52,3 +53,11 @@ def system_config(tmp_config_path):
     dest.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy(initial, dest)
     return dest
+
+
+@pytest.fixture(scope="session")
+def consolidated_config(
+    tmp_config_path, session_name, config_path, system_config, logger
+):
+    consolidate_db(str(config_path), str(tmp_config_path), session_name)
+    return open_configuration(tmp_config_path)
