@@ -8,6 +8,10 @@ on:
   schedule:
     - cron: '0 0 * * 0-4'  # Every Sunday at midnight UTC
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 
 permissions:
   checks: write
@@ -26,6 +30,8 @@ jobs:
       image: ghcr.io/dune-daq/nightly-release-alma9:development_v5
 
     steps:
+      - uses: actions/checkout@v5
+
       - name: Set up dev nightly
         if: ${{ !cancelled() }}
         run: |
@@ -44,22 +50,17 @@ jobs:
         run: |
           cd nightly/NFD_DEV* || true
           source env.sh
+          cd ..
           python -m pip install --upgrade pip
-          cd pythoncode
-          echo "Cloning runconf-ui"
-          git clone https://github.com/${{ github.repository }}.git -b ${{ github.ref_name }}
-          echo "Entering runconf-ui"
-          cd runconf-ui
-          echo "Installing"
-          pip install .[dev]
-          echo "RUNCONF_UI_DIR=$(pwd)" >> $GITHUB_ENV
+          python -m pip install .
+
 
       - name: Test with pytest/pytest-cov
         if: success()
         run: |
           cd nightly/NFD_DEV* || true
           source env.sh
-          cd pythoncode/runconf-ui || true
+          cd ..
           pip install pytest pytest-cov pytest-asyncio
           pytest --junitxml=junit/test-results.xml --cov-report=html
 
