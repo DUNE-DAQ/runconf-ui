@@ -29,7 +29,7 @@ class VersionSelect(Select[str]):
         self.post_message(DaqVersionSelectedMessage(daq_version=selected_version))
 
 
-class SessionSelect(Select[Path]):
+class SessionSelect(Select[Path | str]):
     @on(Select.Changed)
     def handle_selection_changed(self, event: Select.Changed):
         """
@@ -88,8 +88,8 @@ class FileSelect(Static):
         """
         get_logger().debug(f"Updating sessions to {sessions}")
 
-        opts: list[tuple[str, Path]] = [
-            (s.name if isinstance(s, Path) else s, Path(s)) for s in sessions
+        opts: list[tuple[str, Path | str]] = [
+            (s.name if isinstance(s, Path) else s, s) for s in sessions
         ]
         session_select: SessionSelect = self.query_one(SessionSelect)
         session_select.set_options(opts)
