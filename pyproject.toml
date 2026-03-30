@@ -43,6 +43,9 @@ dev = [
 
 [tool.pytest.ini_options]
 addopts = "-v --tb=short --cov=runconf_ui --cov=src/runconf_ui tests/"  # omitted --cov-report=html to avoid suppressing table to stdout
+markers = [
+    "slow: mark a test that takes a long time to run.",
+]
 
 [tool.coverage.run]
 source = ["runconf_ui"]
