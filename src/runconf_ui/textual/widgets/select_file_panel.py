@@ -137,5 +137,5 @@ class FileSelect(Static):
 
     def _select_enabled(self, select: Select) -> bool:
         v = select.value
-        
+
         return (v is not None) and (not isinstance(v, NoSelection))

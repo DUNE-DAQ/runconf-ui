@@ -1,4 +1,5 @@
 # logger.py
+import logging
 from pathlib import Path
 from typing import Literal
 
@@ -10,6 +11,7 @@ LogLevels = Literal["INFO", "DEBUG", "WARNING"]
 
 _LOGGER_NAME = "runconf_ui_logger"
 _LOGGER = None
+
 
 def init_logger(log_file: Path, log_level: LogLevels = "INFO"):
     global _LOGGER
@@ -26,6 +28,12 @@ def init_logger(log_file: Path, log_level: LogLevels = "INFO"):
         file_handler_path=str(log_file),
     )
     _LOGGER.propagate = False  # belt-and-braces
+
+    # Redirect root logger to the same file handler, suppressing console output
+    root_logger = logging.getLogger()
+    root_logger.handlers.clear()
+    root_logger.addHandler(_LOGGER.handlers[0])
+    root_logger.setLevel(logging.DEBUG)
 
 
 def get_logger():
