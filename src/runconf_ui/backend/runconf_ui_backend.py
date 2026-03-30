@@ -119,9 +119,9 @@ class _SessionManager:
         if self._selected_session is None:
             raise RunConfToolsRepoException("No session selected!")
 
-        if self._selected_session not in self.get_sessions():
+        if str(self._selected_session) not in self.get_sessions():
             raise RunConfToolsRepoException(
-                f"Cannot find session {self._selected_session}"
+                f"Cannot find session {self._selected_session} in {self.get_sessions()}"
             )
 
         init_config_path = self.repo_manager.select_config(self._selected_session)  # type: ignore
@@ -222,6 +222,7 @@ class RunconfUIBackend:
         )
 
         if self.config_session is None:
+            self._logger.error("Config session not found in configuration")
             raise RunConfToolsRepoException("Config session not found in configuration")
 
         self._logger.debug("Rendering trees")

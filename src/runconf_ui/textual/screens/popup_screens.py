@@ -142,3 +142,20 @@ class CreateScreen(ButtonPopup):
             info_str="Quit Runconf-UI?",
             css_classes="pop_up quit_pop_up_grid",
         )
+
+
+class ExceptionScreen(ButtonPopup):
+    def __init__(self, error_msg: str):
+        get_logger().debug("initialising exception screen")
+        super().__init__(
+            buttons=[
+                ButtonTemplate.make(
+                    "OK",
+                    "primary",
+                    "ok_button",
+                    CancelQuitMessage(),
+                ),
+            ],
+            info_str=error_msg,
+            css_classes="pop_up exception_pop_up_grid",
+        )

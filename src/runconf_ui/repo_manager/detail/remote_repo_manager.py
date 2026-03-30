@@ -29,9 +29,6 @@ class RemoteRepoManager(RepoManagerInterface):
                 f"Operation URL ({operation_url}) or Base URL ({base_url}) not set"
             )
 
-        self._check_access(base_url)
-        self._check_access(operation_url)
-
         self.conf_directory.mkdir(parents=True, exist_ok=True)
         self.conf_pool = ConfPool(
             str(self.conf_directory), apparatus, operation_url, base_url
@@ -80,15 +77,7 @@ class RemoteRepoManager(RepoManagerInterface):
         # Check session
         if not check_config_has_session(file_path):
             raise ConfigBrokenInRepoException(
-                f"{file_path} does not contain a session {self.daq_version}"
+                f"{file_path} does not contain a session!"
             )
 
         return file_path
-
-    @classmethod
-    def _check_access(cls, url: str):
-        ...
-        # os.environ["GIT_SSH_COMMAND"] = "ssh -o BatchMode=yes"
-        # g = Git()
-        # g.ls_remote(url)
-        # get_logger().info(f"Repo {url} is accessible")

@@ -42,8 +42,8 @@ def check_config_has_session(config_path: Path) -> bool:
     """Return True if the configuration at the given path contains at least one Session."""
     try:
         conf = open_configuration(config_path)
-    except (FileNotFoundError, ConfigReadException):
-        return False
+    except Exception as e:
+        raise ConfigReadException(f"Cannot read configuration at {config_path}") from e
 
     has_session = get_number_of_sessions(conf) > 0
     conf.unload()

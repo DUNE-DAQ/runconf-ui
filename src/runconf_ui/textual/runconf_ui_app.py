@@ -11,7 +11,13 @@ from textual.css.query import DOMQuery
 
 from runconf_ui.backend import RunconfUIBackend
 from runconf_ui.textual import messages as runconf_msg
-from runconf_ui.textual.screens import CreateScreen, HelpScreen, MainScreen, QuitScreen
+from runconf_ui.textual.screens import (
+    CreateScreen,
+    ExceptionScreen,
+    HelpScreen,
+    MainScreen,
+    QuitScreen,
+)
 from runconf_ui.textual.screens.popup_screens import LoadingScreen
 from runconf_ui.textual.widgets import (
     AdjustableAttributeTabs,
@@ -96,18 +102,20 @@ class RunconfUIApp(App):
 
     @work(thread=True)
     def _load_config_worker(self) -> None:
-        self.backend.open_selected_session()
-        self.app.call_from_thread(self._on_config_loaded)
+        try:
+            self.backend.open_selected_session()
+            self.app.call_from_thread(self._on_config_loaded)
+        except Exception as e:
+            self.app.call_from_thread(self._on_config_failed_popup, e)
 
     def _on_config_loaded(self) -> None:
         self.pop_screen()
         self._refresh_enabled_info(load_fresh=True)
         self.refresh()
 
-    def _on_config_failed(self, error_msg: str) -> None:
-        self.pop_screen()
-        get_logger().error("Config Load failed")
-        self.notify(error_msg, title="Config Load Failed", severity="error", timeout=30)
+    def _on_config_failed_popup(self, e: Exception) -> None:
+        self.pop_screen()  # dismiss the loading screen first
+        self.handle_exception_popup(e)
 
     # ------------------------------------------------------------------ #
     # Quit / create / help handlers                                        #
@@ -123,7 +131,10 @@ class RunconfUIApp(App):
 
     @on(runconf_msg.QuitAndSaveMessage)
     def handle_quit_save(self):
-        self.backend.save_config()
+        try:
+            self.backend.save_config()
+        except Exception as e:
+            self.handle_exception_popup(e)
         self.exit()
 
     @on(runconf_msg.QuitAndScrapMessage)
@@ -137,6 +148,10 @@ class RunconfUIApp(App):
     @on(runconf_msg.OpenHelpMenuMessage)
     def handle_help(self):
         self.push_screen("help")
+
+    def handle_exception_popup(self, exception: Exception) -> None:
+        get_logger().error(f"Error during operation: {exception}")
+        self.push_screen(ExceptionScreen(str(exception)))
 
     # ------------------------------------------------------------------ #
     # Node toggle handler                                                  #
