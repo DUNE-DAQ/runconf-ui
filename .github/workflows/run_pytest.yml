@@ -8,6 +8,10 @@ on:
   schedule:
     - cron: '0 0 * * 0-4'  # Every Sunday at midnight UTC
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 
 permissions:
   checks: write
@@ -26,6 +30,8 @@ jobs:
       image: ghcr.io/dune-daq/nightly-release-alma9:development_v5
 
     steps:
+      - uses: actions/checkout@v5
+
       - name: Set up dev nightly
         if: ${{ !cancelled() }}
         run: |
@@ -44,37 +50,16 @@ jobs:
         run: |
           cd nightly/NFD_DEV* || true
           source env.sh
+          cd ../..
           python -m pip install --upgrade pip
-          cd pythoncode
-          echo "Cloning runconf-ui"
-          git clone https://github.com/${{ github.repository }}.git -b ${{ github.ref_name }}
-          echo "Entering runconf-ui"
-          cd runconf-ui
-          echo "Installing"
-          pip install .[test]
-          echo "RUNCONF_UI_DIR=$(pwd)" >> $GITHUB_ENV
+          python -m pip install .
+
 
       - name: Test with pytest/pytest-cov
         if: success()
         run: |
           cd nightly/NFD_DEV* || true
           source env.sh
-          cd pythoncode/runconf-ui || true
+          cd ../..
           pip install pytest pytest-cov pytest-asyncio
-          pytest --junitxml=junit/test-results.xml --cov-report=html
-
-      - name: Publish JUnit test report
-        uses: mikepenz/action-junit-report@v5
-        if: ${{ !cancelled() }}
-        with:
-          report_paths: '${{ env.RUNCONF_UI_DIR }}/junit/test-results.xml'
-
-
-      - name: Upload coverage report (HTML)
-        if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: html-coverage-report
-          path: ${{ env.RUNCONF_UI_DIR }}/htmlcov/
-          if-no-files-found: error
-          retention-days: 7
+          pytest --junitxml=junit/test-results.xml  --cov-report=xml --cov-report=term-missing

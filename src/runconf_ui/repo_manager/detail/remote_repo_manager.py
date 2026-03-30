@@ -11,7 +11,7 @@ from runconf_ui.exceptions import (
     RunConfToolsRepoException,
 )
 from runconf_ui.repo_manager.repo_manager_interface import RepoManagerInterface
-from runconf_ui.utils import check_config_has_session
+from runconf_ui.utils import check_config_has_session, get_logger
 
 
 class RemoteRepoManager(RepoManagerInterface):
@@ -87,6 +87,10 @@ class RemoteRepoManager(RepoManagerInterface):
         """
         if self.daq_version is None:
             raise DaqVersionException("No DAQ release selected")
+
+        get_logger().info(
+            "Checking out config %s for DAQ version %s", conf, self.daq_version
+        )
 
         self.conf_pool.checkout_conf(conf, self.daq_version)  # type: ignore
 

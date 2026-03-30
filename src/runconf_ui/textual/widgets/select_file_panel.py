@@ -119,11 +119,11 @@ class FileSelect(Static):
         """
         get_logger().debug(f"Updating sessions to {sessions}")
 
-        opts: list[tuple[str, Path]] = [
-            (s.name if isinstance(s, Path) else s, Path(s)) for s in sessions
+        opts: list[tuple[str, Path | str]] = [
+            (s.name if isinstance(s, Path) else s, s) for s in sessions
         ]
         session_select: SessionSelect = self.query_one(SessionSelect)
-        session_select.set_options(opts)
+        session_select.set_options(opts)  # type: ignore
 
     def enable_session_select(self):
         """Enable or disable the session selector based on version selection.
@@ -186,4 +186,5 @@ class FileSelect(Static):
         :rtype: bool
         """
         v = select.value
+
         return (v is not None) and (not isinstance(v, NoSelection))

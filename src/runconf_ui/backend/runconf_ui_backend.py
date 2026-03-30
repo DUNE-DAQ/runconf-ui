@@ -95,7 +95,12 @@ class _SessionManager:
                 context.base_url,
             )
 
-        buffer_id = os.environ.get("SESSION_NAME", os.getlogin())
+        try:
+            backup = os.getlogin()
+        except OSError:
+            backup = "unknown_user"
+
+        buffer_id = os.environ.get("SESSION_NAME", backup)
         self._logger.debug(f"Buffer ID is {buffer_id}")
 
         self._config_buffer_path = Path(f"/tmp/shifter_configs-{buffer_id}")
