@@ -83,14 +83,20 @@ class NodeStatus:
         return self.node.tooltip
 
     def toggle(self) -> None:
-        """Flip the node's state. No-op if the node is not interactive."""
+        """Flip the node's state. No-op if the node is not interactive.
+
+        Only works when is_interactive is True (not PARENT_DISABLED).
+        """
         self.node.set(not self.node.get())
         get_logger().debug(f"Toggling {self.label}")
 
         self.refresh_state()
 
     def refresh_state(self) -> None:
-        """Recompute state in place from live adapter values."""
+        """Recompute state in place from live adapter values.
+
+        Updates the state attribute based on current node and parent values.
+        """
         self.state = compute_state(self.node, self.parent)
         get_logger().debug(f"{self.label} now in state {self.state}")
 
@@ -101,14 +107,18 @@ class NodeStatus:
 
 
 def compute_state(node: Node, parent: Group | None) -> State:
-    """
-    Compute the visible state of a node.
+    """Compute the visible state of a node.
 
     Precedence (highest first):
       1. Parent gating — if the parent group is off, always PARENT_DISABLED.
       2. DAL resource state — if the underlying DAL is resource-disabled,
          PARENT_DISABLED (only checked for Leaf nodes).
       3. Node internal value — ENABLED or DISABLED.
+
+    :param node: The node to compute state for
+    :param parent: The parent group, if any
+    :returns: The computed state
+    :rtype: State
     """
     # 1. Parent gating takes precedence over everything.
     if parent is not None and not parent.get():
@@ -131,12 +141,17 @@ def compute_state(node: Node, parent: Group | None) -> State:
 
 
 def walk(root: Node, parent: Group | None = None, _ancestor_disabled: bool = False):
-    """
-    Depth-first traversal of the node tree, yielding NodeStatus for every node.
+    """Depth-first traversal of the node tree, yielding NodeStatus for every node.
 
+    Yields NodeStatus objects containing the state of each node in the tree.
     _ancestor_disabled is an internal parameter used during recursion to
     propagate PARENT_DISABLED down through the tree when an ancestor is off.
-    It should not be passed by external callers.
+
+    :param root: The root node to start traversal from
+    :param parent: The parent group (internal use)
+    :param _ancestor_disabled: Whether an ancestor is disabled (internal use)
+    :returns: Iterator of NodeStatus objects
+    :rtype: Iterator[NodeStatus]
     """
     state = compute_state(root, parent if not _ancestor_disabled else None)
     if _ancestor_disabled:
@@ -157,16 +172,25 @@ def walk(root: Node, parent: Group | None = None, _ancestor_disabled: bool = Fal
 
 
 def labelled(root: Node) -> Iterator[NodeStatus]:
-    """Yields NodeStatus for all nodes with non-empty labels."""
+    """Yield NodeStatus for all nodes with non-empty labels.
+
+    :param root: The root node to traverse
+    :returns: Iterator of NodeStatus for labelled nodes only
+    :rtype: Iterator[NodeStatus]
+    """
     for status in walk(root):
         if status.node.label:
             yield status
 
 
 def disabled_child_nodes(group: Group) -> list[Node]:
-    """
-    Returns the voting children that are causing this group to be disabled.
-    Useful for diagnostic tooltips: "TPC is off because CRP4 is off."
+    """Get voting children that are causing the group to be disabled.
+
+    Useful for diagnostic tooltips like "TPC is off because CRP4 is off."
+
+    :param group: The group to check
+    :returns: List of disabled voting child nodes
+    :rtype: list[Node]
     """
     return [n for n in group.voting_children if not n.get()]
 
@@ -177,12 +201,15 @@ def disabled_child_nodes(group: Group) -> list[Node]:
 
 
 def build_index(root: Node) -> dict[str, Node]:
-    """
-    Build a flat label->node mapping for O(1) lookup by label.
-    Raises ValueError on duplicate labels.
+    """Build a flat label->node mapping for O(1) lookup by label.
 
-    Call once after tree construction. Rebuild by calling again if the
-    tree structure changes (only happens at startup).
+    Raises ValueError on duplicate labels. Call once after tree construction.
+    Rebuild by calling again if the tree structure changes.
+
+    :param root: The root node to index
+    :returns: Dictionary mapping node labels to node objects
+    :rtype: dict[str, Node]
+    :raises ValueError: If duplicate labels are found in the tree
     """
     index: dict[str, Node] = {}
 

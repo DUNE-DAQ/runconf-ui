@@ -14,17 +14,20 @@ TDisableAttributeData = TypeVar("TDisableAttributeData", bound=DisableAttributeD
 
 
 class AttributeFactory(FactoryBase[TDisableAttributeData, "Group | None"]):
-    """
+    """Creates a Group node containing Leaf nodes for disable attributes.
+
     Creates a Group node (strategy=any) containing one Leaf per matching DAL.
     OR semantics: the attribute group is considered enabled if any DAL has
     the attribute enabled.
-
-    Each Leaf's tooltip is resolved from the DAL at construction time:
-    getattr(dal, data.tooltip, dal.id) when data.tooltip names a DAL attribute,
-    otherwise dal.id. The Group itself has no single DAL so carries no tooltip.
     """
 
     def create(self, data: TDisableAttributeData) -> Group | None:
+        """Create attribute group from configuration data.
+
+        :param data: DisableAttributeData specifying the attributes to create
+        :returns: Group containing Leaf nodes, or None if no matching DALs
+        :rtype: Group | None
+        """
         dal_list = get_class_from_segment_list(
             self.configuration,
             data.segments,

@@ -13,7 +13,14 @@ _logger = None
 
 
 def init_logger(log_file: Path, log_level: LogLevels = "INFO"):
-    """Call once at application startup."""
+    """Initialize the global logger for the application.
+
+    Call once at application startup. Creates a DAQ logger with file and stream handlers.
+    Subsequent calls are no-ops if logger is already initialized.
+
+    :param log_file: Path to the log file to write to
+    :param log_level: Log level (INFO, DEBUG, WARNING)
+    """
     global _logger
     if _logger is not None:
         return
@@ -30,6 +37,11 @@ def init_logger(log_file: Path, log_level: LogLevels = "INFO"):
 
 
 def get_logger():
+    """Get the global logger instance.
+
+    :returns: The initialized logger instance
+    :raises LoggerNotFound: If logger has not been initialized
+    """
     if _logger is None:
         raise LoggerNotFound("cannot find logger!")
 

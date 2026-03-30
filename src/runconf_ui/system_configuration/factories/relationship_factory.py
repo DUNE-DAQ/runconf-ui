@@ -11,12 +11,19 @@ from .attribute_factory import (
 
 
 class RelationshipFactory(AttributeFactory[DisableRelationshipData]):
-    """
+    """Creates Group nodes for disable relationships.
+
     Creates the same Group structure as AttributeFactory but first resolves
     enabled_state and disabled_state strings to DAL objects.
     """
 
     def create(self, data: DisableRelationshipData) -> Group | None:
+        """Create relationship group from configuration data.
+
+        :param data: DisableRelationshipData specifying the relationships
+        :returns: Group containing Leaf nodes, or None if unable to resolve states
+        :rtype: Group | None
+        """
         data = copy(data)
 
         enabled = self._resolve_state(data.enabled_state, data.relationship_class)
@@ -35,6 +42,13 @@ class RelationshipFactory(AttributeFactory[DisableRelationshipData]):
         state_id: str | list[str],
         state_class: str,
     ) -> DalBase | list[DalBase] | None:
+        """Resolve enabled/disabled state identifiers to DAL objects.
+
+        :param state_id: State identifier (string, list of strings, or empty)
+        :param state_class: The DAL class to resolve into
+        :returns: Resolved DAL object(s), or None if resolution fails
+        :rtype: DalBase | list[DalBase] | None
+        """
         if not state_id:
             return []
 

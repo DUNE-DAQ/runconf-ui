@@ -6,12 +6,22 @@ from textual.widgets import Button, Static
 
 
 class HelpScreen(Screen):
-    """Help Screen pop up."""
+    """Pop-up help screen displaying usage instructions for the application.
+
+    Shows detailed help text explaining how to use the configuration UI,
+    including instructions for version selection, session management, and
+    configuration modification.
+    """
 
     def __init__(self):
+        """Initialize HelpScreen with pop-up styling."""
         super().__init__(classes="pop_up_screen")
 
     def compose(self):
+        """Compose the help screen with scrollable content and close button.
+
+        :returns: A generator yielding screen content widgets
+        """
         with ScrollableContainer(classes="pop_up scrollable_popup"):
             yield Static(
                 self.message(),
@@ -21,6 +31,11 @@ class HelpScreen(Screen):
         yield Button("Close", id="close_help_screen", classes="help_up_button")
 
     def message(self):
+        """Generate the help message text.
+
+        :returns: Formatted help text with Rich markup
+        :rtype: str
+        """
         return dedent("""\
             [bold]Hello and welcome to Runconf-shifter UI!![/bold]
             To get started, please select the following from dropdown menus:
@@ -62,5 +77,11 @@ class HelpScreen(Screen):
         """)
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
+        """
+        Handle button press events to close the help screen.
+
+        :param event: The Button.Pressed event
+        """
+
         if event.button.id == "close_help_screen":
             self.app.pop_screen()

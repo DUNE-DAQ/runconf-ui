@@ -60,6 +60,11 @@ class DisableSystemBuilder:
     """
 
     def __init__(self, configuration: Configuration, session: DalBase):
+        """Initialize DisableSystemBuilder.
+
+        :param configuration: The conffwk Configuration object
+        :param session: The session DAL object
+        """
         get_logger().debug("Initialising DisableSystemBuilder")
         args = (configuration, session)
         self.component_factory = ComponentFactory(*args)
@@ -70,6 +75,13 @@ class DisableSystemBuilder:
         get_logger().debug("   - relationship_factory intiialised")
 
     def build(self, system: DisableableSystemData, label: str) -> Group:
+        """Build a Group tree from system data.
+
+        :param system: The system definition to build from
+        :param label: Label for the root group
+        :returns: The constructed Group tree
+        :rtype: Group
+        """
         root_strategy = any if system.subsystem_dependent else all
         root = Group(label=label, strategy=root_strategy)
 
@@ -101,6 +113,12 @@ class DisableSystemBuilder:
         comp: DisableElementData,
         subsystem_dependent: bool,
     ) -> None:
+        """Add component nodes to the root group.
+
+        :param root: The root group to add components to
+        :param comp: The component element data
+        :param subsystem_dependent: Whether the system is subsystem dependent
+        """
         nodes = self.component_factory.create(comp)
         if not nodes:
             return
@@ -131,6 +149,12 @@ class DisableSystemBuilder:
         attr: DisableAttributeData,
         subsystem_dependent: bool,
     ) -> None:
+        """Add attribute nodes to the root group.
+
+        :param root: The root group to add attributes to
+        :param attr: The attribute element data
+        :param subsystem_dependent: Whether the system is subsystem dependent
+        """
         node = self.attribute_factory.create(attr)
         if node is None:
             return
@@ -149,6 +173,12 @@ class DisableSystemBuilder:
         rel: DisableRelationshipData,
         subsystem_dependent: bool,
     ) -> None:
+        """Add relationship nodes to the root group.
+
+        :param root: The root group to add relationships to
+        :param rel: The relationship element data
+        :param subsystem_dependent: Whether the system is subsystem dependent
+        """
         node = self.relationship_factory.create(rel)
         if node is None:
             return
@@ -179,11 +209,23 @@ class AdjustableSystemBuilder:
     """
 
     def __init__(self, configuration: Configuration, session: DalBase):
+        """Initialize AdjustableSystemBuilder.
+
+        :param configuration: The conffwk Configuration object
+        :param session: The session DAL object
+        """
         get_logger().debug("Initialising AdjustableSystemBuilder")
 
         self.factory = AdjustableFactory(configuration, session)
 
     def build(self, attributes: list[AdjustableAttributeData], label: str) -> Group:
+        """Build a Group tree from adjustable attribute data.
+
+        :param attributes: List of adjustable attribute definitions
+        :param label: Label for the root group
+        :returns: The constructed Group tree
+        :rtype: Group
+        """
         root = Group(label=label, strategy=all)
         get_logger().debug("Building adjustable attributes")
 
