@@ -37,12 +37,7 @@ class VersionSelect(Select[str]):
         self.post_message(DaqVersionSelectedMessage(daq_version=selected_version))
 
 
-class SessionSelect(Select[Path]):
-    """Select widget for choosing a DAQ session.
-
-    Emits DaqSessionSelectedMessage when the selection changes.
-    """
-
+class SessionSelect(Select[Path | str]):
     @on(Select.Changed)
     def handle_selection_changed(self, event: Select.Changed):
         """Handle DAQ session selection changes.

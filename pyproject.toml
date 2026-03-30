@@ -38,7 +38,8 @@ dev = [
     "pytest-cov",
     "pytest-asyncio",
     "pre-commit",
-    "mypy"
+    "mypy",
+    "types-PyYAML"
 ]
 
 [tool.pytest.ini_options]
