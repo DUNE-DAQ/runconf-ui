@@ -50,7 +50,7 @@ jobs:
         run: |
           cd nightly/NFD_DEV* || true
           source env.sh
-          cd ..
+          cd ../..
           python -m pip install --upgrade pip
           python -m pip install .
 
@@ -60,7 +60,7 @@ jobs:
         run: |
           cd nightly/NFD_DEV* || true
           source env.sh
-          cd ..
+          cd ../..
           pip install pytest pytest-cov pytest-asyncio
           pytest --junitxml=junit/test-results.xml --cov-report=html
 
