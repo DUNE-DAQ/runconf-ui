@@ -3,7 +3,8 @@ name: Run pytest
 on:
   pull_request:
     branches:
-      - main
+      - develop
+      - patch/*
   schedule:
     - cron: '0 0 * * 0-4'  # Every Sunday at midnight UTC
 
