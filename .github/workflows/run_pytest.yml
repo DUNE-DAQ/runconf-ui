@@ -51,7 +51,7 @@ jobs:
           echo "Entering runconf-ui"
           cd runconf-ui
           echo "Installing"
-          pip install .[test]
+          pip install .[dev]
           echo "RUNCONF_UI_DIR=$(pwd)" >> $GITHUB_ENV
 
       - name: Test with pytest/pytest-cov
