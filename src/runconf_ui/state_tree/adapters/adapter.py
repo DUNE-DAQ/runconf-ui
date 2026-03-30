@@ -23,7 +23,6 @@ class Adapter(ABC):
     @abstractmethod
     def set(self, value: Any) -> None: ...
 
-
     def dal_enabled(self) -> bool:
         """
         Whether the underlying DAL is enabled as a resource in the session.
@@ -33,5 +32,6 @@ class Adapter(ABC):
         it is a secondary check — the DAL may be resource-disabled independently
         of the attribute value or the tree structure.
         """
-        return not component_disabled(self.configuration._obj, self.session.id, self.dal.id)
-
+        return not component_disabled(
+            self.configuration._obj, self.session.id, self.dal.id
+        )

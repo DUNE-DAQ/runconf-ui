@@ -4,7 +4,7 @@ from ..dataclasses import DisableElementData
 from .factory_base import FactoryBase
 
 
-class ComponentFactory(FactoryBase):
+class ComponentFactory(FactoryBase["DisableElementData", "list[Leaf] | None"]):
     """
     Creates Leaf nodes from DisableElementData (component entries in YAML).
     Returns a list because one config entry can expand to many components

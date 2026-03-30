@@ -6,10 +6,9 @@ See issue # for details
 _Otherwise, please include a summary of the change and which issue is fixed (if any).
 Include relevant motivation and context, including a target environment and dunedaq version if known.
 Also list any dependencies that are required for this change._
-Addresses issue # 
+Addresses issue #
 
 _Please also include instructions for how a reviewer can test your changes._
-
 
 ## Type of change
 
@@ -35,4 +34,3 @@ _Comments here on the testing_
 - [ ] Code style is correct (`dbt-build --lint`, and/or see https://dune-daq-sw.readthedocs.io/en/latest/packages/styleguide/)
 - [ ] If applicable, new tests have been added or an issue has been opened to tackle that in the future.
   (Indicate issue here: # (issue))
-

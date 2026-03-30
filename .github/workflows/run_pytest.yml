@@ -2,6 +2,11 @@ name: Run pytest
 
 on:
   pull_request:
+    branches:
+      - main
+  schedule:
+    - cron: '0 0 * * 0-4'  # Every Sunday at midnight UTC
+
 
 permissions:
   checks: write

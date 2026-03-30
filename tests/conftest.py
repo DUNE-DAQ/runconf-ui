@@ -13,12 +13,12 @@ import pytest
 from daqconf.consolidate import consolidate_db
 
 from runconf_ui.utils import open_configuration
-from runconf_ui.utils import init_logger
 
 
 @pytest.fixture(scope="session")
 def session_name():
     return "local-1x1-config"
+
 
 @pytest.fixture(scope="session")
 def config_path() -> Path:
@@ -48,8 +48,7 @@ def consolidated_session(consolidated_config, session_name):
 @pytest.fixture(scope="session")
 def system_config(tmp_config_path):
     initial = Path(__file__).parent / "test_files" / "dummy.yml"
-    dest    = tmp_config_path.parent / "runconf-ui-settings" / "dummy.yml"
+    dest = tmp_config_path.parent / "runconf-ui-settings" / "dummy.yml"
     dest.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy(initial, dest)
     return dest
-

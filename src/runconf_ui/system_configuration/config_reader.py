@@ -31,10 +31,10 @@ from .dataclasses import (
 # Utility functions
 # ---------------------------------------------------------------------------
 
+
 def _natural_key(s: str):
     return [
-        int(text) if text.isdigit() else text.lower()
-        for text in re.split(r'(\d+)', s)
+        int(text) if text.isdigit() else text.lower() for text in re.split(r"(\d+)", s)
     ]
 
 
@@ -50,13 +50,14 @@ def _node_sort_key(item: tuple[str, NodeStatus]):
 # Output dataclasses
 # ---------------------------------------------------------------------------
 
+
 @dataclass()
 class AssembledSystem:
-    root:                Group
+    root: Group
     display_full_system: bool
 
     def __post_init__(self):
-        self.nodes: dict[str, NodeStatus] = {
+        self.nodes = {
             status.path: status
             for status in walk(self.root)
             if status.path is not None
@@ -67,13 +68,13 @@ class AssembledSystem:
 
 @dataclass()
 class AssembledGroup:
-    id:         str
-    label:      str
-    systems:    list[AssembledSystem]
+    id: str
+    label: str
+    systems: list[AssembledSystem]
     view_panel: str = ""
 
     def __post_init__(self):
-        self.nodes: dict[str, NodeStatus] = {}
+        self.nodes = {}
         for system in self.systems:
             self.nodes.update(system.nodes)
 
@@ -81,16 +82,14 @@ class AssembledGroup:
 @dataclass
 class AssembledConfig:
     disableable: list[AssembledGroup]
-    adjustable:  list[AssembledGroup]
+    adjustable: list[AssembledGroup]
 
     def __post_init__(self):
         self.disableable_nodes = {
-            group.id: self._sorted_nodes(group.nodes)
-            for group in self.disableable
+            group.id: self._sorted_nodes(group.nodes) for group in self.disableable
         }
         self.adjustable_nodes = {
-            group.id: self._sorted_nodes(group.nodes)
-            for group in self.adjustable
+            group.id: self._sorted_nodes(group.nodes) for group in self.adjustable
         }
         self.all_nodes = {**self.adjustable_nodes, **self.disableable_nodes}
 
@@ -102,6 +101,7 @@ class AssembledConfig:
 # SystemConfig
 # ---------------------------------------------------------------------------
 
+
 class SystemConfig:
     """Loads a YAML file and exposes structured dataclass skeletons."""
 
@@ -109,11 +109,11 @@ class SystemConfig:
         self.path = path
         raw = self._load(path)
 
-        self._settings    = YamlToSystemData.build_settings(raw)
+        self._settings = YamlToSystemData.build_settings(raw)
         self._disableable = YamlToSystemData.build_disableable_groups(
             raw.get("PanelOptions", {})
         )
-        self._adjustable  = YamlToSystemData.build_adjustable_groups(
+        self._adjustable = YamlToSystemData.build_adjustable_groups(
             raw.get("AdjustableAttributes", {})
         )
 
@@ -139,6 +139,7 @@ class SystemConfig:
 # ConfigAssembler
 # ---------------------------------------------------------------------------
 
+
 class ConfigAssembler:
     """Turns YAML skeletons into Group trees via the system builders."""
 
@@ -161,20 +162,24 @@ class ConfigAssembler:
                     root = builder.build(system_data, label=system_name)
                     if not root.children:
                         continue
-                    systems.append(AssembledSystem(
-                        root=root,
-                        display_full_system=system_data.display_full_system,
-                    ))
+                    systems.append(
+                        AssembledSystem(
+                            root=root,
+                            display_full_system=system_data.display_full_system,
+                        )
+                    )
 
             if not systems:
                 continue
 
-            assembled_groups.append(AssembledGroup(
-                id=group_name,
-                label=group_data.label or group_name,
-                view_panel=group_data.view_panel,
-                systems=systems,
-            ))
+            assembled_groups.append(
+                AssembledGroup(
+                    id=group_name,
+                    label=group_data.label or group_name,
+                    view_panel=group_data.view_panel,
+                    systems=systems,
+                )
+            )
 
         return assembled_groups
 
@@ -191,20 +196,24 @@ class ConfigAssembler:
                 root = builder.build(attrs, label=system_name)
                 if not root.children:
                     continue
-                systems.append(AssembledSystem(
-                    root=root,
-                    display_full_system=False,
-                ))
+                systems.append(
+                    AssembledSystem(
+                        root=root,
+                        display_full_system=False,
+                    )
+                )
 
             if not systems:
                 continue
 
-            assembled_groups.append(AssembledGroup(
-                id=group_name,
-                label=group_data.label or group_name,
-                view_panel="",
-                systems=systems,
-            ))
+            assembled_groups.append(
+                AssembledGroup(
+                    id=group_name,
+                    label=group_data.label or group_name,
+                    view_panel="",
+                    systems=systems,
+                )
+            )
 
         return assembled_groups
 
@@ -212,6 +221,7 @@ class ConfigAssembler:
 # ---------------------------------------------------------------------------
 # SystemConfigReader
 # ---------------------------------------------------------------------------
+
 
 class SystemConfigReader:
     """
@@ -234,10 +244,12 @@ class SystemConfigReader:
         session_name: str,
     ) -> AssembledConfig:
 
-        session   = configuration.get_dal("Session", session_name)
+        session = configuration.get_dal("Session", session_name)
         assembler = ConfigAssembler(configuration, session)
-        get_logger().info(f"Assembling: {session_name} in {repr(configuration)}")
+        get_logger().info(f"Assembling: {session_name} in {configuration!r}")
         return AssembledConfig(
-            disableable=assembler.assemble_disableable(self.config.disableable_skeleton),
+            disableable=assembler.assemble_disableable(
+                self.config.disableable_skeleton
+            ),
             adjustable=assembler.assemble_adjustable(self.config.adjustable_skeleton),
         )

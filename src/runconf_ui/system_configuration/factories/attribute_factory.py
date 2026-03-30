@@ -1,3 +1,5 @@
+from typing import TypeVar
+
 from runconf_ui.state_tree import (
     DisableAttribute,
     Group,
@@ -8,8 +10,10 @@ from runconf_ui.utils import get_class_from_segment_list
 from ..dataclasses import DisableAttributeData
 from .factory_base import FactoryBase
 
+TDisableAttributeData = TypeVar("TDisableAttributeData", bound=DisableAttributeData)
 
-class AttributeFactory(FactoryBase):
+
+class AttributeFactory(FactoryBase[TDisableAttributeData, "Group | None"]):
     """
     Creates a Group node (strategy=any) containing one Leaf per matching DAL.
     OR semantics: the attribute group is considered enabled if any DAL has
@@ -20,7 +24,7 @@ class AttributeFactory(FactoryBase):
     otherwise dal.id. The Group itself has no single DAL so carries no tooltip.
     """
 
-    def create(self, data: DisableAttributeData) -> Group | None:
+    def create(self, data: TDisableAttributeData) -> Group | None:
         dal_list = get_class_from_segment_list(
             self.configuration,
             data.segments,
@@ -42,7 +46,9 @@ class AttributeFactory(FactoryBase):
                             data.enabled_state,
                             data.disabled_state,
                         ),
-                        tooltip=getattr(dal, data.tooltip, dal.id) if data.tooltip else dal.id,
+                        tooltip=getattr(dal, data.tooltip, dal.id)
+                        if data.tooltip
+                        else dal.id,
                     )
                 )
 

@@ -5,7 +5,7 @@ from runconf_ui.repo_manager.repo_manager_interface import RepoManagerInterface
 from runconf_ui.utils import get_configs_with_session
 
 
-class LocalRepoManager(RepoManagerInterface[Path]):
+class LocalRepoManager(RepoManagerInterface):
     def __init__(self, apparatus: str, conf_directory: Path):
         super().__init__(apparatus, conf_directory)
         self._available_versions = [conf_directory]
@@ -31,4 +31,6 @@ class LocalRepoManager(RepoManagerInterface[Path]):
         if match is not None:
             return match
 
-        raise DaqVersionException(f"Session {config} does not exist for {self.daq_version}")
+        raise DaqVersionException(
+            f"Session {config} does not exist for {self.daq_version}"
+        )

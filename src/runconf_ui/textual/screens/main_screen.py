@@ -1,6 +1,7 @@
 """
 Main screen for runconf-shifter-ui.
 """
+
 from textual.containers import Grid
 from textual.screen import Screen  # NOT ModalScreen
 from textual.widgets import Footer, Header, TabbedContent, TabPane
@@ -21,11 +22,17 @@ class MainScreen(Screen):
         with Grid(id="main_container"):
             yield FileSelect(id="file-select-panel")
             with Grid(id="tabbed_content_container"):
-                with TabbedContent("Controls", id="selection_adjust_tabs", classes="content_switcher"):
+                with TabbedContent(
+                    "Controls", id="selection_adjust_tabs", classes="content_switcher"
+                ):
                     with TabPane("Enable/Disable", classes="top_level_tab_pane"):
                         yield EnableDisableTabs(id="selection_tabs")
 
-                with TabbedContent("Schematic Views", id="control_maps_tabs", classes="content_switcher"):
+                with TabbedContent(
+                    "Schematic Views",
+                    id="control_maps_tabs",
+                    classes="content_switcher",
+                ):
                     with TabPane("Configuration", classes="top_level_tab_pane"):
                         yield ConfigTreePanel(id="config_tree_panel")
 

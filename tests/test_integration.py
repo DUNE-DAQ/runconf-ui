@@ -24,6 +24,7 @@ from runconf_ui.system_configuration import SystemConfigReader
 # Tree integration — real DALs, no YAML
 # ---------------------------------------------------------------------------
 
+
 class TestTreeIntegration:
     """
     Manually builds the TPC tree used in the dummy config and verifies
@@ -44,7 +45,9 @@ class TestTreeIntegration:
         return consolidated_config.get_dal("Segment", "ru-segment")
 
     @pytest.fixture
-    def tpc_tree(self, consolidated_config, consolidated_session, ru01, ru02, ru_segment):
+    def tpc_tree(
+        self, consolidated_config, consolidated_session, ru01, ru02, ru_segment
+    ):
         """
         TPC (all):
           CRP4 (any): ru-01  (votes=True)
@@ -52,11 +55,22 @@ class TestTreeIntegration:
           ru-segment          (votes=False, propagate=True)
         """
         for dal in (ru01, ru02, ru_segment):
-            Leaf(DisableComponent(consolidated_config, consolidated_session, dal)).set(True)
+            Leaf(DisableComponent(consolidated_config, consolidated_session, dal)).set(
+                True
+            )
 
-        ru01_leaf = Leaf(DisableComponent(consolidated_config, consolidated_session, ru01), label="ru-01")
-        ru02_leaf = Leaf(DisableComponent(consolidated_config, consolidated_session, ru02), label="ru-02")
-        seg_leaf  = Leaf(DisableComponent(consolidated_config, consolidated_session, ru_segment), label="ru-segment")
+        ru01_leaf = Leaf(
+            DisableComponent(consolidated_config, consolidated_session, ru01),
+            label="ru-01",
+        )
+        ru02_leaf = Leaf(
+            DisableComponent(consolidated_config, consolidated_session, ru02),
+            label="ru-02",
+        )
+        seg_leaf = Leaf(
+            DisableComponent(consolidated_config, consolidated_session, ru_segment),
+            label="ru-segment",
+        )
 
         root = Group("TPC", strategy=all)
         root.at("CRP4").add(ru01_leaf)
@@ -92,15 +106,22 @@ class TestTreeIntegration:
         assert statuses["ru-segment"].state == State.PARENT_DISABLED
 
     def test_build_index_contains_all_labelled(self, tpc_tree):
-        assert set(build_index(tpc_tree).keys()) == {"TPC", "CRP4", "CRP5", "ru-01", "ru-02", "ru-segment"}
+        assert set(build_index(tpc_tree).keys()) == {
+            "TPC",
+            "CRP4",
+            "CRP5",
+            "ru-01",
+            "ru-02",
+            "ru-segment",
+        }
 
 
 # ---------------------------------------------------------------------------
 # SystemConfigReader integration
 # ---------------------------------------------------------------------------
 
-class TestSystemConfigReaderIntegration:
 
+class TestSystemConfigReaderIntegration:
     @pytest.fixture
     def assembled(self, system_config, consolidated_config, session_name):
         reader = SystemConfigReader(system_config)
@@ -131,7 +152,7 @@ class TestSystemConfigReaderIntegration:
 
     def test_adjustable_nodes_unaffected_by_set(self, assembled):
         group = assembled.adjustable[0]
-        root  = group.systems[0].root
+        root = group.systems[0].root
         index = build_index(root)
         rate_node = index["random-tc-generator - trigger_rate_hz"]
         initial = rate_node.get()
@@ -139,7 +160,9 @@ class TestSystemConfigReaderIntegration:
         assert rate_node.get() == initial
 
     def test_disableable_set_changes_state(self, assembled):
-        root = next(g for g in assembled.disableable if g.id == "Detector").systems[0].root
+        root = (
+            next(g for g in assembled.disableable if g.id == "Detector").systems[0].root
+        )
         root.set(False)
         assert root.get() is False
         root.set(True)

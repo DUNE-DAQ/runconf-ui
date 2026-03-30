@@ -7,6 +7,7 @@ from textual.widgets import Button, Static
 
 class HelpScreen(Screen):
     """Help Screen pop up."""
+
     def __init__(self):
         super().__init__(classes="pop_up_screen")
 

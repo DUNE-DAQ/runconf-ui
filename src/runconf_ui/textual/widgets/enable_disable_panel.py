@@ -1,4 +1,3 @@
-
 from textual import on
 from textual.containers import ScrollableContainer
 from textual.widgets import Button
@@ -15,17 +14,16 @@ class EnableDisablePanel(ScrollableContainer):
         super().__init__(*args, **kwargs)
         get_logger().info(f"Initialising enable/disable panel with id {group_id}")
         get_logger().debug(f"Initialising enable/disable panel with nodes {nodes}")
-        
+
         self._group_id = group_id
         self._runconf_nodes = nodes
 
     def compose(self):
-        get_logger().debug(f"Composing enable/disable panel")
+        get_logger().debug("Composing enable/disable panel")
         for node_id, node in self._runconf_nodes.items():
             get_logger().debug(f"   - {node_id} : {node}")
 
-                        
-            cls     = "node_enabled" if node.is_enabled else "node_disabled"
+            cls = "node_enabled" if node.is_enabled else "node_disabled"
             enabled = node.is_interactive
             btn = Button(
                 label=node.node.label,
@@ -39,12 +37,17 @@ class EnableDisablePanel(ScrollableContainer):
 
     @on(Button.Pressed)
     def handle_button_pressed(self, event: Button.Pressed):
-        self.post_message(NodeToggledMessage(group_id=self._group_id, widget_id=event.button.id))
+        if event.button.id is None:
+            return
+
+        self.post_message(
+            NodeToggledMessage(group_id=self._group_id, widget_id=event.button.id)
+        )
 
     def update_buttons(self, nodes: dict[str, NodeStatus]) -> None:
-        get_logger().debug(f"Updating buttons")
+        get_logger().debug("Updating buttons")
 
-        get_logger().debug(f"Updating buttons")
+        get_logger().debug("Updating buttons")
         for node_id, node in nodes.items():
             results = self.query(f"#{node_id}")
             if not results:
@@ -64,7 +67,9 @@ class EnableDisablePanel(ScrollableContainer):
 class EnableDisableTabs(DynamicTabbedContent):
     panel_prefix = "enable_disable_panel"
 
-    def _make_pane_content(self, group_id: str, data: dict[str, NodeStatus], panel_id: str) -> EnableDisablePanel:
+    def _make_pane_content(
+        self, group_id: str, data: dict[str, NodeStatus], panel_id: str
+    ) -> EnableDisablePanel:
         return EnableDisablePanel(group_id, data, id=panel_id)
 
     def _update_panes(self, data: dict) -> None:
@@ -73,13 +78,13 @@ class EnableDisableTabs(DynamicTabbedContent):
             get_logger().debug(f"{group_id}:")
             group_id_safe = textual_safe_id(group_id)
             get_logger().debug(f"    - Safe ID: {group_id_safe}")
-            panel_id      = self._panel_id(group_id_safe)
+            panel_id = self._panel_id(group_id_safe)
             get_logger().debug(f"    - Panel ID: {panel_id}")
             results = self.query(f"#{panel_id}")
             if not results:
-                get_logger().debug(f"    Couldn't find panel, continuing")
+                get_logger().debug("    Couldn't find panel, continuing")
                 continue
             panel = results.first(EnableDisablePanel)
-            get_logger().debug(f"    Found panel")
+            get_logger().debug("    Found panel")
             panel.update_buttons(nodes)
-            get_logger().debug(f"    Panel updated")
+            get_logger().debug("    Panel updated")

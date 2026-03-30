@@ -35,12 +35,10 @@ class DisableAttribute(Adapter):
         self.enabled_value = enabled_value
         self.disabled_value = disabled_value
 
-
     def get(self) -> bool:
         return (
             getattr(self.dal, self.attribute_name) == self.enabled_value
             and self.dal_enabled()
-
         )
 
     def set(self, value: bool) -> None:
@@ -48,6 +46,7 @@ class DisableAttribute(Adapter):
         if getattr(self.dal, self.attribute_name) != new_value:
             setattr(self.dal, self.attribute_name, new_value)
             self.configuration.update_dal(self.dal)
+
 
 class AdjustableAttribute(Adapter):
     """
@@ -76,5 +75,3 @@ class AdjustableAttribute(Adapter):
         if getattr(self.dal, self.attribute_name) != value:
             setattr(self.dal, self.attribute_name, value)
             self.configuration.update_dal(self.dal)
-
-

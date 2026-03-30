@@ -22,9 +22,11 @@ The three states:
 Parent gating is checked first. A node's own internal state is only
 consulted when its parent (if any) is enabled.
 """
+
 from collections.abc import Iterator
 from dataclasses import dataclass
 from enum import Enum, auto
+
 from runconf_ui.utils.logging import get_logger
 
 from .nodes import Group, Leaf, Node
@@ -33,18 +35,21 @@ from .nodes import Group, Leaf, Node
 # State
 # ---------------------------------------------------------------------------
 
+
 class State(Enum):
     """The state of a node."""
-    ENABLED         = auto()
-    DISABLED        = auto()
+
+    ENABLED = auto()
+    DISABLED = auto()
     PARENT_DISABLED = auto()
 
 
 @dataclass
 class NodeStatus:
     """A full node status, carrying the node, its computed state, and its parent."""
-    node:   Node
-    state:  State
+
+    node: Node
+    state: State
     parent: Group | None
 
     @property
@@ -81,7 +86,7 @@ class NodeStatus:
         """Flip the node's state. No-op if the node is not interactive."""
         self.node.set(not self.node.get())
         get_logger().debug(f"Toggling {self.label}")
-        
+
         self.refresh_state()
 
     def refresh_state(self) -> None:
@@ -90,10 +95,10 @@ class NodeStatus:
         get_logger().debug(f"{self.label} now in state {self.state}")
 
 
-
 # ---------------------------------------------------------------------------
 # State computation
 # ---------------------------------------------------------------------------
+
 
 def compute_state(node: Node, parent: Group | None) -> State:
     """
@@ -124,6 +129,7 @@ def compute_state(node: Node, parent: Group | None) -> State:
 # Traversal
 # ---------------------------------------------------------------------------
 
+
 def walk(root: Node, parent: Group | None = None, _ancestor_disabled: bool = False):
     """
     Depth-first traversal of the node tree, yielding NodeStatus for every node.
@@ -140,12 +146,15 @@ def walk(root: Node, parent: Group | None = None, _ancestor_disabled: bool = Fal
     if isinstance(root, Group):
         child_ancestor_disabled = _ancestor_disabled or state == State.PARENT_DISABLED
         for child, _, _ in root:
-            yield from walk(child, parent=root, _ancestor_disabled=child_ancestor_disabled)
+            yield from walk(
+                child, parent=root, _ancestor_disabled=child_ancestor_disabled
+            )
 
 
 # ---------------------------------------------------------------------------
 # Filtered views
 # ---------------------------------------------------------------------------
+
 
 def labelled(root: Node) -> Iterator[NodeStatus]:
     """Yields NodeStatus for all nodes with non-empty labels."""
@@ -165,6 +174,7 @@ def disabled_child_nodes(group: Group) -> list[Node]:
 # ---------------------------------------------------------------------------
 # Index
 # ---------------------------------------------------------------------------
+
 
 def build_index(root: Node) -> dict[str, Node]:
     """

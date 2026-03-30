@@ -10,6 +10,7 @@ from runconf_ui.state_tree import Group, Leaf
 # Stub adapter
 # ---------------------------------------------------------------------------
 
+
 class StubAdapter:
     def __init__(self, value: bool = True):
         self._value = value
@@ -26,15 +27,15 @@ class StubAdapter:
 
 
 def leaf(value: bool = True, label: str = "") -> Leaf:
-    return Leaf(StubAdapter(value), label=label)
+    return Leaf(StubAdapter(value), label=label)  # type: ignore
 
 
 # ---------------------------------------------------------------------------
 # Leaf
 # ---------------------------------------------------------------------------
 
-class TestLeaf:
 
+class TestLeaf:
     def test_get_and_set(self):
         n = leaf(True)
         assert n.get() is True
@@ -49,8 +50,8 @@ class TestLeaf:
 # Group — get() aggregation
 # ---------------------------------------------------------------------------
 
-class TestGroupGet:
 
+class TestGroupGet:
     def test_all_strategy_true_when_all_enabled(self):
         g = Group(strategy=all)
         g.add(leaf(True)).add(leaf(True))
@@ -85,8 +86,8 @@ class TestGroupGet:
 # Group — set() propagation
 # ---------------------------------------------------------------------------
 
-class TestGroupSet:
 
+class TestGroupSet:
     def test_set_propagates_to_voting_and_propagate_true_children(self):
         voting = leaf(True)
         controlled = leaf(True)
@@ -121,8 +122,8 @@ class TestGroupSet:
 # Group — gated_get()
 # ---------------------------------------------------------------------------
 
-class TestGroupGatedGet:
 
+class TestGroupGatedGet:
     def test_returns_false_when_parent_disabled(self):
         child = leaf(True)
         g = Group(strategy=all)
@@ -143,8 +144,8 @@ class TestGroupGatedGet:
 # Group — at() subsystem creation
 # ---------------------------------------------------------------------------
 
-class TestGroupAt:
 
+class TestGroupAt:
     def test_at_creates_and_reuses_subgroup(self):
         root = Group("root", strategy=all)
         sub1 = root.at("CRP4")
@@ -168,8 +169,8 @@ class TestGroupAt:
 # Group — structural accessors
 # ---------------------------------------------------------------------------
 
-class TestGroupStructure:
 
+class TestGroupStructure:
     def test_children_and_voting_children(self):
         g = Group()
         a, b = leaf(), leaf()
@@ -180,7 +181,7 @@ class TestGroupStructure:
     def test_iter_yields_node_votes_propagate(self):
         g = Group()
         a, b, c = leaf(), leaf(), leaf()
-        g.add(a, votes=True,  propagate=True)
+        g.add(a, votes=True, propagate=True)
         g.add(b, votes=False, propagate=True)
         g.add(c, votes=False, propagate=False)
         assert list(g) == [(a, True, True), (b, False, True), (c, False, False)]

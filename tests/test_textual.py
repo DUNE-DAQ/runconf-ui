@@ -56,7 +56,7 @@ class _StubAdapter:
 def _node(label: str, enabled=True, parent=None):
     state = State.ENABLED if enabled else State.DISABLED
     return NodeStatus(
-        node=Leaf(_StubAdapter(enabled), label=label),
+        node=Leaf(_StubAdapter(enabled), label=label),  # type: ignore
         state=state,
         parent=parent,
     )
@@ -111,8 +111,9 @@ def _loaded_backend():
 
     adj = {
         "Random Trigger Rates": {
-            "Random Trigger Rates__random-tc-generator - trigger_rate_hz":
-                _node("random-tc-generator - trigger_rate_hz", True)
+            "Random Trigger Rates__random-tc-generator - trigger_rate_hz": _node(
+                "random-tc-generator - trigger_rate_hz", True
+            )
         }
     }
 
@@ -191,7 +192,7 @@ async def test_active_screen_is_main_screen_on_startup(pilot):
 
 async def test_active_screen_id_is_not_default(pilot):
     """If screen id is '_default', MainScreen was never made active."""
-    assert pilot.app.screen.id != '_default', (
+    assert pilot.app.screen.id != "_default", (
         "Active screen is '_default' — MainScreen was never activated. "
         "This is the Textual 7.x push_screen regression."
     )
@@ -387,10 +388,13 @@ async def test_clicking_button_calls_backend_toggle():
         # events unless their tab is focused. Post the message directly to
         # test that the handler wires through to backend.toggle correctly.
         from runconf_ui.textual import messages as runconf_msg
-        app.post_message(runconf_msg.NodeToggledMessage(
-            group_id="Detector",
-            widget_id="Readout",
-        ))
+
+        app.post_message(
+            runconf_msg.NodeToggledMessage(
+                group_id="Detector",
+                widget_id="Readout",
+            )
+        )
         await pilot.pause()
 
         backend.toggle.assert_called_once_with("Detector", "Readout")
@@ -416,10 +420,8 @@ async def test_config_info_text_updated_after_load(loaded_pilot):
 
 
 async def test_adjustable_tabs_have_content(loaded_pilot):
-    tabbed = (
-        loaded_pilot.app
-        .query_one(AdjustableAttributeTabs)
-        .query_one(TabbedContent)
+    tabbed = loaded_pilot.app.query_one(AdjustableAttributeTabs).query_one(
+        TabbedContent
     )
 
     assert tabbed.tab_count >= 1

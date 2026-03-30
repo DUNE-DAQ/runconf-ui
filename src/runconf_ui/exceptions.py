@@ -10,39 +10,73 @@ class _RunconfUIException(Exception): ...
 # ------- State Ops -------- #
 # Set of exceptions for state operations
 # Generic bad state exception, shouldn't be called
-class _RunConfUITreeException(_RunconfUIException): ... 
+class _RunConfUITreeException(_RunconfUIException): ...
+
+
 # DAL is incompatible for a given property
 class IncompatibleDalException(_RunConfUITreeException): ...
+
+
 # Generic attribute exception
 class _RunconfUIAttributeException(_RunConfUITreeException): ...
+
+
 # Attribute is missing
 class AttributeMissingException(_RunconfUIAttributeException): ...
+
+
 # Attribute value is wrong
 class AttributeValueException(_RunconfUIAttributeException): ...
+
 
 # ------- Repo Management -------- #
 # Set of exceptions for repo management
 class _RunConfUIRepoException(_RunconfUIException): ...
+
+
 # When you select a bad DAQ version
 class DaqVersionException(_RunConfUIRepoException): ...
+
+
 # When you find a repo with no settings
 class MissingRunconfUIConfigException(_RunConfUIRepoException): ...
+
+
 # When the user doesn't set runconf-tools repo
 class RunConfToolsRepoException(_RunConfUIRepoException): ...
+
+
 # When the config doesn't exist
 class ConfigNotFoundInRepoException(_RunConfUIRepoException): ...
+
+
 # When there is no session
 class ConfigBrokenInRepoException(_RunConfUIRepoException): ...
 
+
 # ------- Configuration Errors -------- #
 class _DaqConfigException(_RunconfUIException): ...
+
+
 # Error when reading config
 class ConfigReadException(_DaqConfigException): ...
+
+
 # Error when writing to config
 class ConfigWriteException(_DaqConfigException): ...
+
+
 # When runconf-tools repos aren't linked
 
+
 # ------ Lookup exceptions -------- #
-class _NodeException(_RunconfUIException):...
-class NodeNotFound(_NodeException):...
-class NodeNotToggleAble(_NodeException):...
+class _NodeException(_RunconfUIException): ...
+
+
+class NodeNotFound(_NodeException): ...
+
+
+class NodeNotToggleAble(_NodeException): ...
+
+
+class LoggerNotFound(_RunconfUIException): ...

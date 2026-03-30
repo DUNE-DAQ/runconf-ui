@@ -9,7 +9,11 @@ from .adapter import Adapter
 
 class DisableComponent(Adapter):
     def __init__(
-        self, configuration: Configuration, session: DalBase, dal: DalBase, label: str = ""
+        self,
+        configuration: Configuration,
+        session: DalBase,
+        dal: DalBase,
+        label: str = "",
     ):
         if "Resource" not in configuration.superclasses(dal.className(), all=True):
             raise IncompatibleDalException(
@@ -26,6 +30,6 @@ class DisableComponent(Adapter):
             enable_component(self.configuration._obj, self.session.id, self.dal.id)
         else:
             disable_component(self.configuration._obj, self.session.id, self.dal.id)
-        
+
         self.configuration.update_dal(self.session)
         self.configuration.update_dal(self.dal)

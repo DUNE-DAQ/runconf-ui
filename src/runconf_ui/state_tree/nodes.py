@@ -50,6 +50,7 @@ from .adapters.adapter import Adapter
 # Base
 # ---------------------------------------------------------------------------
 
+
 class Node(ABC):
     """Base class for all tree nodes."""
 
@@ -63,16 +64,17 @@ class Node(ABC):
 
     @abstractmethod
     def get(self) -> Any:
-        '''Get the value of the node'''
-        
+        """Get the value of the node"""
+
     @abstractmethod
     def set(self, value: Any) -> None:
-        '''Set the value of the node'''
-        
+        """Set the value of the node"""
+
 
 # ---------------------------------------------------------------------------
 # Leaf
 # ---------------------------------------------------------------------------
+
 
 class Leaf(Node):
     """
@@ -95,16 +97,18 @@ class Leaf(Node):
 # Child entry
 # ---------------------------------------------------------------------------
 
+
 @dataclass(frozen=True)
 class _Child:
-    node:      Node
-    votes:     bool
+    node: Node
+    votes: bool
     propagate: bool
 
 
 # ---------------------------------------------------------------------------
 # Group
 # ---------------------------------------------------------------------------
+
 
 class Group(Node):
     """
@@ -152,7 +156,7 @@ class Group(Node):
         node: Node,
         votes: bool = True,
         propagate: bool = True,
-    ) -> 'Group':
+    ) -> "Group":
         """
         Add a child node. Returns self for chaining:
             group.add(a).add(b, votes=False)
@@ -164,7 +168,7 @@ class Group(Node):
         self._children.append(_Child(node=node, votes=votes, propagate=propagate))
         return self
 
-    def at(self, *path: str) -> 'Group':
+    def at(self, *path: str) -> "Group":
         """
         Find or create a chain of named child Groups, returning the deepest.
         Creates any missing intermediate groups with strategy=any.
@@ -177,7 +181,7 @@ class Group(Node):
             node = node._get_or_create_subgroup(label)
         return node
 
-    def _get_or_create_subgroup(self, label: str) -> 'Group':
+    def _get_or_create_subgroup(self, label: str) -> "Group":
         for child in self._children:
             if isinstance(child.node, Group) and child.node.label == label:
                 return child.node
@@ -189,7 +193,7 @@ class Group(Node):
         """
         Propagate state to all children where propagate=True.
         Adjustable nodes (propagate=False) are never touched.
-        """ 
+        """
         for child in self._children:
             if child.propagate:
                 child.node.set(value)

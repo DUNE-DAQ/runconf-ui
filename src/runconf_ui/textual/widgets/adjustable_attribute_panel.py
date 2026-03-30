@@ -3,6 +3,7 @@ from textual.containers import ScrollableContainer
 from textual.widgets import Button, Input, Static
 
 from runconf_ui.state_tree import NodeStatus
+from runconf_ui.utils import get_logger
 
 from ..messages import ValueChangedMessage
 from .dynamic_panel import DynamicTabbedContent, textual_safe_id
@@ -32,7 +33,9 @@ class AdjustableAttributeContainer(Static):
         if self._adjust_node.tooltip:
             label_widget.tooltip = self._adjust_node.tooltip
 
-        with ScrollableContainer(id=f"{self.id}_container", classes="adjustable_container"):
+        with ScrollableContainer(
+            id=f"{self.id}_container", classes="adjustable_container"
+        ):
             yield label_widget
 
             yield Input(
@@ -82,7 +85,8 @@ class AdjustableAttributeContainer(Static):
     def check_enabled(self):
         container = self.query_one(ScrollableContainer)
         for child in container.children:
-            if hasattr(child, 'disabled'):
+            get_logger().debug(f"Setting {child.id} to {not self.interactive}")
+            if hasattr(child, "disabled"):
                 child.disabled = not self.interactive
 
 
@@ -112,13 +116,15 @@ class AdjustableAttributePanel(ScrollableContainer):
 class AdjustableAttributeTabs(DynamicTabbedContent):
     panel_prefix = "adjustable_panel"
 
-    def _make_pane_content(self, group_id: str, data: dict[str, NodeStatus], panel_id: str) -> AdjustableAttributePanel:
+    def _make_pane_content(
+        self, group_id: str, data: dict[str, NodeStatus], panel_id: str
+    ) -> AdjustableAttributePanel:
         return AdjustableAttributePanel(group_id, data, id=panel_id)
 
     def _update_panes(self, data: dict) -> None:
         for group_id, nodes in data.items():
             group_id_safe = textual_safe_id(group_id)
-            panel_id      = self._panel_id(group_id_safe)
+            panel_id = self._panel_id(group_id_safe)
             results = self.query(f"#{panel_id}")
             if not results:
                 continue

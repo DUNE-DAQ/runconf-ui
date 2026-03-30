@@ -52,17 +52,17 @@ def test_main_screen_registered_in_modes():
     In Textual 7.x, SCREENS + push_screen() stacks on _default so app.query()
     finds nothing. MODES + DEFAULT_MODE activates before the event loop starts.
     """
-    assert 'main' in RunconfUIApp.MODES, (
+    assert "main" in RunconfUIApp.MODES, (
         "MainScreen must be in MODES. "
         "SCREENS + push_screen() stacks on _default and breaks app.query() in Textual 7.x."
     )
-    assert RunconfUIApp.MODES['main'] is MainScreen
+    assert RunconfUIApp.MODES["main"] is MainScreen
 
 
 def test_main_screen_not_in_screens():
     """MainScreen must not also be in SCREENS — that re-enables push_screen('main')
     which reverts to the broken _default stacking behaviour."""
-    assert 'main' not in RunconfUIApp.SCREENS, (
+    assert "main" not in RunconfUIApp.SCREENS, (
         "MainScreen must not be in SCREENS — push_screen('main') stacks on _default."
     )
 
@@ -73,7 +73,7 @@ def test_default_mode_is_main():
     switch_mode() in on_mount races against run_test in Textual 7.x.
     DEFAULT_MODE is resolved at class definition time, before the event loop.
     """
-    assert getattr(RunconfUIApp, 'DEFAULT_MODE', None) == 'main', (
+    assert getattr(RunconfUIApp, "DEFAULT_MODE", None) == "main", (
         "DEFAULT_MODE must be 'main'. "
         "switch_mode() in on_mount races against run_test in Textual 7.x."
     )
@@ -81,8 +81,12 @@ def test_default_mode_is_main():
 
 def test_overlay_screens_registered_in_screens():
     """Overlay screens must be in SCREENS so push_screen() can find them."""
-    for name, cls in (('create', CreateScreen), ('quit', QuitScreen),
-                      ('load', LoadingScreen), ('help', HelpScreen)):
+    for name, cls in (
+        ("create", CreateScreen),
+        ("quit", QuitScreen),
+        ("load", LoadingScreen),
+        ("help", HelpScreen),
+    ):
         assert name in RunconfUIApp.SCREENS, (
             f"'{name}' must be in SCREENS for push_screen() to work."
         )

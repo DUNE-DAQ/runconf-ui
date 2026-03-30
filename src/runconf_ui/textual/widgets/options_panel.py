@@ -2,19 +2,21 @@ from textual import on
 from textual.containers import ScrollableContainer
 from textual.widgets import Button
 
+from runconf_ui.utils import get_logger
+
 from ..messages import (
     LoadConfigMessage,
     OpenCreateMenuMessage,
     OpenHelpMenuMessage,
     OpenQuitMenuMessage,
 )
-from runconf_ui.utils import get_logger
 
 
 class OptionsPanel(ScrollableContainer):
-    '''
+    """
     Container for options (create, help, reset, quit)
-    '''
+    """
+
     def __init__(self, *args, **kwargs):
         self.BUTTONS = [
             ("Create Run Configuration", "create_run_config", "success", True),
@@ -24,19 +26,25 @@ class OptionsPanel(ScrollableContainer):
         ]
 
         super().__init__(*args, **kwargs)
-        get_logger().debug(f"Options panel initialised")
+        get_logger().debug("Options panel initialised")
 
         self._config_loaded = False
 
     def compose(self):
         for label, button_id, style, disabled in self.BUTTONS:
-            yield Button(label, id=button_id, variant=style, disabled=disabled, classes="options_button")
-        get_logger().debug(f"Options panel composed")
+            yield Button(
+                label,
+                id=button_id,
+                variant=style,
+                disabled=disabled,
+                classes="options_button",
+            )
+        get_logger().debug("Options panel composed")
 
     def enable_all(self):
         for button in self.query(Button):
-            button.disabled=False
-            
+            button.disabled = False
+
     def disable_selected(self):
         for _, id, _, init_state in self.BUTTONS:
             button = self.query_exactly_one(id)
@@ -44,9 +52,9 @@ class OptionsPanel(ScrollableContainer):
 
     @on(Button.Pressed)
     def handle_button_pressed(self, event: Button.Pressed):
-        '''
+        """
         Handle button press events and emit corresponding messages
-        '''
+        """
         button_id = event.button.id
         get_logger().debug(f"{button_id} pressed in options panel")
 

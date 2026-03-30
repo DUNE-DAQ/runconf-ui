@@ -14,8 +14,8 @@ from rich.tree import Tree
 from runconf_ui.state_tree import Group, Node, State, compute_state
 
 _COLOURS: dict[State, str] = {
-    State.ENABLED:         "green",
-    State.DISABLED:        "red",
+    State.ENABLED: "green",
+    State.DISABLED: "red",
     State.PARENT_DISABLED: "grey46",
 }
 
@@ -26,6 +26,7 @@ def _format_label(label: str, state: State) -> str:
 
 
 # ── Node-based trees ─────────────────────────────────────────────────────────
+
 
 def _render_node_branch(branch, node: Node, parent: Group | None) -> None:
     if not isinstance(node, Group):
@@ -48,6 +49,7 @@ def draw_node_tree(label: str, root: Node) -> Tree:
 
 
 # ── Configuration-based trees ─────────────────────────────────────────────────
+
 
 class ConfigTreeRenderer:
     def __init__(self, config, session, classes_to_draw: list[str]) -> None:
@@ -76,12 +78,9 @@ class ConfigTreeRenderer:
         for rel, r_prop in self.config.relations(dal.className()).items():
             rel_type = r_prop["type"]
 
-            draw = (
-                rel_type in self.classes_to_draw
-                or any(
-                    rel_type in self.config.superclasses(c, all=True)
-                    for c in self.classes_to_draw
-                )
+            draw = rel_type in self.classes_to_draw or any(
+                rel_type in self.config.superclasses(c, all=True)
+                for c in self.classes_to_draw
             )
 
             rel_vals = getattr(dal, rel)
@@ -95,5 +94,7 @@ class ConfigTreeRenderer:
 
             for r in rel_vals:
                 r_state = self._calc_config_state(r, parent_state)
-                branch_to_add = branch.add(_format_label(repr(r), r_state)) if draw else branch
+                branch_to_add = (
+                    branch.add(_format_label(repr(r), r_state)) if draw else branch
+                )
                 self._render_config_branch(branch_to_add, r, r_state)

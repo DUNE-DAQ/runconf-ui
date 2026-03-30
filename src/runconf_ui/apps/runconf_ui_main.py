@@ -2,25 +2,105 @@
 Main app for runconf-ui
 """
 
+import os
 from pathlib import Path
 
 import click
 
-from runconf_ui import RunconfContext, RunconfUIApp
+from runconf_ui import RunconfContext, RunconfUIApp, RunconfUIBackend
 from runconf_ui.utils import LogLevels
- 
+
+
+def get_exit_msg(backend: RunconfUIBackend) -> str:
+    """
+    Quick message to return shortcut for run- dcontrol
+    """
+    # We'll grab the environment variables
+    run_mode = Path(os.getenv("PROCESS_MANAGER_CONFIG", "ssh-standalone")).stem
+    buffer_id = os.getenv("SESSION_NAME", os.getlogin())
+    if backend.config_session is None:
+        return "No session selected, cannot use DRUNC"
+
+    config_file = backend.config_save_path
+    config_session = getattr(backend.config_session, "id")
+
+    run_cmd = (
+        f"drunc-unified-shell {run_mode} {config_file} {config_session} {buffer_id}"
+    )
+
+    output_script = f"/tmp/shifter_configs-{buffer_id}/set_next_run.sh"
+    with open(f"{output_script}", "w") as f:
+        f.write(f"export EHN1_RUN_FILE={Path(config_file).expanduser()}\n")
+        f.write(f"export EHN1_RUN_CONFIG_ID={config_session}\n")
+        f.write(f"export EHN1_RUN_COMMAND='{run_cmd}'\n")
+
+    return os.getenv("EHN1_RC_LAUNCH", run_cmd)
+
+
 @click.command()
-@click.option('-c', '--config-directory', type=click.Path(), help='Path to your local config directory. This should contain your configs.', envvar="CONFIG_DIR")
-@click.option('-o', '--output-directory', type=click.Path(), default=Path('shifter-configs'), show_default=True, help='Directory to save run configs to.')
-@click.option('-l', '--use-local', is_flag=True, default=False)
-@click.option('-a', '--apparatus', required=True, help='DAQ apparatus to use (e.g. NP02, NP04).', envvar="APPARATUS")
-@click.option('-f', '--config-file-name', required=True, help='Config file to find in the ops repo (e.g. <X>.data.xml).', envvar="SESSION_FILE")
-@click.option('-b', '--base-url', default="ssh://git@gitlab.cern.ch:7999/dune-daq/online/ehn1-daqconfigs.git", help='URL for the BASE repository.', envvar="BASE_URL")
-@click.option('-r', '--ops-url', required=True, help='URL for the operations repository.', envvar="OPERATION_URL")
-@click.option('-d', '--log-level', default='INFO', show_default=True, help='Debug level (INFO, WARNING, DEBUG)')
-def cli(apparatus: str, config_directory: str, output_directory: str, use_local: bool, config_file_name: str, base_url: str, ops_url: str, log_level: LogLevels="INFO"):
+@click.option(
+    "-c",
+    "--config-directory",
+    type=click.Path(),
+    help="Path to your local config directory. This should contain your configs.",
+    envvar="CONFIG_DIR",
+)
+@click.option(
+    "-o",
+    "--output-directory",
+    type=click.Path(),
+    default=Path("shifter-configs"),
+    show_default=True,
+    help="Directory to save run configs to.",
+)
+@click.option("-l", "--use-local", is_flag=True, default=False)
+@click.option(
+    "-a",
+    "--apparatus",
+    required=True,
+    help="DAQ apparatus to use (e.g. NP02, NP04).",
+    envvar="APPARATUS",
+)
+@click.option(
+    "-f",
+    "--config-file-name",
+    required=True,
+    help="Config file to find in the ops repo (e.g. <X>.data.xml).",
+    envvar="SESSION_FILE",
+)
+@click.option(
+    "-b",
+    "--base-url",
+    default="ssh://git@gitlab.cern.ch:7999/dune-daq/online/ehn1-daqconfigs.git",
+    help="URL for the BASE repository.",
+    envvar="BASE_URL",
+)
+@click.option(
+    "-r",
+    "--ops-url",
+    required=True,
+    help="URL for the operations repository.",
+    envvar="OPERATION_URL",
+)
+@click.option(
+    "-d",
+    "--log-level",
+    default="INFO",
+    show_default=True,
+    help="Debug level (INFO, WARNING, DEBUG)",
+)
+def cli(
+    apparatus: str,
+    config_directory: str,
+    output_directory: str,
+    use_local: bool,
+    config_file_name: str,
+    base_url: str,
+    ops_url: str,
+    log_level: LogLevels = "INFO",
+):
     """runconf-ui — run configuration interface."""
-    context = RunconfContext(
+    ctx = RunconfContext(
         apparatus=apparatus,
         conf_directory=Path(config_directory),
         use_local=use_local,
@@ -30,15 +110,23 @@ def cli(apparatus: str, config_directory: str, output_directory: str, use_local:
         output_directory=Path(output_directory),
         log_level=log_level,
     )
-    print(RunconfUIApp(context).run())
 
-if __name__ == '__main__':
-    context = RunconfContext(
+    backend = RunconfUIBackend(ctx)
+    RunconfUIApp(backend).run()
+    print(get_exit_msg(backend))
+
+
+if __name__ == "__main__":
+    # FOR TESTING ONLY
+    ctx_ = RunconfContext(
         apparatus="dummy",
         conf_directory=Path("/tmp/pytest-of-hwallace/pytest-current/configscurrent"),
         use_local=True,
         output_directory=Path("test-cfg"),
         log_level="INFO",
     )
-        
-    RunconfUIApp(context).run()
+    backend_ = RunconfUIBackend(ctx_)
+
+    RunconfUIApp(backend_).run()
+
+    print(get_exit_msg(backend_))

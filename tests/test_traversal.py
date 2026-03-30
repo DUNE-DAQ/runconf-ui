@@ -23,6 +23,7 @@ from runconf_ui.state_tree import (
 # Stub adapter
 # ---------------------------------------------------------------------------
 
+
 class StubAdapter:
     def __init__(self, value: bool = True, dal_enabled: bool = True):
         self._value = value
@@ -39,15 +40,15 @@ class StubAdapter:
 
 
 def leaf(value: bool = True, label: str = "", dal_enabled: bool = True) -> Leaf:
-    return Leaf(StubAdapter(value, dal_enabled=dal_enabled), label=label)
+    return Leaf(StubAdapter(value, dal_enabled=dal_enabled), label=label)  # type: ignore
 
 
 # ---------------------------------------------------------------------------
 # compute_state
 # ---------------------------------------------------------------------------
 
-class TestComputeState:
 
+class TestComputeState:
     def test_enabled_node_no_parent(self):
         assert compute_state(leaf(True), None) == State.ENABLED
 
@@ -69,7 +70,9 @@ class TestComputeState:
         assert compute_state(child, parent) == State.PARENT_DISABLED
 
     def test_dal_resource_disabled_returns_parent_disabled(self):
-        assert compute_state(leaf(True, dal_enabled=False), None) == State.PARENT_DISABLED
+        assert (
+            compute_state(leaf(True, dal_enabled=False), None) == State.PARENT_DISABLED
+        )
 
     def test_group_node_enabled(self):
         g = Group(strategy=all)
@@ -93,22 +96,33 @@ class TestComputeState:
 # NodeStatus
 # ---------------------------------------------------------------------------
 
-class TestNodeStatus:
 
+class TestNodeStatus:
     def test_is_interactive_for_enabled_and_disabled(self):
-        assert NodeStatus(node=leaf(), state=State.ENABLED,  parent=None).is_interactive is True
-        assert NodeStatus(node=leaf(), state=State.DISABLED, parent=None).is_interactive is True
+        assert (
+            NodeStatus(node=leaf(), state=State.ENABLED, parent=None).is_interactive
+            is True
+        )
+        assert (
+            NodeStatus(node=leaf(), state=State.DISABLED, parent=None).is_interactive
+            is True
+        )
 
     def test_not_interactive_when_parent_disabled(self):
-        assert NodeStatus(node=leaf(), state=State.PARENT_DISABLED, parent=None).is_interactive is False
+        assert (
+            NodeStatus(
+                node=leaf(), state=State.PARENT_DISABLED, parent=None
+            ).is_interactive
+            is False
+        )
 
 
 # ---------------------------------------------------------------------------
 # walk()
 # ---------------------------------------------------------------------------
 
-class TestWalk:
 
+class TestWalk:
     def test_yields_root_first_then_depth_first(self):
         root = Group("root", strategy=all)
         c1 = leaf(label="c1")
@@ -138,8 +152,8 @@ class TestWalk:
 # labelled()
 # ---------------------------------------------------------------------------
 
-class TestLabelled:
 
+class TestLabelled:
     def test_anonymous_nodes_excluded(self):
         root = Group("root", strategy=all)
         root.add(leaf(label=""))
@@ -158,8 +172,8 @@ class TestLabelled:
 # disabled_child_nodes()
 # ---------------------------------------------------------------------------
 
-class TestDisabledChildNodes:
 
+class TestDisabledChildNodes:
     def test_returns_voting_children_that_are_off(self):
         on = leaf(True, label="on")
         off = leaf(False, label="off")
@@ -183,13 +197,13 @@ class TestDisabledChildNodes:
 # build_index()
 # ---------------------------------------------------------------------------
 
-class TestBuildIndex:
 
+class TestBuildIndex:
     def test_flat_and_nested_nodes_indexed(self):
         root = Group("root", strategy=all)
-        sub  = Group("sub",  strategy=any)
+        sub = Group("sub", strategy=any)
         deep = leaf(label="deep")
-        a    = leaf(label="a")
+        a = leaf(label="a")
         sub.add(deep)
         root.add(a).add(sub)
         index = build_index(root)

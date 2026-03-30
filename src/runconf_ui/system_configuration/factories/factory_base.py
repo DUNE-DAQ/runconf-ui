@@ -1,28 +1,31 @@
 from abc import ABC, abstractmethod
+from typing import Generic, TypeVar
 
 from conffwk import Configuration
 from conffwk.dal import DalBase
 
-from runconf_ui.state_tree import Node
 from runconf_ui.utils import class_in_config, dal_in_config
 
 from ..dataclasses import FilterData
 
+TData = TypeVar("TData")
+TResult = TypeVar("TResult")
 
-class FactoryBase(ABC):
+
+class FactoryBase(ABC, Generic[TData, TResult]):
     def __init__(self, configuration: Configuration, session: DalBase):
         self.configuration = configuration
         self.session = session
 
     @abstractmethod
-    def create(self, data) -> Node | list[Node] | None: ...
+    def create(self, data: TData) -> TResult: ...
 
     def resolve_dals(
         self,
         class_name: str,
         object_id: str | None = None,
     ) -> list[DalBase] | None:
-        '''Checks if a DAL(s) exists, if it does return the dal(s)'''
+        """Checks if a DAL(s) exists, if it does return the dal(s)"""
         if not class_in_config(self.configuration, class_name):
             return None
         if object_id:
@@ -33,7 +36,7 @@ class FactoryBase(ABC):
 
     @staticmethod
     def is_filtered(dal: DalBase, filters: list[FilterData]) -> bool:
-        '''Is a given DAL object filtered?'''
+        """Is a given DAL object filtered?"""
         for f in filters:
             if not hasattr(dal, f.attribute):
                 return False

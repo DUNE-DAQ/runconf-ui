@@ -1,13 +1,15 @@
 """
 Textual application for controlling runconf-shifter-ui.
 """
+
 from importlib.metadata import version
-from typing import ClassVar
+from typing import Any, ClassVar
 
 from textual import on, work
 from textual.app import App
+from textual.css.query import DOMQuery
 
-from runconf_ui.backend import RunconfContext, RunconfUIBackend
+from runconf_ui.backend import RunconfUIBackend
 from runconf_ui.textual import messages as runconf_msg
 from runconf_ui.textual.screens import CreateScreen, HelpScreen, MainScreen, QuitScreen
 from runconf_ui.textual.screens.popup_screens import LoadingScreen
@@ -21,9 +23,13 @@ from runconf_ui.textual.widgets import (
 )
 from runconf_ui.utils import get_logger
 
+# No neat way to type this sadly
+NodeIterator = list[tuple[DOMQuery, Any]]
+
+
 class RunconfUIApp(App):
     CSS_PATH: ClassVar[str] = "runconf_shifter_ui.tcss"
-    BINDINGS: ClassVar[list[tuple]] = [("ctrl+q", "quit", "Quit")]
+    BINDINGS: ClassVar[list] = [("ctrl+q", "quit", "Quit")]
 
     # In Textual 7.x, MODES + switch_mode is the correct way to make a named
     # screen the active base screen. SCREENS + push_screen stacks on top of
@@ -31,28 +37,28 @@ class RunconfUIApp(App):
     # MODES gives each entry its own screen stack; switch_mode makes it active
     # and app.query() then correctly searches MainScreen's widget tree.
     MODES: ClassVar[dict] = {
-        'main':   MainScreen,
+        "main": MainScreen,
     }
-    DEFAULT_MODE: ClassVar[str] = 'main'
+    DEFAULT_MODE: ClassVar[str] = "main"
 
     # These are still registered as named screens for push/pop overlays
     SCREENS: ClassVar[dict] = {
-        'create': CreateScreen,
-        'help':   HelpScreen,
-        'quit':   QuitScreen,
-        'load':   LoadingScreen,
+        "create": CreateScreen,
+        "help": HelpScreen,
+        "quit": QuitScreen,
+        "load": LoadingScreen,
     }
 
-    def __init__(self, context: RunconfContext, *args, **kwargs):
+    def __init__(self, backend: RunconfUIBackend, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.backend = RunconfUIBackend(context)
+        self.backend = backend
         get_logger().debug("Initialised application")
 
     def on_mount(self) -> None:
         get_logger().debug("Mounting")
         self.theme = "catppuccin-latte"
         self.title = f"Runconf-Shifter-UI v{version('runconf_ui')}"
-        self.switch_mode('main')
+        self.switch_mode("main")
         self.call_after_refresh(self._init_file_selects)
         get_logger().debug("Mounted")
 
@@ -84,9 +90,8 @@ class RunconfUIApp(App):
 
     @on(runconf_msg.LoadConfigMessage)
     def handle_load_config(self, _: runconf_msg.LoadConfigMessage) -> None:
-        get_logger().debug(f"Pushing load")
-
-        self.push_screen('load')
+        get_logger().debug("Pushing config load")
+        self.push_screen("load")
         self._load_config_worker()
 
     @work(thread=True)
@@ -101,7 +106,7 @@ class RunconfUIApp(App):
 
     def _on_config_failed(self, error_msg: str) -> None:
         self.pop_screen()
-        get_logger().error(f"Config Load failed")
+        get_logger().error("Config Load failed")
         self.notify(error_msg, title="Config Load Failed", severity="error", timeout=30)
 
     # ------------------------------------------------------------------ #
@@ -114,7 +119,7 @@ class RunconfUIApp(App):
 
     @on(runconf_msg.OpenCreateMenuMessage)
     def handle_open_create(self):
-        self.push_screen('create')
+        self.push_screen("create")
 
     @on(runconf_msg.QuitAndSaveMessage)
     def handle_quit_save(self):
@@ -131,7 +136,7 @@ class RunconfUIApp(App):
 
     @on(runconf_msg.OpenHelpMenuMessage)
     def handle_help(self):
-        self.push_screen('help')
+        self.push_screen("help")
 
     # ------------------------------------------------------------------ #
     # Node toggle handler                                                  #
@@ -150,35 +155,36 @@ class RunconfUIApp(App):
 
     def _refresh_enabled_info(self, load_fresh: bool = False) -> None:
 
-        get_logger().debug(f"Refreshing enabled info")
+        get_logger().debug("Refreshing enabled info")
 
-        dis_info    = self.backend.get_disableable_values()
-        adj_info    = self.backend.get_adjustable_values()
-        tree_views  = self.backend.get_tree_views()
+        dis_info = self.backend.get_disableable_values()
+        adj_info = self.backend.get_adjustable_values()
+        tree_views = self.backend.get_tree_views()
         config_tree = self.backend.get_config_tree()
 
-        pairs = [
-            (self.query(EnableDisableTabs),       dis_info),
+        pairs: NodeIterator = [
+            (self.query(EnableDisableTabs), dis_info),
             (self.query(AdjustableAttributeTabs), adj_info),
-            (self.query(RichTreeTabbed),          tree_views),
-            (self.query(ConfigTreePanel),         config_tree),
+            (self.query(RichTreeTabbed), tree_views),
+            (self.query(ConfigTreePanel), config_tree),
         ]
         for widgets, data in pairs:
+            if not widgets:
+                continue
+
             for widget in widgets:
                 widget.load(data) if load_fresh else widget.update(data)
-                get_logger().debug(f"Loading {data} to {widget.id}")
-
+                get_logger().debug("Loading %s to %s", data, widget.id)
 
         opts_panel = self.query(OptionsPanel)
         if opts_panel:
-            get_logger().debug(f"Loading options")
+            get_logger().debug("Loading options")
             if self.backend.configuration is None:
                 opts_panel.first().disable_selected()
-                get_logger().debug(f"Disabling Opts")
+                get_logger().debug("Disabling Opts")
             else:
                 opts_panel.first().enable_all()
-                get_logger().debug(f"Enabling Opts")
-
+                get_logger().debug("Enabling Opts")
 
         file_select = self.query(FileSelect)
         if file_select:
@@ -192,7 +198,7 @@ class RunconfUIApp(App):
         for file_select in self.query(FileSelect):
             file_select.update_versions(versions)
             file_select.refresh()
-            
+
     # ------------------------------------------------------------------ #
 
     def exit(self):

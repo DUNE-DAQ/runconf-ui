@@ -4,7 +4,7 @@ from ..dataclasses import AdjustableAttributeData
 from .factory_base import FactoryBase
 
 
-class AdjustableFactory(FactoryBase):
+class AdjustableFactory(FactoryBase["AdjustableAttributeData", "list[Leaf] | None"]):
     """
     Creates Leaf(AdjustableAttribute) nodes.
 

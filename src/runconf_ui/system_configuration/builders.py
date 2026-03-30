@@ -45,6 +45,7 @@ from .factories import (
 # Disable system builder
 # ---------------------------------------------------------------------------
 
+
 class DisableSystemBuilder:
     """
     Builds a Group tree from a DisableableSystemData instance.
@@ -59,14 +60,14 @@ class DisableSystemBuilder:
     """
 
     def __init__(self, configuration: Configuration, session: DalBase):
-        get_logger().debug(f"Initialising DisableSystemBuilder")
+        get_logger().debug("Initialising DisableSystemBuilder")
         args = (configuration, session)
-        self.component_factory    = ComponentFactory(*args)
-        get_logger().debug(f"   - component_factory intiialised")
-        self.attribute_factory    = AttributeFactory(*args)
-        get_logger().debug(f"   - attribute_factory intiialised")
+        self.component_factory = ComponentFactory(*args)
+        get_logger().debug("   - component_factory intiialised")
+        self.attribute_factory: AttributeFactory = AttributeFactory(*args)
+        get_logger().debug("   - attribute_factory intiialised")
         self.relationship_factory = RelationshipFactory(*args)
-        get_logger().debug(f"   - relationship_factory intiialised")
+        get_logger().debug("   - relationship_factory intiialised")
 
     def build(self, system: DisableableSystemData, label: str) -> Group:
         root_strategy = any if system.subsystem_dependent else all
@@ -85,7 +86,7 @@ class DisableSystemBuilder:
             self._add_relationship(root, rel, system.subsystem_dependent)
 
         return root
-    
+
     # ------------------------------------------------------------------ #
     def _votes(self, subsystem_dependent: bool, has_own_label: bool) -> bool:
         """
@@ -115,7 +116,9 @@ class DisableSystemBuilder:
                 wrapper.add(node, votes=True, propagate=True)
                 root.add(wrapper, votes=False, propagate=True)
             else:
-                label = comp.system_label or (node.label if comp.separate_system else "")
+                label = comp.system_label or (
+                    node.label if comp.separate_system else ""
+                )
                 votes = self._votes(subsystem_dependent, bool(label))
                 if label:
                     root.at(label).add(node, votes=True, propagate=True)
@@ -163,6 +166,7 @@ class DisableSystemBuilder:
 # Adjustable system builder
 # ---------------------------------------------------------------------------
 
+
 class AdjustableSystemBuilder:
     """
     Builds a Group tree from a list of AdjustableAttributeData instances.
@@ -175,8 +179,7 @@ class AdjustableSystemBuilder:
     """
 
     def __init__(self, configuration: Configuration, session: DalBase):
-        get_logger().debug(f"Initialising AdjustableSystemBuilder")
-
+        get_logger().debug("Initialising AdjustableSystemBuilder")
 
         self.factory = AdjustableFactory(configuration, session)
 

@@ -29,7 +29,7 @@ where = ["src"]
 "*" = ["*"]
 
 [project.scripts]
-runconf-shifter-ui = "runconf_ui.apps.runconf_ui_main:main"
+runconf-shifter-ui = "runconf_ui.apps.runconf_ui_main:cli"
 
 [project.optional-dependencies]
 dev = [
@@ -37,10 +37,8 @@ dev = [
     "pytest",
     "pytest-cov",
     "pytest-asyncio",
-]
-develop = [
-    "ipdb",
-    "ipython",
+    "pre-commit",
+    "mypy"
 ]
 
 [tool.pytest.ini_options]

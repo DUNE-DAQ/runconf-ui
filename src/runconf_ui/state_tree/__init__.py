@@ -1,4 +1,5 @@
-'''state_tree'''
+"""state_tree"""
+
 from .adapters import AdjustableAttribute, DisableAttribute, DisableComponent
 from .nodes import Group, Leaf, Node
 from .traversal import (
