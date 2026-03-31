@@ -79,7 +79,9 @@ def draw_node_tree(label: str, root: Node) -> Tree:
     :rtype: Tree
     """
     root_state = compute_state(root, parent=None)
-    tree = Tree(_format_label(label or root.label or "<root>", root_state))
+    tree = Tree(
+        _format_label(f"[bold green]{label or root.label or '<root>'}[/]", root_state)
+    )
     _render_node_branch(tree, root, parent=None)
     return tree
 

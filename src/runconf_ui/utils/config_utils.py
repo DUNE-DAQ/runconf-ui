@@ -111,7 +111,17 @@ def get_configs_with_session(config_paths: list[Path] | Path) -> list[Path]:
         elif path.is_dir():
             config_files += get_config_paths(path)
 
-    return [c for c in config_files if check_config_has_session(c)]
+    return_paths = []
+
+    for c in config_files:
+        try:
+            if check_config_has_session(c):
+                return_paths.append(c)
+        except Exception:
+            # Skip files that cannot be read as configurations
+            continue
+
+    return return_paths
 
 
 def get_class_from_segment(

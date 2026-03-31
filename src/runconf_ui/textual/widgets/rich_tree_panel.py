@@ -97,7 +97,7 @@ class ConfigTreePanel(ScrollableContainer):
 
         :returns: A generator yielding the static widget containing the tree
         """
-        yield Static(self._tree, id="config_tree_view")
+        yield Static(self._tree, id="config_tree_view", classes="config_tree_view")
 
     def load(self, tree: Tree) -> None:
         """Load and display a new configuration tree.

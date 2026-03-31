@@ -39,6 +39,7 @@ class LocalRepoManager(RepoManagerInterface):
         """
         if self.daq_version is None:
             return []
+
         return get_configs_with_session(self.daq_version)
 
     def select_config(self, config: Path) -> Path:

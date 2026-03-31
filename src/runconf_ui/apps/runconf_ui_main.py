@@ -52,8 +52,15 @@ def get_exit_msg(backend: RunconfUIBackend) -> str:
     "-c",
     "--config-directory",
     type=click.Path(),
-    help="Path to your local config directory. This should contain your configs.",
+    help="Path to your local config directory. This should contain your configs. Can be read from the CONFIG_DIR environment variable.",
     envvar="CONFIG_DIR",
+)
+@click.option(
+    "-a",
+    "--apparatus",
+    required=True,
+    help="DAQ apparatus to use (e.g. NP02, NP04). Can be read from the APPARATUS environment variable.",
+    envvar="APPARATUS",
 )
 @click.option(
     "-o",
@@ -63,33 +70,30 @@ def get_exit_msg(backend: RunconfUIBackend) -> str:
     show_default=True,
     help="Directory to save run configs to.",
 )
-@click.option("-l", "--use-local", is_flag=True, default=False)
 @click.option(
-    "-a",
-    "--apparatus",
-    required=True,
-    help="DAQ apparatus to use (e.g. NP02, NP04).",
-    envvar="APPARATUS",
+    "-l",
+    "--use-local",
+    is_flag=True,
+    default=False,
+    help="Use a local filesystem to get you OKS config.",
 )
 @click.option(
     "-f",
     "--config-file-name",
-    required=True,
-    help="Config file to find in the ops repo (e.g. <X>.data.xml).",
+    help="Config file to find in the ops repo (e.g. <X>.data.xml). Can be read from the SESSION_FILE environment variable.",
     envvar="SESSION_FILE",
 )
 @click.option(
     "-b",
     "--base-url",
     default="ssh://git@gitlab.cern.ch:7999/dune-daq/online/ehn1-daqconfigs.git",
-    help="URL for the BASE repository.",
+    help="URL for the BASE repository. Can be read from the BASE_URL environment variable.",
     envvar="BASE_URL",
 )
 @click.option(
     "-r",
     "--ops-url",
-    required=True,
-    help="URL for the operations repository.",
+    help="URL for the operations repository. Can be read from the OPERATION_URL environment variable.",
     envvar="OPERATION_URL",
 )
 @click.option(
