@@ -149,9 +149,9 @@ AdjustableAttributeTabs{
 AdjustableAttributeContainer {
     height: auto;
     width: 100%;
-    margin: 1 0;
+    margin: 1 1;
     border: panel $primary-background-darken-3;
-    padding: 1;
+    padding: 1 1;
 }
 
 #adjustable_attribute_container {
@@ -164,7 +164,7 @@ AdjustableAttributeContainer {
 .adjustable_container,
 .adjustable-attribute-grid {
     layout: grid;
-    grid-size: 14 1;
+    grid-size: 16 1;
     grid-gutter: 1;
     height: auto;
     width: 100%;
@@ -183,6 +183,13 @@ AdjustableAttributeContainer {
 .adjustable-attribute-button {
     column-span: 2;
     height: auto;
+}
+
+.adjustable-attribute-current-value{
+    column-span: 5;
+    padding: 1 1;
+    color: $text;
+
 }
 
 

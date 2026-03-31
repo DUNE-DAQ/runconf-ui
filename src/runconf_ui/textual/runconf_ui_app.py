@@ -185,6 +185,15 @@ class RunconfUIApp(App):
         self.backend.toggle(event.group_id, event.widget_id)
         self._refresh_enabled_info(load_fresh=False)
 
+    @on(runconf_msg.ValueChangedMessage)
+    def handle_value_changed(self, event: runconf_msg.ValueChangedMessage):
+        get_logger().info(
+            f"Value changed for {event.group_id} : {event.widget_id} -> {event.new_value}"
+        )
+
+        self.backend.set_value(event.group_id, event.widget_id, event.new_value)
+        self._refresh_enabled_info(load_fresh=False)
+
     # ------------------------------------------------------------------ #
     # Shared UI refresh                                                    #
     # ------------------------------------------------------------------ #

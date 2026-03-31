@@ -223,7 +223,7 @@ class YamlToSystemData:
             for name, data in entry.items():
                 system = DisableableSystemData(
                     subsystem_dependent=data.get("subsystem_dependent", False),
-                    display_full_system=data.get("display_full_system", False),
+                    display_full_system=data.get("display_full_system", True),
                     components=[
                         DisableElementData(**_base_disable_kwargs(i))
                         for i in data.get("components", [])

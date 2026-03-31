@@ -56,13 +56,15 @@ class ValueChangedMessage(StateChangeMessage):
     any configuration changes.
     """
 
-    def __init__(self, widget_id: str, new_value):
+    def __init__(self, group_id: str, widget_id: str, new_value):
         """Initialize ValueChangedMessage.
-
+        :param group_id: The ID of the group containing the adjusted node
         :param widget_id: The ID of the widget with changed value
         :param new_value: The new value for the adjustable attribute
         """
         super().__init__()  # type: ignore
+        self.group_id = group_id
+        self.widget_id = widget_id
         self.new_value = new_value
 
 

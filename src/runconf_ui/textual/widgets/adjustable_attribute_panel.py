@@ -16,16 +16,18 @@ class AdjustableAttributeContainer(Static):
     buttons. Handles user input and emits ValueChangedMessage when values change.
     """
 
-    def __init__(self, node: NodeStatus, *args, **kwargs):
+    def __init__(self, group_id: str, node: NodeStatus, *args, **kwargs):
         """Initialize AdjustableAttributeContainer.
 
+        :param group_id: The ID of the group containing the adjustable attribute
         :param node: The NodeStatus object representing the adjustable attribute
         :param args: Variable positional arguments passed to parent Static
         :param kwargs: Variable keyword arguments passed to parent Static
         """
         super().__init__(*args, **kwargs)
         self._adjust_node = node
-        self._init_value = self._adjust_node.node.get()
+        self._group_id = group_id
+        self._curr_value = self._adjust_node.node.get()
 
     def compose(self):
         """Compose the attribute container with label, input, and buttons.
@@ -76,12 +78,37 @@ class AdjustableAttributeContainer(Static):
                 disabled=not self.interactive,
             )
 
+            yield Static(
+                self._generate_current_value_text(),
+                id="current_value",
+                classes="adjustable-attribute-current-value",
+                disabled=not self.interactive,
+            )
+
+    def on_mount(self) -> None:
+        self.border_title = self._adjust_node.tooltip
+
     def _handle_value_changed(self, new_value):
         """Emit a ValueChangedMessage for the new attribute value.
 
         :param new_value: The new value entered by the user
         """
-        self.post_message(ValueChangedMessage(self._adjust_node.path, new_value))
+        self._curr_value = new_value
+        self.query_one("#current_value", Static).update(
+            self._generate_current_value_text()
+        )
+        self.post_message(
+            ValueChangedMessage(self._group_id, self._adjust_node.path, new_value)
+        )
+
+    def _generate_current_value_text(self) -> str:
+        """Generate the display text for the current value.
+
+        :returns: A formatted string representing the current value
+        """
+        return (
+            f"([dim purple]Current Value: [/][bold red]{self._curr_value}[/bold red])"
+        )
 
     @on(Button.Pressed, "#reset")
     def handle_reset(self, _):
@@ -89,8 +116,8 @@ class AdjustableAttributeContainer(Static):
 
         :param _: The Button.Pressed event (unused)
         """
-        self.query_one(Input).value = str(self._init_value)
-        self._handle_value_changed(self._init_value)
+        self.query_one(Input).value = str(self._curr_value)
+        self._handle_value_changed(self._curr_value)
 
     @on(Button.Pressed, "#apply")
     def handle_apply(self, _):
@@ -106,7 +133,6 @@ class AdjustableAttributeContainer(Static):
         :param node: The new NodeStatus to display
         """
         self._adjust_node = node
-        self.query_one(Input).value = str(self._adjust_node.value)
         self.check_enabled()
 
     @property
@@ -157,6 +183,7 @@ class AdjustableAttributePanel(ScrollableContainer):
         """
         for node_id, node in self._runconf_nodes.items():
             yield AdjustableAttributeContainer(
+                self._group_id,
                 node,
                 id=textual_safe_id(node_id),
                 classes="adjustable_attribute",
