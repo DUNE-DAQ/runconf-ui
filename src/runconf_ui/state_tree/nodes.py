@@ -52,9 +52,17 @@ from .adapters.adapter import Adapter
 
 
 class Node(ABC):
-    """Base class for all tree nodes."""
+    """Base class for all tree nodes.
+
+    Provides common interface for getting and setting node values.
+    """
 
     def __init__(self, label: str = "", tooltip: str = ""):
+        """Initialize a Node.
+
+        :param label: Display name for the node (empty string = anonymous)
+        :param tooltip: Hover text shown in the UI (defaults to label if empty)
+        """
         self.label = label
 
         if not tooltip:
@@ -64,11 +72,19 @@ class Node(ABC):
 
     @abstractmethod
     def get(self) -> Any:
-        """Get the value of the node"""
+        """Get the value of the node.
+
+        :returns: The node's current value
+        """
+        ...
 
     @abstractmethod
     def set(self, value: Any) -> None:
-        """Set the value of the node"""
+        """Set the value of the node.
+
+        :param value: The new value for the node
+        """
+        ...
 
 
 # ---------------------------------------------------------------------------
@@ -83,13 +99,27 @@ class Leaf(Node):
     """
 
     def __init__(self, adapter: Adapter, label: str = "", tooltip: str = ""):
+        """Initialize a Leaf node.
+
+        :param adapter: The Adapter that manages the underlying value
+        :param label: Display name for the node
+        :param tooltip: Hover text shown in the UI
+        """
         super().__init__(label, tooltip)
         self.adapter = adapter
 
     def get(self) -> Any:
+        """Get the adapter's value.
+
+        :returns: The underlying adapter value
+        """
         return self.adapter.get()
 
     def set(self, value: Any) -> None:
+        """Set the adapter's value.
+
+        :param value: The new value to set
+        """
         self.adapter.set(value)
 
 
@@ -100,6 +130,8 @@ class Leaf(Node):
 
 @dataclass(frozen=True)
 class _Child:
+    """Internal representation of a child node with voting and propagation flags."""
+
     node: Node
     votes: bool
     propagate: bool
@@ -143,6 +175,12 @@ class Group(Node):
         tooltip: str = "",
         strategy: Callable[[Iterable[bool]], bool] = all,
     ):
+        """Initialize a Group node.
+
+        :param label: Display name for the group
+        :param tooltip: Hover text shown in the UI
+        :param strategy: Callable to aggregate child states (all or any)
+        """
         super().__init__(label, tooltip)
         self.strategy = strategy
         self._children: list[_Child] = []
@@ -157,24 +195,25 @@ class Group(Node):
         votes: bool = True,
         propagate: bool = True,
     ) -> "Group":
-        """
-        Add a child node. Returns self for chaining:
-            group.add(a).add(b, votes=False)
+        """Add a child node. Returns self for method chaining.
 
-        votes=True,  propagate=True  — normal disable child (default)
-        votes=False, propagate=True  — controlled-but-non-voting disable child
-        votes=False, propagate=False — adjustable child
+        :param node: The child node to add
+        :param votes: Whether this child's state influences parent's aggregated state
+        :param propagate: Whether this child receives set() calls from parent
+        :returns: self for method chaining
+        :rtype: Group
         """
         self._children.append(_Child(node=node, votes=votes, propagate=propagate))
         return self
 
     def at(self, *path: str) -> "Group":
-        """
-        Find or create a chain of named child Groups, returning the deepest.
+        """Find or create a chain of named child Groups, returning the deepest.
+
         Creates any missing intermediate groups with strategy=any.
 
-            root.at("CRP4")         — one level
-            root.at("CRP4", "TPG")  — two levels, creating both if absent
+        :param path: Hierarchical path labels for nested groups
+        :returns: The deepest group in the created/found chain
+        :rtype: Group
         """
         node = self
         for label in path:
@@ -182,6 +221,12 @@ class Group(Node):
         return node
 
     def _get_or_create_subgroup(self, label: str) -> "Group":
+        """Get or create a named subgroup.
+
+        :param label: The label/name of the subgroup
+        :returns: Existing or newly created subgroup
+        :rtype: Group
+        """
         for child in self._children:
             if isinstance(child.node, Group) and child.node.label == label:
                 return child.node
@@ -190,9 +235,11 @@ class Group(Node):
         return subgroup
 
     def set(self, value: bool) -> None:
-        """
-        Propagate state to all children where propagate=True.
+        """Propagate state to all children where propagate=True.
+
         Adjustable nodes (propagate=False) are never touched.
+
+        :param value: The value to propagate to children
         """
         for child in self._children:
             if child.propagate:
@@ -203,9 +250,12 @@ class Group(Node):
     # ------------------------------------------------------------------ #
 
     def get(self) -> bool:
-        """
-        Aggregated state of voting children.
+        """Get the aggregated state of voting children.
+
         Returns True vacuously when there are no voting children.
+
+        :returns: Aggregated state based on strategy (all or any)
+        :rtype: bool
         """
         voting = self.voting_children
         if not voting:
@@ -213,10 +263,14 @@ class Group(Node):
         return self.strategy(child.get() for child in voting)
 
     def gated_get(self, child: Node) -> bool:
-        """
-        Return the visible state of a direct child, gated by this group.
+        """Return the visible state of a direct child, gated by this group.
+
         If this group is disabled the child reports disabled regardless of
         its own stored state.
+
+        :param child: The child node to get the gated state for
+        :returns: Gated state of the child
+        :rtype: bool
         """
         if not self.get():
             return False
@@ -227,14 +281,28 @@ class Group(Node):
     # ------------------------------------------------------------------ #
 
     def __iter__(self) -> Iterator[tuple[Node, bool, bool]]:
-        """Iterate over (child, votes, propagate) triples."""
+        """Iterate over (child, votes, propagate) triples.
+
+        :returns: Iterator of child node information tuples
+        :rtype: Iterator[tuple[Node, bool, bool]]
+        """
         for c in self._children:
             yield c.node, c.votes, c.propagate
 
     @property
     def voting_children(self) -> list[Node]:
+        """Get list of children that vote in parent's aggregated state.
+
+        :returns: List of voting child nodes
+        :rtype: list[Node]
+        """
         return [c.node for c in self._children if c.votes]
 
     @property
     def children(self) -> list[Node]:
+        """Get list of all children.
+
+        :returns: List of all child nodes
+        :rtype: list[Node]
+        """
         return [c.node for c in self._children]

@@ -12,8 +12,14 @@ from runconf_ui.utils import LogLevels
 
 
 def get_exit_msg(backend: RunconfUIBackend) -> str:
-    """
-    Quick message to return shortcut for run- dcontrol
+    """Generate exit message with drunc command for run-control launch.
+
+    Quick message to return shortcut for run-control that can be sourced
+    as a shell script to launch the next DAQ run.
+
+    :param backend: RunconfUIBackend instance to grab config info from
+    :returns: Command string to run in terminal to launch run-control, or error message
+    :rtype: str
     """
     # We'll grab the environment variables
     run_mode = Path(os.getenv("PROCESS_MANAGER_CONFIG", "ssh-standalone")).stem
@@ -99,7 +105,20 @@ def cli(
     ops_url: str,
     log_level: LogLevels = "INFO",
 ):
-    """runconf-ui — run configuration interface."""
+    """CLI interface for runconf-ui.
+
+    Launches the interactive configuration UI and saves selected configurations
+    to the specified output directory. Invoked with the runconf-shifter-ui command.
+
+    :param apparatus: DAQ apparatus name (e.g., NP02, NP04)
+    :param config_directory: Path to configuration directory
+    :param output_directory: Directory to save run configs to
+    :param use_local: Use local filesystem instead of remote API
+    :param config_file_name: Config file to find in the ops repo
+    :param base_url: URL for the BASE repository
+    :param ops_url: URL for the operations repository
+    :param log_level: Log level (INFO, WARNING, DEBUG)
+    """
     ctx = RunconfContext(
         apparatus=apparatus,
         conf_directory=Path(config_directory),

@@ -17,7 +17,22 @@ from ..widgets import (
 
 
 class MainScreen(Screen):
+    """Primary user interface screen for runconf-ui configuration management.
+
+    Displays the main layout with file selection, control panels for enable/disable
+    and adjustable attributes, configuration tree views, and application options.
+    Provides the central interface for users to browse, select, and modify
+    DAQ configurations.
+    """
+
     def compose(self):
+        """Compose the main screen layout hierarchy.
+
+        Creates the header, main content grid with file selector, tabbed controls,
+        tree views, and options panel, plus the footer.
+
+        :returns: A generator yielding screen content widgets
+        """
         yield Header()
         with Grid(id="main_container"):
             yield FileSelect(id="file-select-panel")

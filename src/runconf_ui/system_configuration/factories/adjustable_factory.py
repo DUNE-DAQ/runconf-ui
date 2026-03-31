@@ -5,15 +5,19 @@ from .factory_base import FactoryBase
 
 
 class AdjustableFactory(FactoryBase["AdjustableAttributeData", "list[Leaf] | None"]):
-    """
-    Creates Leaf(AdjustableAttribute) nodes.
+    """Creates Leaf nodes for adjustable attributes.
 
-    Each Leaf's tooltip is resolved from the DAL at construction time:
-    getattr(dal, data.tooltip, dal.id) when data.tooltip names a DAL attribute,
-    otherwise dal.id.
+    Creates Leaf(AdjustableAttribute) nodes for configuration attributes that
+    can be adjusted/modified by the user (e.g., trigger rates, thresholds).
     """
 
     def create(self, data: AdjustableAttributeData) -> list[Leaf] | None:
+        """Create adjustable attribute leaf nodes from configuration data.
+
+        :param data: AdjustableAttributeData specifying the attributes to create
+        :returns: List of Leaf nodes, or None if no matching DALs
+        :rtype: list[Leaf] | None
+        """
         dals = self.resolve_dals(data.class_name, data.id or None)
         if dals is None:
             return None

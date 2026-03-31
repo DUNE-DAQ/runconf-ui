@@ -15,6 +15,12 @@ from runconf_ui.utils import check_config_has_session, get_logger
 
 
 class RemoteRepoManager(RepoManagerInterface):
+    """Repository manager for remote git-based DAQ configuration repositories.
+
+    Manages DAQ configurations stored in remote git repositories via the
+    runconftools ConfPool interface.
+    """
+
     def __init__(
         self,
         apparatus: str,
@@ -23,6 +29,15 @@ class RemoteRepoManager(RepoManagerInterface):
         operation_url: str,
         base_url: str,
     ):
+        """Initialize the remote repository manager.
+
+        :param apparatus: The DAQ apparatus name
+        :param conf_directory: Local directory to cache configurations
+        :param config_file_name: Default config filename to load
+        :param operation_url: URL of the operations git repository
+        :param base_url: URL of the base git repository
+        :raises RunConfToolsRepoException: If URLs are not set or ConfPool initialization fails
+        """
         super().__init__(apparatus, conf_directory)
         if operation_url is None or base_url is None:
             raise RunConfToolsRepoException(
@@ -42,14 +57,18 @@ class RemoteRepoManager(RepoManagerInterface):
             )
 
     def get_available_daq_versions(self) -> list[str]:
-        """
-        Get the list of DAQ versions
+        """Get the list of available DAQ versions from the remote repository.
+
+        :returns: List of available DAQ version identifiers
+        :rtype: list[str]
         """
         return self.conf_pool.get_daq_versions()
 
     def get_daq_sessions(self) -> list[str]:
-        """
-        Get the list of DAQ configurations
+        """Get the list of DAQ configurations for the current version.
+
+        :returns: List of configuration names for the current DAQ version
+        :rtype: list[str]
         """
         if self.daq_version is None:
             return []
@@ -57,10 +76,15 @@ class RemoteRepoManager(RepoManagerInterface):
         return self.conf_pool.get_confs(re.compile(f"^{self.daq_version}$"))
 
     def select_config(self, conf: str) -> Configuration:
-        """
-        checkout the ops repo and see the config is there
-        """
+        """Checkout and select a configuration from the remote repository.
 
+        :param conf: The configuration name to select
+        :returns: Path to the local cached configuration file
+        :rtype: Configuration
+        :raises DaqVersionException: If no DAQ version is selected
+        :raises ConfigNotFoundInRepoException: If the config file is not found in the repository
+        :raises ConfigBrokenInRepoException: If the config does not contain a valid session
+        """
         if self.daq_version is None:
             raise DaqVersionException("No DAQ release selected")
 

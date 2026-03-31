@@ -10,7 +10,21 @@ from .dynamic_panel import DynamicTabbedContent, textual_safe_id
 
 
 class EnableDisablePanel(ScrollableContainer):
+    """Panel widget displaying enable/disable toggle buttons for configuration nodes.
+
+    This widget displays a scrollable container of buttons representing nodes
+    that can be enabled or disabled. Button appearance reflects the current
+    enabled/disabled state, and interactivity is managed based on node status.
+    """
+
     def __init__(self, group_id: str, nodes: dict[str, NodeStatus], *args, **kwargs):
+        """Initialize EnableDisablePanel.
+
+        :param group_id: The identifier for this panel's node group
+        :param nodes: Dictionary mapping node IDs to their current NodeStatus
+        :param args: Variable positional arguments passed to parent ScrollableContainer
+        :param kwargs: Variable keyword arguments passed to parent ScrollableContainer
+        """
         super().__init__(*args, **kwargs)
         get_logger().info(f"Initialising enable/disable panel with id {group_id}")
         get_logger().debug(f"Initialising enable/disable panel with nodes {nodes}")
@@ -19,6 +33,10 @@ class EnableDisablePanel(ScrollableContainer):
         self._runconf_nodes = nodes
 
     def compose(self):
+        """Compose toggle buttons for all nodes in this group.
+
+        :returns: A generator yielding Button widgets for each node
+        """
         get_logger().debug("Composing enable/disable panel")
         for node_id, node in self._runconf_nodes.items():
             get_logger().debug(f"   - {node_id} : {node}")
@@ -37,6 +55,13 @@ class EnableDisablePanel(ScrollableContainer):
 
     @on(Button.Pressed)
     def handle_button_pressed(self, event: Button.Pressed):
+        """Handle button press events and emit NodeToggledMessage.
+
+        When a button is pressed, emits a NodeToggledMessage to notify
+        the backend of the state change.
+
+        :param event: The Button.Pressed event
+        """
         if event.button.id is None:
             return
 
@@ -45,6 +70,13 @@ class EnableDisablePanel(ScrollableContainer):
         )
 
     def update_buttons(self, nodes: dict[str, NodeStatus]) -> None:
+        """Update button states to reflect current node status.
+
+        Updates CSS classes, disabled state, and tooltips based on the
+        current node status. Called when state tree changes.
+
+        :param nodes: Dictionary mapping node IDs to their current NodeStatus
+        """
         get_logger().debug("Updating buttons")
 
         get_logger().debug("Updating buttons")
@@ -65,14 +97,32 @@ class EnableDisablePanel(ScrollableContainer):
 
 
 class EnableDisableTabs(DynamicTabbedContent):
+    """Tabbed widget containing enable/disable panels for multiple node groups.
+
+    This widget manages multiple EnableDisablePanel tabs, one for each group
+    of enable/disable nodes in the configuration.
+    """
+
     panel_prefix = "enable_disable_panel"
 
     def _make_pane_content(
         self, group_id: str, data: dict[str, NodeStatus], panel_id: str
     ) -> EnableDisablePanel:
+        """Create an EnableDisablePanel for the given group.
+
+        :param group_id: The identifier for this group
+        :param data: Dictionary of nodes in this group
+        :param panel_id: The widget ID to assign to the panel
+        :returns: A new EnableDisablePanel widget
+        :rtype: EnableDisablePanel
+        """
         return EnableDisablePanel(group_id, data, id=panel_id)
 
     def _update_panes(self, data: dict) -> None:
+        """Update all enable/disable panes with new node status data.
+
+        :param data: Dictionary mapping group IDs to node dictionaries
+        """
         get_logger().debug(f"Updating pans for {self.id}")
         for group_id, nodes in data.items():
             get_logger().debug(f"{group_id}:")

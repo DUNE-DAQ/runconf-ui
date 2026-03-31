@@ -33,12 +33,26 @@ from .dataclasses import (
 
 
 def _natural_key(s: str):
+    """Convert a string into a list suitable for natural sorting.
+
+    :param s: String to convert
+    :returns: List of integers and strings for natural sort order
+    :rtype: list
+    """
     return [
         int(text) if text.isdigit() else text.lower() for text in re.split(r"(\d+)", s)
     ]
 
 
 def _node_sort_key(item: tuple[str, NodeStatus]):
+    """Generate a sort key for node items.
+
+    Sorts by enabled state first, then natural order of keys.
+
+    :param item: Tuple of (key, NodeStatus)
+    :returns: Sort key tuple
+    :rtype: tuple
+    """
     key, node = item
     return (
         0 if node.is_enabled else 1,
@@ -53,6 +67,8 @@ def _node_sort_key(item: tuple[str, NodeStatus]):
 
 @dataclass()
 class AssembledSystem:
+    """A single assembled system with its root node and display configuration."""
+
     root: Group
     display_full_system: bool
 
@@ -68,12 +84,15 @@ class AssembledSystem:
 
 @dataclass()
 class AssembledGroup:
+    """A group of systems with shared ID and label."""
+
     id: str
     label: str
     systems: list[AssembledSystem]
     view_panel: str = ""
 
     def __post_init__(self):
+        """Initialize node dictionary after dataclass initialization."""
         self.nodes = {}
         for system in self.systems:
             self.nodes.update(system.nodes)
@@ -81,10 +100,13 @@ class AssembledGroup:
 
 @dataclass
 class AssembledConfig:
+    """The complete assembled configuration with disableable and adjustable groups."""
+
     disableable: list[AssembledGroup]
     adjustable: list[AssembledGroup]
 
     def __post_init__(self):
+        """Initialize sorted node dictionaries after dataclass initialization."""
         self.disableable_nodes = {
             group.id: self._sorted_nodes(group.nodes) for group in self.disableable
         }
@@ -94,6 +116,12 @@ class AssembledConfig:
         self.all_nodes = {**self.adjustable_nodes, **self.disableable_nodes}
 
     def _sorted_nodes(self, nodes: dict[str, NodeStatus]) -> dict[str, NodeStatus]:
+        """Sort nodes by enable status and natural key order.
+
+        :param nodes: Dictionary of node status objects
+        :returns: Sorted dictionary of node status objects
+        :rtype: dict[str, NodeStatus]
+        """
         return dict(sorted(nodes.items(), key=_node_sort_key))
 
 
@@ -106,6 +134,10 @@ class SystemConfig:
     """Loads a YAML file and exposes structured dataclass skeletons."""
 
     def __init__(self, path: Path):
+        """Initialize SystemConfig by loading and parsing a YAML configuration file.
+
+        :param path: Path to the YAML configuration file
+        """
         self.path = path
         raw = self._load(path)
 
@@ -119,19 +151,40 @@ class SystemConfig:
 
     @staticmethod
     def _load(path: Path) -> dict:
+        """Load and parse a YAML configuration file.
+
+        :param path: Path to the YAML file
+        :returns: Parsed YAML content as a dictionary
+        :rtype: dict
+        """
         with open(path) as f:
             return yaml.safe_load(f)
 
     @property
     def classes_to_show(self) -> list[str]:
+        """Get the list of DAL classes to display.
+
+        :returns: List of DAL class names
+        :rtype: list[str]
+        """
         return self._settings.classes_to_show
 
     @property
     def disableable_skeleton(self) -> dict[str, DisableableGroupData]:
+        """Get the disableable group structure.
+
+        :returns: Dictionary of DisableableGroupData objects by name
+        :rtype: dict[str, DisableableGroupData]
+        """
         return self._disableable
 
     @property
     def adjustable_skeleton(self) -> dict[str, AdjustableGroupData]:
+        """Get the adjustable group structure.
+
+        :returns: Dictionary of AdjustableGroupData objects by name
+        :rtype: dict[str, AdjustableGroupData]
+        """
         return self._adjustable
 
 
@@ -144,6 +197,11 @@ class ConfigAssembler:
     """Turns YAML skeletons into Group trees via the system builders."""
 
     def __init__(self, configuration: Configuration, session: DalBase):
+        """Initialize ConfigAssembler.
+
+        :param configuration: The conffwk Configuration object
+        :param session: The session DAL object
+        """
         self.configuration = configuration
         self.session = session
 
@@ -151,6 +209,12 @@ class ConfigAssembler:
         self,
         skeleton: dict[str, DisableableGroupData],
     ) -> list[AssembledGroup]:
+        """Assemble disableable groups from skeleton data.
+
+        :param skeleton: Dictionary of DisableableGroupData objects
+        :returns: List of assembled disableable groups
+        :rtype: list[AssembledGroup]
+        """
         builder = DisableSystemBuilder(self.configuration, self.session)
 
         assembled_groups = []
@@ -187,6 +251,12 @@ class ConfigAssembler:
         self,
         skeleton: dict[str, AdjustableGroupData],
     ) -> list[AssembledGroup]:
+        """Assemble adjustable groups from skeleton data.
+
+        :param skeleton: Dictionary of AdjustableGroupData objects
+        :returns: List of assembled adjustable groups
+        :rtype: list[AssembledGroup]
+        """
         builder = AdjustableSystemBuilder(self.configuration, self.session)
 
         assembled_groups = []
@@ -230,12 +300,19 @@ class SystemConfigReader:
     """
 
     def __init__(self, config_path: Path):
+        """Initialize SystemConfigReader.
+
+        :param config_path: Path to the YAML configuration file
+        """
         get_logger().info(f"Reading config: {config_path}")
         self.config = SystemConfig(config_path)
 
     @property
     def classes_to_draw(self):
-        """Classes to display in the global config tree."""
+        """Get classes to display in the global config tree.
+
+        :returns: List of DAL class names to draw
+        """
         return self.config.classes_to_show
 
     def assemble_config(
@@ -243,7 +320,13 @@ class SystemConfigReader:
         configuration: Configuration,
         session_name: str,
     ) -> AssembledConfig:
+        """Assemble the full configuration against a live conffwk Configuration.
 
+        :param configuration: The conffwk Configuration object
+        :param session_name: Name of the session to assemble
+        :returns: Complete assembled configuration
+        :rtype: AssembledConfig
+        """
         session = configuration.get_dal("Session", session_name)
         assembler = ConfigAssembler(configuration, session)
         get_logger().info(f"Assembling: {session_name} in {configuration!r}")

@@ -34,6 +34,13 @@ NodeIterator = list[tuple[DOMQuery, Any]]
 
 
 class RunconfUIApp(App):
+    """Main Textual application for runconf-shifter-ui.
+
+    Manages the TUI interface for selecting and configuring DAQ sessions,
+    displaying configuration trees, and managing enable/disable and adjustable
+    attributes through an interactive terminal interface.
+    """
+
     CSS_PATH: ClassVar[str] = "runconf_shifter_ui.tcss"
     BINDINGS: ClassVar[list] = [("ctrl+q", "quit", "Quit")]
 
@@ -56,11 +63,21 @@ class RunconfUIApp(App):
     }
 
     def __init__(self, backend: RunconfUIBackend, *args, **kwargs):
+        """Initialize RunconfUIApp.
+
+        :param backend: The RunconfUIBackend instance managing configuration logic
+        :param args: Positional arguments passed to App
+        :param kwargs: Keyword arguments passed to App
+        """
         super().__init__(*args, **kwargs)
         self.backend = backend
         get_logger().debug("Initialised application")
 
     def on_mount(self) -> None:
+        """Initialize the application on Textual mount event.
+
+        Sets theme, title, and initializes file selectors.
+        """
         get_logger().debug("Mounting")
         self.theme = "catppuccin-latte"
         self.title = f"Runconf-Shifter-UI v{version('runconf_ui')}"
@@ -74,6 +91,10 @@ class RunconfUIApp(App):
 
     @on(runconf_msg.DaqVersionSelectedMessage)
     def handle_version_selected(self, event: runconf_msg.DaqVersionSelectedMessage):
+        """Handle DAQ version selection event.
+
+        :param event: The DaqVersionSelectedMessage event containing the selected version
+        """
         self.backend.set_daq_version(event.daq_version)
         get_logger().info(f"Selected daq version: {event.daq_version}")
         available_sessions = self.backend.get_sessions()

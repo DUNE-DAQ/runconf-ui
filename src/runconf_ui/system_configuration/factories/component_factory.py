@@ -5,13 +5,19 @@ from .factory_base import FactoryBase
 
 
 class ComponentFactory(FactoryBase["DisableElementData", "list[Leaf] | None"]):
-    """
-    Creates Leaf nodes from DisableElementData (component entries in YAML).
+    """Creates Leaf nodes for disable components.
+
     Returns a list because one config entry can expand to many components
     when each_component_separate=True.
     """
 
     def create(self, data: DisableElementData) -> list[Leaf] | None:
+        """Create component leaf nodes from configuration data.
+
+        :param data: DisableElementData specifying the components to create
+        :returns: List of Leaf nodes, or None if no matching DALs
+        :rtype: list[Leaf] | None
+        """
         dals = self.resolve_dals(data.class_name, data.id or None)
         if dals is None:
             return None

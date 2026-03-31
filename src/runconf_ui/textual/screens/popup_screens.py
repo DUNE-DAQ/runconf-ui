@@ -20,13 +20,25 @@ ButtonVariants = Literal["default", "primary", "success", "warning", "error"]
 
 
 class LoadingScreen(ModalScreen):
-    """Blocking modal shown while a config is being opened."""
+    """Modal loading screen shown during configuration loading.
+
+    Displays a loading indicator and message while a configuration file
+    is being loaded and processed.
+    """
 
     def __init__(self, message: str = "Loading configuration..."):
+        """Initialize LoadingScreen with a message.
+
+        :param message: The message to display while loading
+        """
         super().__init__()
         self._message = message
 
     def compose(self) -> ComposeResult:
+        """Compose the loading screen with message and indicator.
+
+        :returns: A generator yielding loading screen widgets
+        """
         get_logger().debug("Loading")
         with Vertical(id="loading-box"):
             yield Label(self._message, id="loading-label")
@@ -35,6 +47,11 @@ class LoadingScreen(ModalScreen):
 
 @dataclass(frozen=True)
 class ButtonTemplate:
+    """Template for creating a button bound to a specific message.
+
+    Encapsulates a Button widget and the message it should emit when pressed.
+    """
+
     button: Button
     message: QuitMessage
 
@@ -47,6 +64,16 @@ class ButtonTemplate:
         message: QuitMessage,
         disabled: bool = False,
     ) -> "ButtonTemplate":
+        """Create a ButtonTemplate with the given properties.
+
+        :param label: The button label text
+        :param variant: The button styling variant
+        :param button_id: The widget ID for the button
+        :param message: The message to emit when button is pressed
+        :param disabled: Whether the button should be initially disabled
+        :returns: A new ButtonTemplate instance
+        :rtype: ButtonTemplate
+        """
         get_logger().debug(
             f"Making button with label={label}, variant={variant}, id={button_id}, classes='pop_up_button', disabled={disabled}), {message}"
         )
@@ -64,21 +91,40 @@ class ButtonTemplate:
 
 
 class ButtonPopup(ModalScreen):
-    """Pop-up screen with a label and a set of buttons, each mapped to a message."""
+    """Modal pop-up screen with configurable buttons and associated messages.
+
+    Displays a label/prompt and a set of buttons, each mapped to emit a
+    specific message when pressed. Used as a base for confirmation dialogs
+    and other button-driven pop-ups.
+    """
 
     def __init__(self, buttons: list[ButtonTemplate], info_str: str, css_classes: str):
+        """Initialize ButtonPopup with button templates and information.
+
+        :param buttons: List of ButtonTemplate objects defining buttons and their messages
+        :param info_str: The information/prompt text to display
+        :param css_classes: CSS classes to apply to the pop-up
+        """
         super().__init__(classes="pop_up_screen")
         self._buttons = {t.button.id: t for t in buttons}
         self._info_str = info_str
         self._css_classes = css_classes
 
     def compose(self):
+        """Compose the pop-up with label and buttons.
+
+        :returns: A generator yielding pop-up widgets
+        """
         with Grid(id="pop_grid", classes=self._css_classes):
             yield Label(self._info_str, classes="quit_question")
             for template in self._buttons.values():
                 yield template.button
 
     def on_mount(self):
+        """Configure grid layout based on button count.
+
+        Sets up the grid to span as many columns as there are buttons.
+        """
         num_buttons = len(self._buttons)
         grid = self.query_one("#pop_grid")
         grid.styles.grid_size_columns = num_buttons
@@ -86,13 +132,27 @@ class ButtonPopup(ModalScreen):
 
     @on(Button.Pressed)
     def handle_button_press(self, event: Button.Pressed):
+        """Handle button press events and emit the associated message.
+
+        :param event: The Button.Pressed event
+        """
         template = self._buttons.get(event.button.id)
         if template is not None:
             self.post_message(template.message)
 
 
 class QuitScreen(ButtonPopup):
+    """Modal pop-up for quit confirmation with save/discard options.
+
+    Presents options to quit and save configuration, quit without saving,
+    or cancel and continue editing.
+    """
+
     def __init__(self, can_create: bool):
+        """Initialize QuitScreen.
+
+        :param can_create: Whether configuration can be created (enables create-quit button)
+        """
         get_logger().debug("initialising quit screen")
         super().__init__(
             buttons=[
@@ -122,7 +182,13 @@ class QuitScreen(ButtonPopup):
 
 
 class CreateScreen(ButtonPopup):
+    """Modal pop-up for configuration creation.
+
+    Presents options to create configuration and quit or cancel and continue editing.
+    """
+
     def __init__(self):
+        """Initialize CreateScreen."""
         get_logger().debug("initialising create screen")
         super().__init__(
             buttons=[
@@ -145,7 +211,16 @@ class CreateScreen(ButtonPopup):
 
 
 class ExceptionScreen(ButtonPopup):
+    """Modal pop-up for displaying error messages.
+
+    Presents an error message with an OK button to dismiss the error.
+    """
+
     def __init__(self, error_msg: str):
+        """Initialize ExceptionScreen.
+
+        :param error_msg: The error message to display
+        """
         get_logger().debug("initialising exception screen")
         super().__init__(
             buttons=[

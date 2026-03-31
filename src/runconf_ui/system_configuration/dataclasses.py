@@ -111,12 +111,24 @@ class SystemConfigData:
 
 
 def _filters(raw) -> list[FilterData]:
+    """Convert raw filter dictionaries to FilterData objects.
+
+    :param raw: Raw filter data list from YAML
+    :returns: List of FilterData objects
+    :rtype: list[FilterData]
+    """
     return [
         FilterData(attribute=r["attribute"], values=r["values"]) for r in (raw or [])
     ]
 
 
 def _base_disable_kwargs(item: dict) -> dict:
+    """Extract base disable element kwargs from a raw dictionary.
+
+    :param item: Raw item dictionary from YAML
+    :returns: Dictionary of keyword arguments for DisableElementData
+    :rtype: dict
+    """
     return dict(
         class_name=item["class"],
         id=item.get("id", ""),
@@ -131,6 +143,12 @@ def _base_disable_kwargs(item: dict) -> dict:
 
 
 def _attribute_kwargs(item: dict) -> dict:
+    """Extract disable attribute kwargs from a raw dictionary.
+
+    :param item: Raw item dictionary from YAML
+    :returns: Dictionary of keyword arguments for DisableAttributeData
+    :rtype: dict
+    """
     return dict(
         **_base_disable_kwargs(item),
         enabled_state=item.get("enabled_state", True),
@@ -147,6 +165,12 @@ class YamlToSystemData:
 
     @classmethod
     def build_disableable_groups(cls, raw: dict) -> dict[str, DisableableGroupData]:
+        """Build disableable group dataclass objects from raw YAML data.
+
+        :param raw: Raw YAML dictionary containing disableable group data
+        :returns: Dictionary mapping group names to DisableableGroupData objects
+        :rtype: dict[str, DisableableGroupData]
+        """
         return {
             name: DisableableGroupData(
                 label=data.get("label", ""),
@@ -158,6 +182,12 @@ class YamlToSystemData:
 
     @classmethod
     def build_adjustable_groups(cls, raw: dict) -> dict[str, AdjustableGroupData]:
+        """Build adjustable group dataclass objects from raw YAML data.
+
+        :param raw: Raw YAML dictionary containing adjustable group data
+        :returns: Dictionary mapping group names to AdjustableGroupData objects
+        :rtype: dict[str, AdjustableGroupData]
+        """
         return {
             name: AdjustableGroupData(
                 label=data.get("label", ""),
@@ -168,6 +198,12 @@ class YamlToSystemData:
 
     @staticmethod
     def build_settings(raw: dict) -> SettingsData:
+        """Build settings dataclass from raw YAML data.
+
+        :param raw: Raw YAML dictionary containing settings data
+        :returns: SettingsData object
+        :rtype: SettingsData
+        """
         return SettingsData(
             classes_to_show=raw.get("Settings", {}).get("classes_to_show", [])
         )
@@ -176,6 +212,12 @@ class YamlToSystemData:
     def _build_disableable_systems(
         cls, raw_systems: list[dict]
     ) -> dict[str, list[DisableableSystemData]]:
+        """Build disableable system dataclass objects from raw YAML data.
+
+        :param raw_systems: List of raw system dictionaries from YAML
+        :returns: Dictionary mapping system names to lists of DisableableSystemData
+        :rtype: dict[str, list[DisableableSystemData]]
+        """
         systems: dict[str, list[DisableableSystemData]] = {}
         for entry in raw_systems:
             for name, data in entry.items():
@@ -199,6 +241,12 @@ class YamlToSystemData:
 
     @staticmethod
     def _build_relationships(raw) -> list[DisableRelationshipData]:
+        """Build relationship dataclass objects from raw YAML data.
+
+        :param raw: Raw relationship data (dict or list of dicts)
+        :returns: List of DisableRelationshipData objects
+        :rtype: list[DisableRelationshipData]
+        """
         if isinstance(raw, dict):
             raw = [raw]
         return [
@@ -213,6 +261,13 @@ class YamlToSystemData:
     def _build_adjustable_systems(
         raw_systems: list[dict], name: str
     ) -> dict[str, list[AdjustableAttributeData]]:
+        """Build adjustable attribute system dataclass objects from raw YAML data.
+
+        :param raw_systems: List of raw system dictionaries from YAML
+        :param name: The system group name
+        :returns: Dictionary mapping system name to list of AdjustableAttributeData
+        :rtype: dict[str, list[AdjustableAttributeData]]
+        """
         attrs = [
             AdjustableAttributeData(
                 class_name=entry["object_class"],
