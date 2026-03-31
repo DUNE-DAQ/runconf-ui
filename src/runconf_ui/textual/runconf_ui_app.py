@@ -243,10 +243,3 @@ class RunconfUIApp(App):
         for file_select in self.query(FileSelect):
             file_select.update_versions(versions)
             file_select.refresh()
-
-    # ------------------------------------------------------------------ #
-
-    def exit(self):
-        rc_command = "run drunc"
-        get_logger().debug(f"Exiting application with command {rc_command}")
-        super().exit(result=f"To run drunc please launch {rc_command}")
