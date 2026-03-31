@@ -13,11 +13,27 @@ from rich.tree import Tree
 
 from runconf_ui.state_tree import Group, Node, State, compute_state
 
+# Yeah sorry about this
+from runconf_ui.system_configuration.config_reader import _natural_key
+
 _COLOURS: dict[State, str] = {
     State.ENABLED: "green",
     State.DISABLED: "red",
     State.PARENT_DISABLED: "grey46",
 }
+
+
+def sort_children(children: list[Node]) -> list[Node]:
+    """Sort a list of nodes first by type (Group before Node) then by label.
+
+    :param children: List of child nodes to sort
+    :returns: Sorted list of child nodes
+    :rtype: list[Node]
+    """
+    return sorted(
+        children,
+        key=lambda n: (0 if isinstance(n, Group) else 1, _natural_key(n.label or "")),
+    )
 
 
 def _format_label(label: str, state: State) -> str:
@@ -44,7 +60,8 @@ def _render_node_branch(branch, node: Node, parent: Group | None) -> None:
     """
     if not isinstance(node, Group):
         return
-    for child, _, _ in node:
+
+    for child in sort_children(node.children):
         if child.label:
             state = compute_state(child, parent=node)
             sub = branch.add(_format_label(child.label, state))

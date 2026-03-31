@@ -270,12 +270,13 @@ class RunconfUIBackend:
         :raises RunConfToolsRepoException: Session's not been found in the repository manager
         """
         self._logger.debug("Opening session")
-        self.system_config_reader = SystemConfigReader(
-            self._session_manager.get_runconf_ui_config_path()
-        )
         self._logger.debug("Loading session")
         self.configuration, self.config_session, init_config_path = (
             self._session_manager.load_session()
+        )
+
+        self.system_config_reader = SystemConfigReader(
+            self._session_manager.get_runconf_ui_config_path()
         )
 
         if self.config_session is None:
