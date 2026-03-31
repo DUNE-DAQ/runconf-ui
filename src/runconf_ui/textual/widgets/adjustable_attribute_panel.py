@@ -77,6 +77,7 @@ class AdjustableAttributeContainer(Static):
     def update_node(self, node: NodeStatus):
         self._adjust_node = node
         self.query_one(Input).value = str(self._adjust_node.value)
+        self.check_enabled()
 
     @property
     def interactive(self):
@@ -105,12 +106,12 @@ class AdjustableAttributePanel(ScrollableContainer):
             )
 
     def update_containers(self, nodes: dict[str, NodeStatus]) -> None:
-        for node_id in nodes:
+        for node_id, node in nodes.items():
             safe_id = textual_safe_id(node_id)
             results = self.query(f"#{safe_id}")
             if not results:
                 continue
-            results.first(AdjustableAttributeContainer).check_enabled()
+            results.first(AdjustableAttributeContainer).update_node(node)
 
 
 class AdjustableAttributeTabs(DynamicTabbedContent):

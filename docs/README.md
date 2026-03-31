@@ -1,4 +1,5 @@
-# Shifter Interface
+# Runconf-UI
+[![Run pytest](https://github.com/DUNE-DAQ/runconf-ui/actions/workflows/run_pytest.yml/badge.svg)](https://github.com/DUNE-DAQ/runconf-ui/actions/workflows/run_pytest.yml)
 
 ## Overview
 

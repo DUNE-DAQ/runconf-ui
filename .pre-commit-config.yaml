@@ -25,14 +25,3 @@ repos:
     hooks:
       - id: validate-pyproject
         additional_dependencies: ["validate-pyproject[extra]"]
-
--   repo: https://github.com/hukkin/mdformat
-    rev: 0.7.21
-    hooks:
-      - id: mdformat
-        name: "Format markdown"
-        additional_dependencies:
-          - mdformat-gfm          # GitHub-Flavored Markdown support
-          - mdformat-ruff         # Python code formatting
-          - mdformat-frontmatter  # YAML frontmatter support
-          - ruff                  # Required for mdformat-ruff
