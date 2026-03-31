@@ -19,6 +19,7 @@
     :caption: User Guide
     :maxdepth: 2
 
+    modules/general/installation_guide
     modules/general/quick_start
     modules/general/system_configuration
 

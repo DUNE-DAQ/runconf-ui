@@ -8,7 +8,6 @@ API Reference
    system_configuration
    state_tree
    repo_manager
-   state_tree
    backend
    utils
 
