@@ -67,7 +67,10 @@ def _node_sort_key(item: tuple[str, NodeStatus]):
 
 @dataclass()
 class AssembledSystem:
-    """A single assembled system with its root node and display configuration."""
+    """A single assembled system with its root node and display configuration.
+    :param root: The root node of the system's state tree
+    :param display_full_system: Whether to display the full system or just components
+    """
 
     root: Group
     display_full_system: bool
@@ -84,7 +87,12 @@ class AssembledSystem:
 
 @dataclass()
 class AssembledGroup:
-    """A group of systems with shared ID and label."""
+    """A group of systems with shared ID and label.
+    :param id: Internal identifier for the group
+    :param label: Display label for the group
+    :param view_panel: Optional tag for the view panel to display this group in
+    :param systems: List of systems that belong to this group
+    """
 
     id: str
     label: str
@@ -100,7 +108,10 @@ class AssembledGroup:
 
 @dataclass
 class AssembledConfig:
-    """The complete assembled configuration with disableable and adjustable groups."""
+    """The complete assembled configuration with disableable and adjustable groups.
+    :param disableable: List of disableable groups
+    :param adjustable: List of adjustable groups
+    """
 
     disableable: list[AssembledGroup]
     adjustable: list[AssembledGroup]

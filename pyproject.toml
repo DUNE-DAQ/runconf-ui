@@ -42,6 +42,15 @@ dev = [
     "types-PyYAML"
 ]
 
+docs = [
+    "sphinx",
+    "sphinx-click==4.4.0", # OLD VERSION NEEDED
+    "sphinx-autodoc-typehints>=2.3.0",
+    "sphinxcontrib-bibtex",
+    "furo"
+
+]
+
 [tool.pytest.ini_options]
 addopts = "-v --tb=short --cov=runconf_ui --cov=src/runconf_ui tests/"  # omitted --cov-report=html to avoid suppressing table to stdout
 markers = [
