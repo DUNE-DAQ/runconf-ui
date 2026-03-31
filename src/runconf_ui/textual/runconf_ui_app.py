@@ -44,11 +44,9 @@ class RunconfUIApp(App):
     CSS_PATH: ClassVar[str] = "runconf_shifter_ui.tcss"
     BINDINGS: ClassVar[list] = [("ctrl+q", "quit", "Quit")]
 
-    # In Textual 7.x, MODES + switch_mode is the correct way to make a named
-    # screen the active base screen. SCREENS + push_screen stacks on top of
-    # _default, so app.query() searches _default (empty) instead of MainScreen.
-    # MODES gives each entry its own screen stack; switch_mode makes it active
-    # and app.query() then correctly searches MainScreen's widget tree.
+    #: Named screen modes for the application. Uses ``switch_mode`` to set the
+    #: active base screen. Each entry gets its own screen stack so that
+    #: ``app.query()`` correctly searches the active screen's widget tree.
     MODES: ClassVar[dict] = {
         "main": MainScreen,
     }

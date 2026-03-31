@@ -6,19 +6,32 @@ a fully constructed Group tree ready for traversal, indexing, and rendering.
 
 Flag conventions used throughout:
 
-  votes=True,  propagate=True  — normal disable child; influences parent state
-                                 and is set when parent is set. (default)
-  votes=False, propagate=True  — controlled-but-non-voting; gated by parent
-                                 and set when parent is set, but doesn't
-                                 influence parent state.
-                                 Replaces the old controlled_objects mechanism.
-  votes=False, propagate=False — adjustable child; fully independent of the
-                                 enable/disable tree. Never set via Group.set().
+.. list-table::
+   :header-rows: 1
+   :widths: 20 20 60
+
+   * - votes
+     - propagate
+     - Meaning
+   * - ``True``
+     - ``True``
+     - Normal disable child; influences parent state and is set when parent
+       is set. (default)
+   * - ``False``
+     - ``True``
+     - Controlled-but-non-voting; gated by parent and set when parent is set,
+       but doesn't influence parent state. Replaces the old
+       ``controlled_objects`` mechanism.
+   * - ``False``
+     - ``False``
+     - Adjustable child; fully independent of the enable/disable tree. Never
+       set via ``Group.set()``.
 
 Root strategy:
-  subsystem_dependent=False — strategy=all (system is on iff ALL components are on)
-  subsystem_dependent=True  — strategy=any (system is on if ANY subsystem is on;
-                               equivalently, off only when ALL subsystems are off)
+
+- ``subsystem_dependent=False`` — ``strategy=all``: system is on iff ALL components are on.
+- ``subsystem_dependent=True`` — ``strategy=any``: system is on if ANY subsystem is on
+  (equivalently, off only when ALL subsystems are off).
 """
 
 from conffwk import Configuration

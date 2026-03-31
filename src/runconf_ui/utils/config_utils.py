@@ -90,10 +90,11 @@ def get_config_paths(config_directory: Path):
 
 
 def get_configs_with_session(config_paths: list[Path] | Path) -> list[Path]:
-    """Return all configuration files that contain at least one Session.
+    """
+    Return all configuration files that contain at least one Session.
 
     Accepts a single file or directory, or a mixed list of both.
-    Recursively searches directories for *.data.xml files.
+    Recursively searches directories for .data.xml files.
 
     :param config_paths: Configuration file path(s) or directory path(s)
     :returns: List of configuration files containing sessions
