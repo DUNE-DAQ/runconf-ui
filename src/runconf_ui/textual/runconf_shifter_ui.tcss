@@ -266,8 +266,9 @@ AdjustableAttributeContainer {
 .quit_question {
     height: 1fr;
     width: 1fr;
-    color: white;
+    color: black;
     content-align: center middle;
+    background: white 80%;
 }
 
 .quit_question_full {

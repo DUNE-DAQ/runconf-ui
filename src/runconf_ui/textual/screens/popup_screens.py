@@ -5,7 +5,7 @@ from textual import on
 from textual.app import ComposeResult
 from textual.containers import Grid, Vertical
 from textual.screen import ModalScreen
-from textual.widgets import Button, Label, LoadingIndicator
+from textual.widgets import Button, Label, LoadingIndicator, Static
 
 from runconf_ui.utils import get_logger
 
@@ -116,7 +116,7 @@ class ButtonPopup(ModalScreen):
         :returns: A generator yielding pop-up widgets
         """
         with Grid(id="pop_grid", classes=self._css_classes):
-            yield Label(self._info_str, classes="quit_question")
+            yield Static(f"[bold]{self._info_str}[/bold]", classes="quit_question")
             for template in self._buttons.values():
                 yield template.button
 
@@ -226,9 +226,15 @@ class ExceptionScreen(ButtonPopup):
             buttons=[
                 ButtonTemplate.make(
                     "OK",
-                    "primary",
+                    "error",
                     "ok_button",
                     CancelQuitMessage(),
+                ),
+                ButtonTemplate.make(
+                    "Quit Runconf-UI",
+                    "warning",
+                    "quit_scrap_button",
+                    QuitAndScrapMessage(),
                 ),
             ],
             info_str=error_msg,
