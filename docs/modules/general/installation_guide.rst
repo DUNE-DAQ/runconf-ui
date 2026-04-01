@@ -16,4 +16,3 @@ Or via `pip` from the source code
 
     pip install .
 
-w
