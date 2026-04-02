@@ -83,6 +83,7 @@ class DisableableGroupData:
 class AdjustableGroupData:
     label: str  # Label of the group
     systems: dict[str, list[AdjustableAttributeData]]  # Any internal systems
+    view_panel: str  # Tag for the view panel
 
 
 @dataclass
@@ -188,10 +189,12 @@ class YamlToSystemData:
         :returns: Dictionary mapping group names to AdjustableGroupData objects
         :rtype: dict[str, AdjustableGroupData]
         """
+
         return {
             name: AdjustableGroupData(
                 label=data.get("label", ""),
                 systems=cls._build_adjustable_systems(data.get("Systems", []), name),
+                view_panel=data.get("view_panel", ""),
             )
             for name, data in raw.items()
         }
@@ -268,6 +271,7 @@ class YamlToSystemData:
         :returns: Dictionary mapping system name to list of AdjustableAttributeData
         :rtype: dict[str, list[AdjustableAttributeData]]
         """
+
         attrs = [
             AdjustableAttributeData(
                 class_name=entry["object_class"],

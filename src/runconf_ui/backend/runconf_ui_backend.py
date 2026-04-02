@@ -480,7 +480,7 @@ class RunconfUIBackend:
 
         self._tree_views = {
             group.id: self._build_panel_tree(group)
-            for group in a.disableable
+            for group in a.disableable + a.adjustable
             if group.view_panel
         }
 
