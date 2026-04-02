@@ -14,7 +14,7 @@ from runconf_ui.repo_manager.repo_manager_interface import RepoManagerInterface
 from runconf_ui.utils import check_config_has_session, get_logger
 
 
-class RemoteRepoManager(RepoManagerInterface):
+class RemoteRepoManager(RepoManagerInterface[str]):
     """Repository manager for remote git-based DAQ configuration repositories.
 
     Manages DAQ configurations stored in remote git repositories via the

@@ -5,7 +5,7 @@ from runconf_ui.repo_manager.repo_manager_interface import RepoManagerInterface
 from runconf_ui.utils import get_configs_with_session
 
 
-class LocalRepoManager(RepoManagerInterface):
+class LocalRepoManager(RepoManagerInterface[Path]):
     """Repository manager for local file-based configuration repositories.
 
     Manages DAQ configurations stored in a local file system directory.

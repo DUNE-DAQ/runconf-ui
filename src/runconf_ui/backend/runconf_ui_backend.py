@@ -11,7 +11,7 @@ from rich import print as rprint
 from rich.tree import Tree
 
 from runconf_ui.exceptions import NodeNotFound, RunConfToolsRepoException
-from runconf_ui.repo_manager import LocalRepoManager, RemoteRepoManager
+from runconf_ui.repo_manager import RepoManagerInterface, repo_factory
 from runconf_ui.state_tree import NodeStatus, walk
 from runconf_ui.system_configuration import SystemConfigReader
 from runconf_ui.system_configuration.config_reader import AssembledConfig
@@ -59,7 +59,7 @@ TreeViews = dict[str, Tree]
 class _SessionManager:
     """Owns repo interaction and config loading. No state querying here."""
 
-    repo_manager: LocalRepoManager | RemoteRepoManager
+    repo_manager: RepoManagerInterface
 
     def __init__(self, context: RunconfContext):
         """Session management
@@ -71,29 +71,14 @@ class _SessionManager:
         """
         self._logger = get_logger()
 
-        if context.use_local:
-            self._logger.debug("Using local repo manager")
-            self.repo_manager = LocalRepoManager(
-                context.apparatus, context.conf_directory
-            )
-        else:
-            if context.config_file_name is None:
-                raise RunConfToolsRepoException(
-                    "Must set default_config for remote use"
-                )
-            if context.base_url is None:
-                raise RunConfToolsRepoException("Must set base_url for remote use")
-            if context.ops_url is None:
-                raise RunConfToolsRepoException("Must set ops_url for remote use")
-
-            self._logger.debug("Using remote repo manager")
-            self.repo_manager = RemoteRepoManager(
-                context.apparatus,
-                context.conf_directory,
-                context.config_file_name,
-                context.ops_url,
-                context.base_url,
-            )
+        self.repo_manager = repo_factory(
+            apparatus=context.apparatus,
+            conf_directory=context.conf_directory,
+            use_local=context.use_local,
+            config_file_name=context.config_file_name,
+            ops_url=context.ops_url,
+            base_url=context.base_url,
+        )
 
         try:
             backup = os.getlogin()
