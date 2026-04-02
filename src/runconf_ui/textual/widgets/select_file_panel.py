@@ -102,6 +102,10 @@ class FileSelect(Static):
 
         version_select: VersionSelect = self.query_one(VersionSelect)
         version_select.set_options(opts)
+
+        if len(opts) == 1:
+            version_select.value = opts[0][1]
+
         self.enable_session_select()
 
     def update_sessions(self, sessions: list[str] | list[Path]):
@@ -119,6 +123,9 @@ class FileSelect(Static):
         ]
         session_select: SessionSelect = self.query_one(SessionSelect)
         session_select.set_options(opts)  # type: ignore
+
+        if len(opts) == 1:
+            session_select.value = opts[0][1]
 
     def enable_session_select(self):
         """Enable or disable the session selector based on version selection.
@@ -141,6 +148,10 @@ class FileSelect(Static):
         open_button = self.query_one("#open_file_button", Button)
         open_button.disabled = not self._select_enabled(session_select)
 
+        # No selection + Only one opt
+        if len(session_select._options) == 2:
+            self.handle_open_pressed()
+
     def update_text(self, update_text: str | None):
         """Update the status text display.
 
@@ -158,7 +169,7 @@ class FileSelect(Static):
         text_query.update(update_text)
 
     @on(Button.Pressed, ".file_io_button")
-    def handle_open_pressed(self, _: Button.Pressed):
+    def handle_open_pressed(self):
         """Handle open button press events.
 
         When the open button is pressed, emits a LoadConfigMessage to trigger

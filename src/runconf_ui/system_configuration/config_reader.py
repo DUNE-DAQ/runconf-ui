@@ -291,7 +291,7 @@ class ConfigAssembler:
                 AssembledGroup(
                     id=group_name,
                     label=group_data.label or group_name,
-                    view_panel="",
+                    view_panel=group_data.view_panel,
                     systems=systems,
                 )
             )

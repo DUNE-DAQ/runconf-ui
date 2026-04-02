@@ -37,7 +37,7 @@ def repo_factory(
     """
 
     if use_local:
-        return LocalRepoManager(apparatus, conf_directory)
+        return LocalRepoManager(apparatus, conf_directory, config_file_name)
     if config_file_name is None:
         raise RunConfToolsRepoException(
             f"Error {config_file_name} not set, cannot use remote interface"

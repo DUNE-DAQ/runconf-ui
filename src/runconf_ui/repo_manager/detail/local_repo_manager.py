@@ -11,7 +11,9 @@ class LocalRepoManager(RepoManagerInterface[Path]):
     Manages DAQ configurations stored in a local file system directory.
     """
 
-    def __init__(self, apparatus: str, conf_directory: Path):
+    def __init__(
+        self, apparatus: str, conf_directory: Path, config_file_name: str | None = None
+    ):
         """Initialize the local repository manager.
 
         :param apparatus: The DAQ apparatus name
@@ -20,6 +22,8 @@ class LocalRepoManager(RepoManagerInterface[Path]):
         super().__init__(apparatus, conf_directory)
         self._available_versions = [conf_directory]
         self.set_daq_version(conf_directory)
+
+        self.conf_file = config_file_name
 
     def get_available_daq_versions(self) -> list[Path]:
         """Get the list of available DAQ versions.
@@ -40,7 +44,12 @@ class LocalRepoManager(RepoManagerInterface[Path]):
         if self.daq_version is None:
             return []
 
-        return get_configs_with_session(self.daq_version)
+        confs_w_ses = get_configs_with_session(self.daq_version)
+
+        if self.conf_file is None:
+            return confs_w_ses
+
+        return [c for c in confs_w_ses if c.name == self.conf_file]
 
     def select_config(self, config: Path) -> Path:
         """Select a configuration file by path or name.
