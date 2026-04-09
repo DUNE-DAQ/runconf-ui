@@ -193,15 +193,3 @@ AdjustableAttributes:
 The adjustable panel shows the object name and attribute on the left and the current value on the right. **Apply** commits the new value; **Reset** reverts to the value loaded from the configuration file.
 
 > **Note:** If the object containing an adjustable element is disabled, the controls will be greyed out and non-interactive.
-
----
-
-## Environment Setup
-
-The `General` section (used in earlier config versions) maps settings to environment variables. You can also override most settings via CLI flags at startup — see `runconf-shifter-ui --help` for the full list.
-
-> **Important:** You cannot change the `base_url` of a repository that already exists on disk. To use a new URL, point `download_directory` at a fresh directory, either via the YAML or the `-d` / `--base-url` flags:
->
-> ```bash
-> runconf-shifter-ui -d path/to/new/repo --base_url new/base/url
-> ```
