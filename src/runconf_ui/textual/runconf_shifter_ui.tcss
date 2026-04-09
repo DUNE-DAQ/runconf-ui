@@ -348,7 +348,7 @@ LoadingScreen {
 }
 
 #loading-box {
-    width: 30;
+    width: 50;
     height: 6;
     border: round grey;
     background: darkgrey;

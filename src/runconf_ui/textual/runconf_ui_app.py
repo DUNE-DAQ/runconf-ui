@@ -91,16 +91,39 @@ class RunconfUIApp(App):
     def handle_version_selected(self, event: runconf_msg.DaqVersionSelectedMessage):
         """Handle DAQ version selection event.
 
+        Fetches available sessions behind a loading screen, since scanning
+        config files on disk can be slow.
+
         :param event: The DaqVersionSelectedMessage event containing the selected version
         """
         self.backend.set_daq_version(event.daq_version)
         get_logger().info(f"Selected daq version: {event.daq_version}")
-        available_sessions = self.backend.get_sessions()
-        get_logger().debug(f"Available Sessions: {available_sessions}")
+        self.push_screen(LoadingScreen("Scanning for available sessions..."))
+        self._fetch_sessions_worker()
 
+    @work(thread=True)
+    def _fetch_sessions_worker(self) -> None:
+        """Fetch available sessions on a background thread.
+
+        The local repo manager scans and opens every config file to check
+        for a session, which can be slow on large directories.
+        """
+        try:
+            sessions = self.backend.get_sessions()
+            get_logger().debug(f"Available Sessions: {sessions}")
+            self.app.call_from_thread(self._apply_sessions, sessions)
+        except Exception as e:
+            self.app.call_from_thread(self._on_config_failed_popup, e)
+
+    def _apply_sessions(self, sessions) -> None:
+        """Populate session selects and dismiss the loading screen.
+
+        :param sessions: List of available DAQ sessions
+        """
+        self.pop_screen()
         for file_select in self.query(FileSelect):
             file_select.enable_session_select()
-            file_select.update_sessions(available_sessions)
+            file_select.update_sessions(sessions)
 
     @on(runconf_msg.DaqSessionSelectedMessage)
     def handle_session_selected(self, event: runconf_msg.DaqSessionSelectedMessage):
