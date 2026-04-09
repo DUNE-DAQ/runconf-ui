@@ -78,3 +78,12 @@ class RepoManagerInterface(ABC, Generic[T]):
         :rtype: T
         """
         ...
+
+    @property
+    @abstractmethod
+    def default_version(self) -> str:
+        """Return the default version used
+
+        :return: Default version
+        :rtype: str
+        """

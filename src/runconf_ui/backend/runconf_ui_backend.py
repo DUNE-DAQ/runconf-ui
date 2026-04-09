@@ -123,6 +123,10 @@ class _SessionManager:
         """Get the path to the currently selected RUNCONF-UI config file from the repository manager."""
         return self.repo_manager.get_runconf_ui_config_path()
 
+    def get_default_version(self) -> str:
+        """Get the default DAQ version"""
+        return self.repo_manager.default_version
+
     # ---- Config loading ----
 
     def load_session(self) -> tuple[Configuration, DalBase, Path]:
@@ -215,12 +219,16 @@ class RunconfUIBackend:
         self._logger.debug("Backend instantiated")
 
     # ------------------------------------------------------------------ #
-    # Session / version forwarding                                         #
+    # Session / version forwarding [I hate this]                         #
     # ------------------------------------------------------------------ #
 
     def get_daq_versions(self):
         """Forward the request for available DAQ versions to the session manager."""
         return self._session_manager.get_daq_versions()
+
+    def get_default_version(self):
+        """Forward the request for default DAQ version to the session manager."""
+        return self._session_manager.get_default_version()
 
     def get_current_version(self):
         """Forward the request for the current DAQ version to the session manager."""

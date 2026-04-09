@@ -109,3 +109,7 @@ class RemoteRepoManager(RepoManagerInterface[str]):
             )
 
         return file_path
+
+    @property
+    def default_version(self) -> str:
+        return self.conf_pool.get_release()

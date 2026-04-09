@@ -75,3 +75,7 @@ class LocalRepoManager(RepoManagerInterface[Path]):
         raise DaqVersionException(
             f"Session {config} does not exist for {self.daq_version}"
         )
+
+    @property
+    def default_version(self) -> str:
+        return ""
