@@ -1,6 +1,6 @@
 # Quick Start
 
-To get started, follow the [Installation Guide](../README.md.md) in the README to set up the environment and install the necessary dependencies. Once runconf-ui is installed you can launch the application and start exploring its features.
+To get started, follow the [Installation Guide](../README.md) in the README to set up the environment and install the necessary dependencies. Once runconf-ui is installed you can launch the application and start exploring its features.
 
 ## Command Line Interface
 
