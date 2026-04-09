@@ -3,7 +3,7 @@
 To get started, follow the [Installation Guide](README.md) in the README to set up the environment and install the necessary dependencies. Once runconf-ui is installed you can launch the application and start exploring its features.
 
 ## Setting up the Remote environment
-`runconf-ui` uses [`runconftools`](https://github.com/DUNE-DAQ/runconftools/tree/develop) to interface with the remote gitlab repositories. In order to access these you need to setup a gitlab token. In order to set this up follow [these steps](https://docs.gitlab.com/user/profile/personal_access_tokens/) then in your `~/.netrc` file do add
+`runconf-ui` uses [`runconftools`](https://github.com/DUNE-DAQ/runconftools/tree/develop) to interface with the remote gitlab repositories. In order to access these you need to setup a gitlab token. In order to set this up follow [these steps](https://docs.gitlab.com/user/profile/personal_access_tokens/) then in your `~/.netrc` file add
 ```sh
 machine gitlab.cern.ch
 login <your gitlab login>
