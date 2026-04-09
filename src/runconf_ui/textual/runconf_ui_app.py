@@ -80,6 +80,7 @@ class RunconfUIApp(App):
         self.theme = "catppuccin-latte"
         self.title = f"Runconf-Shifter-UI v{version('runconf_ui')}"
         self.switch_mode("main")
+        self.push_screen(LoadingScreen("Initialising..."))
         self.call_after_refresh(self._init_file_selects)
         get_logger().debug("Mounted")
 
@@ -89,26 +90,14 @@ class RunconfUIApp(App):
 
     @on(runconf_msg.DaqVersionSelectedMessage)
     def handle_version_selected(self, event: runconf_msg.DaqVersionSelectedMessage):
-        """Handle DAQ version selection event.
-
-        Fetches available sessions behind a loading screen, since scanning
-        config files on disk can be slow.
-
-        :param event: The DaqVersionSelectedMessage event containing the selected version
-        """
-        self.backend.set_daq_version(event.daq_version)
         get_logger().info(f"Selected daq version: {event.daq_version}")
-        self.push_screen(LoadingScreen("Scanning for available sessions..."))
-        self._fetch_sessions_worker()
+        self.push_screen(LoadingScreen("Scanning for available sessions..."))  # ← first
+        self._fetch_sessions_worker(event.daq_version)
 
     @work(thread=True)
-    def _fetch_sessions_worker(self) -> None:
-        """Fetch available sessions on a background thread.
-
-        The local repo manager scans and opens every config file to check
-        for a session, which can be slow on large directories.
-        """
+    def _fetch_sessions_worker(self, daq_version) -> None:
         try:
+            self.backend.set_daq_version(daq_version)  # ← moved into worker
             sessions = self.backend.get_sessions()
             get_logger().debug(f"Available Sessions: {sessions}")
             self.app.call_from_thread(self._apply_sessions, sessions)
@@ -259,9 +248,14 @@ class RunconfUIApp(App):
         self.refresh()
 
     def _init_file_selects(self) -> None:
-        versions = self.backend.get_daq_versions()
-        get_logger().debug(f"Initialising file selects with {versions}")
-        for file_select in self.query(FileSelect):
-            file_select.update_versions(versions)
-            file_select.set_default_version(self.backend.get_default_version())
-            file_select.refresh()
+        try:
+            versions = self.backend.get_daq_versions()
+            get_logger().debug(f"Initialising file selects with {versions}")
+            for file_select in self.query(FileSelect):
+                file_select.update_versions(versions)
+                file_select.set_default_version(self.backend.get_default_version())
+                file_select.refresh()
+        except Exception as e:
+            self.handle_exception_popup(e)
+        finally:
+            self.pop_screen()
