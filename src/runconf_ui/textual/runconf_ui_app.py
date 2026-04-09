@@ -240,4 +240,5 @@ class RunconfUIApp(App):
         get_logger().debug(f"Initialising file selects with {versions}")
         for file_select in self.query(FileSelect):
             file_select.update_versions(versions)
+            file_select.set_default_version(self.backend.get_default_version())
             file_select.refresh()

@@ -88,6 +88,15 @@ class FileSelect(Static):
             )
             yield Static("No Config Loaded", id="config_info")
 
+    def set_default_version(self, default: str):
+        version_select: VersionSelect = self.query_one(VersionSelect)
+
+        opts = [o[1] for o in version_select._options]
+
+        if default in opts:
+            version_select.value = default
+            self.enable_session_select()
+
     def update_versions(self, versions: list[str]):
         """Update the list of available DAQ versions in the selector.
 
@@ -105,8 +114,7 @@ class FileSelect(Static):
 
         if len(opts) == 1:
             version_select.value = opts[0][1]
-
-        self.enable_session_select()
+            self.enable_session_select()
 
     def update_sessions(self, sessions: list[str] | list[Path]):
         """Update the list of available DAQ sessions in the selector.
