@@ -40,8 +40,8 @@ class RunconfContext:
     log_level: LogLevels           # "INFO" | "DEBUG" | "WARNING"
 ```
 
-The backend has four main responsibilities, described below.
 
+The backend has four main responsibilities, described below.
 ---
 
 ### The Repo Manager
