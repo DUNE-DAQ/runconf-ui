@@ -1,34 +1,24 @@
 from textwrap import dedent
+from typing import ClassVar
 
-from textual.containers import ScrollableContainer
-from textual.screen import Screen
+from textual.containers import ScrollableContainer, Vertical
+from textual.screen import ModalScreen
 from textual.widgets import Button, Static
 
 
-class HelpScreen(Screen):
-    """Pop-up help screen displaying usage instructions for the application.
-
-    Shows detailed help text explaining how to use the configuration UI,
-    including instructions for version selection, session management, and
-    configuration modification.
-    """
+class HelpScreen(ModalScreen):
+    BINDINGS: ClassVar[list] = [("escape", "app.pop_screen", "Close")]
 
     def __init__(self):
-        """Initialize HelpScreen with pop-up styling."""
         super().__init__(classes="pop_up_screen")
 
     def compose(self):
-        """Compose the help screen with scrollable content and close button.
-
-        :returns: A generator yielding screen content widgets
-        """
-        with ScrollableContainer(classes="pop_up scrollable_popup"):
-            yield Static(
-                self.message(),
-                classes="help_message",
+        with Vertical(classes="pop_up help_popup_container"):
+            with ScrollableContainer(classes="help_scroll"):
+                yield Static(self.message(), classes="help_message")
+            yield Button(
+                "Close (Esc)", id="close_help_screen", classes="help_up_button"
             )
-
-        yield Button("Close", id="close_help_screen", classes="help_up_button")
 
     def message(self):
         """Generate the help message text.

@@ -21,6 +21,7 @@ class LocalRepoManager(RepoManagerInterface[Path]):
         """
         super().__init__(apparatus, conf_directory)
         self._available_versions = [conf_directory]
+
         self.set_daq_version(conf_directory)
 
         self.conf_file = config_file_name
@@ -45,6 +46,11 @@ class LocalRepoManager(RepoManagerInterface[Path]):
             return []
 
         confs_w_ses = get_configs_with_session(self.daq_version)
+
+        if not confs_w_ses:
+            raise FileNotFoundError(
+                "Cannot find any configuration files. Check your 'DUNEDAQ_DB_PATH' is setup correctly (source setup_db_path.sh in the conf directory)"
+            )
 
         if self.conf_file is None:
             return confs_w_ses

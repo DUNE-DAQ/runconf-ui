@@ -292,19 +292,32 @@ AdjustableAttributeContainer {
    Help Screen
    ============================================================ */
 
-.help_message {
-    color: white;
+.help_popup_container {
+    width: 60%;
+    height: 80%;
+    border: thick $primary-background-darken-3 80%;
+    background: $primary-background-darken-1;
+    padding: 1 2;
 }
 
-.scrollable_popup {
-    height: 50%;
-    width: 40%;
+.help_scroll {
+    height: 1fr;
+    width: 100%;
+    background: $primary-background;
+}
+
+.help_message {
+    padding: 1 1;
+    color: white;
 }
 
 .help_up_button {
+    width: 100%;
+    height: auto;
+    margin-top: 1;
     background: $warning;
     color: white;
-    align-horizontal: right;
+    align-horizontal: right;  /* remove or keep as you like */
 }
 
 
