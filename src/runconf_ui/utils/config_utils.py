@@ -58,23 +58,6 @@ def get_number_of_sessions(configuration: Configuration) -> int:
     return len(configuration.get_dals("Session"))
 
 
-# def check_config_has_session(config_path: Path) -> bool:
-#     """Return True if the configuration at the given path contains at least one Session.
-
-#     :param config_path: Path to the configuration file to check
-#     :returns: True if at least one Session DAL exists, False otherwise
-#     :rtype: bool
-#     :raises ConfigReadException: If the configuration cannot be read
-#     """
-#     try:
-#         conf = open_configuration(config_path)
-#     except Exception as e:
-#         raise ConfigReadException(f"Cannot read configuration at {config_path}") from e
-
-
-#     has_session = get_number_of_sessions(conf) > 0
-#     conf.unload()
-#     return has_session
 def check_config_has_session(config_path: Path) -> bool:
     """Return True if the configuration contains at least one Session.
 
