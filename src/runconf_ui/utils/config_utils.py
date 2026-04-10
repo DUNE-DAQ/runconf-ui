@@ -77,7 +77,7 @@ def check_config_has_session(config_path: Path) -> bool:
 
     try:
         # Stream parse: stops as soon as we find a Session
-        for event, elem in ET.iterparse(config_path, events=("start",)):
+        for _, elem in ET.iterparse(config_path, events=("start",)):
             if elem.tag == "obj" and elem.attrib.get("class") == "Session":
                 return True
         return False
