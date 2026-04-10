@@ -119,19 +119,31 @@ EnableDisablePanel {
     height: auto;
 }
 
+.en_group_txt{
+    padding: 0 1;
+    color: $primary-background-darken-3;
+}
+
 .en_button_container {
     border: round $primary-background-darken-3;
     width: 100%;
     height: auto;
     padding: 0 1;
+    content-align: right middle;
     margin: 0 1 1 1;
 }
 
-.enable_disable_button,
-.detector_subsystem_button {
+.main_enabled_btn {
     width: 100%;
     align: center middle;
     margin: 0 1;
+    color: white;
+}
+
+.sub_enabled_btn {
+    width: 100%;
+    align: center middle;
+    margin: 0 1 0 5;
     color: white;
 }
 

@@ -1,6 +1,6 @@
 from textual import on
 from textual.containers import ScrollableContainer, Vertical
-from textual.widgets import Button
+from textual.widgets import Button, Static
 
 from runconf_ui.state_tree import NodeStatus
 from runconf_ui.utils import get_logger
@@ -45,12 +45,18 @@ class EnableDisablePanel(ScrollableContainer):
         for node_id, node in self._runconf_nodes.items():
             get_logger().debug(f"   - {node_id} : {node}")
 
-            cls = "node_enabled" if node.is_enabled else "node_disabled"
+            enabled_state = "node_enabled" if node.is_enabled else "node_disabled"
+
+            if node.parent:
+                node_classes = f"sub_enabled_btn {enabled_state}"
+            else:
+                node_classes = f"main_enabled_btn {enabled_state}"
+
             enabled = node.is_interactive
             btn = Button(
                 label=node.node.label,
                 id=node_id,
-                classes=f"enable_disable_button {cls}",
+                classes=node_classes,
                 disabled=not enabled,
             )
             if node.tooltip:
@@ -58,12 +64,14 @@ class EnableDisablePanel(ScrollableContainer):
 
             group_box = node.parent.label if node.parent else node.label
             if group_box in button_groups:
-                button_groups[group_box].append(btn)
+                button_groups[group_box].append((node.parent is None, btn))
             else:
-                button_groups[group_box] = [btn]
+                button_groups[group_box] = [(node.parent is None, btn)]
 
+        yield Static(self._group_id, classes="en_group_txt")
         for group_lab, btns in button_groups.items():
-            vtcl = Vertical(*btns, classes="en_button_container")
+            btns_sorted = [btn for _, btn in sorted(btns, key=lambda x: not x[0])]
+            vtcl = Vertical(*btns_sorted, classes="en_button_container")
             vtcl.border_title = group_lab
             yield vtcl
 
