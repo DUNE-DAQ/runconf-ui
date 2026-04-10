@@ -382,7 +382,9 @@ async def test_quit_scrap_exits_app(pilot):
 
 @pytest.mark.slow
 async def test_buttons_render_after_load(loaded_pilot):
-    buttons = list(loaded_pilot.app.query(".enable_disable_button"))
+    buttons = list(loaded_pilot.app.query(".main_enabled_btn")) + list(
+        loaded_pilot.app.query(".sub_enabled_btn")
+    )
 
     assert len(buttons) > 0
 
