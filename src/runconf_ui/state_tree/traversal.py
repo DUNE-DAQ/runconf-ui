@@ -156,6 +156,8 @@ def walk(root: Node, parent: Group | None = None, _ancestor_disabled: bool = Fal
     state = compute_state(root, parent if not _ancestor_disabled else None)
     if _ancestor_disabled:
         state = State.PARENT_DISABLED
+
+    # We can also set the state here
     yield NodeStatus(root, state, parent)
 
     if isinstance(root, Group):

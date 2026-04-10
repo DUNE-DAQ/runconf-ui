@@ -254,13 +254,22 @@ class Group(Node):
 
         Returns True vacuously when there are no voting children.
 
+        HAS A MAJOR SIDE EFFECT: Propagates the state to non-voting nodes
+
         :returns: Aggregated state based on strategy (all or any)
         :rtype: bool
         """
         voting = self.voting_children
         if not voting:
             return True
-        return self.strategy(child.get() for child in voting)
+        state = self.strategy(child.get() for child in voting)
+
+        # Propagate to non-voting nodes
+        for child in self._children:
+            if child.propagate and not child.votes:
+                child.node.set(state)
+
+        return state
 
     def gated_get(self, child: Node) -> bool:
         """Return the visible state of a direct child, gated by this group.
