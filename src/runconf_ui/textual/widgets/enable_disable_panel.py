@@ -1,5 +1,5 @@
 from textual import on
-from textual.containers import ScrollableContainer
+from textual.containers import ScrollableContainer, Vertical
 from textual.widgets import Button
 
 from runconf_ui.state_tree import NodeStatus
@@ -37,6 +37,9 @@ class EnableDisablePanel(ScrollableContainer):
 
         :returns: A generator yielding Button widgets for each node
         """
+        # We're gonna structure things into a dict
+        button_groups = {}
+
         get_logger().debug("Composing enable/disable panel")
         for node_id, node in self._runconf_nodes.items():
             get_logger().debug(f"   - {node_id} : {node}")
@@ -51,7 +54,17 @@ class EnableDisablePanel(ScrollableContainer):
             )
             if node.tooltip:
                 btn.tooltip = node.tooltip
-            yield btn
+
+            group_box = node.parent.label if node.parent else node.label
+            if group_box in button_groups:
+                button_groups[group_box].append(btn)
+            else:
+                button_groups[group_box] = [btn]
+
+        for group_lab, btns in button_groups.items():
+            vtcl = Vertical(*btns, classes="en_button_container")
+            vtcl.border_title = group_lab
+            yield vtcl
 
     @on(Button.Pressed)
     def handle_button_pressed(self, event: Button.Pressed):

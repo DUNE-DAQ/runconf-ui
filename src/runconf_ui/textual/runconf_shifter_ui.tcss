@@ -116,13 +116,22 @@ EnableDisablePanel {
     layout: vertical;
     overflow-y: auto;
     width: 100%;
+    height: auto;
+}
+
+.en_button_container {
+    border: round $primary-background-darken-3;
+    width: 100%;
+    height: auto;
+    padding: 0 1;
+    margin: 0 1 1 1;
 }
 
 .enable_disable_button,
 .detector_subsystem_button {
     width: 100%;
     align: center middle;
-    margin: 1 3;
+    margin: 0 1;
     color: white;
 }
 
@@ -317,7 +326,7 @@ AdjustableAttributeContainer {
     margin-top: 1;
     background: $warning;
     color: white;
-    align-horizontal: right;  /* remove or keep as you like */
+    align-horizontal: right;
 }
 
 
@@ -345,8 +354,8 @@ AdjustableAttributeContainer {
 
 
 .quit_grid {
-    width: 60%;   /* Increased width */
-    height: 30%;  /* Increased height */
+    width: 60%;
+    height: 30%;
     grid-gutter: 1 2;
     grid-rows: 1fr 3;
 }
