@@ -314,6 +314,7 @@ class RunconfUIBackend:
             raise FileExistsError("Configuration file not found!")
         self.configuration.commit()
         self._save_path.parent.mkdir(parents=True, exist_ok=True)
+
         copy_and_open_config(Path(self.configuration.active_database), self._save_path)
 
         # Save the trees as well

@@ -6,7 +6,7 @@ from pathlib import Path
 
 from conffwk import Configuration
 from conffwk.dal import DalBase
-from daqconf.consolidate import consolidate_files
+from daqconf.consolidate import consolidate_db
 
 from runconf_ui.exceptions import ConfigReadException
 
@@ -43,7 +43,7 @@ def copy_and_open_config(original_config: Path, buffer_file: Path):
     :rtype: Configuration
     """
     buffer_file.parent.mkdir(parents=True, exist_ok=True)
-    consolidate_files(str(buffer_file), str(original_config))
+    consolidate_db(str(original_config), str(buffer_file))
     return open_configuration(buffer_file)
 
 
