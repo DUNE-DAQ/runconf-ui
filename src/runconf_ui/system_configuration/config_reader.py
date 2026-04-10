@@ -7,9 +7,15 @@ SystemConfigReader — public facade: load + assemble in one call.
 
 AssembledConfig, AssembledGroup, AssembledSystem are the typed output
 dataclasses consumed by the TUI layer.
+
+Group assembly is parallelised with ThreadPoolExecutor: each group is built
+on its own thread since the per-group factories only *read* from conffwk
+(no writes occur during construction).  The number of workers is capped at
+``min(32, len(groups))`` so we never spin up more threads than there is work.
 """
 
 import re
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -205,7 +211,12 @@ class SystemConfig:
 
 
 class ConfigAssembler:
-    """Turns YAML skeletons into Group trees via the system builders."""
+    """Turns YAML skeletons into Group trees via the system builders.
+
+    Group assembly is parallelised: each (group_name, group_data) pair is
+    dispatched to a worker thread.  The builders only *read* from conffwk
+    during construction so concurrent execution is safe.
+    """
 
     def __init__(self, configuration: Configuration, session: DalBase):
         """Initialize ConfigAssembler.
@@ -216,87 +227,169 @@ class ConfigAssembler:
         self.configuration = configuration
         self.session = session
 
-    def assemble_disableable(
-        self,
-        skeleton: dict[str, DisableableGroupData],
-    ) -> list[AssembledGroup]:
-        """Assemble disableable groups from skeleton data.
+    # ------------------------------------------------------------------ #
+    # Internal per-group helpers (run on worker threads)                  #
+    # ------------------------------------------------------------------ #
 
-        :param skeleton: Dictionary of DisableableGroupData objects
-        :returns: List of assembled disableable groups
-        :rtype: list[AssembledGroup]
+    def _build_disableable_group(
+        self,
+        group_name: str,
+        group_data: DisableableGroupData,
+    ) -> AssembledGroup | None:
+        """Build a single disableable AssembledGroup.
+
+        Intended to be called from a worker thread.  Creates its own
+        DisableSystemBuilder so there is no shared mutable builder state
+        between threads.
+
+        :param group_name: Name/ID of the group
+        :param group_data: Skeleton data for the group
+        :returns: AssembledGroup or None if no systems produced children
         """
         builder = DisableSystemBuilder(self.configuration, self.session)
+        systems = []
 
-        assembled_groups = []
-        for group_name, group_data in skeleton.items():
-            systems = []
-            for system_name, system_list in group_data.systems.items():
-                for system_data in system_list:
-                    # Build the tree once and reuse it — avoid running factories twice.
-                    root = builder.build(system_data, label=system_name)
-                    if not root.children:
-                        continue
-                    systems.append(
-                        AssembledSystem(
-                            root=root,
-                            display_full_system=system_data.display_full_system,
-                        )
-                    )
-
-            if not systems:
-                continue
-
-            assembled_groups.append(
-                AssembledGroup(
-                    id=group_name,
-                    label=group_data.label or group_name,
-                    view_panel=group_data.view_panel,
-                    systems=systems,
-                )
-            )
-
-        return assembled_groups
-
-    def assemble_adjustable(
-        self,
-        skeleton: dict[str, AdjustableGroupData],
-    ) -> list[AssembledGroup]:
-        """Assemble adjustable groups from skeleton data.
-
-        :param skeleton: Dictionary of AdjustableGroupData objects
-        :returns: List of assembled adjustable groups
-        :rtype: list[AssembledGroup]
-        """
-        builder = AdjustableSystemBuilder(self.configuration, self.session)
-
-        assembled_groups = []
-        for group_name, group_data in skeleton.items():
-            systems = []
-            for system_name, attrs in group_data.systems.items():
-                root = builder.build(attrs, label=system_name)
+        for system_name, system_list in group_data.systems.items():
+            for system_data in system_list:
+                root = builder.build(system_data, label=system_name)
                 if not root.children:
                     continue
                 systems.append(
                     AssembledSystem(
                         root=root,
-                        display_full_system=False,
+                        display_full_system=system_data.display_full_system,
                     )
                 )
 
-            if not systems:
-                continue
+        if not systems:
+            return None
 
-            assembled_groups.append(
-                AssembledGroup(
-                    id=group_name,
-                    label=group_data.label or group_name,
-                    view_panel=group_data.view_panel,
-                    systems=systems,
+        return AssembledGroup(
+            id=group_name,
+            label=group_data.label or group_name,
+            view_panel=group_data.view_panel,
+            systems=systems,
+        )
+
+    def _build_adjustable_group(
+        self,
+        group_name: str,
+        group_data: AdjustableGroupData,
+    ) -> AssembledGroup | None:
+        """Build a single adjustable AssembledGroup.
+
+        Intended to be called from a worker thread.  Creates its own
+        AdjustableSystemBuilder so there is no shared mutable builder state
+        between threads.
+
+        :param group_name: Name/ID of the group
+        :param group_data: Skeleton data for the group
+        :returns: AssembledGroup or None if no systems produced children
+        """
+        builder = AdjustableSystemBuilder(self.configuration, self.session)
+        systems = []
+
+        for system_name, attrs in group_data.systems.items():
+            root = builder.build(attrs, label=system_name)
+            if not root.children:
+                continue
+            systems.append(
+                AssembledSystem(
+                    root=root,
+                    display_full_system=False,
                 )
             )
 
-        return assembled_groups
+        if not systems:
+            return None
+
+        return AssembledGroup(
+            id=group_name,
+            label=group_data.label or group_name,
+            view_panel=group_data.view_panel,
+            systems=systems,
+        )
+
+    # ------------------------------------------------------------------ #
+    # Public assembly methods                                              #
+    # ------------------------------------------------------------------ #
+
+    def assemble_disableable(
+        self,
+        skeleton: dict[str, DisableableGroupData],
+    ) -> list[AssembledGroup]:
+        """Assemble disableable groups from skeleton data in parallel.
+
+        Each group is built on a separate thread.  Results are returned in
+        the original skeleton iteration order.
+
+        :param skeleton: Dictionary of DisableableGroupData objects
+        :returns: List of assembled disableable groups (empty groups omitted)
+        :rtype: list[AssembledGroup]
+        """
+        if not skeleton:
+            return []
+
+        items = list(skeleton.items())
+        max_workers = min(32, len(items))
+        results: dict[int, AssembledGroup] = {}
+
+        get_logger().debug(
+            f"Assembling {len(items)} disableable group(s) "
+            f"with up to {max_workers} worker thread(s)"
+        )
+
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            future_to_index = {
+                executor.submit(self._build_disableable_group, name, data): idx
+                for idx, (name, data) in enumerate(items)
+            }
+            for future in as_completed(future_to_index):
+                idx = future_to_index[future]
+                group = future.result()  # re-raises any exception from the thread
+                if group is not None:
+                    results[idx] = group
+
+        # Preserve original YAML order
+        return [results[i] for i in sorted(results)]
+
+    def assemble_adjustable(
+        self,
+        skeleton: dict[str, AdjustableGroupData],
+    ) -> list[AssembledGroup]:
+        """Assemble adjustable groups from skeleton data in parallel.
+
+        Each group is built on a separate thread.  Results are returned in
+        the original skeleton iteration order.
+
+        :param skeleton: Dictionary of AdjustableGroupData objects
+        :returns: List of assembled adjustable groups (empty groups omitted)
+        :rtype: list[AssembledGroup]
+        """
+        if not skeleton:
+            return []
+
+        items = list(skeleton.items())
+        max_workers = min(32, len(items))
+        results: dict[int, AssembledGroup] = {}
+
+        get_logger().debug(
+            f"Assembling {len(items)} adjustable group(s) "
+            f"with up to {max_workers} worker thread(s)"
+        )
+
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            future_to_index = {
+                executor.submit(self._build_adjustable_group, name, data): idx
+                for idx, (name, data) in enumerate(items)
+            }
+            for future in as_completed(future_to_index):
+                idx = future_to_index[future]
+                group = future.result()
+                if group is not None:
+                    results[idx] = group
+
+        return [results[i] for i in sorted(results)]
 
 
 # ---------------------------------------------------------------------------
@@ -332,6 +425,10 @@ class SystemConfigReader:
         session_name: str,
     ) -> AssembledConfig:
         """Assemble the full configuration against a live conffwk Configuration.
+
+        Disableable and adjustable group assembly runs in parallel; the two
+        top-level calls themselves run sequentially since they share the same
+        Configuration object and we do not want to interleave their thread pools.
 
         :param configuration: The conffwk Configuration object
         :param session_name: Name of the session to assemble

@@ -2,6 +2,7 @@
 
 import os
 import shutil
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 from conffwk import Configuration
@@ -96,8 +97,12 @@ def get_configs_with_session(config_paths: list[Path] | Path) -> list[Path]:
     Accepts a single file or directory, or a mixed list of both.
     Recursively searches directories for .data.xml files.
 
+    Session checks are run in parallel using a ThreadPoolExecutor; each
+    check opens its own Configuration object so there is no shared state.
+    The returned list preserves the order in which files were discovered.
+
     :param config_paths: Configuration file path(s) or directory path(s)
-    :returns: List of configuration files containing sessions
+    :returns: List of configuration files containing sessions, in discovery order
     :rtype: list[Path]
     """
     if isinstance(config_paths, Path):
@@ -111,17 +116,39 @@ def get_configs_with_session(config_paths: list[Path] | Path) -> list[Path]:
         elif path.is_dir():
             config_files += get_config_paths(path)
 
-    return_paths = []
+    if not config_files:
+        return []
 
-    for c in config_files:
-        try:
-            if check_config_has_session(c):
-                return_paths.append(c)
-        except Exception:
-            # Skip files that cannot be read as configurations
-            continue
+    # Run session checks in parallel; cap workers to avoid thrashing the FS.
+    max_workers = min(16, len(config_files))
+    results: dict[Path, bool] = {}
 
-    return return_paths
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        future_to_path = {
+            executor.submit(_check_config_has_session_safe, p): p for p in config_files
+        }
+        for future in as_completed(future_to_path):
+            path = future_to_path[future]
+            results[path] = future.result()
+
+    # Preserve discovery order
+    return [p for p in config_files if results.get(p, False)]
+
+
+def _check_config_has_session_safe(config_path: Path) -> bool:
+    """Thread-safe wrapper around check_config_has_session.
+
+    Returns False instead of raising for files that cannot be read, so that
+    a single bad file does not abort the parallel scan.
+
+    :param config_path: Path to the configuration file to check
+    :returns: True if the file contains a session, False on any error
+    :rtype: bool
+    """
+    try:
+        return check_config_has_session(config_path)
+    except Exception:
+        return False
 
 
 def get_class_from_segment(

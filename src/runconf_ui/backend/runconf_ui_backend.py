@@ -1,5 +1,6 @@
 import os
 import shutil
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -459,22 +460,30 @@ class RunconfUIBackend:
         return node
 
     def _rebuild_indexes(self) -> None:
-        """Rebuild the node indices for all groups and systems.
+        """Rebuild the node indices for all groups and systems in parallel.
 
-        Updates the index of nodes in all disableable and adjustable groups,
-        recalculating node paths and updating tree views.
+        Dispatches each group's walk() traversal to a worker thread.
+        walk() is a pure read over an independent subtree, so concurrent
+        execution is safe.  Results are collected and merged on the main
+        thread before updating the assembled config dictionaries.
         """
         self._logger.debug("Rebuilding indices")
         a = self._assembled
         if a is None:
             return
 
-        for group in (*a.disableable, *a.adjustable):
-            group.nodes = {}
-            self._logger.debug(f"Building nodes for {group}")
+        all_groups = [*a.disableable, *a.adjustable]
 
+        if not all_groups:
+            return
+
+        def _rebuild_group(group) -> tuple:
+            """Rebuild a single group's node index.
+
+            :returns: (group, nodes_dict) tuple
+            """
+            group.nodes = {}
             for system in group.systems:
-                self._logger.debug(f"   Building nodes for system: {system}")
                 system.nodes = {
                     s.path: s
                     for s in walk(system.root)
@@ -482,7 +491,20 @@ class RunconfUIBackend:
                     and (system.display_full_system or s.parent is not None)
                 }
                 group.nodes.update(system.nodes)
+            return group, group.nodes
 
+        max_workers = min(32, len(all_groups))
+        self._logger.debug(
+            f"Rebuilding {len(all_groups)} group index(es) "
+            f"with up to {max_workers} worker thread(s)"
+        )
+
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = {executor.submit(_rebuild_group, g): g for g in all_groups}
+            for future in as_completed(futures):
+                future.result()  # re-raise any exception from the thread
+
+        # Sort and publish — done on the main thread after all walks complete
         a.disableable_nodes = {g.id: a._sorted_nodes(g.nodes) for g in a.disableable}
         a.adjustable_nodes = {g.id: a._sorted_nodes(g.nodes) for g in a.adjustable}
         a.all_nodes = {**a.adjustable_nodes, **a.disableable_nodes}
