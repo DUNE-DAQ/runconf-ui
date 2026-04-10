@@ -9,12 +9,19 @@ from ..messages import NodeToggledMessage
 from .dynamic_panel import DynamicTabbedContent, textual_safe_id
 
 
-class EnableDisablePanel(ScrollableContainer):
+class EnableDisableButtonScroller(ScrollableContainer):
+    """Inner scrollable area containing the button groups for an EnableDisablePanel."""
+
+    pass
+
+
+class EnableDisablePanel(Vertical):
     """Panel widget displaying enable/disable toggle buttons for configuration nodes.
 
-    This widget displays a scrollable container of buttons representing nodes
-    that can be enabled or disabled. Button appearance reflects the current
-    enabled/disabled state, and interactivity is managed based on node status.
+    This widget displays a label above a scrollable container of buttons
+    representing nodes that can be enabled or disabled. Button appearance
+    reflects the current enabled/disabled state, and interactivity is managed
+    based on node status.
     """
 
     def __init__(self, group_id: str, nodes: dict[str, NodeStatus], *args, **kwargs):
@@ -22,8 +29,8 @@ class EnableDisablePanel(ScrollableContainer):
 
         :param group_id: The identifier for this panel's node group
         :param nodes: Dictionary mapping node IDs to their current NodeStatus
-        :param args: Variable positional arguments passed to parent ScrollableContainer
-        :param kwargs: Variable keyword arguments passed to parent ScrollableContainer
+        :param args: Variable positional arguments passed to parent Vertical
+        :param kwargs: Variable keyword arguments passed to parent Vertical
         """
         super().__init__(*args, **kwargs)
         get_logger().info(f"Initialising enable/disable panel with id {group_id}")
@@ -34,46 +41,61 @@ class EnableDisablePanel(ScrollableContainer):
         self._runconf_nodes = nodes
 
     def compose(self):
-        """Compose toggle buttons for all nodes in this group.
+        """Compose the label and scrollable button groups for this panel.
 
-        :returns: A generator yielding Button widgets for each node
+        :returns: A generator yielding the label Static and the scroller widget
         """
         # We're gonna structure things into a dict
         button_groups = {}
 
         get_logger().debug("Composing enable/disable panel")
+
+        main_node_label = "main_enabled_btn"
+        sub_node_label = "sub_enabled_btn"
+
         for node_id, node in self._runconf_nodes.items():
             get_logger().debug(f"   - {node_id} : {node}")
 
             enabled_state = "node_enabled" if node.is_enabled else "node_disabled"
+            is_top = node.parent is None
 
-            if node.parent:
-                node_classes = f"sub_enabled_btn {enabled_state}"
-            else:
-                node_classes = f"main_enabled_btn {enabled_state}"
+            node_classes = (
+                f"{main_node_label if is_top else sub_node_label} {enabled_state}"
+            )
 
-            enabled = node.is_interactive
             btn = Button(
                 label=node.node.label,
                 id=node_id,
                 classes=node_classes,
-                disabled=not enabled,
+                disabled=not node.is_interactive,
             )
             if node.tooltip:
                 btn.tooltip = node.tooltip
 
             group_box = node.parent.label if node.parent else node.label
-            if group_box in button_groups:
-                button_groups[group_box].append((node.parent is None, btn))
-            else:
-                button_groups[group_box] = [(node.parent is None, btn)]
+            if group_box not in button_groups:
+                button_groups[group_box] = []
+            button_groups[group_box].append((is_top, btn))
 
+        # Label sits above the scroll area so it's always visible
         yield Static(self._group_id, classes="en_group_txt")
+
+        button_group_widgets = []
         for group_lab, btns in button_groups.items():
             btns_sorted = [btn for _, btn in sorted(btns, key=lambda x: not x[0])]
+
+            if "main_enabled_btn" not in btns_sorted[0].classes:
+                for b in btns_sorted:
+                    b_cls = list(b.classes)
+                    b_cls.pop(b_cls.index("sub_enabled_btn"))
+                    b_cls.append("main_enabled_btn")
+                    b.classes = b_cls
+
             vtcl = Vertical(*btns_sorted, classes="en_button_container")
             vtcl.border_title = group_lab
-            yield vtcl
+            button_group_widgets.append(vtcl)
+
+        yield EnableDisableButtonScroller(*button_group_widgets)
 
     @on(Button.Pressed)
     def handle_button_pressed(self, event: Button.Pressed):
@@ -101,7 +123,6 @@ class EnableDisablePanel(ScrollableContainer):
         """
         get_logger().debug("Updating buttons")
 
-        get_logger().debug("Updating buttons")
         for node_id, node in nodes.items():
             results = self.query(f"#{node_id}")
             if not results:
