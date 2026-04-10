@@ -2,6 +2,7 @@
 
 import os
 import shutil
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 from conffwk import Configuration
@@ -57,22 +58,51 @@ def get_number_of_sessions(configuration: Configuration) -> int:
     return len(configuration.get_dals("Session"))
 
 
+# def check_config_has_session(config_path: Path) -> bool:
+#     """Return True if the configuration at the given path contains at least one Session.
+
+#     :param config_path: Path to the configuration file to check
+#     :returns: True if at least one Session DAL exists, False otherwise
+#     :rtype: bool
+#     :raises ConfigReadException: If the configuration cannot be read
+#     """
+#     try:
+#         conf = open_configuration(config_path)
+#     except Exception as e:
+#         raise ConfigReadException(f"Cannot read configuration at {config_path}") from e
+
+
+#     has_session = get_number_of_sessions(conf) > 0
+#     conf.unload()
+#     return has_session
 def check_config_has_session(config_path: Path) -> bool:
-    """Return True if the configuration at the given path contains at least one Session.
+    """Return True if the configuration contains at least one Session.
+
+    This version avoids loading the full OKS Configuration and instead
+    scans the XML directly for <obj class="Session">.
 
     :param config_path: Path to the configuration file to check
-    :returns: True if at least one Session DAL exists, False otherwise
+    :returns: True if at least one Session exists, False otherwise
     :rtype: bool
-    :raises ConfigReadException: If the configuration cannot be read
+    :raises ConfigReadException: If the file cannot be parsed
     """
+    if not config_path.exists():
+        raise FileNotFoundError(f"Cannot find {config_path}")
+
+    if not config_path.name.endswith(".data.xml"):
+        return False
+
     try:
-        conf = open_configuration(config_path)
+        # Stream parse: stops as soon as we find a Session
+        for event, elem in ET.iterparse(config_path, events=("start",)):
+            if elem.tag == "obj" and elem.attrib.get("class") == "Session":
+                return True
+        return False
+
+    except ET.ParseError as e:
+        raise ConfigReadException(f"Invalid XML in {config_path}") from e
     except Exception as e:
         raise ConfigReadException(f"Cannot read configuration at {config_path}") from e
-
-    has_session = get_number_of_sessions(conf) > 0
-    conf.unload()
-    return has_session
 
 
 def get_config_paths(config_directory: Path):
