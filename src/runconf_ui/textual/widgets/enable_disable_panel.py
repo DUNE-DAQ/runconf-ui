@@ -30,6 +30,7 @@ class EnableDisablePanel(ScrollableContainer):
         get_logger().debug(f"Initialising enable/disable panel with nodes {nodes}")
 
         self._group_id = group_id
+        self.border_title = group_id
         self._runconf_nodes = nodes
 
     def compose(self):
