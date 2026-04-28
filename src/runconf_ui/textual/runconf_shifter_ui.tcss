@@ -1,0 +1,406 @@
+/* ============================================================
+   Main Screen
+   ============================================================ */
+
+MainScreen,
+ShifterViewScreen {
+}
+
+#main_container {
+    layout: grid;
+    grid-size: 5 8;
+    grid-rows: 1fr;
+    grid-columns: 1fr;
+    grid-gutter: 1;
+    margin: 1 0;
+    padding: 0 1;
+}
+
+
+/* ============================================================
+   File IO Panel
+   ============================================================ */
+
+#file-select-grid {
+    margin-top: 1;
+    margin-left: 1;
+    grid-size: 7 3;
+    width: 100%;
+    column-span: 4;
+    content-align: center middle;
+    align: left middle;
+}
+
+#config_info {
+    margin-top: 1;
+    column-span: 5;
+    row-span: 2;
+}
+.file_select_drop{
+    column-span: 3;
+}
+
+FileSelect,
+FilePanelWidget {
+    column-span: 5;
+    row-span: 2;
+}
+
+.file_io_button {
+    background: $primary-background-darken-1;
+    color: ansi_white 100%;
+}
+
+
+.config_tree_view {
+    margin: 1 0;
+}
+
+/* ============================================================
+   Enable / Disable Panel
+============================================================ */
+
+#tabbed_content_container {
+    grid-size: 20;
+    border: hkey grey;
+    grid-gutter: 3;
+    column-span: 4;
+    row-span: 6;
+}
+
+#selection_adjust_tabs {
+    column-span: 6;
+    height: 100%;
+}
+
+
+/* Tabbed Content */
+
+#selection_tabs
+.multi_view_tabs
+{
+    column-span: 6;
+    width: 100%;
+}
+
+#control_maps_tabs,
+.multi_view_tabs {
+    column-span: 14;
+    height: 100%;
+}
+
+.content_switcher ContentSwitcher {
+    height: 1fr;
+}
+
+#control_maps_tabs ContentSwitcher {
+    border: darkgrey;
+}
+
+.top_level_tab_pane{
+    height: 100%;
+    background: $background-lighten-2;
+}
+
+#buttons_panel {
+    column-span: 10;
+    background: $background-lighten-2;
+}
+
+.systematic_map_tabs {
+    width: 100%;
+    align-horizontal: right;
+}
+
+EnableDisablePanel {
+    layout: vertical;
+    width: 100%;
+    height: 1fr;
+}
+
+EnableDisableButtonScroller {
+    overflow-y: auto;
+    width: 100%;
+    height: 1fr;  /* fills remaining space below the Static label */
+}
+
+.en_group_txt{
+    padding: 0 1;
+    color: $primary-background-darken-3;
+}
+
+.en_button_container {
+    border: round $primary-background-darken-3;
+    width: 100%;
+    height: auto;
+    margin: 0 1 0 1;
+}
+
+.main_enabled_btn {
+    width: 100%;
+    align: center middle;
+    margin: 0 1 0 1;
+    color: white;
+}
+
+.sub_enabled_btn {
+    width: 100%;
+    align: center middle;
+    margin: 0 1 0 5;
+    color: white;
+}
+
+.node_enabled,
+.detector_subsystem_button_enabled {
+    background: $success;
+}
+
+.node_disabled,
+.detector_subsystem_button_disabled {
+    background: $panel-darken-2;
+}
+
+.detector_subsystem_button_partial {
+    background: $warning-lighten-2;
+}
+
+
+/* ============================================================
+   Adjustable Attribute Panel
+   ============================================================ */
+
+AdjustableAttributeTabs{
+    height: 100%;
+}
+
+
+AdjustableAttributeContainer {
+    height: auto;
+    width: 100%;
+    margin: 1 1;
+    border: panel $primary-background-darken-3;
+    padding: 1 1;
+}
+
+#adjustable_attribute_container {
+    layout: grid;
+    grid-size: 1;
+    grid-gutter: 1;
+    grid-rows: 6;
+}
+
+.adjustable_container,
+.adjustable-attribute-grid {
+    layout: grid;
+    grid-size: 16 1;
+    grid-gutter: 1;
+    height: auto;
+    width: 100%;
+}
+
+.adjustable-attribute-label {
+    column-span: 4;
+    padding: 1 0;
+    color: $text;
+}
+
+.adjustable-attribute-input {
+    column-span: 3;
+}
+
+.adjustable-attribute-button {
+    column-span: 2;
+    height: auto;
+}
+
+.adjustable-attribute-current-value{
+    column-span: 5;
+    padding: 1 1;
+    color: $text;
+
+}
+
+
+/* ============================================================
+   Options Panel
+   ============================================================ */
+
+#option_panel_main {
+    margin-top: 2;
+    margin-right: 2;
+    margin-left: 1;
+    column-span: 1;
+    row-span: 6;
+    padding: 1;
+    layout: vertical;
+}
+
+.options_button {
+    width: 100%;
+    height: auto;
+    padding: 1 1;
+    margin: 1 0;
+}
+
+#help,
+#help_button {
+    background: $primary-darken-2;
+}
+
+#create_run_config,
+#create_button {
+    background: $success;
+}
+
+#save_to_database_button {
+    background: $success-darken-1;
+}
+
+#reset,
+#undo_changes_button {
+    background: $warning-darken-1;
+    color: black;
+}
+
+#quit,
+#quit_button {
+    background: $error-darken-1;
+}
+
+
+/* ============================================================
+   Pop-up Screens
+   ============================================================ */
+
+.pop_up_screen {
+    align: center middle;
+    background: black 40%;
+}
+
+.pop_up {
+    padding: 1 2;
+    border: thick $primary-background-darken-3 80%;
+    background: $primary-background;
+}
+
+.quit_pop_up_grid {
+    width: 60%;
+    height: 30%;
+    grid-gutter: 1 2;
+    grid-rows: 1fr 3;
+}
+
+
+.quit_question {
+    height: 1fr;
+    width: 1fr;
+    color: black;
+    content-align: center middle;
+    background: white 80%;
+}
+
+.quit_question_full {
+    column-span: 3;
+}
+
+.quit_question_small {
+    column-span: 2;
+}
+
+.pop_up_button {
+    width: 100%;
+}
+
+
+/* ============================================================
+   Help Screen
+   ============================================================ */
+
+.help_popup_container {
+    width: 60%;
+    height: 80%;
+    border: thick $primary-background-darken-3 80%;
+    background: $primary-background-darken-1;
+    padding: 1 2;
+}
+
+.help_scroll {
+    height: 1fr;
+    width: 100%;
+    background: $primary-background;
+}
+
+.help_message {
+    padding: 1 1;
+    color: white;
+}
+
+.help_up_button {
+    width: 100%;
+    height: auto;
+    margin-top: 1;
+    background: $warning;
+    color: white;
+    align-horizontal: right;
+}
+
+
+/* ============================================================
+   Notification Popups
+   ============================================================ */
+
+.popup {
+    dock: bottom;
+    width: 100%;
+    height: auto;
+    padding: 1;
+    text-style: bold;
+    layer: overlay;
+    content-align: center middle;
+}
+
+.popup_failure {
+    background: $error;
+}
+
+.popup_success {
+    background: $success;
+}
+
+
+.quit_grid {
+    width: 60%;
+    height: 30%;
+    grid-gutter: 1 2;
+    grid-rows: 1fr 3;
+}
+
+/* ============================================================
+   Loading Screen
+   ============================================================ */
+
+LoadingScreen {
+    align: center middle;
+    background: black 10%;
+}
+
+#loading-box {
+    width: 50;
+    height: 6;
+    border: round grey;
+    background: darkgrey;
+    align: center middle;
+    layout: vertical;
+    padding: 1 2;
+}
+
+#loading-label {
+    width: 100%;
+    content-align: center middle;
+    color: $text;
+}
+
+LoadingScreen LoadingIndicator {
+    height: 1;
+    background: transparent;
+}

@@ -1,0 +1,43 @@
+name: Tag new version
+
+on:
+  push:
+    branches:
+      - develop
+      - patch/*
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tag-new-versions:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Detect and tag version
+        id: tagger
+        uses: salsify/action-detect-and-tag-new-version@v2
+        with:
+          tag-template: "v{VERSION}"
+          version-command: |
+            python3 -c "
+            import tomllib
+            with open('pyproject.toml', 'rb') as f:
+                print(tomllib.load(f)['project']['version'])
+            "
+
+      - name: Create release
+        if: steps.tagger.outputs.tag != ''
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ steps.tagger.outputs.tag }}" \
+              --title "${{ steps.tagger.outputs.tag }}" \
+              --generate-notes
