@@ -3,6 +3,8 @@ Main app for runconf-ui
 """
 
 import os
+import re
+import shutil
 from pathlib import Path
 from typing import TypedDict
 
@@ -16,38 +18,61 @@ class ApparatusDefaults(TypedDict):
     base_url: str
     ops_url: str
     config_file_name: str
+    config_dir: str
 
 
-APPARATUS_DEFAULTS: dict[str, ApparatusDefaults] = {
-    "NP02": {
-        "base_url": "ssh://git@gitlab.cern.ch:7999/dune-daq/online/ehn1-daqconfigs.git",
-        "ops_url": "https://gitlab.cern.ch/dune-daq/online/np02-configs-operation.git",
-        "config_file_name": "np02-session.data.xml",
-    },
-    "NP04": {
-        "base_url": "ssh://git@gitlab.cern.ch:7999/dune-daq/online/ehn1-daqconfigs.git",
-        "ops_url": "https://gitlab.cern.ch/dune-daq/online/np04-configs-operation.git",
-        "config_file_name": "np04-session.data.xml",
-    },
-}
+def get_apparatus_defaults(apparatus: str) -> ApparatusDefaults:
+    """Dynamically finds and parses the installed environment setup shell script
+    for a given apparatus to extract configuration defaults.
+    """
+    app_lower = apparatus.lower()
+    script_name = f"runconf_{app_lower}_env_setup.sh"
 
+    # Locate where the script was installed in the current environment's PATH
+    script_path = shutil.which(script_name)
 
-def get_apparatus_default(apparatus: str) -> ApparatusDefaults:
-    """Resolve a default value for a given apparatus and property key."""
-    apparatus = apparatus.upper()
-
-    if apparatus not in APPARATUS_DEFAULTS:
+    if not script_path:
         raise ValueError(
-            f"Apparatus '{apparatus}' not recognized. Valid options are: {', '.join(APPARATUS_DEFAULTS.keys())}"
+            f"Could not find setup script '{script_name}'. "
+            f"Please add '{script_name}' to runconf-ui/scripts and to the pyproject.toml"
         )
 
-    apparatus_defaults = APPARATUS_DEFAULTS.get(apparatus)
-    if apparatus_defaults is None:
-        raise ValueError(
-            f"No defaults found for apparatus '{apparatus}'. Please specify all config options with command line options or environment variables."
+    defaults: dict[str, str] = {}
+
+    # Matches lines like: export KEY="VALUE" or export KEY=${OTHER_VAR}/value
+    # Specifically captures the key and everything inside the quotes
+    export_pattern = re.compile(r'^\s*export\s+([A-Za-z0-9_]+)\s*=\s*"([^"]+)"')
+
+    with open(script_path) as f:
+        for line in f:
+            match = export_pattern.match(line.strip())
+            if match:
+                key, value = match.groups()
+                defaults[key] = value
+
+    # Map the environment variable names to your internal TypedDict structure
+    # Providing fallbacks in case the script structure shifts slightly
+    mapped_defaults: ApparatusDefaults = {
+        "base_url": defaults.get("BASE_URL", ""),
+        "ops_url": defaults.get("OPERATION_URL", ""),
+        "config_file_name": defaults.get("SESSION_FILE", ""),
+        "config_dir": defaults.get("CONFIG_DIR", ""),
+    }
+
+    # Evaluate simple string interpolations if necessary (like ${DBT_AREA_ROOT})
+    if "${DBT_AREA_ROOT}" in mapped_defaults["config_dir"]:
+        dbt_root = os.getenv("DBT_AREA_ROOT", "")
+        mapped_defaults["config_dir"] = mapped_defaults["config_dir"].replace(
+            "${DBT_AREA_ROOT}", dbt_root
         )
 
-    return apparatus_defaults
+    # Sanity check to make sure we actually extracted meaningful data
+    if not any(mapped_defaults.values()):
+        raise ValueError(
+            f"Script '{script_name}' was found but yielded no default variables."
+        )
+
+    return mapped_defaults
 
 
 def get_exit_msg(backend: RunconfUIBackend) -> str:
@@ -165,7 +190,7 @@ def cli(
     if not use_local:
         apparatus_vars = (base_url, ops_url, config_file_name)
         if all(v is None for v in apparatus_vars):
-            apparatus_defaults = get_apparatus_default(apparatus)
+            apparatus_defaults = get_apparatus_defaults(apparatus)
             base_url = apparatus_defaults.get("base_url")
             ops_url = apparatus_defaults.get("ops_url")
             config_file_name = apparatus_defaults.get("config_file_name")
