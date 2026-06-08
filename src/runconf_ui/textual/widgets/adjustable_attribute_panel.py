@@ -27,7 +27,7 @@ class AdjustableAttributeContainer(Static):
         super().__init__(*args, **kwargs)
         self._adjust_node = node
         self._group_id = group_id
-        self._curr_value = self._adjust_node.node.get()
+        self._curr_value = self._init_value = self._adjust_node.node.get()
 
     def compose(self):
         """Compose the attribute container with label, input, and buttons.
@@ -107,7 +107,8 @@ class AdjustableAttributeContainer(Static):
         :returns: A formatted string representing the current value
         """
         return (
-            f"([dim purple]Current Value: [/][bold red]{self._curr_value}[/bold red])"
+            f"[dim purple]Current Value: [/][bold red]{self._curr_value}[/bold red]\n"
+            f"[dim grey]Init value: [dim red]{self._init_value}[/]"
         )
 
     @on(Button.Pressed, "#reset")
@@ -116,8 +117,8 @@ class AdjustableAttributeContainer(Static):
 
         :param _: The Button.Pressed event (unused)
         """
-        self.query_one(Input).value = str(self._curr_value)
-        self._handle_value_changed(self._curr_value)
+        self.query_one(Input).value = str(self._init_value)
+        self._handle_value_changed(self._init_value)
 
     @on(Button.Pressed, "#apply")
     def handle_apply(self, _):
