@@ -102,6 +102,7 @@ class RunconfUIApp(App):
             get_logger().debug(f"Available Sessions: {sessions}")
             self.app.call_from_thread(self._apply_sessions, sessions)
         except Exception as e:
+            get_logger().error(e)
             self.app.call_from_thread(self._on_config_failed_popup, e)
 
     def _apply_sessions(self, sessions) -> None:
@@ -256,6 +257,7 @@ class RunconfUIApp(App):
                 file_select.set_default_version(self.backend.get_default_version())
                 file_select.refresh()
         except Exception as e:
+            get_logger().error(e)
             self.handle_exception_popup(e)
         finally:
             self.pop_screen()
