@@ -4,11 +4,50 @@ Main app for runconf-ui
 
 import os
 from pathlib import Path
+from typing import TypedDict
 
 import click
 
 from runconf_ui import RunconfContext, RunconfUIApp, RunconfUIBackend
 from runconf_ui.utils import LogLevels
+
+
+class ApparatusDefaults(TypedDict):
+    base_url: str
+    ops_url: str
+    config_file_name: str
+
+
+APPARATUS_DEFAULTS: dict[str, ApparatusDefaults] = {
+    "NP02": {
+        "base_url": "ssh://git@gitlab.cern.ch:7999/dune-daq/online/ehn1-daqconfigs.git",
+        "ops_url": "https://gitlab.cern.ch/dune-daq/online/np02-configs-operation.git",
+        "config_file_name": "np02-session.data.xml",
+    },
+    "NP04": {
+        "base_url": "ssh://git@gitlab.cern.ch:7999/dune-daq/online/ehn1-daqconfigs.git",
+        "ops_url": "https://gitlab.cern.ch/dune-daq/online/np04-configs-operation.git",
+        "config_file_name": "np04-session.data.xml",
+    },
+}
+
+
+def get_apparatus_default(apparatus: str) -> ApparatusDefaults:
+    """Resolve a default value for a given apparatus and property key."""
+    apparatus = apparatus.upper()
+
+    if apparatus not in APPARATUS_DEFAULTS:
+        raise ValueError(
+            f"Apparatus '{apparatus}' not recognized. Valid options are: {', '.join(APPARATUS_DEFAULTS.keys())}"
+        )
+
+    apparatus_defaults = APPARATUS_DEFAULTS.get(apparatus)
+    if apparatus_defaults is None:
+        raise ValueError(
+            f"No defaults found for apparatus '{apparatus}'. Please specify all config options with command line options or environment variables."
+        )
+
+    return apparatus_defaults
 
 
 def get_exit_msg(backend: RunconfUIBackend) -> str:
@@ -54,6 +93,7 @@ def get_exit_msg(backend: RunconfUIBackend) -> str:
     type=click.Path(),
     help="Path to your local config directory. This should contain your configs. Can be read from the CONFIG_DIR environment variable.",
     envvar="CONFIG_DIR",
+    default=Path("base-configs"),
 )
 @click.option(
     "-a",
@@ -86,7 +126,6 @@ def get_exit_msg(backend: RunconfUIBackend) -> str:
 @click.option(
     "-b",
     "--base-url",
-    default="ssh://git@gitlab.cern.ch:7999/dune-daq/online/ehn1-daqconfigs.git",
     help="URL for the BASE repository. Can be read from the BASE_URL environment variable.",
     envvar="BASE_URL",
 )
@@ -113,20 +152,28 @@ def cli(
     ops_url: str,
     log_level: LogLevels = "INFO",
 ):
-    """CLI interface for runconf-ui.
-
+    """
     Launches the interactive configuration UI and saves selected configurations
     to the specified output directory. Invoked with the runconf-shifter-ui command.
-
-    :param apparatus: DAQ apparatus name (e.g., NP02, NP04)
-    :param config_directory: Path to configuration directory
-    :param output_directory: Directory to save run configs to
-    :param use_local: Use local filesystem instead of remote API
-    :param config_file_name: Config file to find in the ops repo
-    :param base_url: URL for the BASE repository
-    :param ops_url: URL for the operations repository
-    :param log_level: Log level (INFO, WARNING, DEBUG)
     """
+    if apparatus is None:
+        raise ValueError(
+            "Apparatus must be specified with -a or APPARATUS env variable"
+        )
+
+    # When we JUST provide the apparatus
+    if not use_local:
+        apparatus_vars = (base_url, ops_url, config_file_name)
+        if all(v is None for v in apparatus_vars):
+            apparatus_defaults = get_apparatus_default(apparatus)
+            base_url = apparatus_defaults.get("base_url")
+            ops_url = apparatus_defaults.get("ops_url")
+            config_file_name = apparatus_defaults.get("config_file_name")
+        elif any(v is None for v in apparatus_vars):
+            raise ValueError(
+                "If any of base_url, ops_url, or config_file_name are not specified, all three must be resolved from the apparatus defaults."
+            )
+
     ctx = RunconfContext(
         apparatus=apparatus,
         conf_directory=Path(config_directory),
