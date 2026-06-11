@@ -46,7 +46,10 @@ def get_exit_msg(backend: RunconfUIBackend) -> str:
 
     return os.getenv("EHN1_RC_LAUNCH", run_cmd)
 
-
+# HW Again a bit hacky, but cleaner than defining in the CLI itself!
+DEFAULT_CONFIG_EXTENSION = f"-{os.getenv('SESSION_NAME')}" if os.getenv("SESSION_NAME") else ""
+DEFAULT_CONFIG_PATH = Path().cwd()/f"config{DEFAULT_CONFIG_EXTENSION}"
+    
 @click.command()
 @click.option(
     "-c",
@@ -54,6 +57,7 @@ def get_exit_msg(backend: RunconfUIBackend) -> str:
     type=click.Path(),
     help="Path to your local config directory. This should contain your configs. Can be read from the CONFIG_DIR environment variable.",
     envvar="CONFIG_DIR",
+    default=DEFAULT_CONFIG_PATH
 )
 @click.option(
     "-a",
@@ -141,19 +145,3 @@ def cli(
     backend = RunconfUIBackend(ctx)
     RunconfUIApp(backend).run()
     print(get_exit_msg(backend))
-
-
-if __name__ == "__main__":
-    # FOR TESTING ONLY
-    ctx_ = RunconfContext(
-        apparatus="dummy",
-        conf_directory=Path("/tmp/pytest-of-hwallace/pytest-current/configscurrent"),
-        use_local=True,
-        output_directory=Path("test-cfg"),
-        log_level="INFO",
-    )
-    backend_ = RunconfUIBackend(ctx_)
-
-    RunconfUIApp(backend_).run()
-
-    print(get_exit_msg(backend_))
