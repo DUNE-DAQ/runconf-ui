@@ -40,7 +40,7 @@ class ShifterView(App):
                 kwargs:
                     - apparatus: str - The apparatus to use
                     - session_config: str - The default top level DAQ configuration file to use
-                    - download_directory - default download directory
+                    - daq_config_directory - default download directory
                     - session_name - tmux session name
 
                     - base_url- base url for the interface
