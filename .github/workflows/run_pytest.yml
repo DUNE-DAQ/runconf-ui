@@ -1,0 +1,65 @@
+name: Run pytest
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - patch/*
+  schedule:
+    - cron: '0 0 * * 0-4'  # Every Sunday at midnight UTC
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+
+permissions:
+  checks: write
+  pull-requests: write
+
+jobs:
+  install_and_test:
+
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+
+    container:
+      image: ghcr.io/dune-daq/nightly-release-alma9:development_v5
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up dev nightly
+        if: ${{ !cancelled() }}
+        run: |
+          mkdir nightly
+          cd nightly
+          source /cvmfs/dunedaq.opensciencegrid.org/setup_dunedaq.sh
+          setup_dbt latest_v5
+          dbt-create -n last_fddaq
+          cd NFD_DEV*
+          source env.sh
+          dbt-build
+          dbt-workarea-env
+
+      - name: Install Runconf-ui
+        if: success()
+        run: |
+          cd nightly/NFD_DEV* || true
+          source env.sh
+          cd ../..
+          python -m pip install --upgrade pip
+          python -m pip install .
+
+
+      - name: Test with pytest/pytest-cov
+        if: success()
+        run: |
+          cd nightly/NFD_DEV* || true
+          source env.sh
+          cd ../..
+          pip install pytest pytest-cov pytest-asyncio
+          pytest --junitxml=junit/test-results.xml  --cov-report=xml --cov-report=term-missing

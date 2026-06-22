@@ -1,0 +1,27 @@
+repos:
+-   repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.7
+    hooks:
+      # Run the linter.
+      - id: ruff-check
+        name: "Ruff Linter"
+        args: [ --fix ]
+
+      # Run the formatter.
+      - id: ruff-format
+        name: "Ruff Formatter"
+        types_or: [ python, pyi ]
+
+-   repo: https://github.com/pre-commit/mirrors-mypy
+    rev: 'v1.19.1'  # Use the sha / tag you want to point at
+    hooks:
+    - id: mypy
+      name: "Type Checker"
+      additional_dependencies:
+        - types-PyYAML
+
+-   repo: https://github.com/abravalheri/validate-pyproject
+    rev: v0.25
+    hooks:
+      - id: validate-pyproject
+        additional_dependencies: ["validate-pyproject[extra]"]
