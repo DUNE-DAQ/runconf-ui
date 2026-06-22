@@ -19,7 +19,9 @@ dependencies = [
 package-dir = {"" = "src"}
 include-package-data = true
 script-files = ["scripts/runconf_np02_env_setup.sh",
-                "scripts/runconf_np04_env_setup.sh"]
+                "scripts/runconf_np04_env_setup.sh",
+                "scripts/runconf_np02_emu_env_setup.sh",
+                "scripts/runconf_np04_emu_env_setup.sh"]
 
 [tool.setuptools.packages.find]
 namespaces = true
