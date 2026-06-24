@@ -108,7 +108,7 @@ class AdjustableAttributeContainer(Static):
         """
         return (
             f"[dim purple]Current Value: [/][bold red]{self._curr_value}[/bold red]\n"
-            f"[dim grey]Init value: [dim red]{self._init_value}[/]"
+            f"[dim grey]Init value: [/][dim red]{self._init_value}[/]"
         )
 
     @on(Button.Pressed, "#reset")
