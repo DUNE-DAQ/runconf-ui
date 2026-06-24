@@ -3,12 +3,80 @@ Main app for runconf-ui
 """
 
 import os
+import re
+import shutil
 from pathlib import Path
+from typing import TypedDict
 
 import click
 
 from runconf_ui import RunconfContext, RunconfUIApp, RunconfUIBackend
 from runconf_ui.utils import LogLevels
+
+
+class ApparatusDefaults(TypedDict):
+    base_url: str
+    ops_url: str
+    config_file_name: str
+    config_dir: str
+
+
+def get_apparatus_defaults(apparatus: str) -> ApparatusDefaults:
+    """Dynamically finds and parses the installed environment setup shell script
+    for a given apparatus to extract configuration defaults.
+    """
+    app_lower = apparatus.lower()
+    script_name = f"runconf_{app_lower}_env_setup.sh"
+
+    # Locate where the script was installed in the current environment's PATH
+    script_path = shutil.which(script_name)
+
+    if not script_path:
+        raise click.UsageError(
+            f"Could not find setup script '{script_name}'. "
+            f"Please add '{script_name}' to runconf-ui/scripts and to the pyproject.toml"
+        )
+
+    defaults: dict[str, str] = {}
+
+    # Matches lines like: export KEY="VALUE" or export KEY=${OTHER_VAR}/value
+    # Specifically captures the key and everything inside the quotes
+    export_pattern = re.compile(
+        r'^\s*export\s+([A-Za-z0-9_]+)\s*=\s*(?:"([^"]*)"'
+        r"|'([^']*)'|([^#\s]*))"
+    )
+
+    with open(script_path) as f:
+        for line in f:
+            match = export_pattern.match(line.strip())
+            if match:                
+                key = match.group(1)
+                value = next((v for v in match.groups()[1:] if v is not None), "")
+                defaults[key] = value
+
+    # Map the environment variable names to your internal TypedDict structure
+    # Providing fallbacks in case the script structure shifts slightly
+    mapped_defaults: ApparatusDefaults = {
+        "base_url": defaults.get("BASE_URL", ""),
+        "ops_url": defaults.get("OPERATION_URL", ""),
+        "config_file_name": defaults.get("SESSION_FILE", ""),
+        "config_dir": defaults.get("CONFIG_DIR", ""),
+    }
+
+    # Evaluate simple string interpolations if necessary (like ${DBT_AREA_ROOT})
+    if "${DBT_AREA_ROOT}" in mapped_defaults["config_dir"]:
+        dbt_root = os.getenv("DBT_AREA_ROOT", "")
+        mapped_defaults["config_dir"] = mapped_defaults["config_dir"].replace(
+            "${DBT_AREA_ROOT}", dbt_root
+        )
+
+    # Sanity check to make sure we actually extracted meaningful data
+    if not any(mapped_defaults.values()):
+        raise ValueError(
+            f"Script '{script_name}' was found but yielded no default variables."
+        )
+
+    return mapped_defaults
 
 
 def get_exit_msg(backend: RunconfUIBackend) -> str:
@@ -54,6 +122,7 @@ def get_exit_msg(backend: RunconfUIBackend) -> str:
     type=click.Path(),
     help="Path to your local config directory. This should contain your configs. Can be read from the CONFIG_DIR environment variable.",
     envvar="CONFIG_DIR",
+    default=Path("base-configs"),
 )
 @click.option(
     "-a",
@@ -86,7 +155,6 @@ def get_exit_msg(backend: RunconfUIBackend) -> str:
 @click.option(
     "-b",
     "--base-url",
-    default="ssh://git@gitlab.cern.ch:7999/dune-daq/online/ehn1-daqconfigs.git",
     help="URL for the BASE repository. Can be read from the BASE_URL environment variable.",
     envvar="BASE_URL",
 )
@@ -113,11 +181,12 @@ def cli(
     ops_url: str,
     log_level: LogLevels = "INFO",
 ):
-    """CLI interface for runconf-ui.
-
+    """
     Launches the interactive configuration UI and saves selected configurations
     to the specified output directory. Invoked with the runconf-shifter-ui command.
-
+    
+    \f
+    
     :param apparatus: DAQ apparatus name (e.g., NP02, NP04)
     :param config_directory: Path to configuration directory
     :param output_directory: Directory to save run configs to
@@ -126,7 +195,26 @@ def cli(
     :param base_url: URL for the BASE repository
     :param ops_url: URL for the operations repository
     :param log_level: Log level (INFO, WARNING, DEBUG)
+
+    
     """
+    if apparatus is None:
+        raise click.UsageError(
+            "Apparatus must be specified with -a or APPARATUS env variable"
+        )
+
+    # When we JUST provide the apparatus
+    if not use_local:
+        apparatus_vars = (base_url, ops_url, config_file_name)
+        if all(v is None for v in apparatus_vars):
+            apparatus_defaults = get_apparatus_defaults(apparatus)
+            base_url = apparatus_defaults.get("base_url")
+            ops_url = apparatus_defaults.get("ops_url")
+            config_file_name = apparatus_defaults.get("config_file_name")
+        elif any(v is None for v in apparatus_vars):
+            raise click.UsageError(
+                "Specify all of --base-url, --ops-url, and --config-file-name together, or omit all three to use apparatus defaults."            )
+
     ctx = RunconfContext(
         apparatus=apparatus,
         conf_directory=Path(config_directory),
