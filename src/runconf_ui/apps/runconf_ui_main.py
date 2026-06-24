@@ -41,7 +41,10 @@ def get_apparatus_defaults(apparatus: str) -> ApparatusDefaults:
 
     # Matches lines like: export KEY="VALUE" or export KEY=${OTHER_VAR}/value
     # Specifically captures the key and everything inside the quotes
-    export_pattern = re.compile(r'^\s*export\s+([A-Za-z0-9_]+)\s*=\s*"([^"]+)"')
+    export_pattern = re.compile(
+        r'^\s*export\s+([A-Za-z0-9_]+)\s*=\s*(?:"([^"]*)"'
+        r"|'([^']*)'|([^#\s]*))"
+    )
 
     with open(script_path) as f:
         for line in f:
