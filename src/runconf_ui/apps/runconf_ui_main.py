@@ -198,7 +198,7 @@ def cli(
     
     """
     if apparatus is None:
-        raise ValueError(
+        raise click.UsageError(
             "Apparatus must be specified with -a or APPARATUS env variable"
         )
 
