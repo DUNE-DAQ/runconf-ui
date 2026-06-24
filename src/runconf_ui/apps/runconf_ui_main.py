@@ -32,7 +32,7 @@ def get_apparatus_defaults(apparatus: str) -> ApparatusDefaults:
     script_path = shutil.which(script_name)
 
     if not script_path:
-        raise ValueError(
+        raise click.UsageError(
             f"Could not find setup script '{script_name}'. "
             f"Please add '{script_name}' to runconf-ui/scripts and to the pyproject.toml"
         )
@@ -195,9 +195,8 @@ def cli(
             ops_url = apparatus_defaults.get("ops_url")
             config_file_name = apparatus_defaults.get("config_file_name")
         elif any(v is None for v in apparatus_vars):
-            raise ValueError(
-                "If any of base_url, ops_url, or config_file_name are not specified, all three must be resolved from the apparatus defaults."
-            )
+            raise click.UsageError(
+                "Specify all of --base-url, --ops-url, and --config-file-name together, or omit all three to use apparatus defaults."            )
 
     ctx = RunconfContext(
         apparatus=apparatus,
