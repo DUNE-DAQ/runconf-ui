@@ -11,7 +11,7 @@ from runconf_ui.exceptions import (
     RunConfToolsRepoException,
 )
 from runconf_ui.repo_manager.repo_manager_interface import RepoManagerInterface
-from runconf_ui.utils import check_config_has_session, get_logger
+from runconf_ui.utils import check_config_has_session, get_logger, get_configs_with_session
 
 
 class EmulationRepoManager(RepoManagerInterface[str]):
@@ -120,4 +120,5 @@ d
         """
         Among all the session contained recursively in config paths, it returns all the emulation session files
         """
-        return []
+        confs = get_configs_with_sessions(config_path)
+        return [c for c in confs if c.name.endswith("emu-session.data.xml")]
