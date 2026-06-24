@@ -49,8 +49,9 @@ def get_apparatus_defaults(apparatus: str) -> ApparatusDefaults:
     with open(script_path) as f:
         for line in f:
             match = export_pattern.match(line.strip())
-            if match:
-                key, value = match.groups()
+            if match:                
+                key = match.group(1)
+                value = next((v for v in match.groups()[1:] if v is not None), "")
                 defaults[key] = value
 
     # Map the environment variable names to your internal TypedDict structure
