@@ -183,6 +183,19 @@ def cli(
     """
     Launches the interactive configuration UI and saves selected configurations
     to the specified output directory. Invoked with the runconf-shifter-ui command.
+    
+    \f
+    
+    :param apparatus: DAQ apparatus name (e.g., NP02, NP04)
+    :param config_directory: Path to configuration directory
+    :param output_directory: Directory to save run configs to
+    :param use_local: Use local filesystem instead of remote API
+    :param config_file_name: Config file to find in the ops repo
+    :param base_url: URL for the BASE repository
+    :param ops_url: URL for the operations repository
+    :param log_level: Log level (INFO, WARNING, DEBUG)
+
+    
     """
     if apparatus is None:
         raise ValueError(
