@@ -26,9 +26,9 @@ class EmulationRepoManager(RepoManagerInterface[str]):
         self,
         apparatus: str,
         conf_directory: Path,
-        config_file_name: str | None = None,  ## Can we remove this option completely? In the local is there hence why I left it
         operation_url: str,   ## MR: this is in some way a problem of ConfPool, we should envision a mode in which the operation is not necessary
         base_url: str,
+        config_file_name: str | None = None,
     ):
         """Initialize the remote repository manager.
 
@@ -89,7 +89,6 @@ class EmulationRepoManager(RepoManagerInterface[str]):
         """Select a configuration file by path or name.
 
         Attempts direct path match first, then falls back to matching by filename.
-d
         :param config: The path or filename of the configuration to select
         :returns: The full path to the selected configuration file
         :rtype: Path
@@ -121,4 +120,4 @@ d
         Among all the session contained recursively in config paths, it returns all the emulation session files
         """
         confs = get_configs_with_sessions(config_path)
-        return [c for c in confs if c.name.endswith("emu-session.data.xml")]
+        return [c for c in confs if c.name.endswith("emu-session.data.xml")]  ## shall we make this configurable? What is configurable? Check with Michal 
