@@ -8,6 +8,7 @@ from pathlib import Path
 import click
 
 from runconf_ui import RunconfContext, RunconfUIApp, RunconfUIBackend
+from runconf_ui.repo_manager import RepoManagerType
 from runconf_ui.utils import LogLevels
 
 
@@ -71,11 +72,11 @@ def get_exit_msg(backend: RunconfUIBackend) -> str:
     help="Directory to save run configs to.",
 )
 @click.option(
-    "-l",
-    "--use-local",
-    is_flag=True,
-    default=False,
-    help="Use a local filesystem to get you OKS config.",
+    "-r",
+    "--repo-type",
+    type=click.Choice(RepoManagerType.values()),
+    default="remote",
+    help="Type of repository to use (local, remote or emulation).",
 )
 @click.option(
     "-f",
@@ -107,7 +108,7 @@ def cli(
     apparatus: str,
     config_directory: str,
     output_directory: str,
-    use_local: bool,
+    repo_type: str,
     config_file_name: str,
     base_url: str,
     ops_url: str,
@@ -121,7 +122,7 @@ def cli(
     :param apparatus: DAQ apparatus name (e.g., NP02, NP04)
     :param config_directory: Path to configuration directory
     :param output_directory: Directory to save run configs to
-    :param use_local: Use local filesystem instead of remote API
+    :param repo_type: Type of repository to use (local, remote or emulation)
     :param config_file_name: Config file to find in the ops repo
     :param base_url: URL for the BASE repository
     :param ops_url: URL for the operations repository
@@ -130,7 +131,7 @@ def cli(
     ctx = RunconfContext(
         apparatus=apparatus,
         conf_directory=Path(config_directory),
-        use_local=use_local,
+        repo_type=RepoManagerType.from_str(repo_type),
         config_file_name=config_file_name,
         base_url=base_url,
         ops_url=ops_url,
@@ -148,7 +149,7 @@ if __name__ == "__main__":
     ctx_ = RunconfContext(
         apparatus="dummy",
         conf_directory=Path("/tmp/pytest-of-hwallace/pytest-current/configscurrent"),
-        use_local=True,
+        repo_type=RepoManagerType.local,
         output_directory=Path("test-cfg"),
         log_level="INFO",
     )
