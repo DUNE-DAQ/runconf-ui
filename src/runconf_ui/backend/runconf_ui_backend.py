@@ -11,7 +11,7 @@ from rich import print as rprint
 from rich.tree import Tree
 
 from runconf_ui.exceptions import NodeNotFound, RunConfToolsRepoException
-from runconf_ui.repo_manager import RepoManagerInterface, repo_factory, RepoManagerType
+from runconf_ui.repo_manager import RepoManagerType, RepoManagerInterface, repo_factory
 from runconf_ui.state_tree import NodeStatus, walk
 from runconf_ui.system_configuration import SystemConfigReader
 from runconf_ui.system_configuration.config_reader import AssembledConfig

@@ -7,8 +7,7 @@ from pathlib import Path
 
 import click
 
-from runconf_ui import RunconfContext, RunconfUIApp, RunconfUIBackend
-from runconf_ui.repo_manager.repo_manager_factory import RepoManagerType
+from runconf_ui import RunconfContext, RunconfUIApp, RunconfUIBackend, RepoManagerType
 from runconf_ui.utils import LogLevels
 
 
