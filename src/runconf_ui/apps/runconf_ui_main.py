@@ -71,7 +71,7 @@ def get_exit_msg(backend: RunconfUIBackend) -> str:
     help="Directory to save run configs to.",
 )
 @click.option(
-    "-r",
+    "-t",
     "--repo-type",
     type=click.Choice(RepoManagerType.values()),
     default="remote",
@@ -130,7 +130,7 @@ def cli(
     ctx = RunconfContext(
         apparatus=apparatus,
         conf_directory=Path(config_directory),
-        repo_type=RepoManagerType.from_str(repo_type),
+        repo_type=RepoManagerType.from_string(repo_type),
         config_file_name=config_file_name,
         base_url=base_url,
         ops_url=ops_url,
