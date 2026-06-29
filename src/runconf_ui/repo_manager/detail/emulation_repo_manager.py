@@ -83,7 +83,7 @@ class EmulationRepoManager(RepoManagerInterface[str]):
         ## MaR: check with Henry if it's ok to do it here
         self.conf_pool.checkout_base(self.daq_version)  # type: ignore
 
-        return get_emulation_configurations(self.conf_directory)
+        return EmulationRepoManager.get_emulation_configurations(self.conf_directory)
 
     def select_config(self, config: Path) -> Path:
         """Select a configuration file by path or name.
@@ -119,5 +119,5 @@ class EmulationRepoManager(RepoManagerInterface[str]):
         """
         Among all the session contained recursively in config paths, it returns all the emulation session files
         """
-        confs = get_configs_with_sessions(config_path)
+        confs = get_configs_with_session(config_path)
         return [c for c in confs if c.name.endswith("emu-session.data.xml")]  ## shall we make this configurable? What is configurable? Check with Michal 
