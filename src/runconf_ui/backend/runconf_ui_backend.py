@@ -11,7 +11,7 @@ from rich import print as rprint
 from rich.tree import Tree
 
 from runconf_ui.exceptions import NodeNotFound, RunConfToolsRepoException
-from runconf_ui.repo_manager import RepoManagerInterface, repo_factory
+from runconf_ui.repo_manager import RepoManagerType, RepoManagerInterface, repo_factory
 from runconf_ui.state_tree import NodeStatus, walk
 from runconf_ui.system_configuration import SystemConfigReader
 from runconf_ui.system_configuration.config_reader import AssembledConfig
@@ -30,7 +30,7 @@ class RunconfContext:
     """Context required to initialise the runconf-ui backend
     :param apparatus: str name of the apparatus to load configs for (np02/np04/etc.)
     :param conf_directory: path to the config repository (local or remote)
-    :param use_local: whether to use the local filesystem or remote API to load configs
+    :param repo_type: type of repository to use (local, remote or emulation)
     :param config_file_name: (remote only) the default config file to load when apparatus is selected. This should be a file that exists in the remote repository and contains a session that matches the apparatus name.
     :param base_url: (remote only) URL for the BASE repository, used to populate the dropdown for config selection and load the default config.
     :param ops_url: (remote only) URL for the operations repository, used to populate the dropdown for config selection and load the default config.
@@ -40,7 +40,7 @@ class RunconfContext:
 
     apparatus: str
     conf_directory: Path
-    use_local: bool
+    repo_type: RepoManagerType
     config_file_name: str | None = None
     base_url: str | None = None
     ops_url: str | None = None
@@ -74,7 +74,7 @@ class _SessionManager:
         self.repo_manager = repo_factory(
             apparatus=context.apparatus,
             conf_directory=context.conf_directory,
-            use_local=context.use_local,
+            repo_type = context.repo_type,
             config_file_name=context.config_file_name,
             ops_url=context.ops_url,
             base_url=context.base_url,

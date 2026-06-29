@@ -2,14 +2,35 @@ from pathlib import Path
 
 from runconf_ui.exceptions import RunConfToolsRepoException
 
-from .detail import LocalRepoManager, RemoteRepoManager
+from .detail import LocalRepoManager, RemoteRepoManager, EmulationRepoManager
 from .repo_manager_interface import RepoManagerInterface
+
+from enum import Enum
+
+class RepoManagerType(Enum) :
+    LOCAL = "local"
+    REMOTE = "remote"
+    EMULATION = "emulation"
+
+    def __str__(self):
+        return self.value
+
+    @classmethod
+    def from_string(cls, s: str) -> "RepoManagerType":
+        try:
+            return cls(s)
+        except ValueError:
+            raise ValueError(f"{s!r} is not a valid {cls.__name__}")
+
+    @classmethod
+    def values(cls) -> list[str]:
+        return [c.value for c in cls]
 
 
 def repo_factory(
     apparatus: str,
     conf_directory: Path,
-    use_local: bool = False,
+    repo_type : RepoManagerType,
     config_file_name: str | None = None,
     ops_url: str | None = None,
     base_url: str | None = None,
@@ -36,25 +57,39 @@ def repo_factory(
     :rtype: RepoManagerInterface
     """
 
-    if use_local:
+    if repo_type.value == "local"  :
         return LocalRepoManager(apparatus, conf_directory, config_file_name)
+    if ops_url is None:
+        raise RunConfToolsRepoException(
+            f"Error {ops_url} not set, cannot use Runconftool interface"
+        )
+    if base_url is None:
+        raise RunConfToolsRepoException(
+            f"Error {base_url} not set, cannot use Runconftool interface"
+        )
+
+    if repo_type.value == "emulation" :
+        return EmulationRepoManager(
+            apparatus=apparatus,
+            conf_directory=conf_directory,
+            config_file_name=config_file_name,
+            operation_url=ops_url,
+            base_url=base_url,
+        )
+
+    
     if config_file_name is None:
         raise RunConfToolsRepoException(
             f"Error {config_file_name} not set, cannot use remote interface"
         )
-    if ops_url is None:
-        raise RunConfToolsRepoException(
-            f"Error {ops_url} not set, cannot use remote interface"
-        )
-    if base_url is None:
-        raise RunConfToolsRepoException(
-            f"Error {base_url} not set, cannot use remote interface"
-        )
 
-    return RemoteRepoManager(
-        apparatus=apparatus,
-        conf_directory=conf_directory,
-        config_file_name=config_file_name,
-        operation_url=ops_url,
-        base_url=base_url,
-    )
+    if repo_type.value == "remote" :
+        return RemoteRepoManager(
+            apparatus=apparatus,
+            conf_directory=conf_directory,
+            config_file_name=config_file_name,
+            operation_url=ops_url,
+            base_url=base_url,
+        )
+    
+ 
