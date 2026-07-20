@@ -7,7 +7,7 @@ from pathlib import Path
 
 import click
 
-from runconf_ui import RunconfContext, RunconfUIApp, RunconfUIBackend, RepoManagerType
+from runconf_ui import RepoManagerType, RunconfContext, RunconfUIApp, RunconfUIBackend
 from runconf_ui.utils import LogLevels
 
 
@@ -80,7 +80,7 @@ def get_exit_msg(backend: RunconfUIBackend) -> str:
 @click.option(
     "-f",
     "--config-file-name",
-    help="Config file to find in the ops repo (e.g. <X>.data.xml). Can be read from the SESSION_FILE environment variable.",
+    help="Config file to find in the ops repo (e.g. <X>.data.xml). Can be read from the SESSION_FILE environment variable. In the emulation case, it can be a column separated list",
     envvar="SESSION_FILE",
 )
 @click.option(
@@ -122,7 +122,7 @@ def cli(
     :param config_directory: Path to configuration directory
     :param output_directory: Directory to save run configs to
     :param repo_type: Type of repository to use (local, remote or emulation)
-    :param config_file_name: Config file to find in the ops repo
+    :param config_file_name: Config file(s) to find in the ops repo
     :param base_url: URL for the BASE repository
     :param ops_url: URL for the operations repository
     :param log_level: Log level (INFO, WARNING, DEBUG)
