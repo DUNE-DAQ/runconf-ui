@@ -28,13 +28,13 @@ class EmulationRepoManager(RepoManagerInterface[str]):
         conf_directory: Path,
         operation_url: str,   ## MR: this is in some way a problem of ConfPool, we should envision a mode in which the operation is not necessary
         base_url: str,
-        config_file_name: str | None = None,
+        config_file_name: str,
     ):
         """Initialize the remote repository manager.
 
         :param apparatus: The DAQ apparatus name
         :param conf_directory: Local directory to cache configurations
-        :param config_file_name: Default config filename to load
+        :param config_file_name: List of config filename to load to mask only emulation files.
         :param operation_url: URL of the operations git repository
         :param base_url: URL of the base git repository
         :raises RunConfToolsRepoException: If URLs are not set or ConfPool initialization fails
@@ -50,7 +50,7 @@ class EmulationRepoManager(RepoManagerInterface[str]):
             str(self.conf_directory), apparatus, operation_url, base_url
         )
 
-        self.config_file_name = config_file_name
+        self.config_file_names = config_file_name
 
         if self.conf_pool is None:
             raise RunConfToolsRepoException(
@@ -120,4 +120,7 @@ class EmulationRepoManager(RepoManagerInterface[str]):
         Among all the session contained recursively in config paths, it returns all the emulation session files
         """
         confs = get_configs_with_session(config_path)
-        return [c for c in confs if c.name.endswith("emu-session.data.xml")]  ## shall we make this configurable? What is configurable? Check with Michal 
+
+        masks = self.config_file_names.split(':')
+        
+        return [c for c in confs if c.name in masks] 
