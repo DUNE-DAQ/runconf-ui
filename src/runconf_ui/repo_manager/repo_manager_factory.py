@@ -1,3 +1,4 @@
+from enum import Enum
 from pathlib import Path
 
 from runconf_ui.exceptions import RunConfToolsRepoException
@@ -5,7 +6,6 @@ from runconf_ui.exceptions import RunConfToolsRepoException
 from .detail import LocalRepoManager, RemoteRepoManager, EmulationRepoManager
 from .repo_manager_interface import RepoManagerInterface
 
-from enum import Enum
 
 class RepoManagerType(Enum) :
     LOCAL = "local"

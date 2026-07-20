@@ -3,13 +3,11 @@ from pathlib import Path
 from runconftools.ConfPool import ConfPool
 
 from runconf_ui.exceptions import (
-    ConfigBrokenInRepoException,
-    ConfigNotFoundInRepoException,
     DaqVersionException,
     RunConfToolsRepoException,
 )
 from runconf_ui.repo_manager.repo_manager_interface import RepoManagerInterface
-from runconf_ui.utils import check_config_has_session, get_configs_with_session, get_logger
+from runconf_ui.utils import get_configs_with_session, get_logger
 
 
 class EmulationRepoManager(RepoManagerInterface[str]):
@@ -114,7 +112,8 @@ class EmulationRepoManager(RepoManagerInterface[str]):
 
     def get_emulation_configurations(self, config_path: Path) -> list[Path]:
         """
-        Among all the session contained recursively in config paths, it returns all the emulation session files
+        Among all the session contained recursively in config paths, it returns all the emulation session files.
+        This is done accordingly to the content of SESSION_FILE content, passed down into config_file_names
         """
         confs = get_configs_with_session(config_path)
 
