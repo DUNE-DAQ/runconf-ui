@@ -3,7 +3,7 @@ from pathlib import Path
 
 from runconf_ui.exceptions import RunConfToolsRepoException
 
-from .detail import LocalRepoManager, RemoteRepoManager, EmulationRepoManager
+from .detail import EmulationRepoManager, LocalRepoManager, RemoteRepoManager
 from .repo_manager_interface import RepoManagerInterface
 
 
@@ -83,13 +83,12 @@ def repo_factory(
             f"Error {config_file_name} not set, cannot use remote interface"
         )
 
-    if repo_type.value == "remote" :
-        return RemoteRepoManager(
-            apparatus=apparatus,
-            conf_directory=conf_directory,
-            config_file_name=config_file_name,
-            operation_url=ops_url,
-            base_url=base_url,
-        )
+    return RemoteRepoManager(
+        apparatus=apparatus,
+        conf_directory=conf_directory,
+        config_file_name=config_file_name,
+        operation_url=ops_url,
+        base_url=base_url,
+    )
     
  
