@@ -20,7 +20,7 @@ def backend(tmp_config_path, save_path):
     context = RunconfContext(
         apparatus="dummy",
         conf_directory=tmp_config_path.parent,
-        repo_type=RepoManagerType.local,
+        repo_type=RepoManagerType.LOCAL,
         output_directory=save_path,
     )
     b = RunconfUIBackend(context)

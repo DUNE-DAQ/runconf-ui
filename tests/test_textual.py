@@ -131,7 +131,7 @@ def _app(backend):
     context = RunconfContext(
         apparatus="dummy",
         conf_directory=Path("/fake"),
-        repo_type=RepoManagerType.local,
+        repo_type=RepoManagerType.LOCAL,
     )
 
     app = RunconfUIApp(context)
