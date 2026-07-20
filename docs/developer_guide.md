@@ -32,10 +32,10 @@ The codebase is also functionally split in half:
 class RunconfContext:
     apparatus: str           # e.g. "np02"
     conf_directory: Path     # path to the config repo
-    use_local: bool          # local filesystem vs remote git
-    config_file_name: str | None   # remote only
-    base_url: str | None           # remote only
-    ops_url: str | None            # remote only
+    repo_type: RepoManagerType     # local filesystem, remote git or emulation from git
+    config_file_name: str | None   # remote and emulation
+    base_url: str | None           # remote and emulation
+    ops_url: str | None            # remote and emulation
     output_directory: Path         # where saved configs are written
     log_level: LogLevels           # "INFO" | "DEBUG" | "WARNING"
 ```
@@ -46,13 +46,15 @@ The backend has four main responsibilities, described below.
 
 ### The Repo Manager
 
-Two repo managers are available, both inheriting from `RepoManagerInterface`:
+Three repo managers are available, all inheriting from `RepoManagerInterface`:
 
 **`LocalRepoManager`** manages repositories on the local filesystem. It requires the apparatus name and a path to the configuration directory. It uses `get_configs_with_session()` to find all `.data.xml` files in that directory that contain a `Session` DAL.
 
 **`RemoteRepoManager`** manages repositories stored in remote git repositories via `runconftools.ConfPool`. It requires the apparatus name, a local cache directory, the config filename to look for, and the ops and base repository URLs.
 
-Both managers expose the same interface: `get_available_daq_versions()`, `get_daq_sessions()`, `set_daq_version()`, `select_config()`, and `get_runconf_ui_config_path()`. The last method locates the YAML system configuration file at `[conf_directory]/runconf-ui-settings/[apparatus].yml`.
+**`EmulationRepoManager`** manages the same remote remote git repositories via `runconftools.ConfPool` used in the remote case, but it exposes only emulation file configuration obtained before running generators. It requires the apparatus name, a local cache directory, the config filename to look for, and the ops and base repository URLs.
+
+All managers expose the same interface: `get_available_daq_versions()`, `get_daq_sessions()`, `set_daq_version()`, `select_config()`, and `get_runconf_ui_config_path()`. The last method locates the YAML system configuration file at `[conf_directory]/runconf-ui-settings/[apparatus].yml`.
 
 ---
 
