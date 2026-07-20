@@ -10,7 +10,7 @@ import pytest_asyncio
 from rich.tree import Tree
 from textual.widgets import Button, Select, Static, TabbedContent
 
-from runconf_ui import RunconfContext, RunconfUIBackend
+from runconf_ui import RepoManagerType, RunconfContext, RunconfUIBackend
 from runconf_ui.state_tree import Group, Leaf, NodeStatus, State
 from runconf_ui.textual.runconf_ui_app import RunconfUIApp
 from runconf_ui.textual.screens import (
@@ -131,7 +131,7 @@ def _app(backend):
     context = RunconfContext(
         apparatus="dummy",
         conf_directory=Path("/fake"),
-        use_local=True,
+        repo_type=RepoManagerType.local,
     )
 
     app = RunconfUIApp(context)

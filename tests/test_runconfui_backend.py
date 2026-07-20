@@ -7,7 +7,7 @@ get_values, save_config) against a real conffwk configuration.
 
 import pytest
 
-from runconf_ui import RunconfContext, RunconfUIBackend
+from runconf_ui import RepoManagerType, RunconfContext, RunconfUIBackend
 
 
 @pytest.fixture(scope="session")
@@ -20,7 +20,7 @@ def backend(tmp_config_path, save_path):
     context = RunconfContext(
         apparatus="dummy",
         conf_directory=tmp_config_path.parent,
-        use_local=True,
+        repo_type=RepoManagerType.local,
         output_directory=save_path,
     )
     b = RunconfUIBackend(context)
