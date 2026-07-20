@@ -148,7 +148,7 @@ if __name__ == "__main__":
     ctx_ = RunconfContext(
         apparatus="dummy",
         conf_directory=Path("/tmp/pytest-of-hwallace/pytest-current/configscurrent"),
-        repo_type=RepoManagerType.local,
+        repo_type=RepoManagerType.LOCAL,
         output_directory=Path("test-cfg"),
         log_level="INFO",
     )
