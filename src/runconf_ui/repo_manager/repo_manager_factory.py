@@ -42,8 +42,8 @@ def repo_factory(
     :type apparatus: str
     :param conf_directory: Config directory
     :type conf_directory: Path
-    :param use_local: Use a local configuration?, defaults to False
-    :type use_local: bool, optional
+    :param repo_type : specifies the type of the repo manager to instantiate
+    :type repo_type:  RepoManagerType
     :param config_file_name: The config file name, defaults to None
     :type config_file_name: Optional[str], optional
     :param ops_url: The operation URL, defaults to None
