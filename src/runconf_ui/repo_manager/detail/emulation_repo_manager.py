@@ -1,7 +1,5 @@
-import re
 from pathlib import Path
 
-from conffwk import Configuration
 from runconftools.ConfPool import ConfPool
 
 from runconf_ui.exceptions import (
@@ -11,7 +9,7 @@ from runconf_ui.exceptions import (
     RunConfToolsRepoException,
 )
 from runconf_ui.repo_manager.repo_manager_interface import RepoManagerInterface
-from runconf_ui.utils import check_config_has_session, get_logger, get_configs_with_session
+from runconf_ui.utils import check_config_has_session, get_configs_with_session, get_logger
 
 
 class EmulationRepoManager(RepoManagerInterface[str]):
