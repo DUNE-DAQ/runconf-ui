@@ -83,7 +83,7 @@ class EmulationRepoManager(RepoManagerInterface[str]):
         ## MaR: check with Henry if it's ok to do it here
         self.conf_pool.checkout_base(self.daq_version)  # type: ignore
 
-        return EmulationRepoManager.get_emulation_configurations(self.conf_directory)
+        return self.get_emulation_configurations(self.conf_directory)
 
     def select_config(self, config: Path) -> Path:
         """Select a configuration file by path or name.
@@ -114,8 +114,7 @@ class EmulationRepoManager(RepoManagerInterface[str]):
     def default_version(self) -> str:
         return self.conf_pool.get_release()
 
-    @staticmethod
-    def get_emulation_configurations(config_path: Path) -> list[Path]:
+    def get_emulation_configurations(self, config_path: Path) -> list[Path]:
         """
         Among all the session contained recursively in config paths, it returns all the emulation session files
         """
