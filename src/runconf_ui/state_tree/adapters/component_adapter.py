@@ -51,9 +51,8 @@ class DisableComponent(Adapter):
         :param value: True to enable the component, False to disable
         """
         
-        disabled = self.session.disabled
         
-        if value and self.dal in disabled:
+        if value:
             enable_component(self.configuration._obj, self.session.id, self.dal.id)
-        elif not value and self.dal not in disabled:
+        else:
             disable_component(self.configuration._obj, self.session.id, self.dal.id)
