@@ -3,6 +3,7 @@ from conffwk.dal import DalBase
 from confmodel_dal import disable_component, enable_component
 
 from runconf_ui.exceptions import IncompatibleDalException
+from runconf_ui.utils import get_logger
 
 from .adapter import Adapter
 
@@ -12,6 +13,7 @@ class DisableComponent(Adapter):
 
     Raises an IncompatibleDalException if the DAL is not a Resource subclass.
     """
+
 
     def __init__(
         self,
@@ -48,10 +50,10 @@ class DisableComponent(Adapter):
 
         :param value: True to enable the component, False to disable
         """
-        if value:
+        
+        disabled = self.session.disabled
+        
+        if value and self.dal in disabled:
             enable_component(self.configuration._obj, self.session.id, self.dal.id)
-        else:
+        elif not value and self.dal not in disabled:
             disable_component(self.configuration._obj, self.session.id, self.dal.id)
-
-        self.configuration.update_dal(self.session)
-        self.configuration.update_dal(self.dal)
