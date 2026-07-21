@@ -3,8 +3,6 @@ from conffwk.dal import DalBase
 from confmodel_dal import disable_component, enable_component
 
 from runconf_ui.exceptions import IncompatibleDalException
-from runconf_ui.utils import get_logger
-
 from .adapter import Adapter
 
 
@@ -50,8 +48,6 @@ class DisableComponent(Adapter):
 
         :param value: True to enable the component, False to disable
         """
-        
-        
         if value:
             enable_component(self.configuration._obj, self.session.id, self.dal.id)
         else:
