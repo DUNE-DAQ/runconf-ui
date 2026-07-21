@@ -54,9 +54,7 @@ class RunconfUIApp(App):
 
     # These are still registered as named screens for push/pop overlays
     SCREENS: ClassVar[dict] = {
-        "create": CreateScreen,
         "help": HelpScreen,
-        "quit": QuitScreen,
         "load": LoadingScreen,
     }
 
@@ -158,7 +156,7 @@ class RunconfUIApp(App):
 
     @on(runconf_msg.OpenCreateMenuMessage)
     def handle_open_create(self):
-        self.push_screen("create")
+        self.push_screen(CreateScreen())
 
     @on(runconf_msg.QuitAndSaveMessage)
     def handle_quit_save(self):

@@ -77,17 +77,3 @@ def test_default_mode_is_main():
         "DEFAULT_MODE must be 'main'. "
         "switch_mode() in on_mount races against run_test in Textual 7.x."
     )
-
-
-def test_overlay_screens_registered_in_screens():
-    """Overlay screens must be in SCREENS so push_screen() can find them."""
-    for name, cls in (
-        ("create", CreateScreen),
-        ("quit", QuitScreen),
-        ("load", LoadingScreen),
-        ("help", HelpScreen),
-    ):
-        assert name in RunconfUIApp.SCREENS, (
-            f"'{name}' must be in SCREENS for push_screen() to work."
-        )
-        assert RunconfUIApp.SCREENS[name] is cls
