@@ -204,7 +204,7 @@ def cli(
         )
 
     # When we JUST provide the apparatus
-    if not use_local:
+    if repo_type ! eq RepoManagerType.LOCAL.value :
         apparatus_vars = (base_url, ops_url, config_file_name)
         if all(v is None for v in apparatus_vars):
             apparatus_defaults = get_apparatus_defaults(apparatus)
