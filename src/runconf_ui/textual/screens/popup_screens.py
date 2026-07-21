@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Literal
 
+from rich.markup import escape
 from textual import on
 from textual.app import ComposeResult
 from textual.containers import Grid, Vertical
@@ -237,6 +238,7 @@ class ExceptionScreen(ButtonPopup):
                     QuitAndScrapMessage(),
                 ),
             ],
-            info_str=error_msg,
+            info_str="Error handling config. This is likely due to incompatible config or older DAQ dependencies.\n"
+                    f"The following error has been raised: \n [bold red]{escape(error_msg)}[/bold red]",
             css_classes="pop_up quit_pop_up_grid",
         )
