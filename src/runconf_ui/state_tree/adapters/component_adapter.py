@@ -3,6 +3,7 @@ from conffwk.dal import DalBase
 from confmodel_dal import disable_component, enable_component
 
 from runconf_ui.exceptions import IncompatibleDalException
+
 from .adapter import Adapter
 
 
@@ -11,7 +12,6 @@ class DisableComponent(Adapter):
 
     Raises an IncompatibleDalException if the DAL is not a Resource subclass.
     """
-
 
     def __init__(
         self,

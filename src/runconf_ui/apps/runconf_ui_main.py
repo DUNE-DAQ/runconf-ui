@@ -49,7 +49,7 @@ def get_apparatus_defaults(apparatus: str) -> ApparatusDefaults:
     with open(script_path) as f:
         for line in f:
             match = export_pattern.match(line.strip())
-            if match:                
+            if match:
                 key = match.group(1)
                 value = next((v for v in match.groups()[1:] if v is not None), "")
                 defaults[key] = value
@@ -184,9 +184,9 @@ def cli(
     """
     Launches the interactive configuration UI and saves selected configurations
     to the specified output directory. Invoked with the runconf-shifter-ui command.
-    
+
     \f
-    
+
     :param apparatus: DAQ apparatus name (e.g., NP02, NP04)
     :param config_directory: Path to configuration directory
     :param output_directory: Directory to save run configs to
@@ -196,7 +196,7 @@ def cli(
     :param ops_url: URL for the operations repository
     :param log_level: Log level (INFO, WARNING, DEBUG)
 
-    
+
     """
     if apparatus is None:
         raise click.UsageError(
@@ -213,7 +213,8 @@ def cli(
             config_file_name = apparatus_defaults.get("config_file_name")
         elif any(v is None for v in apparatus_vars):
             raise click.UsageError(
-                "Specify all of --base-url, --ops-url, and --config-file-name together, or omit all three to use apparatus defaults."            )
+                "Specify all of --base-url, --ops-url, and --config-file-name together, or omit all three to use apparatus defaults."
+            )
 
     ctx = RunconfContext(
         apparatus=apparatus,

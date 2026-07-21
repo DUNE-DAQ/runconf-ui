@@ -239,6 +239,6 @@ class ExceptionScreen(ButtonPopup):
                 ),
             ],
             info_str="Error handling config. This is likely due to incompatible config or older DAQ dependencies.\n"
-                    f"The following error has been raised: \n [bold red]{escape(error_msg)}[/bold red]",
+            f"The following error has been raised: \n [bold red]{escape(error_msg)}[/bold red]",
             css_classes="pop_up quit_pop_up_grid",
         )
