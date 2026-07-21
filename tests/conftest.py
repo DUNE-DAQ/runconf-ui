@@ -12,6 +12,7 @@ from pathlib import Path
 import pytest
 from daqconf.consolidate import consolidate_db
 
+from runconf_ui import RepoManagerType, RunconfContext
 from runconf_ui.utils import init_logger, open_configuration
 
 
@@ -59,5 +60,24 @@ def system_config(tmp_config_path):
 def consolidated_config(
     tmp_config_path, session_name, config_path, system_config, logger
 ):
+    """
+    Dummy args to prevent screaming about logger....
+    """
+
     consolidate_db(str(config_path), str(tmp_config_path), session_name)
     return open_configuration(tmp_config_path)
+
+
+@pytest.fixture(scope="session")
+def save_path(tmp_path_factory):
+    return tmp_path_factory.mktemp("outputs")
+
+
+@pytest.fixture(scope="session")
+def dummy_context(tmp_config_path, save_path):
+    return RunconfContext(
+        apparatus="dummy",
+        conf_directory=tmp_config_path.parent,
+        repo_type=RepoManagerType.LOCAL,
+        output_directory=save_path,
+    )

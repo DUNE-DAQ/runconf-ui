@@ -52,6 +52,3 @@ class DisableComponent(Adapter):
             enable_component(self.configuration._obj, self.session.id, self.dal.id)
         else:
             disable_component(self.configuration._obj, self.session.id, self.dal.id)
-
-        self.configuration.update_dal(self.session)
-        self.configuration.update_dal(self.dal)

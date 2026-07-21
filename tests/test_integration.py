@@ -8,7 +8,9 @@ is covered adequately by test_adapters.py. These tests focus on:
 """
 
 import pytest
+from conffwk import Configuration
 
+from runconf_ui import RunconfUIBackend
 from runconf_ui.state_tree import (
     DisableComponent,
     Group,
@@ -19,6 +21,12 @@ from runconf_ui.state_tree import (
     labelled,
 )
 from runconf_ui.system_configuration import SystemConfigReader
+
+
+def _leaf(config, session, dal, label=None):
+    """Shorthand for building a Leaf wrapping a DisableComponent."""
+    return Leaf(DisableComponent(config, session, dal), label=label)
+
 
 # ---------------------------------------------------------------------------
 # Tree integration — real DALs, no YAML
@@ -54,22 +62,14 @@ class TestTreeIntegration:
           CRP5 (any): ru-02  (votes=True)
           ru-segment          (votes=False, propagate=True)
         """
+        # Reset all DALs to enabled before (re)building the tree.
         for dal in (ru01, ru02, ru_segment):
-            Leaf(DisableComponent(consolidated_config, consolidated_session, dal)).set(
-                True
-            )
+            _leaf(consolidated_config, consolidated_session, dal).set(True)
 
-        ru01_leaf = Leaf(
-            DisableComponent(consolidated_config, consolidated_session, ru01),
-            label="ru-01",
-        )
-        ru02_leaf = Leaf(
-            DisableComponent(consolidated_config, consolidated_session, ru02),
-            label="ru-02",
-        )
-        seg_leaf = Leaf(
-            DisableComponent(consolidated_config, consolidated_session, ru_segment),
-            label="ru-segment",
+        ru01_leaf = _leaf(consolidated_config, consolidated_session, ru01, "ru-01")
+        ru02_leaf = _leaf(consolidated_config, consolidated_session, ru02, "ru-02")
+        seg_leaf = _leaf(
+            consolidated_config, consolidated_session, ru_segment, "ru-segment"
         )
 
         root = Group("TPC", strategy=all)
@@ -170,3 +170,44 @@ class TestSystemConfigReaderIntegration:
 
     def test_non_existent_objects_produce_no_group(self, assembled):
         assert "NotReal" not in [g.id for g in assembled.disableable]
+
+
+# ---------------------------------------------------------------------------
+# Saving — round-trip DAL state through RunconfUIBackend
+# ---------------------------------------------------------------------------
+
+
+class TestDalSave:
+    @pytest.fixture
+    def backend(self, tmp_config_path, dummy_context):
+        b = RunconfUIBackend(dummy_context)
+        b.set_daq_version(tmp_config_path.parent)
+        b.set_daq_session(tmp_config_path)
+        b.open_selected_session()
+        return b
+
+    @pytest.mark.parametrize("enabled", [True, False], ids=["enabled", "disabled"])
+    def test_save_readout_state(self, backend, session_name, enabled):
+        backend.set_value("Detector", "Readout", enabled)
+        backend.set_value("Detector", "Readout__ru-01", enabled)
+        backend.set_value("Detector", "Readout__ru-02", enabled)
+        backend.save_config()
+
+        toggled_config = Configuration(f"oksconflibs:{backend.final_save_path}")
+        session_dal = toggled_config.get_dal("Session", session_name)
+        readout_dal = toggled_config.get_dal("Segment", "ru-segment")
+        ru01_dal = toggled_config.get_dal("ReadoutApplication", "ru-01")
+
+        is_disabled = readout_dal in session_dal.disabled
+        assert is_disabled is (not enabled)
+        assert (ru01_dal in session_dal.disabled) is (not enabled)
+
+    @pytest.mark.parametrize("enabled", [True, False], ids=["enabled", "disabled"])
+    def test_save_tp_generation_attribute(self, backend, enabled):
+        backend.set_value("TPG", "TPG__Readout", enabled)
+        backend.save_config()
+
+        toggled_config = Configuration(f"oksconflibs:{backend.final_save_path}")
+        ru01_dal = toggled_config.get_dal("ReadoutApplication", "ru-01")
+
+        assert ru01_dal.tp_generation_enabled is enabled

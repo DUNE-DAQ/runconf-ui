@@ -74,7 +74,7 @@ class _SessionManager:
         self.repo_manager = repo_factory(
             apparatus=context.apparatus,
             conf_directory=context.conf_directory,
-            repo_type = context.repo_type,
+            repo_type=context.repo_type,
             config_file_name=context.config_file_name,
             ops_url=context.ops_url,
             base_url=context.base_url,
@@ -301,6 +301,15 @@ class RunconfUIBackend:
         :rtype: Path
         """
         return self.current_save_dir / self._save_path.name
+
+    @property
+    def final_save_path(self) -> Path:
+        """Get the path where the config will be saved.
+
+        :returns: Path object representing the config save location
+        :rtype: Path
+        """
+        return self.final_save_dir / self._save_path.name
 
     def save_config(self) -> None:
         """

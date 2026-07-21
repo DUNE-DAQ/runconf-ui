@@ -7,23 +7,12 @@ get_values, save_config) against a real conffwk configuration.
 
 import pytest
 
-from runconf_ui import RepoManagerType, RunconfContext, RunconfUIBackend
+from runconf_ui import RunconfUIBackend
 
 
-@pytest.fixture(scope="session")
-def save_path(tmp_path_factory):
-    return tmp_path_factory.mktemp("outputs")
-
-
-@pytest.fixture(scope="session")
-def backend(tmp_config_path, save_path):
-    context = RunconfContext(
-        apparatus="dummy",
-        conf_directory=tmp_config_path.parent,
-        repo_type=RepoManagerType.LOCAL,
-        output_directory=save_path,
-    )
-    b = RunconfUIBackend(context)
+@pytest.fixture(scope="module")
+def backend(tmp_config_path, dummy_context):
+    b = RunconfUIBackend(dummy_context)
     b.set_daq_version(tmp_config_path.parent)
     b.set_daq_session(tmp_config_path)
     b.open_selected_session()
@@ -105,8 +94,6 @@ class TestRelationshipBackend:
 # ---------------------------------------------------------------------------
 # Adjustable node
 # ---------------------------------------------------------------------------
-
-
 class TestAdjustableBackend:
     def test_set_and_get_adjustable_value(self, backend):
         key = "Random Trigger Rates__random-tc-generator - trigger_rate_hz"
