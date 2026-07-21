@@ -302,6 +302,15 @@ class RunconfUIBackend:
         """
         return self.current_save_dir / self._save_path.name
 
+    @property
+    def final_save_path(self) -> Path:
+        """Get the path where the config will be saved.
+
+        :returns: Path object representing the config save location
+        :rtype: Path
+        """
+        return self.final_save_dir / self._save_path.name
+
     def save_config(self) -> None:
         """
         Commit the in-memory config then write a consolidated copy to the

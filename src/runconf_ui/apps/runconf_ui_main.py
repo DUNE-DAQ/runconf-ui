@@ -95,7 +95,7 @@ def get_exit_msg(backend: RunconfUIBackend) -> str:
     if backend.config_session is None:
         return "No session selected, cannot use DRUNC"
 
-    config_file = backend.config_save_path
+    config_file = backend.final_save_path.resolve()
 
     if not config_file.is_file():
         return f"Config file {config_file} not created, cannot use DRUNC"
