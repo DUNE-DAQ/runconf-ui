@@ -1,5 +1,6 @@
 from enum import Enum
 from pathlib import Path
+from typing import Any
 
 from runconf_ui.exceptions import RunConfToolsRepoException
 
@@ -7,7 +8,7 @@ from .detail import EmulationRepoManager, LocalRepoManager, RemoteRepoManager
 from .repo_manager_interface import RepoManagerInterface
 
 
-class RepoManagerType(Enum) :
+class RepoManagerType(Enum):
     LOCAL = "local"
     REMOTE = "remote"
     EMULATION = "emulation"
@@ -30,11 +31,11 @@ class RepoManagerType(Enum) :
 def repo_factory(
     apparatus: str,
     conf_directory: Path,
-    repo_type : RepoManagerType,
+    repo_type: RepoManagerType,
     config_file_name: str | None = None,
     ops_url: str | None = None,
     base_url: str | None = None,
-) -> RepoManagerInterface:
+) -> RepoManagerInterface[Any]:
     """
     Factory for the repo maanger
 
@@ -57,7 +58,7 @@ def repo_factory(
     :rtype: RepoManagerInterface
     """
 
-    if repo_type.value == "local"  :
+    if repo_type.value == "local":
         return LocalRepoManager(apparatus, conf_directory, config_file_name)
     if ops_url is None:
         raise RunConfToolsRepoException(
@@ -68,7 +69,12 @@ def repo_factory(
             f"Error {base_url} not set, cannot use Runconftool interface"
         )
 
-    if repo_type.value == "emulation" :
+    if repo_type.value == "emulation":
+        if config_file_name is None:
+            raise ValueError(
+                "Config file name not specified, cannot run runconf-ui with emulations"
+            )
+
         return EmulationRepoManager(
             apparatus=apparatus,
             conf_directory=conf_directory,
@@ -77,7 +83,6 @@ def repo_factory(
             base_url=base_url,
         )
 
-    
     if config_file_name is None:
         raise RunConfToolsRepoException(
             f"Error {config_file_name} not set, cannot use remote interface"
@@ -90,5 +95,3 @@ def repo_factory(
         operation_url=ops_url,
         base_url=base_url,
     )
-    
- 

@@ -211,6 +211,7 @@ def cli(
             base_url = apparatus_defaults.get("base_url")
             ops_url = apparatus_defaults.get("ops_url")
             config_file_name = apparatus_defaults.get("config_file_name")
+            config_directory = apparatus_defaults.get("config_dir")
         elif any(v is None for v in apparatus_vars):
             raise click.UsageError(
                 "Specify all of --base-url, --ops-url, and --config-file-name together, or omit all three to use apparatus defaults."

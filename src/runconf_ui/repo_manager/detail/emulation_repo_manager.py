@@ -10,7 +10,7 @@ from runconf_ui.repo_manager.repo_manager_interface import RepoManagerInterface
 from runconf_ui.utils import get_configs_with_session, get_logger
 
 
-class EmulationRepoManager(RepoManagerInterface[str]):
+class EmulationRepoManager(RepoManagerInterface[Path]):
     """Repository manager for remote git-based DAQ configuration repositories.
     But, contrary to the remote one, this interfaces with the base repository as it's only for emulation
 
@@ -22,7 +22,7 @@ class EmulationRepoManager(RepoManagerInterface[str]):
         self,
         apparatus: str,
         conf_directory: Path,
-        operation_url: str,   ## MR: this is in some way a problem of ConfPool, we should envision a mode in which the operation is not necessary
+        operation_url: str,  ## MR: this is in some way a problem of ConfPool, we should envision a mode in which the operation is not necessary
         base_url: str,
         config_file_name: str,
     ):
@@ -53,7 +53,7 @@ class EmulationRepoManager(RepoManagerInterface[str]):
                 f"Cannot set up runconftools.ConfPool with operation url: {operation_url}, base url: {base_url}, apparatus: {apparatus}"
             )
 
-    def get_available_daq_versions(self) -> list[str]:
+    def get_available_daq_versions(self) -> list[str]:  # type: ignore[override]
         """Get the list of available DAQ versions from the remote repository.
 
         :returns: List of available DAQ version identifiers
@@ -67,14 +67,12 @@ class EmulationRepoManager(RepoManagerInterface[str]):
         :returns: List of configuration names for the current DAQ version
         :rtype: list[str]
 
-        Specifically this means getting all the configuration file with a session 
+        Specifically this means getting all the configuration file with a session
         """
         if self.daq_version is None:
             return []
 
-        get_logger().info(
-            "Checking out base for DAQ version %s", self.daq_version
-        )
+        get_logger().info("Checking out base for DAQ version %s", self.daq_version)
 
         ## MaR: check with Henry if it's ok to do it here
         self.conf_pool.checkout_base(self.daq_version)  # type: ignore
@@ -91,7 +89,9 @@ class EmulationRepoManager(RepoManagerInterface[str]):
         :raises DaqVersionException: If the configuration is not found
         """
 
-        sessions = self.get_daq_sessions()  ## in this case if feels a bit redundant, can we remove it?
+        sessions = (
+            self.get_daq_sessions()
+        )  ## in this case if feels a bit redundant, can we remove it?
 
         # Direct match first.
         if config in sessions:
@@ -117,6 +117,6 @@ class EmulationRepoManager(RepoManagerInterface[str]):
         """
         confs = get_configs_with_session(config_path)
 
-        masks = self.config_file_names.split(':')
-        
-        return [c for c in confs if c.name in masks] 
+        masks = self.config_file_names.split(":")
+
+        return [c for c in confs if c.name in masks]

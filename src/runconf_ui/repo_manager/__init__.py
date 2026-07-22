@@ -8,5 +8,5 @@ __all__ = [
     "RemoteRepoManager",
     "RepoManagerInterface",
     "RepoManagerType",
-    "repo_factory"
+    "repo_factory",
 ]
