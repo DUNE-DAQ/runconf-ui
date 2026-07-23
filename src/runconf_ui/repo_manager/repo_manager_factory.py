@@ -58,8 +58,9 @@ def repo_factory(
     :rtype: RepoManagerInterface
     """
 
-    if repo_type.value == "local":
+    if repo_type == RepoManagerType.LOCAL:
         return LocalRepoManager(apparatus, conf_directory, config_file_name)
+    
     if ops_url is None:
         raise RunConfToolsRepoException(
             f"Error {ops_url} not set, cannot use Runconftool interface"
@@ -69,7 +70,7 @@ def repo_factory(
             f"Error {base_url} not set, cannot use Runconftool interface"
         )
 
-    if repo_type.value == "emulation":
+    if repo_type == RepoManagerType.EMULATION: 
         if config_file_name is None:
             raise ValueError(
                 "Config file name not specified, cannot run runconf-ui with emulations"
