@@ -52,7 +52,7 @@ Three repo managers are available, all inheriting from `RepoManagerInterface`:
 
 **`RemoteRepoManager`** manages repositories stored in remote git repositories via `runconftools.ConfPool`. It requires the apparatus name, a local cache directory, the config filename to look for, and the ops and base repository URLs.
 
-**`EmulationRepoManager`** manages the same remote remote git repositories via `runconftools.ConfPool` used in the remote case, but it exposes only emulation file configuration obtained before running generators. It requires the apparatus name, a local cache directory, the config filename to look for, and the ops and base repository URLs.
+**`EmulationRepoManager`** manages the same remote git repositories via `runconftools.ConfPool` used in the remote case, but it exposes only emulation file configuration obtained before running generators. It requires the apparatus name, a local cache directory, the config filename to look for, and the ops and base repository URLs.
 
 All managers expose the same interface: `get_available_daq_versions()`, `get_daq_sessions()`, `set_daq_version()`, `select_config()`, and `get_runconf_ui_config_path()`. The last method locates the YAML system configuration file at `[conf_directory]/runconf-ui-settings/[apparatus].yml`.
 
