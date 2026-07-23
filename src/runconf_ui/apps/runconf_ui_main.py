@@ -203,8 +203,10 @@ def cli(
             "Apparatus must be specified with -a or APPARATUS env variable"
         )
 
+    repo_type_enum = RepoManagerType.from_string(repo_type)
+    
     # When we JUST provide the apparatus
-    if repo_type != RepoManagerType.LOCAL.value:
+    if repo_type_enum != RepoManagerType.LOCAL :
         apparatus_vars = (base_url, ops_url, config_file_name)
         if all(v is None for v in apparatus_vars):
             apparatus_defaults = get_apparatus_defaults(apparatus)
@@ -220,7 +222,7 @@ def cli(
     ctx = RunconfContext(
         apparatus=apparatus,
         conf_directory=Path(config_directory),
-        repo_type=RepoManagerType.from_string(repo_type),
+        repo_type=repo_type_enum,
         config_file_name=config_file_name,
         base_url=base_url,
         ops_url=ops_url,

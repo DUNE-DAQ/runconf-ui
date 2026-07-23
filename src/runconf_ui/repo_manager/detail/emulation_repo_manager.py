@@ -59,7 +59,7 @@ class EmulationRepoManager(RepoManagerInterface[Path]):
         :returns: List of available DAQ version identifiers
         :rtype: list[str]
         """
-        return self.conf_pool.get_base_branches()  ## or do we want the same as for the remote, the problem is that would queary the remote, not the base
+        return self.conf_pool.get_base_branches()  
 
     def get_daq_sessions(self) -> list[Path]:
         """Get the list of DAQ configurations for the current version.
