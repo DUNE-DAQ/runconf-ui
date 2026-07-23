@@ -63,11 +63,11 @@ def repo_factory(
     
     if ops_url is None:
         raise RunConfToolsRepoException(
-            f"Error {ops_url} not set, cannot use Runconftool interface"
+            "Error ops_url not set, cannot use Runconftool interface"
         )
     if base_url is None:
         raise RunConfToolsRepoException(
-            f"Error {base_url} not set, cannot use Runconftool interface"
+            "Error base_url not set, cannot use Runconftool interface"
         )
 
     if repo_type == RepoManagerType.EMULATION: 
