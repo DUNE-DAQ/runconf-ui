@@ -46,6 +46,10 @@ class EmulationRepoManager(RepoManagerInterface[Path]):
             str(self.conf_directory), apparatus, operation_url, base_url
         )
 
+        if not config_file_names:
+            raise RunConfToolsRepoException(
+                "config_file_name must be specified for emulation mode"
+            )
         self.config_file_names = config_file_names
 
         if self.conf_pool is None:
