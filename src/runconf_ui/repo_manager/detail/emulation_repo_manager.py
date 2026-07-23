@@ -24,7 +24,7 @@ class EmulationRepoManager(RepoManagerInterface[Path]):
         conf_directory: Path,
         operation_url: str,  ## MR: this is in some way a problem of ConfPool, we should envision a mode in which the operation is not necessary
         base_url: str,
-        config_file_name: str,
+        config_file_names: list[str],
     ):
         """Initialize the remote repository manager.
 
@@ -46,7 +46,7 @@ class EmulationRepoManager(RepoManagerInterface[Path]):
             str(self.conf_directory), apparatus, operation_url, base_url
         )
 
-        self.config_file_names = config_file_name
+        self.config_file_names = config_file_names
 
         if self.conf_pool is None:
             raise RunConfToolsRepoException(
@@ -111,12 +111,6 @@ class EmulationRepoManager(RepoManagerInterface[Path]):
         return self.conf_pool.get_release()
 
     def get_emulation_configurations(self, config_path: Path) -> list[Path]:
-        """
-        Among all the session contained recursively in config paths, it returns all the emulation session files.
-        This is done accordingly to the content of SESSION_FILE content, passed down into config_file_names
-        """
         confs = get_configs_with_session(config_path)
 
-        masks = self.config_file_names.split(":")
-
-        return [c for c in confs if c.name in masks]
+        return [c for c in confs if c.name in self.config_file_names]

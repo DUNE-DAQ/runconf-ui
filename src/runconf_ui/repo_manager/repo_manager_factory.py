@@ -79,7 +79,7 @@ def repo_factory(
         return EmulationRepoManager(
             apparatus=apparatus,
             conf_directory=conf_directory,
-            config_file_name=config_file_name,
+            config_file_names=config_file_name.split(':'),
             operation_url=ops_url,
             base_url=base_url,
         )
