@@ -2,7 +2,7 @@
 
 To get started, follow the [Installation Guide](README.md) in the README to set up the environment and install the necessary dependencies. Once runconf-ui is installed you can launch the application and start exploring its features.
 
-## Setting up the Remote environment
+## Setting up the Remote and Emulation environment
 `runconf-ui` uses [`runconftools`](https://github.com/DUNE-DAQ/runconftools/tree/develop) to interface with the remote gitlab repositories. In order to access these you need to setup a gitlab token. In order to set this up follow [these steps](https://docs.gitlab.com/user/profile/personal_access_tokens/) then in your `~/.netrc` file add
 ```sh
 machine gitlab.cern.ch
@@ -26,7 +26,7 @@ source runconf_<YOUR DETECTOR NAME>_env_setup.sh
 
 Currently provided detectors are `np02` and `np04`.
 
-The app can be booted in local mode (`-l`) or remote mode. Remote mode requires the ops and base repositories to be provided as well as the name of the configuration file (containing a `Session`) you wish to use.
+The app can be booted in three modes (`-t`): `local`, `remote` or `emulation`. Remote and emulation mode require the ops and base repositories to be provided as well as the name of the configuration file (containing a `Session`) you wish to use.
 
 ### Options
 
@@ -34,7 +34,7 @@ The app can be booted in local mode (`-l`) or remote mode. Remote mode requires 
 |---|---|---|---|---|
 | `--apparatus` | `-a` | `APPARATUS` | *(required)* | DAQ apparatus name, e.g. `NP02` or `NP04`. Used by `runconf-ui` to find the detectory YAML as well as by the remote repository manager to find the correct base configuration repo.|
 | `--config-directory` | `-c` | `CONFIG_DIR` | | Path to your local config directory. i.e. "where will the repository manager look for configs" |
-| `--use-local` | `-l` | | `False` | Use the local filesystem for the OKS config instead of a remote repository.  |
+| `--repo-type` | `-t` | | `remote` | Choice from `local`, `remote` or `emulation`.  |
 | `--config-file-name` | `-f` | `SESSION_FILE` | | Config file to find in the ops repository, e.g. `run.data.xml`. Remote mode only. |
 | `--base-url` | `-b` | `BASE_URL` | `ssh://git@gitlab.cern.ch:7999/dune-daq/online/ehn1-daqconfigs.git` | URL for the base DAQ config repository. The `BASE` branch of the git repo from which all others will be merged in. Remote mode only. |
 | `--ops-url` | `-r` | `OPERATION_URL` | | URL for the operations repository. Remote mode only. The specific operational repository, for example the configuration specifically relating to the CRT |
@@ -42,7 +42,12 @@ The app can be booted in local mode (`-l`) or remote mode. Remote mode requires 
 | `--log-level` | `-d` | | `INFO` | Logging verbosity: `INFO`, `WARNING`, or `DEBUG`. |
 
 All options that have a corresponding environment variable can be set either way; the CLI flag takes precedence.
+For the variables that can be configured via environmental variables, they can be configured automically via configuration scripts according to the selected apparatus, so for example
 
+```bash
+runconf-shifter-ui -a np02
+```
+Calls a setup script to configure the `np02` environmental settings, so that the user does not have to set anything in particular if they intent to use default configurations. 
 ---
 
 ## Using the App
