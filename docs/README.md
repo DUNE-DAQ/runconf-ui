@@ -12,7 +12,7 @@ pip install [-e] .
 ```
 
 ## User Guides
-* [Getting Started](docs/quick_start.md)
-* [Advanced users](docs/developer_guide.md)
-* [System Configuration](docs/configuration.md)
+* [Getting Started](quick_start.md)
+* [Advanced users](developer_guide.md)
+* [System Configuration](configuration.md)
 
