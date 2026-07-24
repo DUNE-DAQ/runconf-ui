@@ -71,11 +71,6 @@ class EmulationRepoManager(RepoManagerInterface[Path]):
         if self.daq_version is None:
             return []
 
-        get_logger().info("Checking out base for DAQ version %s", self.daq_version)
-
-        ## MaR: check with Henry if it's ok to do it here
-        self.conf_pool.checkout_base(self.daq_version)  # type: ignore
-
         return self.get_emulation_configurations(self.conf_directory)
 
     def select_config(self, config: Path) -> Path:
@@ -105,6 +100,11 @@ class EmulationRepoManager(RepoManagerInterface[Path]):
             f"Session {config} does not exist for {self.daq_version}"
         )
 
+    def set_daq_version(self, version: str | None):
+        super().set_daq_version(version)
+        if version is not None:
+            self.conf_pool.checkout_base(version)
+    
     @property
     def default_version(self) -> str:
         return self.conf_pool.get_release()
