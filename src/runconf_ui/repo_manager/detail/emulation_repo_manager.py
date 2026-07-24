@@ -91,11 +91,6 @@ class EmulationRepoManager(RepoManagerInterface[Path]):
         if config in sessions:
             return config
 
-        # Fall back to matching by filename only.
-        match = next((p for p in sessions if p.name == config), None)
-        if match is not None:
-            return match
-
         raise DaqVersionException(
             f"Session {config} does not exist for {self.daq_version}"
         )
@@ -103,6 +98,9 @@ class EmulationRepoManager(RepoManagerInterface[Path]):
     def set_daq_version(self, version: str | None):
         super().set_daq_version(version)
         if version is not None:
+            get_logger().info(
+            "Checking out DAQ version %s", self.daq_version
+            )
             self.conf_pool.checkout_base(version)
     
     @property
