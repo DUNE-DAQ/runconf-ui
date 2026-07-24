@@ -149,7 +149,7 @@ def get_exit_msg(backend: RunconfUIBackend) -> str:
 @click.option(
     "-f",
     "--config-file-name",
-    help="Config file to find in the ops repo (e.g. <X>.data.xml). Can be read from the SESSION_FILE environment variable. In the emulation case, it can be a colon separated list",
+    help="Config file to find in the ops repo (e.g. <X>.data.xml). Can be read from the SESSION_FILE environment variable. In the emulation case, it can be a colon separated list, e.g. np02-emu-session.data.xml:np02-emu-other.data.xml",
     envvar="SESSION_FILE",
 )
 @click.option(
