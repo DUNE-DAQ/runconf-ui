@@ -52,11 +52,6 @@ class EmulationRepoManager(RepoManagerInterface[Path]):
             )
         self.config_file_names = config_file_names
 
-        if self.conf_pool is None:
-            raise RunConfToolsRepoException(
-                f"Cannot set up runconftools.ConfPool with operation url: {operation_url}, base url: {base_url}, apparatus: {apparatus}"
-            )
-
     def get_available_daq_versions(self) -> list[str]:  # type: ignore[override]
         """Get the list of available DAQ versions from the remote repository.
 
