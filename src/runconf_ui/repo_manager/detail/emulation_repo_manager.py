@@ -103,6 +103,9 @@ class EmulationRepoManager(RepoManagerInterface[Path]):
     def set_daq_version(self, version: str | None):
         super().set_daq_version(version)
         if version is not None:
+            get_logger().info(
+            "Checking out DAQ version %s", self.daq_version
+            )
             self.conf_pool.checkout_base(version)
     
     @property
