@@ -147,9 +147,8 @@ class RunconfUIApp(App):
         self.refresh()
 
     def _on_config_failed_popup(self, e: Exception) -> None:
-        # self.pop_screen()  # dismiss the loading screen first
-        # self.handle_exception_popup(e)
-        ...
+        self.pop_screen()  # dismiss the loading screen first
+        self.handle_exception_popup(e)
 
     # ------------------------------------------------------------------ #
     # Quit / create / help handlers                                        #
