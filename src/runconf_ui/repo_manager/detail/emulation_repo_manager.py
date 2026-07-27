@@ -11,11 +11,12 @@ from runconf_ui.utils import get_configs_with_session, get_logger
 
 
 class EmulationRepoManager(RepoManagerInterface[Path]):
-    """Repository manager for remote git-based DAQ configuration repositories.
-    But, contrary to the remote one, this interfaces with the base repository as it's only for emulation
+    """Repository manager for emulation DAQ configuration repositories.
+                                                                                                                                                                                                                    
+    Uses the same git-backed ConfPool as RemoteRepoManager, but exposes only
+    pre-generator emulation configuration files rather than full session configs.
 
-    Manages DAQ configurations stored in remote git repositories via the
-    runconftools ConfPool interface.
+    As the remote repo manager, it uses the runconftools ConfPool interface.
     """
 
     def __init__(
