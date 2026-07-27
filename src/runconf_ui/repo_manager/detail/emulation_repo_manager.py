@@ -31,7 +31,7 @@ class EmulationRepoManager(RepoManagerInterface[Path]):
 
         :param apparatus: The DAQ apparatus name
         :param conf_directory: Local directory to cache configurations
-        :param config_file_name: List of config filename to load to mask only emulation files.
+        :param config_file_names: List of config filename to load to mask only emulation files.
         :param operation_url: URL of the operations git repository
         :param base_url: URL of the base git repository
         :raises RunConfToolsRepoException: If URLs are not set or ConfPool initialization fails

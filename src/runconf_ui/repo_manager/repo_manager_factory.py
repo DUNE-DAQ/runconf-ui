@@ -71,7 +71,7 @@ def repo_factory(
         )
 
     if repo_type == RepoManagerType.EMULATION: 
-        if config_file_name is None:
+        if not config_file_name:
             raise ValueError(
                 "Config file name not specified, cannot run runconf-ui with emulations"
             )
