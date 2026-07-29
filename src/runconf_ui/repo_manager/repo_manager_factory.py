@@ -4,7 +4,7 @@ from typing import Any
 
 from runconf_ui.exceptions import RunConfToolsRepoException
 
-from .detail import EmulationRepoManager, LocalRepoManager, RemoteRepoManager
+from .detail import LocalRepoManager, RemoteRepoManager
 from .repo_manager_interface import RepoManagerInterface
 
 
