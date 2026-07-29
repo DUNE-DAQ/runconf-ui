@@ -11,7 +11,6 @@ from .repo_manager_interface import RepoManagerInterface
 class RepoManagerType(Enum):
     LOCAL = "local"
     REMOTE = "remote"
-    EMULATION = "emulation"
 
     def __str__(self):
         return self.value
@@ -68,20 +67,6 @@ def repo_factory(
     if base_url is None:
         raise RunConfToolsRepoException(
             "Error base_url not set, cannot use Runconftool interface"
-        )
-
-    if repo_type == RepoManagerType.EMULATION: 
-        if not config_file_name:
-            raise ValueError(
-                "Config file name not specified, cannot run runconf-ui with emulations"
-            )
-
-        return EmulationRepoManager(
-            apparatus=apparatus,
-            conf_directory=conf_directory,
-            config_file_names=config_file_name.split(':'),
-            operation_url=ops_url,
-            base_url=base_url,
         )
 
     if config_file_name is None:
