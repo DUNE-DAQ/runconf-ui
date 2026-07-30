@@ -33,9 +33,9 @@ class RunconfContext:
     apparatus: str           # e.g. "np02"
     conf_directory: Path     # path to the config repo
     repo_type: RepoManagerType     # local filesystem, remote git 
-    config_file_name: str | None   # remote and emulation
-    base_url: str | None           # remote and emulation
-    ops_url: str | None            # remote and emulation
+    config_file_name: str | None   # remote 
+    base_url: str | None           # remote 
+    ops_url: str | None            # remote 
     output_directory: Path         # where saved configs are written
     log_level: LogLevels           # "INFO" | "DEBUG" | "WARNING"
 ```
