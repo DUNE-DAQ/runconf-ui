@@ -102,7 +102,7 @@ Leaf nodes wrap one of three `Adapter` subclasses, which provide a uniform `get(
 
 | Adapter | Used for |
 |---|---|
-| `DisableComponent` | `Resource` DAL objects — toggled via `enable_component` / `disable_component` from `confmodel_dal`. Raises `IncompatibleDalException` if the DAL is not a `Resource` subclass. |
+| `DisableComponent` | `Resource` DAL objects — toggled via `include_entity` / `exclude_entity` from `confmodel_dal`. Raises `IncompatibleDalException` if the DAL is not a `Resource` subclass. |
 | `DisableAttribute` | Named boolean-like attributes on a DAL (e.g. `tp_generation_enabled`). Also checks the DAL's resource-disabled state: if the DAL itself is disabled as a resource, the attribute is considered disabled regardless of its stored value. |
 | `AdjustableAttribute` | Any-valued attributes (trigger rates, thresholds, etc.). Reads and writes the attribute value directly without any resource-state logic. |
 

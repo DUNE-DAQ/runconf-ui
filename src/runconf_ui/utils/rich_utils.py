@@ -8,7 +8,7 @@ Colour scheme:
            or the underlying DAL is resource-disabled in the session)
 """
 
-from confmodel_dal import component_disabled
+from confmodel_dal import entity_excluded
 from rich.tree import Tree
 
 from runconf_ui.state_tree import Group, Node, State, compute_state
@@ -131,7 +131,7 @@ class ConfigTreeRenderer:
         if "Resource" not in self.config.superclasses(dal.className(), all=True):
             return parent_state
 
-        if component_disabled(self.config._obj, self.session.id, dal.id):
+        if entity_excluded(self.config._obj, self.session.id, dal.id):
             return State.DISABLED
 
         return State.ENABLED

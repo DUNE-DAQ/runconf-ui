@@ -7,7 +7,7 @@ test via yield fixtures so tests are order-independent.
 """
 
 import pytest
-from confmodel_dal import component_disabled, disable_component, enable_component
+from confmodel_dal import entity_excluded, exclude_entity, include_entity
 
 from runconf_ui.exceptions import AttributeMissingException, IncompatibleDalException
 from runconf_ui.state_tree import (
@@ -35,7 +35,7 @@ def resource_dal(consolidated_config):
 def restore_resource_dal(consolidated_config, consolidated_session, resource_dal):
     """Ensure ru-01 is always re-enabled after each test."""
     yield
-    enable_component(consolidated_config._obj, consolidated_session.id, resource_dal.id)
+    include_entity(consolidated_config._obj, consolidated_session.id, resource_dal.id)
 
 
 # ---------------------------------------------------------------------------
@@ -68,14 +68,14 @@ class TestDisableComponent:
         )
         adapter.set(False)
         assert adapter.get() is False
-        assert component_disabled(
+        assert entity_excluded(
             consolidated_config._obj, consolidated_session.id, resource_dal.id
         )
 
     def test_set_true_enables(
         self, consolidated_config, consolidated_session, resource_dal
     ):
-        disable_component(
+        exclude_entity(
             consolidated_config._obj, consolidated_session.id, resource_dal.id
         )
         adapter = DisableComponent(
@@ -83,7 +83,7 @@ class TestDisableComponent:
         )
         adapter.set(True)
         assert adapter.get() is True
-        assert not component_disabled(
+        assert not entity_excluded(
             consolidated_config._obj, consolidated_session.id, resource_dal.id
         )
 
@@ -124,7 +124,7 @@ class TestDisableAttribute:
         self, adapter, consolidated_config, consolidated_session, resource_dal
     ):
         resource_dal.tp_generation_enabled = True
-        disable_component(
+        exclude_entity(
             consolidated_config._obj, consolidated_session.id, resource_dal.id
         )
         assert adapter.get() is False

@@ -1,6 +1,6 @@
 from conffwk import Configuration
 from conffwk.dal import DalBase
-from confmodel_dal import disable_component, enable_component
+from confmodel_dal import exclude_entity, include_entity
 
 from runconf_ui.exceptions import IncompatibleDalException
 
@@ -49,6 +49,6 @@ class DisableComponent(Adapter):
         :param value: True to enable the component, False to disable
         """
         if value:
-            enable_component(self.configuration._obj, self.session.id, self.dal.id)
+            include_entity(self.configuration._obj, self.session.id, self.dal.id)
         else:
-            disable_component(self.configuration._obj, self.session.id, self.dal.id)
+            exclude_entity(self.configuration._obj, self.session.id, self.dal.id)

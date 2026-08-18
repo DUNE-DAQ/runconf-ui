@@ -3,7 +3,7 @@ from typing import Any
 
 from conffwk import Configuration
 from conffwk.dal import DalBase
-from confmodel_dal import component_disabled
+from confmodel_dal import entity_excluded
 
 
 class Adapter(ABC):
@@ -53,6 +53,6 @@ class Adapter(ABC):
         :returns: True if the DAL is enabled, False if disabled
         :rtype: bool
         """
-        return not component_disabled(
+        return not entity_excluded(
             self.configuration._obj, self.session.id, self.dal.id
         )

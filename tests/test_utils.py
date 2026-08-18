@@ -160,9 +160,9 @@ class TestConfigTreeRendererIntegration:
         assert any("ru-segment" in label for label in labels)
 
     def test_disabled_state_propagation(self, renderer, ru01, monkeypatch):
-        # Patch component_disabled to simulate ru-01 as disabled
+        # Patch entity_excluded to simulate ru-01 as disabled
         monkeypatch.setattr(
-            "runconf_ui.utils.rich_utils.component_disabled",
+            "runconf_ui.utils.rich_utils.entity_excluded",
             lambda obj, session_id, dal_id: dal_id == "ru-01",
         )
 
