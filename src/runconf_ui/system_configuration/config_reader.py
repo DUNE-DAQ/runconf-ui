@@ -17,7 +17,7 @@ import yaml
 from conffwk import Configuration
 from conffwk.dal import DalBase
 
-from runconf_ui.state_tree import Group, NodeStatus, walk
+from runconf_ui.state_tree import Group, NodeStatus, walk, NodeState
 from runconf_ui.utils import get_logger
 
 from .builders import AdjustableSystemBuilder, DisableSystemBuilder
@@ -33,7 +33,7 @@ from .dataclasses import (
 
 
 def _natural_key(s: str):
-    """Convert a string into a list suitable for natural sorting.
+    """Convert a string into a list suitable for naturalf sorting.
 
     :param s: String to convert
     :returns: List of integers and strings for natural sort order
@@ -55,7 +55,7 @@ def _node_sort_key(item: tuple[str, NodeStatus]):
     """
     key, node = item
     return (
-        0 if node.is_enabled else 1,
+        0 if NodeState.state_to_bool(node.state) else 1,
         _natural_key(key),
     )
 

@@ -11,15 +11,18 @@ Colour scheme:
 from confmodel_dal import component_disabled
 from rich.tree import Tree
 
-from runconf_ui.state_tree import Group, Node, State, compute_state
+from runconf_ui.state_tree import Group, Node, compute_state
 
 # Yeah sorry about this
+from runconf_ui.state_tree.node_state import NodeState
 from runconf_ui.system_configuration.config_reader import _natural_key
 
-_COLOURS: dict[State, str] = {
-    State.ENABLED: "green",
-    State.DISABLED: "red",
-    State.PARENT_DISABLED: "grey46",
+_COLOURS: dict[NodeState, str] = {
+    NodeState.ENABLED: "green",
+    NodeState.DISABLED: "red",
+    NodeState.PARTIALLY_ENABLED: "orange3",
+    NodeState.PARENT_DISABLED: "grey46",
+    NodeState.ERROR_STATE: "grey3"
 }
 
 
@@ -36,7 +39,7 @@ def sort_children(children: list[Node]) -> list[Node]:
     )
 
 
-def _format_label(label: str, state: State) -> str:
+def _format_label(label: str, state: NodeState) -> str:
     """Format a label with color and state annotation for Rich rendering.
 
     :param label: The label text to format
@@ -114,10 +117,10 @@ class ConfigTreeRenderer:
         :rtype: Tree
         """
         tree = Tree(f"[bold green]{self.session.id}")
-        self._render_config_branch(tree, self.session, State.ENABLED)
+        self._render_config_branch(tree, self.session, NodeState.ENABLED)
         return tree
 
-    def _calc_config_state(self, dal, parent_state: State) -> State:
+    def _calc_config_state(self, dal, parent_state: NodeState) -> NodeState:
         """Calculate the state of a DAL object based on parent and resource state.
 
         :param dal: The DAL object to calculate state for
@@ -125,18 +128,18 @@ class ConfigTreeRenderer:
         :returns: The calculated state for the DAL
         :rtype: State
         """
-        if parent_state is not State.ENABLED:
-            return State.PARENT_DISABLED
+        if parent_state is not NodeState.ENABLED:
+            return NodeState.PARENT_DISABLED
 
         if "Resource" not in self.config.superclasses(dal.className(), all=True):
             return parent_state
 
         if component_disabled(self.config._obj, self.session.id, dal.id):
-            return State.DISABLED
+            return NodeState.DISABLED
 
-        return State.ENABLED
+        return NodeState.ENABLED
 
-    def _render_config_branch(self, branch, dal, parent_state: State) -> None:
+    def _render_config_branch(self, branch, dal, parent_state: NodeState) -> None:
         """Recursively render configuration tree branches.
 
         :param branch: The Rich tree branch to render into

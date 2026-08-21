@@ -3,8 +3,11 @@ from conffwk.dal import DalBase
 from confmodel_dal import disable_component, enable_component
 
 from runconf_ui.exceptions import IncompatibleDalException
+from runconf_ui.state_tree import NodeState
 
 from .adapter import Adapter
+
+# Set up some class colours dynamically
 
 
 class DisableComponent(Adapter):
@@ -35,19 +38,23 @@ class DisableComponent(Adapter):
         self.label = label
         super().__init__(configuration, session, dal)
 
-    def get(self) -> bool:
+    def get(self) -> NodeState:
         """Get the enabled state of the component.
 
         :returns: True if the component is enabled as a resource, False otherwise
         :rtype: bool
         """
-        return self.dal_enabled()
+        return NodeState.bool_to_state(self.dal_enabled())
+        
 
-    def set(self, value: bool) -> None:
+    def set(self, value: bool|NodeState) -> None:
         """Set the enabled state of the component.
 
         :param value: True to enable the component, False to disable
         """
+        if isinstance(value, NodeState):
+            value = NodeState.state_to_bool(value)
+        
         if value:
             enable_component(self.configuration._obj, self.session.id, self.dal.id)
         else:

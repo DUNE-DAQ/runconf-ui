@@ -2,7 +2,7 @@ from textual import on
 from textual.containers import ScrollableContainer, Vertical
 from textual.widgets import Button, Static
 
-from runconf_ui.state_tree import NodeStatus
+from runconf_ui.state_tree import NodeStatus, NodeState
 from runconf_ui.utils import get_logger
 
 from ..messages import NodeToggledMessage
@@ -56,19 +56,20 @@ class EnableDisablePanel(Vertical):
         for node_id, node in self._runconf_nodes.items():
             get_logger().debug(f"   - {node_id} : {node}")
 
-            enabled_state = "node_enabled" if node.is_enabled else "node_disabled"
             is_top = node.parent is None
 
             node_classes = (
-                f"{main_node_label if is_top else sub_node_label} {enabled_state}"
+                f"{main_node_label if is_top else sub_node_label}"
             )
+
+            state_class = f"node-state-{node.state.name.lower()}"
 
             btn = Button(
                 label=node.node.label,
                 id=node_id,
-                classes=node_classes,
+                classes=f"{node_classes} {state_class}",
                 disabled=not node.is_interactive,
-            )
+)            
             if node.tooltip:
                 btn.tooltip = node.tooltip
 
@@ -130,8 +131,16 @@ class EnableDisablePanel(Vertical):
                 continue
             get_logger().debug(f"Node : {node_id} found")
             button = results.first(Button)
-            button.remove_class("node_enabled", "node_disabled")
-            button.add_class("node_enabled" if node.is_enabled else "node_disabled")
+            for state in NodeState:
+                button.remove_class(f"node-state-{state.name.lower()}")
+
+            # Add the current node-state class.
+            button.add_class(f"node-state-{node.state.name.lower()}")
+
+
+            button.styles.color = node.state.colour
+
+
             get_logger().debug(f"   - State : {button.classes}")
             button.disabled = not node.is_interactive
             get_logger().debug(f"   - Enabled : {button.disabled}")
