@@ -8,13 +8,14 @@ get_values, save_config) against a real conffwk configuration.
 import pytest
 
 from runconf_ui import RunconfUIBackend
+from runconf_ui.state_tree import NodeState
 
 
 @pytest.fixture(scope="module")
 def backend(tmp_config_path, dummy_context):
     b = RunconfUIBackend(dummy_context)
-    b.set_daq_version(tmp_config_path.parent)
-    b.set_daq_session(tmp_config_path)
+    b.session_manager.set_daq_version(tmp_config_path.parent)
+    b.session_manager.set_daq_session(tmp_config_path)
     b.open_selected_session()
     return b
 
@@ -27,28 +28,31 @@ def backend(tmp_config_path, dummy_context):
 class TestDisableableBackend:
     def test_toggle_top_level_propagates_to_children(self, backend):
         backend.set_value("Detector", "Readout", True)
-        assert backend.get_value("Detector", "Readout")
-        assert backend.get_value("Detector", "Readout__ru-01")
-        assert backend.get_value("Detector", "Readout__ru-02")
+        assert backend.get_value("Detector", "Readout") == NodeState.ENABLED
+        assert backend.get_value("Detector", "Readout__ru-01") == NodeState.ENABLED
+        assert backend.get_value("Detector", "Readout__ru-02") == NodeState.ENABLED
 
         backend.toggle("Detector", "Readout")
-        assert not backend.get_value("Detector", "Readout")
-        assert not backend.get_value("Detector", "Readout__ru-01")
-        assert not backend.get_value("Detector", "Readout__ru-02")
+        assert backend.get_value("Detector", "Readout") == NodeState.DISABLED
+        assert backend.get_value("Detector", "Readout__ru-01") == NodeState.DISABLED
+        assert backend.get_value("Detector", "Readout__ru-02") == NodeState.DISABLED
 
-        backend.toggle("Detector", "Readout")  # restore
+        backend.set_value("Detector", "Readout", NodeState.ENABLED)  # restore
+        backend.set_value("Detector", "Readout__ru-01", NodeState.ENABLED)
+        backend.set_value("Detector", "Readout__ru-02", NodeState.ENABLED)
+
 
     def test_toggle_subsystem_updates_parent_state(self, backend):
         backend.set_value("Detector", "Readout", True)
 
         # Disabling one subsystem leaves parent enabled (OR semantics for subsystem_dependent)
         backend.toggle("Detector", "Readout__ru-02")
-        assert backend.get_value("Detector", "Readout")
-        assert not backend.get_value("Detector", "Readout__ru-02")
+        assert backend.get_value("Detector", "Readout") == NodeState.PARTIALLY_ENABLED
+        assert backend.get_value("Detector", "Readout__ru-02") == NodeState.DISABLED
 
         # Disabling both subsystems disables parent
         backend.toggle("Detector", "Readout__ru-01")
-        assert not backend.get_value("Detector", "Readout")
+        assert backend.get_value("Detector", "Readout") == NodeState.DISABLED
 
         backend.toggle("Detector", "Readout")  # restore
 
@@ -56,25 +60,27 @@ class TestDisableableBackend:
         backend.set_value("Detector", "Readout", True)
         vals = backend.get_values()
 
-        assert vals["Detector"]["Readout"].is_enabled
-        assert vals["Detector"]["Readout__ru-01"].is_enabled
-        assert vals["Detector"]["Readout__ru-02"].is_enabled
+        assert vals["Detector"]["Readout"].state == NodeState.ENABLED
+        assert vals["Detector"]["Readout__ru-01"].state == NodeState.ENABLED
+        assert vals["Detector"]["Readout__ru-02"].state == NodeState.ENABLED
 
         backend.toggle("Detector", "Readout__ru-02")
         vals = backend.get_values()
-        assert not vals["Detector"]["Readout__ru-02"].is_enabled
+        assert not vals["Detector"]["Readout__ru-02"].state == NodeState.ENABLED
         assert vals["Detector"][
             "Readout__ru-02"
         ].is_interactive  # still interactive (parent on)
 
-        backend.toggle("Detector", "Readout__ru-01")
+        backend.set_value("Detector", "Readout", NodeState.DISABLED)
+        # backend.set_value("Detector", "Readout__ru-01", NodeState.DISABLED)
+        # backend.set_value("Detector", "Readout__ru-02", NodeState.DISABLED)
         vals = backend.get_values()
-        # Both subsystems off → parent off → children become non-interactive
-        assert not vals["Detector"]["Readout"].is_enabled
+
+        assert backend.get_value("Detector", "Readout") == NodeState.DISABLED
+        
+        # Both subsystems off → parent off → children become non-intractive
         assert not vals["Detector"]["Readout__ru-01"].is_interactive
         assert not vals["Detector"]["Readout__ru-02"].is_interactive
-
-        backend.toggle("Detector", "Readout")  # restore
 
 
 # ---------------------------------------------------------------------------
@@ -85,10 +91,10 @@ class TestDisableableBackend:
 class TestRelationshipBackend:
     def test_toggle_relationship(self, backend):
         backend.set_value("Trigger", "RandomTrigger", True)
-        assert backend.get_value("Trigger", "RandomTrigger")
+        assert backend.get_value("Trigger", "RandomTrigger") == NodeState.ENABLED
 
         backend.set_value("Trigger", "RandomTrigger", False)
-        assert not backend.get_value("Trigger", "RandomTrigger")
+        assert backend.get_value("Trigger", "RandomTrigger") == NodeState.DISABLED
 
 
 # ---------------------------------------------------------------------------

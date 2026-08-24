@@ -28,6 +28,9 @@ class NodeState(Enum):
 
     @staticmethod
     def bool_to_state(state_bool: bool)->"NodeState":
+        if isinstance(state_bool, NodeState):
+            return state_bool
+        
         if state_bool:
             return NodeState.ENABLED
         else:
@@ -35,4 +38,6 @@ class NodeState(Enum):
         
     @staticmethod
     def state_to_bool(state: "NodeState")->bool:
-        return state==NodeState.ENABLED or state==NodeState.PARTIALLY_ENABLED
+        if isinstance(state, bool):
+            return state
+        return state in {NodeState.ENABLED, NodeState.PARTIALLY_ENABLED}

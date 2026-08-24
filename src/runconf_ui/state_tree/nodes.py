@@ -75,7 +75,7 @@ class Leaf(Node):
     Wraps a single Adapter. The only node type that reads/writes conffwk.
     Reports its own raw adapter value; gating by parent is handled in traversal.
     """
-
+    
     def __init__(self, adapter: Adapter, label: str = "", tooltip: str = ""):
         """Initialize a Leaf node.
 
@@ -136,15 +136,13 @@ class Group(Node):
 
         :param node: The child node to add
         :returns: self for method chaining
-        :rtype: Group
+        :rtype: Groupx
         """
         self.children.append(node)
         return self
 
     def at(self, *path: str) -> "Group":
         """Find or create a chain of named child Groups, returning the deepest.
-
-
         :param path: Hierarchical path labels for nested groups
         :returns: The deepest group in the created/found chain
         :rtype: Group
@@ -172,8 +170,12 @@ class Group(Node):
         """Propagate state to all children who can be toggled
         """
         for child in self.children:
-            if isinstance(child.get(), NodeState):            
+            if isinstance(child.get(), NodeState):
                 child.set(value)
+    
+    @property
+    def top_level_leaves(self):
+        return [c for c in self.children if isinstance(c, Leaf)]
 
     # ------------------------------------------------------------------ #
     # Read path                                                            #
@@ -181,9 +183,18 @@ class Group(Node):
     def get(self) -> NodeState:
         """Get the aggregated state of all nodes."""
         child_states = [c.get() for c in self.children]
+        
+        if not child_states:
+            return NodeState.DISABLED
 
         if NodeState.ERROR_STATE in child_states:
             return NodeState.ERROR_STATE
+
+
+        top_states = [not NodeState.state_to_bool(l.get()) for l in self.top_level_leaves if isinstance(l.get(), NodeState)]
+
+        if all(top_states) and top_states:
+            return NodeState.DISABLED
 
         first_state = child_states[0]
         if all(s == first_state for s in child_states):

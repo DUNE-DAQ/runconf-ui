@@ -42,7 +42,7 @@ class NodeStatus:
     @property
     def is_interactive(self) -> bool:
         """False when the node is greyed out due to parent or DAL state."""
-        return self.state not in (NodeState.PARENT_DISABLED, NodeState.ERROR_STATE)
+        return self.parent is None or NodeState.state_to_bool(self.parent.get())
 
     @property
     def path(self) -> str | None:
@@ -104,15 +104,16 @@ def compute_state(node: Node, parent: Group | None) -> NodeState:
     :returns: The computed state
     :rtype: State
     """
-    # 1. Parent gating takes precedence over everything.
-    if parent is not None and not NodeState.state_to_bool(parent.get()):
+    parent_gated = (
+        parent is not None
+        and not NodeState.state_to_bool(parent.get())
+        and (all(not NodeState.state_to_bool(s.get()) for s in parent.top_level_leaves) if parent.top_level_leaves else True)
+    )
+    dal_disabled = isinstance(node, Leaf) and not node.adapter.dal_enabled()
+
+    if parent_gated or dal_disabled:
         return NodeState.PARENT_DISABLED
 
-    # 2. Leaf DAL resource state.
-    if isinstance(node, Leaf) and not node.adapter.dal_enabled():
-        return NodeState.PARENT_DISABLED
-
-    # 3. Node's own internal value.
     return node.get()
 
 # ---------------------------------------------------------------------------

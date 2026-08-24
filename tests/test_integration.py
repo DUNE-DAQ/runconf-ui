@@ -15,11 +15,11 @@ from runconf_ui.state_tree import (
     DisableComponent,
     Group,
     Leaf,
-    State,
     build_index,
     disabled_child_nodes,
     labelled,
 )
+from runconf_ui.state_tree.node_state import NodeState
 from runconf_ui.system_configuration import SystemConfigReader
 
 
@@ -56,12 +56,6 @@ class TestTreeIntegration:
     def tpc_tree(
         self, consolidated_config, consolidated_session, ru01, ru02, ru_segment
     ):
-        """
-        TPC (all):
-          CRP4 (any): ru-01  (votes=True)
-          CRP5 (any): ru-02  (votes=True)
-          ru-segment          (votes=False, propagate=True)
-        """
         # Reset all DALs to enabled before (re)building the tree.
         for dal in (ru01, ru02, ru_segment):
             _leaf(consolidated_config, consolidated_session, dal).set(True)
@@ -72,10 +66,10 @@ class TestTreeIntegration:
             consolidated_config, consolidated_session, ru_segment, "ru-segment"
         )
 
-        root = Group("TPC", strategy=all)
+        root = Group("TPC")
         root.at("CRP4").add(ru01_leaf)
         root.at("CRP5").add(ru02_leaf)
-        root.add(seg_leaf, votes=False, propagate=True)
+        root.add(seg_leaf)
         return root
 
     @pytest.fixture(autouse=True)
@@ -84,15 +78,15 @@ class TestTreeIntegration:
         tpc_tree.set(True)
 
     def test_all_enabled_by_default(self, tpc_tree):
-        assert tpc_tree.get() is True
+        assert tpc_tree.get() == NodeState.ENABLED
 
-    def test_disabling_one_crp_disables_root(self, tpc_tree):
+    def test_partial_enabling(self, tpc_tree):
         tpc_tree.at("CRP4").set(False)
-        assert tpc_tree.get() is False
+        assert tpc_tree.get() == NodeState.PARTIALLY_ENABLED
 
     def test_controlled_object_propagates_with_root(self, tpc_tree):
         tpc_tree.set(False)
-        assert build_index(tpc_tree)["ru-segment"].get() is False
+        assert build_index(tpc_tree)["ru-segment"].get() == NodeState.DISABLED
 
     def test_disabled_children_diagnostic(self, tpc_tree):
         tpc_tree.at("CRP4").set(False)
@@ -102,8 +96,8 @@ class TestTreeIntegration:
     def test_parent_disabled_propagates_to_non_voting_child(self, tpc_tree):
         tpc_tree.at("CRP4").set(False)
         statuses = {s.node.label: s for s in labelled(tpc_tree) if s.node.label}
-        assert statuses["TPC"].state == State.DISABLED
-        assert statuses["ru-segment"].state == State.PARENT_DISABLED
+        assert statuses["TPC"].state == NodeState.PARTIALLY_ENABLED
+        assert statuses["ru-segment"].state == NodeState.ENABLED
 
     def test_build_index_contains_all_labelled(self, tpc_tree):
         assert set(build_index(tpc_tree).keys()) == {
@@ -164,9 +158,9 @@ class TestSystemConfigReaderIntegration:
             next(g for g in assembled.disableable if g.id == "Detector").systems[0].root
         )
         root.set(False)
-        assert root.get() is False
+        assert root.get() == NodeState.DISABLED
         root.set(True)
-        assert root.get() is True
+        assert root.get() == NodeState.ENABLED
 
     def test_non_existent_objects_produce_no_group(self, assembled):
         assert "NotReal" not in [g.id for g in assembled.disableable]
@@ -181,8 +175,8 @@ class TestDalSave:
     @pytest.fixture
     def backend(self, tmp_config_path, dummy_context):
         b = RunconfUIBackend(dummy_context)
-        b.set_daq_version(tmp_config_path.parent)
-        b.set_daq_session(tmp_config_path)
+        b.session_manager.set_daq_version(tmp_config_path.parent)
+        b.session_manager.set_daq_session(tmp_config_path)
         b.open_selected_session()
         return b
 

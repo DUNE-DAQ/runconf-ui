@@ -140,7 +140,6 @@ class EnableDisablePanel(Vertical):
 
             button.styles.color = node.state.colour
 
-
             get_logger().debug(f"   - State : {button.classes}")
             button.disabled = not node.is_interactive
             get_logger().debug(f"   - Enabled : {button.disabled}")

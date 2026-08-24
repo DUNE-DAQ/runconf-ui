@@ -11,7 +11,9 @@ from rich.tree import Tree
 from textual.widgets import Button, Select, Static, TabbedContent
 
 from runconf_ui import RunconfContext, RunconfUIBackend
-from runconf_ui.state_tree import Group, Leaf, NodeStatus, State
+from runconf_ui.backend.runconf_ui_backend import SessionManager
+from runconf_ui.state_tree import Group, Leaf, NodeStatus
+from runconf_ui.state_tree.node_state import NodeState
 from runconf_ui.textual.runconf_ui_app import RunconfUIApp
 from runconf_ui.textual.screens import (
     CreateScreen,
@@ -54,13 +56,30 @@ class _StubAdapter:
 
 
 def _node(label: str, enabled=True, parent=None):
-    state = State.ENABLED if enabled else State.DISABLED
-    return NodeStatus(
+    state = NodeState.ENABLED if enabled else NodeState.DISABLED
+    return NodeStatus( 
         node=Leaf(_StubAdapter(enabled), label=label),  # type: ignore
         state=state,
         parent=parent,
     )
 
+def _make_session_manager(
+    versions=None,
+    sessions=None,
+):
+    s = MagicMock(SessionManager)
+    s.get_current_version.return_value = (versions or [Path("/fake/v1")])[0]
+    s.get_daq_versions.return_value = versions or [
+        Path("/fake/v1"),
+        Path("/fake/v2"),
+    ]
+    
+    s.get_sessions.return_value = sessions or [
+        Path("/fake/v1/session-a.data.xml"),
+        Path("/fake/v1/session-b.data.xml"),
+    ]
+    
+    return s 
 
 def _make_backend(
     versions=None,
@@ -71,17 +90,7 @@ def _make_backend(
 ):
     b = MagicMock(spec=RunconfUIBackend)
 
-    b.get_daq_versions.return_value = versions or [
-        Path("/fake/v1"),
-        Path("/fake/v2"),
-    ]
-
-    b.get_current_version.return_value = (versions or [Path("/fake/v1")])[0]
-
-    b.get_sessions.return_value = sessions or [
-        Path("/fake/v1/session-a.data.xml"),
-        Path("/fake/v1/session-b.data.xml"),
-    ]
+    b.session_manager = _make_session_manager(versions)
 
     b.get_disableable_values.return_value = disableable or {}
     b.get_adjustable_values.return_value = adjustable or {}
@@ -99,11 +108,11 @@ def _make_backend(
 
 
 def _loaded_backend():
-    parent = Group("Readout", strategy=all)
+    parent = Group("Readout")
 
     dis = {
         "Detector": {
-            "Readout": NodeStatus(node=parent, state=State.ENABLED, parent=None),
+            "Readout": NodeStatus(node=parent, state=NodeState.ENABLED, parent=None),
             "Readout__ru-01": _node("ru-01", True, parent),
             "Readout__ru-02": _node("ru-02", True, parent),
         }
@@ -392,8 +401,7 @@ async def test_buttons_render_after_load(loaded_pilot):
 @pytest.mark.slow
 async def test_enabled_node_has_class(loaded_pilot):
     button = loaded_pilot.app.query_one("#Readout", Button)
-
-    assert "node_enabled" in button.classes
+    assert "node-state-enabled" in button.classes
 
 
 @pytest.mark.slow

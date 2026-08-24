@@ -56,10 +56,11 @@ TreeViews = dict[str, Tree]
 # ---------------------------------------------------------------------------
 
 
-class _SessionManager:
+class SessionManager:
     """Owns repo interaction and config loading. No state querying here."""
 
     repo_manager: RepoManagerInterface
+    session_manager: "SessionManager" = None  # type: ignore[assignment]
 
     def __init__(self, context: RunconfContext):
         """Session management
@@ -204,7 +205,7 @@ class RunconfUIBackend:
 
         self._logger = get_logger()
 
-        self.session_manager = _SessionManager(context)
+        self.session_manager = SessionManager(context)
         self.apparatus = context.apparatus
 
         self._assembled: AssembledConfig | None = None
@@ -487,7 +488,7 @@ class RunconfUIBackend:
         """
         section_marker = "==============================\n"
 
-        rprint("## Main Tree ##\n")
+        rprint("## Main Tree ##\n", file=text_file)
         rprint(self.get_config_tree(), file=text_file)
         rprint(section_marker, file=text_file)
 
