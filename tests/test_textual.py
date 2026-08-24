@@ -23,7 +23,7 @@ from runconf_ui.textual.screens import (
 from runconf_ui.textual.widgets import (
     AdjustableAttributeTabs,
     ConfigTreePanel,
-    EnableDisableTabs,
+    IncludeExcludeTabs,
     FileSelect,
     OptionsPanel,
     RichTreeTabbed,
@@ -41,7 +41,7 @@ pytestmark = pytest.mark.asyncio
 class _StubAdapter:
     def __init__(self, value=True):
         self._value = value
-        self._dal_enabled = True
+        self._dal_included = True
 
     def get(self):
         return self._value
@@ -49,14 +49,14 @@ class _StubAdapter:
     def set(self, value):
         self._value = value
 
-    def dal_enabled(self):
-        return self._dal_enabled
+    def dal_included(self):
+        return self._dal_included
 
 
-def _node(label: str, enabled=True, parent=None):
-    state = State.ENABLED if enabled else State.DISABLED
+def _node(label: str, included=True, parent=None):
+    state = State.INCLUDED if included else State.EXCLUDED
     return NodeStatus(
-        node=Leaf(_StubAdapter(enabled), label=label),  # type: ignore
+        node=Leaf(_StubAdapter(included), label=label),  # type: ignore
         state=state,
         parent=parent,
     )
@@ -103,7 +103,7 @@ def _loaded_backend():
 
     dis = {
         "Detector": {
-            "Readout": NodeStatus(node=parent, state=State.ENABLED, parent=None),
+            "Readout": NodeStatus(node=parent, state=State.INCLUDED, parent=None),
             "Readout__ru-01": _node("ru-01", True, parent),
             "Readout__ru-02": _node("ru-02", True, parent),
         }
@@ -172,7 +172,7 @@ async def loaded_pilot():
     app = _app(backend)
 
     async with app.run_test(size=(100, 50)) as pilot:
-        app._refresh_enabled_info(load_fresh=True)
+        app._refresh_included_info(load_fresh=True)
         await pilot.pause()
         yield pilot
 
@@ -224,7 +224,7 @@ async def test_main_widgets_present(pilot):
 
     assert app.query_one(FileSelect)
     assert app.query_one(OptionsPanel)
-    assert app.query_one(EnableDisableTabs)
+    assert app.query_one(IncludeExcludeTabs)
     assert app.query_one(AdjustableAttributeTabs)
     assert app.query_one(ConfigTreePanel)
     assert app.query_one(RichTreeTabbed)
@@ -382,8 +382,8 @@ async def test_quit_scrap_exits_app(pilot):
 
 @pytest.mark.slow
 async def test_buttons_render_after_load(loaded_pilot):
-    buttons = list(loaded_pilot.app.query(".main_enabled_btn")) + list(
-        loaded_pilot.app.query(".sub_enabled_btn")
+    buttons = list(loaded_pilot.app.query(".main_includeed_btn")) + list(
+        loaded_pilot.app.query(".sub_included_btn")
     )
 
     assert len(buttons) > 0
@@ -403,7 +403,7 @@ async def test_clicking_button_calls_backend_toggle():
     async with _app(backend).run_test(size=(100, 50)) as pilot:
         app = pilot.app
 
-        app._refresh_enabled_info(load_fresh=True)
+        app._refresh_included_info(load_fresh=True)
         await pilot.pause()
 
         # In Textual 7.x, buttons inside TabbedContent don't receive click

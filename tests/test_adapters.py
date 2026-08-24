@@ -12,8 +12,8 @@ from confmodel_dal import entity_excluded, exclude_entity, include_entity
 from runconf_ui.exceptions import AttributeMissingException, IncompatibleDalException
 from runconf_ui.state_tree import (
     AdjustableAttribute,
-    DisableAttribute,
-    DisableComponent,
+    IncludeAttribute,
+    IncludeComponent,
 )
 
 # ---------------------------------------------------------------------------
@@ -33,37 +33,37 @@ def resource_dal(consolidated_config):
 
 @pytest.fixture(autouse=True)
 def restore_resource_dal(consolidated_config, consolidated_session, resource_dal):
-    """Ensure ru-01 is always re-enabled after each test."""
+    """Ensure ru-01 is always re-included after each test."""
     yield
     include_entity(consolidated_config._obj, consolidated_session.id, resource_dal.id)
 
 
 # ---------------------------------------------------------------------------
-# DisableComponent
+# excludeComponent
 # ---------------------------------------------------------------------------
 
 
-class TestDisableComponent:
+class TestexcludeComponent:
     def test_rejects_non_resource_dal(
         self, consolidated_config, consolidated_session, non_resource_dal
     ):
         with pytest.raises(IncompatibleDalException):
-            DisableComponent(
+            IncludeComponent(
                 consolidated_config, consolidated_session, non_resource_dal
             )
 
-    def test_enabled_by_default(
+    def test_included_by_default(
         self, consolidated_config, consolidated_session, resource_dal
     ):
-        adapter = DisableComponent(
+        adapter = IncludeComponent(
             consolidated_config, consolidated_session, resource_dal
         )
         assert adapter.get() is True
 
-    def test_set_false_disables(
+    def test_set_false_excludes(
         self, consolidated_config, consolidated_session, resource_dal
     ):
-        adapter = DisableComponent(
+        adapter = IncludeComponent(
             consolidated_config, consolidated_session, resource_dal
         )
         adapter.set(False)
@@ -72,13 +72,13 @@ class TestDisableComponent:
             consolidated_config._obj, consolidated_session.id, resource_dal.id
         )
 
-    def test_set_true_enables(
+    def test_set_true_includes(
         self, consolidated_config, consolidated_session, resource_dal
     ):
         exclude_entity(
             consolidated_config._obj, consolidated_session.id, resource_dal.id
         )
-        adapter = DisableComponent(
+        adapter = IncludeComponent(
             consolidated_config, consolidated_session, resource_dal
         )
         adapter.set(True)
@@ -89,41 +89,41 @@ class TestDisableComponent:
 
 
 # ---------------------------------------------------------------------------
-# DisableAttribute
+# excludeAttribute
 # ---------------------------------------------------------------------------
 
 
-class TestDisableAttribute:
+class TestexcludeAttribute:
     @pytest.fixture
     def adapter(self, consolidated_config, consolidated_session, resource_dal):
-        return DisableAttribute(
+        return IncludeAttribute(
             consolidated_config,
             consolidated_session,
             resource_dal,
-            "tp_generation_enabled",
+            "tp_generation_included",
         )
 
     def test_rejects_missing_attribute(
         self, consolidated_config, consolidated_session, non_resource_dal
     ):
         with pytest.raises(AttributeMissingException):
-            DisableAttribute(
+            IncludeAttribute(
                 consolidated_config,
                 consolidated_session,
                 non_resource_dal,
-                "tp_generation_enabled",
+                "tp_generation_included",
             )
 
     def test_get_reflects_attribute_value(self, adapter, resource_dal):
-        resource_dal.tp_generation_enabled = True
+        resource_dal.tp_generation_included = True
         assert adapter.get() is True
-        resource_dal.tp_generation_enabled = False
+        resource_dal.tp_generation_included = False
         assert adapter.get() is False
 
-    def test_disabled_when_dal_resource_disabled(
+    def test_excluded_when_dal_resource_excluded(
         self, adapter, consolidated_config, consolidated_session, resource_dal
     ):
-        resource_dal.tp_generation_enabled = True
+        resource_dal.tp_generation_included = True
         exclude_entity(
             consolidated_config._obj, consolidated_session.id, resource_dal.id
         )
@@ -131,21 +131,21 @@ class TestDisableAttribute:
 
     def test_set_updates_attribute(self, adapter, resource_dal):
         adapter.set(True)
-        assert resource_dal.tp_generation_enabled is True
+        assert resource_dal.tp_generation_included is True
         adapter.set(False)
-        assert resource_dal.tp_generation_enabled is False
+        assert resource_dal.tp_generation_included is False
 
-    def test_custom_enabled_disabled_values(
+    def test_custom_included_excluded_values(
         self, consolidated_config, consolidated_session, non_resource_dal
     ):
         non_resource_dal.sid = 1001
-        adapter = DisableAttribute(
+        adapter = IncludeAttribute(
             consolidated_config,
             consolidated_session,
             non_resource_dal,
             "sid",
-            enabled_value=1001,
-            disabled_value=1002,
+            include_value=1001,
+            exclude_value=1002,
         )
         assert adapter.get() is True
         adapter.set(False)

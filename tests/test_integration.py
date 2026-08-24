@@ -1,7 +1,7 @@
 """
 Integration tests against a live conffwk configuration.
 
-Adapter-level integration (DisableComponent, DisableAttribute, AdjustableAttribute)
+Adapter-level integration (excludeComponent, excludeAttribute, AdjustableAttribute)
 is covered adequately by test_adapters.py. These tests focus on:
   - Tree construction and state propagation with real DAL objects.
   - SystemConfigReader end-to-end assembly.
@@ -12,20 +12,20 @@ from conffwk import Configuration
 
 from runconf_ui import RunconfUIBackend
 from runconf_ui.state_tree import (
-    DisableComponent,
+    IncludeComponent,
     Group,
     Leaf,
     State,
     build_index,
-    disabled_child_nodes,
+    excludable_child_nodes,
     labelled,
 )
 from runconf_ui.system_configuration import SystemConfigReader
 
 
 def _leaf(config, session, dal, label=None):
-    """Shorthand for building a Leaf wrapping a DisableComponent."""
-    return Leaf(DisableComponent(config, session, dal), label=label)
+    """Shorthand for building a Leaf wrapping a excludeComponent."""
+    return Leaf(IncludeComponent(config, session, dal), label=label)
 
 
 # ---------------------------------------------------------------------------
@@ -62,7 +62,7 @@ class TestTreeIntegration:
           CRP5 (any): ru-02  (votes=True)
           ru-segment          (votes=False, propagate=True)
         """
-        # Reset all DALs to enabled before (re)building the tree.
+        # Reset all DALs to included before (re)building the tree.
         for dal in (ru01, ru02, ru_segment):
             _leaf(consolidated_config, consolidated_session, dal).set(True)
 
@@ -83,10 +83,10 @@ class TestTreeIntegration:
         yield
         tpc_tree.set(True)
 
-    def test_all_enabled_by_default(self, tpc_tree):
+    def test_all_included_by_default(self, tpc_tree):
         assert tpc_tree.get() is True
 
-    def test_disabling_one_crp_disables_root(self, tpc_tree):
+    def test_disabling_one_crp_excludes_root(self, tpc_tree):
         tpc_tree.at("CRP4").set(False)
         assert tpc_tree.get() is False
 
@@ -94,16 +94,16 @@ class TestTreeIntegration:
         tpc_tree.set(False)
         assert build_index(tpc_tree)["ru-segment"].get() is False
 
-    def test_disabled_children_diagnostic(self, tpc_tree):
+    def test_excluded_children_diagnostic(self, tpc_tree):
         tpc_tree.at("CRP4").set(False)
-        result = disabled_child_nodes(tpc_tree)
+        result = excludable_child_nodes(tpc_tree)
         assert any(c.label == "CRP4" for c in result)
 
-    def test_parent_disabled_propagates_to_non_voting_child(self, tpc_tree):
+    def test_parent_excluded_propagates_to_non_voting_child(self, tpc_tree):
         tpc_tree.at("CRP4").set(False)
         statuses = {s.node.label: s for s in labelled(tpc_tree) if s.node.label}
-        assert statuses["TPC"].state == State.DISABLED
-        assert statuses["ru-segment"].state == State.PARENT_DISABLED
+        assert statuses["TPC"].state == State.EXCLUDED
+        assert statuses["ru-segment"].state == State.PARENT_EXCLUDED
 
     def test_build_index_contains_all_labelled(self, tpc_tree):
         assert set(build_index(tpc_tree).keys()) == {
@@ -127,12 +127,12 @@ class TestSystemConfigReaderIntegration:
         reader = SystemConfigReader(system_config)
         return reader.assemble_config(consolidated_config, session_name)
 
-    def test_has_disableable_and_adjustable_groups(self, assembled):
-        assert assembled.disableable
+    def test_has_excludeable_and_adjustable_groups(self, assembled):
+        assert assembled.excludeable
         assert assembled.adjustable
 
     def test_detector_group_structure(self, assembled):
-        detector = next(g for g in assembled.disableable if g.id == "Detector")
+        detector = next(g for g in assembled.excludeable if g.id == "Detector")
         assert detector.label == "detector"
         assert detector.view_panel == "Detector View"
         index = build_index(detector.systems[0].root)
@@ -140,7 +140,7 @@ class TestSystemConfigReaderIntegration:
         assert "ru-02" in index
 
     def test_tpg_group_has_readout_subsystem(self, assembled):
-        tpg = next(g for g in assembled.disableable if g.id == "TPG")
+        tpg = next(g for g in assembled.excludeable if g.id == "TPG")
         index = build_index(tpg.systems[0].root)
         assert "Readout" in index
 
@@ -159,9 +159,9 @@ class TestSystemConfigReaderIntegration:
         root.set(False)
         assert rate_node.get() == initial
 
-    def test_disableable_set_changes_state(self, assembled):
+    def test_excludeable_set_changes_state(self, assembled):
         root = (
-            next(g for g in assembled.disableable if g.id == "Detector").systems[0].root
+            next(g for g in assembled.excludeable if g.id == "Detector").systems[0].root
         )
         root.set(False)
         assert root.get() is False
@@ -169,7 +169,7 @@ class TestSystemConfigReaderIntegration:
         assert root.get() is True
 
     def test_non_existent_objects_produce_no_group(self, assembled):
-        assert "NotReal" not in [g.id for g in assembled.disableable]
+        assert "NotReal" not in [g.id for g in assembled.excludeable]
 
 
 # ---------------------------------------------------------------------------
@@ -186,11 +186,11 @@ class TestDalSave:
         b.open_selected_session()
         return b
 
-    @pytest.mark.parametrize("enabled", [True, False], ids=["enabled", "disabled"])
-    def test_save_readout_state(self, backend, session_name, enabled):
-        backend.set_value("Detector", "Readout", enabled)
-        backend.set_value("Detector", "Readout__ru-01", enabled)
-        backend.set_value("Detector", "Readout__ru-02", enabled)
+    @pytest.mark.parametrize("included", [True, False], ids=["included", "excluded"])
+    def test_save_readout_state(self, backend, session_name, included):
+        backend.set_value("Detector", "Readout", included)
+        backend.set_value("Detector", "Readout__ru-01", included)
+        backend.set_value("Detector", "Readout__ru-02", included)
         backend.save_config()
 
         toggled_config = Configuration(f"oksconflibs:{backend.final_save_path}")
@@ -198,16 +198,16 @@ class TestDalSave:
         readout_dal = toggled_config.get_dal("Segment", "ru-segment")
         ru01_dal = toggled_config.get_dal("ReadoutApplication", "ru-01")
 
-        is_disabled = readout_dal in session_dal.disabled
-        assert is_disabled is (not enabled)
-        assert (ru01_dal in session_dal.disabled) is (not enabled)
+        is_excluded = readout_dal in session_dal.excluded
+        assert is_excluded is (not included)
+        assert (ru01_dal in session_dal.excluded) is (not included)
 
-    @pytest.mark.parametrize("enabled", [True, False], ids=["enabled", "disabled"])
-    def test_save_tp_generation_attribute(self, backend, enabled):
-        backend.set_value("TPG", "TPG__Readout", enabled)
+    @pytest.mark.parametrize("included", [True, False], ids=["included", "excluded"])
+    def test_save_tp_generation_attribute(self, backend, included):
+        backend.set_value("TPG", "TPG__Readout", included)
         backend.save_config()
 
         toggled_config = Configuration(f"oksconflibs:{backend.final_save_path}")
         ru01_dal = toggled_config.get_dal("ReadoutApplication", "ru-01")
 
-        assert ru01_dal.tp_generation_enabled is enabled
+        assert ru01_dal.tp_generation_included is included

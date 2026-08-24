@@ -20,11 +20,11 @@ def backend(tmp_config_path, dummy_context):
 
 
 # ---------------------------------------------------------------------------
-# Toggle / get / set on disableable nodes
+# Toggle / get / set on excludeable nodes
 # ---------------------------------------------------------------------------
 
 
-class TestDisableableBackend:
+class TestexcludeableBackend:
     def test_toggle_top_level_propagates_to_children(self, backend):
         backend.set_value("Detector", "Readout", True)
         assert backend.get_value("Detector", "Readout")
@@ -41,12 +41,12 @@ class TestDisableableBackend:
     def test_toggle_subsystem_updates_parent_state(self, backend):
         backend.set_value("Detector", "Readout", True)
 
-        # Disabling one subsystem leaves parent enabled (OR semantics for subsystem_dependent)
+        # Disabling one subsystem leaves parent included (OR semantics for subsystem_dependent)
         backend.toggle("Detector", "Readout__ru-02")
         assert backend.get_value("Detector", "Readout")
         assert not backend.get_value("Detector", "Readout__ru-02")
 
-        # Disabling both subsystems disables parent
+        # Disabling both subsystems excludes parent
         backend.toggle("Detector", "Readout__ru-01")
         assert not backend.get_value("Detector", "Readout")
 
@@ -56,13 +56,13 @@ class TestDisableableBackend:
         backend.set_value("Detector", "Readout", True)
         vals = backend.get_values()
 
-        assert vals["Detector"]["Readout"].is_enabled
-        assert vals["Detector"]["Readout__ru-01"].is_enabled
-        assert vals["Detector"]["Readout__ru-02"].is_enabled
+        assert vals["Detector"]["Readout"].is_included
+        assert vals["Detector"]["Readout__ru-01"].is_included
+        assert vals["Detector"]["Readout__ru-02"].is_included
 
         backend.toggle("Detector", "Readout__ru-02")
         vals = backend.get_values()
-        assert not vals["Detector"]["Readout__ru-02"].is_enabled
+        assert not vals["Detector"]["Readout__ru-02"].is_included
         assert vals["Detector"][
             "Readout__ru-02"
         ].is_interactive  # still interactive (parent on)
@@ -70,7 +70,7 @@ class TestDisableableBackend:
         backend.toggle("Detector", "Readout__ru-01")
         vals = backend.get_values()
         # Both subsystems off → parent off → children become non-interactive
-        assert not vals["Detector"]["Readout"].is_enabled
+        assert not vals["Detector"]["Readout"].is_included
         assert not vals["Detector"]["Readout__ru-01"].is_interactive
         assert not vals["Detector"]["Readout__ru-02"].is_interactive
 
