@@ -95,36 +95,27 @@ class DisableSystemBuilder:
         :returns: The constructed Group tree
         :rtype: Group
         """
-        root_strategy = any if system.subsystem_dependent else all
-        root = Group(label=label, strategy=root_strategy)
+        root = Group(label=label)
 
         for comp in system.components:
             get_logger().debug(f"            - adding component: {comp} ")
-            self._add_component(root, comp, system.subsystem_dependent)
+            self._add_component(root, comp)
 
         for attr in system.attributes:
             get_logger().debug(f"            - adding attribute: {attr} ")
-            self._add_attribute(root, attr, system.subsystem_dependent)
+            self._add_attribute(root, attr)
 
         for rel in system.relationships:
             get_logger().debug(f"            - adding relationship: {rel} ")
-            self._add_relationship(root, rel, system.subsystem_dependent)
+            self._add_relationship(root, rel)
 
         return root
 
     # ------------------------------------------------------------------ #
-    def _votes(self, subsystem_dependent: bool, has_own_label: bool) -> bool:
-        """
-        A child votes iff the system is not subsystem_dependent, or the child
-        has its own named label (i.e. it is itself a named subsystem).
-        """
-        return not subsystem_dependent or has_own_label
-
     def _add_component(
         self,
         root: Group,
         comp: DisableElementData,
-        subsystem_dependent: bool,
     ) -> None:
         """Add component nodes to the root group.
 
@@ -138,29 +129,23 @@ class DisableSystemBuilder:
 
         for node in nodes:
             if comp.each_component_separate:
-                # Wrap each leaf in a named container Group.
-                # The leaf's label is cleared so only the Group appears as a button.
-                # votes=False on root → root stays vacuously True, never gating siblings.
-                # propagate=True on root → toggling root still reaches all containers.
-                wrapper = Group(label=comp.system_label or node.label, strategy=any)
-                node.label = ""
-                wrapper.add(node, votes=True, propagate=True)
-                root.add(wrapper, votes=False, propagate=True)
+                # wrapper = Group(label=comp.system_label or node.label)
+                # node.label = ""
+                # wrapper.add(node)
+                root.add(node)
             else:
                 label = comp.system_label or (
                     node.label if comp.separate_system else ""
                 )
-                votes = self._votes(subsystem_dependent, bool(label))
                 if label:
-                    root.at(label).add(node, votes=True, propagate=True)
+                    root.at(label).add(node)
                 else:
-                    root.add(node, votes=votes, propagate=True)
+                    root.add(node)
 
     def _add_attribute(
         self,
         root: Group,
         attr: DisableAttributeData,
-        subsystem_dependent: bool,
     ) -> None:
         """Add attribute nodes to the root group.
 
@@ -173,18 +158,16 @@ class DisableSystemBuilder:
             return
 
         label = attr.system_label
-        votes = self._votes(subsystem_dependent, bool(label or attr.separate_system))
 
         if label:
-            root.at(label).add(node, votes=True, propagate=True)
+            root.at(label).add(node)
         else:
-            root.add(node, votes=votes, propagate=True)
+            root.add(node)
 
     def _add_relationship(
         self,
         root: Group,
         rel: DisableRelationshipData,
-        subsystem_dependent: bool,
     ) -> None:
         """Add relationship nodes to the root group.
 
@@ -197,12 +180,11 @@ class DisableSystemBuilder:
             return
 
         label = rel.system_label
-        votes = self._votes(subsystem_dependent, bool(label or rel.separate_system))
 
         if label:
-            root.at(label).add(node, votes=True, propagate=True)
+            root.at(label).add(node)
         else:
-            root.add(node, votes=votes, propagate=True)
+            root.add(node)
 
 
 # ---------------------------------------------------------------------------
@@ -213,12 +195,6 @@ class DisableSystemBuilder:
 class AdjustableSystemBuilder:
     """
     Builds a Group tree from a list of AdjustableAttributeData instances.
-
-    All children use votes=False, propagate=False — they are never touched
-    by Group.set() and do not influence any parent's aggregated state.
-    Their visible state (ENABLED / PARENT_DISABLED) is computed by
-    compute_state() in traversal.py based on parent group state and
-    DAL resource state.
     """
 
     def __init__(self, configuration: Configuration, session: DalBase):
@@ -228,7 +204,6 @@ class AdjustableSystemBuilder:
         :param session: The session DAL object
         """
         get_logger().debug("Initialising AdjustableSystemBuilder")
-
         self.factory = AdjustableFactory(configuration, session)
 
     def build(self, attributes: list[AdjustableAttributeData], label: str) -> Group:
@@ -239,16 +214,14 @@ class AdjustableSystemBuilder:
         :returns: The constructed Group tree
         :rtype: Group
         """
-        root = Group(label=label, strategy=all)
+        root = Group(label=label)
         get_logger().debug("Building adjustable attributes")
 
         for attr in attributes:
             get_logger().debug(f"    - Building {attr}")
 
             nodes = self.factory.create(attr)
-            if not nodes:
-                continue
-            for node in nodes:
-                root.add(node, votes=False, propagate=False)
+            for node in nodes or []:
+                root.add(node)
 
         return root

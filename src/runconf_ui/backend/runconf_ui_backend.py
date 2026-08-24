@@ -56,10 +56,11 @@ TreeViews = dict[str, Tree]
 # ---------------------------------------------------------------------------
 
 
-class _SessionManager:
+class SessionManager:
     """Owns repo interaction and config loading. No state querying here."""
 
     repo_manager: RepoManagerInterface
+    session_manager: "SessionManager" = None  # type: ignore[assignment]
 
     def __init__(self, context: RunconfContext):
         """Session management
@@ -204,7 +205,7 @@ class RunconfUIBackend:
 
         self._logger = get_logger()
 
-        self._session_manager = _SessionManager(context)
+        self.session_manager = SessionManager(context)
         self.apparatus = context.apparatus
 
         self._assembled: AssembledConfig | None = None
@@ -219,42 +220,6 @@ class RunconfUIBackend:
         self._logger.debug("Backend instantiated")
 
     # ------------------------------------------------------------------ #
-    # Session / version forwarding [I hate this]                         #
-    # ------------------------------------------------------------------ #
-
-    def get_daq_versions(self):
-        """Forward the request for available DAQ versions to the session manager."""
-        return self._session_manager.get_daq_versions()
-
-    def get_default_version(self):
-        """Forward the request for default DAQ version to the session manager."""
-        return self._session_manager.get_default_version()
-
-    def get_current_version(self):
-        """Forward the request for the current DAQ version to the session manager."""
-        return self._session_manager.get_current_version()
-
-    def get_sessions(self):
-        """Forward the request for available sessions to the session manager."""
-        return self._session_manager.get_sessions()
-
-    def get_current_session(self):
-        """Forward the request for the current session to the session manager."""
-        return self._session_manager.get_current_session()
-
-    def set_daq_version(self, version) -> None:
-        """Forward the request to set the DAQ version to the session manager.
-        :param version: the DAQ version to set, e.g. "v3.0.0"
-        """
-        self._session_manager.set_daq_version(version)
-
-    def set_daq_session(self, session: str | Path | None) -> None:
-        """Forward the request to set the DAQ session to the session manager.
-        :param session: the DAQ session to set i.e. "CRT"
-        """
-        self._session_manager.set_daq_session(session)
-
-    # ------------------------------------------------------------------ #
     # Config lifecycle                                                     #
     # ------------------------------------------------------------------ #
     def open_selected_session(self) -> None:
@@ -265,11 +230,11 @@ class RunconfUIBackend:
         self._logger.debug("Opening session")
         self._logger.debug("Loading session")
         self.configuration, self.config_session, init_config_path = (
-            self._session_manager.load_session()
+            self.session_manager.load_session()
         )
 
         self.system_config_reader = SystemConfigReader(
-            self._session_manager.get_runconf_ui_config_path()
+            self.session_manager.get_runconf_ui_config_path()
         )
 
         if self.config_session is None:
@@ -429,7 +394,7 @@ class RunconfUIBackend:
         :param init_config_path: Path to the initial configuration file
         """
         self.info_text = (
-            f"      [bold green]DAQ Version[/bold green]:  [deep_pink4]{self.get_current_version()}[/deep_pink4]\n"
+            f"      [bold green]DAQ Version[/bold green]:  [deep_pink4]{self.session_manager.get_current_version()}[/deep_pink4]\n"
             f"      [bold green]Apparatus[/bold green]:  [deep_pink4]{self.apparatus}[/deep_pink4]\n"
             f"      [bold green]DAQ Config[/bold green]: [deep_pink4]{init_config_path}[/deep_pink4]\n"
             f"      [bold green]Current Config File[/bold green]:  [deep_pink4]{self.configuration.active_database if self.configuration else None}[/deep_pink4]\n"
@@ -523,7 +488,7 @@ class RunconfUIBackend:
         """
         section_marker = "==============================\n"
 
-        rprint("## Main Tree ##\n")
+        rprint("## Main Tree ##\n", file=text_file)
         rprint(self.get_config_tree(), file=text_file)
         rprint(section_marker, file=text_file)
 

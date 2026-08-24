@@ -5,6 +5,7 @@ from conffwk.dal import DalBase
 
 from runconf_ui.exceptions import AttributeMissingException
 
+from ..node_state import NodeState
 from .adapter import Adapter
 
 
@@ -44,22 +45,24 @@ class DisableAttribute(Adapter):
         self.enabled_value = enabled_value
         self.disabled_value = disabled_value
 
-    def get(self) -> bool:
+    def get(self) -> NodeState:
         """Get the enabled state of the attribute.
 
         :returns: True if attribute equals enabled_value and DAL is enabled as resource
         :rtype: bool
         """
-        return (
-            getattr(self.dal, self.attribute_name) == self.enabled_value
-            and self.dal_enabled()
-        )
+        is_enabled = getattr(self.dal, self.attribute_name) == self.enabled_value and self.dal_enabled()
+        return NodeState.bool_to_state(is_enabled)
 
-    def set(self, value: bool) -> None:
+    def set(self, value: bool | NodeState) -> None:
         """Set the enabled state by toggling the attribute value.
 
         :param value: True to set enabled_value, False to set disabled_value
         """
+        
+        if isinstance(value, NodeState):
+            value = NodeState.state_to_bool(value)
+        
         new_value = self.enabled_value if value else self.disabled_value
         if getattr(self.dal, self.attribute_name) != new_value:
             setattr(self.dal, self.attribute_name, new_value)

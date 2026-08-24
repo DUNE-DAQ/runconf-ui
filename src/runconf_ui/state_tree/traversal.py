@@ -25,23 +25,11 @@ consulted when its parent (if any) is enabled.
 
 from collections.abc import Iterator
 from dataclasses import dataclass
-from enum import Enum, auto
 
+from runconf_ui.state_tree.node_state import NodeState
 from runconf_ui.utils.logging import get_logger
 
 from .nodes import Group, Leaf, Node
-
-# ---------------------------------------------------------------------------
-# State
-# ---------------------------------------------------------------------------
-
-
-class State(Enum):
-    """The state of a node."""
-
-    ENABLED = auto()
-    DISABLED = auto()
-    PARENT_DISABLED = auto()
 
 
 @dataclass
@@ -49,18 +37,19 @@ class NodeStatus:
     """A full node status, carrying the node, its computed state, and its parent."""
 
     node: Node
-    state: State
+    state: NodeState
     parent: Group | None
 
     @property
     def is_interactive(self) -> bool:
         """False when the node is greyed out due to parent or DAL state."""
-        return self.state != State.PARENT_DISABLED
-
-    @property
-    def is_enabled(self) -> bool:
-        """True only when the node is fully enabled."""
-        return self.state == State.ENABLED
+        if self.parent is None:
+            return True
+        
+        if not self.parent.top_level_groups:
+            return True
+        
+        return NodeState.state_to_bool(self.parent.get()) 
 
     @property
     def path(self) -> str | None:
@@ -87,7 +76,9 @@ class NodeStatus:
 
         Only works when is_interactive is True (not PARENT_DISABLED).
         """
-        self.node.set(not self.node.get())
+        if self.state != NodeState.ERROR_STATE:    
+            self.node.set(not NodeState.state_to_bool(self.state))
+
         get_logger().debug(f"Toggling {self.label}")
 
         self.refresh_state()
@@ -106,7 +97,7 @@ class NodeStatus:
 # ---------------------------------------------------------------------------
 
 
-def compute_state(node: Node, parent: Group | None) -> State:
+def compute_state(node: Node, parent: Group | None) -> NodeState:
     """Compute the visible state of a node.
 
     Precedence (highest first):
@@ -120,27 +111,24 @@ def compute_state(node: Node, parent: Group | None) -> State:
     :returns: The computed state
     :rtype: State
     """
-    # 1. Parent gating takes precedence over everything.
-    if parent is not None and not parent.get():
-        return State.PARENT_DISABLED
+    parent_gated = (
+        parent is not None
+        and not NodeState.state_to_bool(parent.get())
+        and (all(not NodeState.state_to_bool(s.get()) for s in parent.top_level_groups) if parent.top_level_groups else True)
+    )
+    dal_disabled = isinstance(node, Leaf) and not node.adapter.dal_enabled()
 
-    # 2. Leaf DAL resource state.
-    if isinstance(node, Leaf) and not node.adapter.dal_enabled():
-        return State.PARENT_DISABLED
+    if parent_gated or dal_disabled:
+        return NodeState.PARENT_DISABLED
 
-    # 3. Node's own internal value.
-    if not node.get():
-        return State.DISABLED
-
-    return State.ENABLED
-
+    return node.get()
 
 # ---------------------------------------------------------------------------
 # Traversal
 # ---------------------------------------------------------------------------
 
 
-def walk(root: Node, parent: Group | None = None, _ancestor_disabled: bool = False):
+def walk(root: Node, parent: Group | None = None, _ancestor_state: NodeState = NodeState.ENABLED):
     """Depth-first traversal of the node tree, yielding NodeStatus for every node.
 
     Yields NodeStatus objects containing the state of each node in the tree.
@@ -153,18 +141,18 @@ def walk(root: Node, parent: Group | None = None, _ancestor_disabled: bool = Fal
     :returns: Iterator of NodeStatus objects
     :rtype: Iterator[NodeStatus]
     """
-    state = compute_state(root, parent if not _ancestor_disabled else None)
-    if _ancestor_disabled:
-        state = State.PARENT_DISABLED
+    state = compute_state(root, parent if not _ancestor_state else None)
+    if not NodeState.state_to_bool(_ancestor_state):
+        state = NodeState.PARENT_DISABLED
 
     # We can also set the state here
     yield NodeStatus(root, state, parent)
 
     if isinstance(root, Group):
-        child_ancestor_disabled = _ancestor_disabled or state == State.PARENT_DISABLED
-        for child, _, _ in root:
+        child_ancestor_disabled = NodeState.state_to_bool(_ancestor_state) or NodeState.state_to_bool(state)
+        for child in root:
             yield from walk(
-                child, parent=root, _ancestor_disabled=child_ancestor_disabled
+                child, parent=root, _ancestor_state=NodeState.bool_to_state(child_ancestor_disabled)
             )
 
 
@@ -194,14 +182,12 @@ def disabled_child_nodes(group: Group) -> list[Node]:
     :returns: List of disabled voting child nodes
     :rtype: list[Node]
     """
-    return [n for n in group.voting_children if not n.get()]
+    return [n for n in group.children if not NodeState.state_to_bool(n.get())]
 
 
 # ---------------------------------------------------------------------------
 # Index
 # ---------------------------------------------------------------------------
-
-
 def build_index(root: Node) -> dict[str, Node]:
     """Build a flat label->node mapping for O(1) lookup by label.
 

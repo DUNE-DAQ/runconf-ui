@@ -10,6 +10,7 @@ from textual.app import App
 from textual.css.query import DOMQuery
 
 from runconf_ui.backend import RunconfUIBackend
+from runconf_ui.state_tree import NodeState
 from runconf_ui.textual import messages as runconf_msg
 from runconf_ui.textual.screens import (
     CreateScreen,
@@ -31,6 +32,7 @@ from runconf_ui.utils import get_logger
 
 # No neat way to type this sadly
 NodeIterator = list[tuple[DOMQuery, Any]]
+
 
 
 class RunconfUIApp(App):
@@ -75,6 +77,8 @@ class RunconfUIApp(App):
         Sets theme, title, and initializes file selectors.
         """
         get_logger().debug("Mounting")
+
+        self._install_node_state_css()
         self.theme = "catppuccin-latte"
         self.title = f"Runconf-Shifter-UI v{version('runconf_ui')}"
         self.switch_mode("main")
@@ -95,8 +99,8 @@ class RunconfUIApp(App):
     @work(thread=True)
     def _fetch_sessions_worker(self, daq_version) -> None:
         try:
-            self.backend.set_daq_version(daq_version)  # ← moved into worker
-            sessions = self.backend.get_sessions()
+            self.backend.session_manager.set_daq_version(daq_version)  # ← moved into worker
+            sessions = self.backend.session_manager.get_sessions()
             get_logger().debug(f"Available Sessions: {sessions}")
             self.app.call_from_thread(self._apply_sessions, sessions)
         except Exception as e:
@@ -115,7 +119,7 @@ class RunconfUIApp(App):
 
     @on(runconf_msg.DaqSessionSelectedMessage)
     def handle_session_selected(self, event: runconf_msg.DaqSessionSelectedMessage):
-        self.backend.set_daq_session(event.daq_session)
+        self.backend.session_manager.set_daq_session(event.daq_session)
         get_logger().info(f"Selected daq session: {event.daq_session}")
         for file_select in self.query(FileSelect):
             file_select.enable_open_button()
@@ -248,14 +252,29 @@ class RunconfUIApp(App):
 
     def _init_file_selects(self) -> None:
         try:
-            versions = self.backend.get_daq_versions()
+            versions = self.backend.session_manager.get_daq_versions()
             get_logger().debug(f"Initialising file selects with {versions}")
             for file_select in self.query(FileSelect):
                 file_select.update_versions(versions)
-                file_select.set_default_version(self.backend.get_default_version())
+                file_select.set_default_version(self.backend.session_manager.get_default_version())
                 file_select.refresh()
         except Exception as e:
             get_logger().exception(e)
             self.handle_exception_popup(e)
         finally:
             self.pop_screen()
+   
+    def _install_node_state_css(self) -> None:
+        """Install CSS rules for the fixed NodeState colours."""
+
+        css = "\n".join(
+            f"""
+            .node-state-{state.name.lower()} {{
+                background: {state.colour};
+                color: white;
+            }}
+            """
+            for state in NodeState
+        )
+
+        self.stylesheet.add_source(css)

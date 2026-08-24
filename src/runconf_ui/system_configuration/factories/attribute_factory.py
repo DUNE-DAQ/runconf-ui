@@ -16,7 +16,7 @@ TDisableAttributeData = TypeVar("TDisableAttributeData", bound=DisableAttributeD
 class AttributeFactory(FactoryBase[TDisableAttributeData, "Group | None"]):
     """Creates a Group node containing Leaf nodes for disable attributes.
 
-    Creates a Group node (strategy=any) containing one Leaf per matching DAL.
+    Creates a Group node containing one Leaf per matching DAL.
     OR semantics: the attribute group is considered enabled if any DAL has
     the attribute enabled.
     """
@@ -36,7 +36,7 @@ class AttributeFactory(FactoryBase[TDisableAttributeData, "Group | None"]):
         if not dal_list:
             return None
 
-        group = Group(strategy=any)
+        group = Group()
         for dal in dal_list:
             if not self.is_filtered(dal, data.filters):
                 group.add(

@@ -2,7 +2,7 @@ import pytest
 from rich.tree import Tree
 
 from runconf_ui.exceptions import ConfigReadException
-from runconf_ui.state_tree import State
+from runconf_ui.state_tree.node_state import NodeState
 from runconf_ui.utils.config_utils import (
     check_config_has_session,
     dal_in_config,
@@ -131,15 +131,15 @@ class TestConfigTreeRendererIntegration:
         assert renderer.session.id in tree.label
 
     def test_calc_config_state_real_objects(self, renderer, ru01):
-        state = renderer._calc_config_state(ru01, State.ENABLED)
+        state = renderer._calc_config_state(ru01, NodeState.ENABLED)
         # Should be ENABLED initially if component not disabled
-        assert state in (State.ENABLED, State.DISABLED, State.PARENT_DISABLED)
+        assert state in (NodeState.ENABLED, NodeState.DISABLED, NodeState.PARENT_DISABLED)
 
     def test_render_config_branch_recurses(self, renderer, ru_segment):
         # Use real DALs
         tree = Tree(f"[bold green]{renderer.session.id}")
         # _render_config_branch should not error
-        renderer._render_config_branch(tree, ru_segment, State.ENABLED)
+        renderer._render_config_branch(tree, ru_segment, NodeState.ENABLED)
         # At least one child node should be added
         assert len(tree.children) > 0
 
@@ -166,5 +166,5 @@ class TestConfigTreeRendererIntegration:
             lambda obj, session_id, dal_id: dal_id == "ru-01",
         )
 
-        state = renderer._calc_config_state(ru01, State.ENABLED)
-        assert state == State.DISABLED
+        state = renderer._calc_config_state(ru01, NodeState.ENABLED)
+        assert state == NodeState.DISABLED

@@ -14,6 +14,7 @@ from runconf_ui.state_tree import (
     AdjustableAttribute,
     DisableAttribute,
     DisableComponent,
+    NodeState,
 )
 
 # ---------------------------------------------------------------------------
@@ -58,7 +59,9 @@ class TestDisableComponent:
         adapter = DisableComponent(
             consolidated_config, consolidated_session, resource_dal
         )
-        assert adapter.get() is True
+        assert NodeState.state_to_bool(adapter.get())
+        assert adapter.get() == NodeState.ENABLED
+
 
     def test_set_false_disables(
         self, consolidated_config, consolidated_session, resource_dal
@@ -67,7 +70,8 @@ class TestDisableComponent:
             consolidated_config, consolidated_session, resource_dal
         )
         adapter.set(False)
-        assert adapter.get() is False
+        assert not NodeState.state_to_bool(adapter.get())
+        assert adapter.get() == NodeState.DISABLED
         assert component_disabled(
             consolidated_config._obj, consolidated_session.id, resource_dal.id
         )
@@ -82,7 +86,7 @@ class TestDisableComponent:
             consolidated_config, consolidated_session, resource_dal
         )
         adapter.set(True)
-        assert adapter.get() is True
+        assert adapter.get() == NodeState.ENABLED
         assert not component_disabled(
             consolidated_config._obj, consolidated_session.id, resource_dal.id
         )
@@ -116,9 +120,10 @@ class TestDisableAttribute:
 
     def test_get_reflects_attribute_value(self, adapter, resource_dal):
         resource_dal.tp_generation_enabled = True
-        assert adapter.get() is True
+        assert adapter.get() == NodeState.ENABLED
         resource_dal.tp_generation_enabled = False
-        assert adapter.get() is False
+        assert adapter.get() == NodeState.DISABLED
+
 
     def test_disabled_when_dal_resource_disabled(
         self, adapter, consolidated_config, consolidated_session, resource_dal
@@ -127,7 +132,7 @@ class TestDisableAttribute:
         disable_component(
             consolidated_config._obj, consolidated_session.id, resource_dal.id
         )
-        assert adapter.get() is False
+        assert adapter.get() == NodeState.DISABLED
 
     def test_set_updates_attribute(self, adapter, resource_dal):
         adapter.set(True)
@@ -147,7 +152,7 @@ class TestDisableAttribute:
             enabled_value=1001,
             disabled_value=1002,
         )
-        assert adapter.get() is True
+        assert adapter.get() == NodeState.ENABLED
         adapter.set(False)
         assert non_resource_dal.sid == 1002
 
