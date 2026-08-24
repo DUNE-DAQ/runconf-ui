@@ -2,7 +2,7 @@
 
 To get started, follow the [Installation Guide](README.md) in the README to set up the environment and install the necessary dependencies. Once runconf-ui is installed you can launch the application and start exploring its features.
 
-## Setting up the Remote and Emulation environment
+## Setting up the Remote environment
 `runconf-ui` uses [`runconftools`](https://github.com/DUNE-DAQ/runconftools/tree/develop) to interface with the remote gitlab repositories. In order to access these you need to setup a gitlab token. In order to set this up follow [these steps](https://docs.gitlab.com/user/profile/personal_access_tokens/) then in your `~/.netrc` file add
 ```sh
 machine gitlab.cern.ch
@@ -26,7 +26,7 @@ source runconf_<YOUR DETECTOR NAME>_env_setup.sh
 
 Currently provided detectors are `np02` and `np04`.
 
-The app can be booted in three modes (`-t`): `local`, `remote` or `emulation`. Remote and emulation mode require the ops and base repositories to be provided as well as the name of the configuration file (containing a `Session`) you wish to use.
+The app can be booted in two modes (`-t`): `local` or `remote`. Remote and emulation mode require the ops and base repositories to be provided as well as the name of the configuration file (containing a `Session`) you wish to use.
 
 ### Options
 

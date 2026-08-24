@@ -30,7 +30,7 @@ class RunconfContext:
     """Context required to initialise the runconf-ui backend
     :param apparatus: str name of the apparatus to load configs for (np02/np04/etc.)
     :param conf_directory: path to the config repository (local or remote)
-    :param repo_type: type of repository to use (local, remote or emulation)
+    :param repo_type: type of repository to use (local or remote)
     :param config_file_name: (remote only) the default config file to load when apparatus is selected. This should be a file that exists in the remote repository and contains a session that matches the apparatus name.
     :param base_url: (remote only) URL for the BASE repository, used to populate the dropdown for config selection and load the default config.
     :param ops_url: (remote only) URL for the operations repository, used to populate the dropdown for config selection and load the default config.
