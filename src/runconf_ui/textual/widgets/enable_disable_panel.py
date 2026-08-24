@@ -2,7 +2,7 @@ from textual import on
 from textual.containers import ScrollableContainer, Vertical
 from textual.widgets import Button, Static
 
-from runconf_ui.state_tree import NodeStatus, NodeState
+from runconf_ui.state_tree import NodeState, NodeStatus
 from runconf_ui.utils import get_logger
 
 from ..messages import NodeToggledMessage

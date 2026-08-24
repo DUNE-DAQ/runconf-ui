@@ -33,8 +33,7 @@ class NodeState(Enum):
         
         if state_bool:
             return NodeState.ENABLED
-        else:
-            return NodeState.DISABLED
+        return NodeState.DISABLED
         
     @staticmethod
     def state_to_bool(state: "NodeState")->bool:

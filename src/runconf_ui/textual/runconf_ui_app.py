@@ -10,6 +10,7 @@ from textual.app import App
 from textual.css.query import DOMQuery
 
 from runconf_ui.backend import RunconfUIBackend
+from runconf_ui.state_tree import NodeState
 from runconf_ui.textual import messages as runconf_msg
 from runconf_ui.textual.screens import (
     CreateScreen,
@@ -27,7 +28,6 @@ from runconf_ui.textual.widgets import (
     OptionsPanel,
     RichTreeTabbed,
 )
-from runconf_ui.state_tree import NodeState
 from runconf_ui.utils import get_logger
 
 # No neat way to type this sadly

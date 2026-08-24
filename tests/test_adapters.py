@@ -14,7 +14,7 @@ from runconf_ui.state_tree import (
     AdjustableAttribute,
     DisableAttribute,
     DisableComponent,
-    NodeState
+    NodeState,
 )
 
 # ---------------------------------------------------------------------------

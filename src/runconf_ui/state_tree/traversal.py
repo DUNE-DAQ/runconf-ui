@@ -31,6 +31,7 @@ from runconf_ui.utils.logging import get_logger
 
 from .nodes import Group, Leaf, Node
 
+
 @dataclass
 class NodeStatus:
     """A full node status, carrying the node, its computed state, and its parent."""

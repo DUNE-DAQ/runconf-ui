@@ -22,9 +22,9 @@ from abc import ABC, abstractmethod
 from collections.abc import Iterator
 from typing import Any
 
+from .adapters.adapter import Adapter
 from .node_state import NodeState
 
-from .adapters.adapter import Adapter
 
 # ---------------------------------------------------------------------------
 # Base
@@ -191,7 +191,7 @@ class Group(Node):
             return NodeState.ERROR_STATE
 
 
-        top_states = [not NodeState.state_to_bool(l.get()) for l in self.top_level_leaves if isinstance(l.get(), NodeState)]
+        top_states = [not NodeState.state_to_bool(i.get()) for i in self.top_level_leaves if isinstance(i.get(), NodeState)]
 
         if all(top_states) and top_states:
             return NodeState.DISABLED
@@ -218,5 +218,4 @@ class Group(Node):
         :returns: Iterator of child node information tuples
         :rtype: Iterator[Node]
         """
-        for c in self.children:
-            yield c
+        yield from self.children

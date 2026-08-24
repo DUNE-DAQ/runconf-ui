@@ -64,8 +64,8 @@ class TestComputeState:
         top_level = Group(label="Top Group")
         top_level.add(leaf(False, label="Top Leaf"))
         
-        l = leaf(True, label="Sub Leaf")
-        top_level.at("subgroup").add(l)
+        child = leaf(True, label="Sub Leaf")
+        top_level.at("subgroup").add(child)
                 
         print(top_level.get())
         assert compute_state(top_level.at("subgroup"), top_level) == NodeState.PARENT_DISABLED
@@ -80,11 +80,11 @@ class TestComputeState:
 
     def test_dal_resource_disabled_returns_parent_disabled(self):
         g = Group()
-        l = leaf(True, dal_enabled=False)
-        g.add(l)
+        lf = leaf(True, dal_enabled=False)
+        g.add(lf)
         
         assert (
-            compute_state(l, g) == NodeState.PARENT_DISABLED
+            compute_state(lf, g) == NodeState.PARENT_DISABLED
         )
 
     def test_group_node_enabled(self):

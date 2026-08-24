@@ -8,6 +8,7 @@ from runconf_ui.state_tree import NodeState
 
 from .adapter import Adapter
 
+
 class DisableAttribute(Adapter):
     """Adapter for toggling DAL objects by enabling/disabling a named attribute.
 
