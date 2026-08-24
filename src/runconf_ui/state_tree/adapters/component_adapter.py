@@ -3,8 +3,8 @@ from conffwk.dal import DalBase
 from confmodel_dal import disable_component, enable_component
 
 from runconf_ui.exceptions import IncompatibleDalException
-from runconf_ui.state_tree import NodeState
 
+from ..node_state import NodeState
 from .adapter import Adapter
 
 # Set up some class colours dynamically

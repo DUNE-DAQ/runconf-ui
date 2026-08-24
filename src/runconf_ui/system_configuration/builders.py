@@ -129,10 +129,10 @@ class DisableSystemBuilder:
 
         for node in nodes:
             if comp.each_component_separate:
-                wrapper = Group(label=comp.system_label or node.label)
-                node.label = ""
-                wrapper.add(node)
-                root.add(wrapper)
+                # wrapper = Group(label=comp.system_label or node.label)
+                # node.label = ""
+                # wrapper.add(node)
+                root.add(node)
             else:
                 label = comp.system_label or (
                     node.label if comp.separate_system else ""

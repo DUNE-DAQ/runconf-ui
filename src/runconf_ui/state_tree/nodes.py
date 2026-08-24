@@ -174,8 +174,8 @@ class Group(Node):
                 child.set(value)
     
     @property
-    def top_level_leaves(self):
-        return [c for c in self.children if isinstance(c, Leaf)]
+    def top_level_groups(self):
+        return [c for c in self.children if isinstance(c, Group)]
 
     # ------------------------------------------------------------------ #
     # Read path                                                            #
@@ -191,11 +191,12 @@ class Group(Node):
             return NodeState.ERROR_STATE
 
 
-        top_states = [not NodeState.state_to_bool(i.get()) for i in self.top_level_leaves if isinstance(i.get(), NodeState)]
+        top_groups = [not NodeState.state_to_bool(g.get()) for g in self.top_level_groups]
 
-        if all(top_states) and top_states:
+        if all(top_groups) and top_groups:
             return NodeState.DISABLED
 
+        # Now we check 
         first_state = child_states[0]
         if all(s == first_state for s in child_states):
             return first_state

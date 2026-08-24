@@ -60,15 +60,6 @@ class TestComputeState:
     def test_disabled_node_no_parent(self):
         assert compute_state(leaf(NodeState.DISABLED), None) == NodeState.DISABLED
 
-    def test_enabled_node_with_disabled_parent_returns_parent_disabled(self):
-        top_level = Group(label="Top Group")
-        top_level.add(leaf(False, label="Top Leaf"))
-        
-        child = leaf(True, label="Sub Leaf")
-        top_level.at("subgroup").add(child)
-                
-        print(top_level.get())
-        assert compute_state(top_level.at("subgroup"), top_level) == NodeState.PARENT_DISABLED
 
     def test_disabled_node_with_disabled_parent_returns_parent_disabled(self):
         # Parent gating takes precedence — node's own DISABLED is not visible
@@ -99,7 +90,7 @@ class TestComputeState:
 
     def test_group_node_parent_disabled(self):
         child_group = Group()
-        child_group.add(leaf(True))
+        child_group.add(leaf(False))
         parent = Group()
         parent.add(leaf(False)).add(child_group)
         assert compute_state(child_group, parent) == NodeState.PARENT_DISABLED
@@ -122,11 +113,23 @@ class TestNodeStatus:
         )
 
     def test_not_interactive_when_parent_disabled(self):
+        parent = Group()
+        child = leaf(False)
+        parent.add(child)
+        parent.at("subgroup").add(leaf(False))
+
         assert (
             NodeStatus(
-                node=leaf(True), state=NodeState.ENABLED, parent=Group().add(leaf(False))
+                node=child, state=NodeState.DISABLED, parent=parent
             ).is_interactive
             is False
+        )
+        
+        assert (
+            NodeStatus(
+                node=parent, state=NodeState.DISABLED, parent=None
+            ).is_interactive
+            is True
         )
         
 # ---------------------------------------------------------------------------

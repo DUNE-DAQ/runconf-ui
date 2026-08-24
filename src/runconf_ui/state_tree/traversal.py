@@ -43,7 +43,13 @@ class NodeStatus:
     @property
     def is_interactive(self) -> bool:
         """False when the node is greyed out due to parent or DAL state."""
-        return self.parent is None or NodeState.state_to_bool(self.parent.get())
+        if self.parent is None:
+            return True
+        
+        if not self.parent.top_level_groups:
+            return True
+        
+        return NodeState.state_to_bool(self.parent.get()) 
 
     @property
     def path(self) -> str | None:
@@ -108,7 +114,7 @@ def compute_state(node: Node, parent: Group | None) -> NodeState:
     parent_gated = (
         parent is not None
         and not NodeState.state_to_bool(parent.get())
-        and (all(not NodeState.state_to_bool(s.get()) for s in parent.top_level_leaves) if parent.top_level_leaves else True)
+        and (all(not NodeState.state_to_bool(s.get()) for s in parent.top_level_groups) if parent.top_level_groups else True)
     )
     dal_disabled = isinstance(node, Leaf) and not node.adapter.dal_enabled()
 
