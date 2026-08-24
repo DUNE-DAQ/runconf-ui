@@ -1,27 +1,27 @@
 from typing import TypeVar
 
 from runconf_ui.state_tree import (
-    DisableAttribute,
+    IncludeAttribute,
     Group,
     Leaf,
 )
 from runconf_ui.utils import get_class_from_segment_list
 
-from ..dataclasses import DisableAttributeData
+from ..dataclasses import IncludeableAttributeData
 from .factory_base import FactoryBase
 
-TDisableAttributeData = TypeVar("TDisableAttributeData", bound=DisableAttributeData)
+TIncludeableAttributeData = TypeVar("TIncludeableAttributeData", bound=IncludeableAttributeData)
 
 
-class AttributeFactory(FactoryBase[TDisableAttributeData, "Group | None"]):
+class AttributeFactory(FactoryBase[TIncludeableAttributeData, "Group | None"]):
     """Creates a Group node containing Leaf nodes for disable attributes.
 
     Creates a Group node (strategy=any) containing one Leaf per matching DAL.
-    OR semantics: the attribute group is considered enabled if any DAL has
-    the attribute enabled.
+    OR semantics: the attribute group is considered included if any DAL has
+    the attribute included.
     """
 
-    def create(self, data: TDisableAttributeData) -> Group | None:
+    def create(self, data: TIncludeableAttributeData) -> Group | None:
         """Create attribute group from configuration data.
 
         :param data: DisableAttributeData specifying the attributes to create
@@ -41,13 +41,13 @@ class AttributeFactory(FactoryBase[TDisableAttributeData, "Group | None"]):
             if not self.is_filtered(dal, data.filters):
                 group.add(
                     Leaf(
-                        DisableAttribute(
+                        IncludeAttribute(
                             self.configuration,
                             self.session,
                             dal,
                             data.id,
-                            data.enabled_state,
-                            data.disabled_state,
+                            data.included_state,
+                            data.excluded_state,
                         ),
                         tooltip=getattr(dal, data.tooltip, dal.id)
                         if data.tooltip

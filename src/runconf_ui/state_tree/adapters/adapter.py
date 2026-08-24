@@ -42,15 +42,15 @@ class Adapter(ABC):
         """
         ...
 
-    def dal_enabled(self) -> bool:
+    def dal_included(self) -> bool:
         """Check if the underlying DAL is enabled as a resource in the session.
 
-        This is a read-only check available on all adapters. For DisableComponent
-        this is the primary state. For DisableAttribute and AdjustableAttribute,
-        it is a secondary check — the DAL may be resource-disabled independently
+        This is a read-only check available on all adapters. For IncludeComponent
+        this is the primary state. For IncludeAttribute and AdjustableAttribute,
+        it is a secondary check — the DAL may be resource-excluded independently
         of the attribute value or the tree structure.
 
-        :returns: True if the DAL is enabled, False if disabled
+        :returns: True if the DAL is included, False if excluded
         :rtype: bool
         """
         return not entity_excluded(

@@ -17,9 +17,9 @@ from runconf_ui.state_tree import Group, Node, State, compute_state
 from runconf_ui.system_configuration.config_reader import _natural_key
 
 _COLOURS: dict[State, str] = {
-    State.ENABLED: "green",
-    State.DISABLED: "red",
-    State.PARENT_DISABLED: "grey46",
+    State.INCLUDED: "green",
+    State.EXCLUDED: "red",
+    State.PARENT_EXCLUDED: "grey46",
 }
 
 
@@ -114,7 +114,7 @@ class ConfigTreeRenderer:
         :rtype: Tree
         """
         tree = Tree(f"[bold green]{self.session.id}")
-        self._render_config_branch(tree, self.session, State.ENABLED)
+        self._render_config_branch(tree, self.session, State.INCLUDED)
         return tree
 
     def _calc_config_state(self, dal, parent_state: State) -> State:
@@ -125,16 +125,16 @@ class ConfigTreeRenderer:
         :returns: The calculated state for the DAL
         :rtype: State
         """
-        if parent_state is not State.ENABLED:
-            return State.PARENT_DISABLED
+        if parent_state is not State.INCLUDED:
+            return State.PARENT_EXCLUDED
 
         if "Resource" not in self.config.superclasses(dal.className(), all=True):
             return parent_state
 
         if entity_excluded(self.config._obj, self.session.id, dal.id):
-            return State.DISABLED
+            return State.EXCLUDED
 
-        return State.ENABLED
+        return State.INCLUDED
 
     def _render_config_branch(self, branch, dal, parent_state: State) -> None:
         """Recursively render configuration tree branches.

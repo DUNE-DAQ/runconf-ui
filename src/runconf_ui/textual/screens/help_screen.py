@@ -37,12 +37,12 @@ class HelpScreen(ModalScreen):
         # Panels
         text.append(
             "\nThis will spawn 2 panels:\n"
-            "  1. The Enable/Disable Panel (left)\n"
+            "  1. The include/exclude Panel (left)\n"
             "  2. The map/adjustable attribute panel (right)\n"
         )
 
-        # Enable/Disable Panel
-        text.append("\nEnable Disable Panel\n", style="bold")
+        # include/exclude Panel
+        text.append("\ninclude exclude Panel\n", style="bold")
         text.append(
             "These tabs contain everything in the detector that can be toggled on/off. "
             "To toggle an object on/off press the button. If a parent of the object "
@@ -56,8 +56,8 @@ class HelpScreen(ModalScreen):
             'The panels on the right contain 3 elements. We will first look at the "System Maps" '
             'and "Configuration" views.\n\n'
             "Configuration is an overview of a large subset of objects within the detector. "
-            "It gives you a global view of what's currently enabled/disabled.\n\n"
-            "The System Maps give you maps of elements in the Enable/Disable Panel. "
+            "It gives you a global view of what's currently included/excluded.\n\n"
+            "The System Maps give you maps of elements in the include/exclude Panel. "
             "This can tell you exactly what the panels are turning on and off.\n"
         )
 

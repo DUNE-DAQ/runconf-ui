@@ -1,13 +1,13 @@
 """state_tree"""
 
-from .adapters import AdjustableAttribute, DisableAttribute, DisableComponent
+from .adapters import AdjustableAttribute, IncludeAttribute, IncludeComponent
 from .nodes import Group, Leaf, Node
 from .traversal import (
     NodeStatus,
     State,
     build_index,
     compute_state,
-    disabled_child_nodes,
+    excludable_child_nodes,
     labelled,
     walk,
 )
@@ -15,8 +15,8 @@ from .traversal import (
 __all__ = [
     # Adapters
     "AdjustableAttribute",
-    "DisableAttribute",
-    "DisableComponent",
+    "IncludeAttribute",
+    "IncludeComponent",
     # Nodes
     "Group",
     "Leaf",
@@ -26,7 +26,7 @@ __all__ = [
     "State",
     "build_index",
     "compute_state",
-    "disabled_child_nodes",
+    "excludable_child_nodes",
     "labelled",
     "walk",
 ]

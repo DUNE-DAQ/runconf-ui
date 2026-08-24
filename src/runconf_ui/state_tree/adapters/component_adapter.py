@@ -7,8 +7,8 @@ from runconf_ui.exceptions import IncompatibleDalException
 from .adapter import Adapter
 
 
-class DisableComponent(Adapter):
-    """Adapter that enables/disables Resource DAL objects via component disable state.
+class IncludeComponent(Adapter):
+    """Adapter that includes/excludeds Resource DAL objects via component excluded state.
 
     Raises an IncompatibleDalException if the DAL is not a Resource subclass.
     """
@@ -20,7 +20,7 @@ class DisableComponent(Adapter):
         dal: DalBase,
         label: str = "",
     ):
-        """Initialize a DisableComponent adapter.
+        """Initialize a IncludeComponent adapter.
 
         :param configuration: The Configuration object containing the DAL
         :param session: The session DAL object
@@ -30,7 +30,7 @@ class DisableComponent(Adapter):
         """
         if "Resource" not in configuration.superclasses(dal.className(), all=True):
             raise IncompatibleDalException(
-                f"{dal!r} is not of class 'Resource' this means it cannot be trivially enabled/disabled"
+                f"{dal!r} is not of class 'Resource' this means it cannot be trivially excluded/incdlude"
             )
         self.label = label
         super().__init__(configuration, session, dal)
@@ -41,12 +41,12 @@ class DisableComponent(Adapter):
         :returns: True if the component is enabled as a resource, False otherwise
         :rtype: bool
         """
-        return self.dal_enabled()
+        return self.dal_included()
 
     def set(self, value: bool) -> None:
         """Set the enabled state of the component.
 
-        :param value: True to enable the component, False to disable
+        :param value: True to include the component, False to exclue
         """
         if value:
             include_entity(self.configuration._obj, self.session.id, self.dal.id)

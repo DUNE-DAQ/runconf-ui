@@ -15,7 +15,7 @@ Flag conventions used throughout:
      - Meaning
    * - ``True``
      - ``True``
-     - Normal disable child; influences parent state and is set when parent
+     - Normal exclude child; influences parent state and is set when parent
        is set. (default)
    * - ``False``
      - ``True``
@@ -24,7 +24,7 @@ Flag conventions used throughout:
        ``controlled_objects`` mechanism.
    * - ``False``
      - ``False``
-     - Adjustable child; fully independent of the enable/disable tree. Never
+     - Adjustable child; fully independent of the include/exclude tree. Never
        set via ``Group.set()``.
 
 Root strategy:
@@ -42,10 +42,10 @@ from runconf_ui.utils import get_logger
 
 from .dataclasses import (
     AdjustableAttributeData,
-    DisableableSystemData,
-    DisableAttributeData,
-    DisableElementData,
-    DisableRelationshipData,
+    IncludeableSystemData,
+    IncludeableAttributeData,
+    IncludeableElementData,
+    IncludeableRelationshipData,
 )
 from .factories import (
     AdjustableFactory,
@@ -55,13 +55,13 @@ from .factories import (
 )
 
 # ---------------------------------------------------------------------------
-# Disable system builder
+# exclude system builder
 # ---------------------------------------------------------------------------
 
 
-class DisableSystemBuilder:
+class IncludeableSystemBuilder:
     """
-    Builds a Group tree from a DisableableSystemData instance.
+    Builds a Group tree from a IncludeableSystemBuilder instance.
 
     When subsystem_dependent=False the root uses AND semantics: the system is
     on iff every voting child is on.
@@ -73,12 +73,12 @@ class DisableSystemBuilder:
     """
 
     def __init__(self, configuration: Configuration, session: DalBase):
-        """Initialize DisableSystemBuilder.
+        """Initialize excludeSystemBuilder.
 
         :param configuration: The conffwk Configuration object
         :param session: The session DAL object
         """
-        get_logger().debug("Initialising DisableSystemBuilder")
+        get_logger().debug("Initialising excludeSystemBuilder")
         args = (configuration, session)
         self.component_factory = ComponentFactory(*args)
         get_logger().debug("   - component_factory intiialised")
@@ -87,7 +87,7 @@ class DisableSystemBuilder:
         self.relationship_factory = RelationshipFactory(*args)
         get_logger().debug("   - relationship_factory intiialised")
 
-    def build(self, system: DisableableSystemData, label: str) -> Group:
+    def build(self, system: IncludeableSystemData, label: str) -> Group:
         """Build a Group tree from system data.
 
         :param system: The system definition to build from
@@ -123,7 +123,7 @@ class DisableSystemBuilder:
     def _add_component(
         self,
         root: Group,
-        comp: DisableElementData,
+        comp: IncludeableElementData,
         subsystem_dependent: bool,
     ) -> None:
         """Add component nodes to the root group.
@@ -159,7 +159,7 @@ class DisableSystemBuilder:
     def _add_attribute(
         self,
         root: Group,
-        attr: DisableAttributeData,
+        attr: IncludeableAttributeData,
         subsystem_dependent: bool,
     ) -> None:
         """Add attribute nodes to the root group.
@@ -183,7 +183,7 @@ class DisableSystemBuilder:
     def _add_relationship(
         self,
         root: Group,
-        rel: DisableRelationshipData,
+        rel: IncludeableRelationshipData,
         subsystem_dependent: bool,
     ) -> None:
         """Add relationship nodes to the root group.
@@ -216,7 +216,7 @@ class AdjustableSystemBuilder:
 
     All children use votes=False, propagate=False — they are never touched
     by Group.set() and do not influence any parent's aggregated state.
-    Their visible state (ENABLED / PARENT_DISABLED) is computed by
+    Their visible state (INCLUDED / PARENT_EXCLUDED) is computed by
     compute_state() in traversal.py based on parent group state and
     DAL resource state.
     """
