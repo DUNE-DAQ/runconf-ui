@@ -46,7 +46,7 @@ The backend has four main responsibilities, described below.
 
 ### The Repo Manager
 
-Two repo managers are available, all inheriting from `RepoManagerInterface`:
+Two repo managers are available, both inheriting from `RepoManagerInterface`:
 
 **`LocalRepoManager`** manages repositories on the local filesystem. It requires the apparatus name and a path to the configuration directory. It uses `get_configs_with_session()` to find all `.data.xml` files in that directory that contain a `Session` DAL.
 
