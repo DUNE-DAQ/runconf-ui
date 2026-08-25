@@ -259,7 +259,8 @@ class RunconfUIApp(App):
                 file_select.refresh()
         except Exception as e:
             get_logger().exception(e)
-            self.handle_exception_popup(e)
-        finally:
             if isinstance(self.screen, LoadingScreen):
                 self.pop_screen()
+            self.handle_exception_popup(e)
+        finally:
+            pass
