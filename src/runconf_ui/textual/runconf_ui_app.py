@@ -257,10 +257,10 @@ class RunconfUIApp(App):
                 file_select.update_versions(versions)
                 file_select.set_default_version(self.backend.get_default_version())
                 file_select.refresh()
+                if isinstance(self.screen, LoadingScreen):
+                    self.pop_screen()
         except Exception as e:
             get_logger().exception(e)
             if isinstance(self.screen, LoadingScreen):
                 self.pop_screen()
             self.handle_exception_popup(e)
-        finally:
-            pass
