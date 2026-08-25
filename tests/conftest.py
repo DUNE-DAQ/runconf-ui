@@ -12,7 +12,7 @@ from pathlib import Path
 import pytest
 from daqconf.consolidate import consolidate_db
 
-from runconf_ui import RunconfContext
+from runconf_ui import RepoManagerType, RunconfContext
 from runconf_ui.utils import init_logger, open_configuration
 
 
@@ -78,6 +78,6 @@ def dummy_context(tmp_config_path, save_path):
     return RunconfContext(
         apparatus="dummy",
         conf_directory=tmp_config_path.parent,
-        use_local=True,
+        repo_type=RepoManagerType.LOCAL,
         output_directory=save_path,
     )

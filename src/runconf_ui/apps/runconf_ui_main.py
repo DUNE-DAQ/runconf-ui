@@ -10,7 +10,7 @@ from typing import TypedDict
 
 import click
 
-from runconf_ui import RunconfContext, RunconfUIApp, RunconfUIBackend
+from runconf_ui import RepoManagerType, RunconfContext, RunconfUIApp, RunconfUIBackend
 from runconf_ui.utils import LogLevels
 
 
@@ -128,7 +128,7 @@ def get_exit_msg(backend: RunconfUIBackend) -> str:
     "-a",
     "--apparatus",
     required=True,
-    help="DAQ apparatus to use (e.g. NP02, NP04). Can be read from the APPARATUS environment variable.",
+    help="DAQ apparatus to use (e.g. NP02, NP04, NP02_EMU). Can be read from the APPARATUS environment variable.",
     envvar="APPARATUS",
 )
 @click.option(
@@ -140,11 +140,11 @@ def get_exit_msg(backend: RunconfUIBackend) -> str:
     help="Directory to save run configs to.",
 )
 @click.option(
-    "-l",
-    "--use-local",
-    is_flag=True,
-    default=False,
-    help="Use a local filesystem to get you OKS config.",
+    "-t",
+    "--repo-type",
+    type=click.Choice(RepoManagerType.values()),
+    default="remote",
+    help="Type of repository to use (local, remote or emulation).",
 )
 @click.option(
     "-f",
@@ -175,7 +175,7 @@ def cli(
     apparatus: str,
     config_directory: str,
     output_directory: str,
-    use_local: bool,
+    repo_type: str,
     config_file_name: str,
     base_url: str,
     ops_url: str,
@@ -190,8 +190,8 @@ def cli(
     :param apparatus: DAQ apparatus name (e.g., NP02, NP04)
     :param config_directory: Path to configuration directory
     :param output_directory: Directory to save run configs to
-    :param use_local: Use local filesystem instead of remote API
-    :param config_file_name: Config file to find in the ops repo
+    :param repo_type: Type of repository to use (local or remote)
+    :param config_file_name: Config file(s) to find in the ops repo
     :param base_url: URL for the BASE repository
     :param ops_url: URL for the operations repository
     :param log_level: Log level (INFO, WARNING, DEBUG)
@@ -203,14 +203,17 @@ def cli(
             "Apparatus must be specified with -a or APPARATUS env variable"
         )
 
+    repo_type_enum = RepoManagerType.from_string(repo_type)
+    
     # When we JUST provide the apparatus
-    if not use_local:
+    if repo_type_enum != RepoManagerType.LOCAL :
         apparatus_vars = (base_url, ops_url, config_file_name)
         if all(v is None for v in apparatus_vars):
             apparatus_defaults = get_apparatus_defaults(apparatus)
             base_url = apparatus_defaults.get("base_url")
             ops_url = apparatus_defaults.get("ops_url")
             config_file_name = apparatus_defaults.get("config_file_name")
+            config_directory = apparatus_defaults.get("config_dir")
         elif any(v is None for v in apparatus_vars):
             raise click.UsageError(
                 "Specify all of --base-url, --ops-url, and --config-file-name together, or omit all three to use apparatus defaults."
@@ -219,7 +222,7 @@ def cli(
     ctx = RunconfContext(
         apparatus=apparatus,
         conf_directory=Path(config_directory),
-        use_local=use_local,
+        repo_type=repo_type_enum,
         config_file_name=config_file_name,
         base_url=base_url,
         ops_url=ops_url,
@@ -237,7 +240,7 @@ if __name__ == "__main__":
     ctx_ = RunconfContext(
         apparatus="dummy",
         conf_directory=Path("/tmp/pytest-of-hwallace/pytest-current/configscurrent"),
-        use_local=True,
+        repo_type=RepoManagerType.LOCAL,
         output_directory=Path("test-cfg"),
         log_level="INFO",
     )

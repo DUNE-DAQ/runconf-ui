@@ -55,7 +55,6 @@ class RunconfUIApp(App):
     # These are still registered as named screens for push/pop overlays
     SCREENS: ClassVar[dict] = {
         "help": HelpScreen,
-        "load": LoadingScreen,
     }
 
     def __init__(self, backend: RunconfUIBackend, *args, **kwargs):
@@ -108,10 +107,11 @@ class RunconfUIApp(App):
 
         :param sessions: List of available DAQ sessions
         """
-        self.pop_screen()
         for file_select in self.query(FileSelect):
             file_select.enable_session_select()
             file_select.update_sessions(sessions)
+        if isinstance(self.screen, LoadingScreen):
+            self.pop_screen()
 
     @on(runconf_msg.DaqSessionSelectedMessage)
     def handle_session_selected(self, event: runconf_msg.DaqSessionSelectedMessage):
@@ -127,7 +127,10 @@ class RunconfUIApp(App):
     @on(runconf_msg.LoadConfigMessage)
     def handle_load_config(self, _: runconf_msg.LoadConfigMessage) -> None:
         get_logger().debug("Pushing config load")
-        self.push_screen("load")
+        if isinstance(self.screen, LoadingScreen):
+            self.pop_screen()
+
+        self.push_screen(LoadingScreen("Opening Configuration..."))
         self._load_config_worker()
 
     @work(thread=True)
@@ -254,8 +257,10 @@ class RunconfUIApp(App):
                 file_select.update_versions(versions)
                 file_select.set_default_version(self.backend.get_default_version())
                 file_select.refresh()
+                if isinstance(self.screen, LoadingScreen):
+                    self.pop_screen()
         except Exception as e:
             get_logger().exception(e)
+            if isinstance(self.screen, LoadingScreen):
+                self.pop_screen()
             self.handle_exception_popup(e)
-        finally:
-            self.pop_screen()
