@@ -5,7 +5,7 @@ requires = ["setuptools>=61.0"]
 [project]
 name = "runconf_ui"
 description = "A text user interface (TUI) designed to be used to enable/disable elements of the detector"
-version = "6.0.0"
+version = "6.1.0"
 readme = "docs/README.md"
 requires-python = ">=3.10"
 dependencies = [
@@ -19,7 +19,9 @@ dependencies = [
 package-dir = {"" = "src"}
 include-package-data = true
 script-files = ["scripts/runconf_np02_env_setup.sh",
-                "scripts/runconf_np04_env_setup.sh"]
+                "scripts/runconf_np02_emu_env_setup.sh",
+                "scripts/runconf_np04_env_setup.sh",
+                "scripts/runconf_np04_emu_env_setup.sh"]
 
 [tool.setuptools.packages.find]
 namespaces = true
