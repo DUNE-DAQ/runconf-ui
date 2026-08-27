@@ -1,8 +1,8 @@
 from typing import TypeVar
 
 from runconf_ui.state_tree import (
-    Group,
     AttributeAdapter,
+    Group,
     Leaf,
 )
 from runconf_ui.utils import get_class_from_segment_list

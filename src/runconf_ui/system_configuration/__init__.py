@@ -2,19 +2,19 @@
 from .config_reader import SystemConfigReader
 from .dataclasses import (
     AdjustableAttributeData,
-    FilterData,
     ExcludableAttributeData,
     ExcludableElementData,
     ExcludableRelationshipData,
+    FilterData,
     YamlToSystemData,
 )
 
 __all__ = [
     "AdjustableAttributeData",
-    "FilterData",
     "ExcludableAttributeData",
     "ExcludableElementData",
     "ExcludableRelationshipData",
+    "FilterData",
     "SystemConfigReader",
     "YamlToSystemData",
 ]
