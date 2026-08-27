@@ -23,8 +23,8 @@ from runconf_ui.textual.screens import (
 from runconf_ui.textual.widgets import (
     AdjustableAttributeTabs,
     ConfigTreePanel,
-    IncludeExcludeTabs,
     FileSelect,
+    IncludeExcludeTabs,
     OptionsPanel,
     RichTreeTabbed,
 )

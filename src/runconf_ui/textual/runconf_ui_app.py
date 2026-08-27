@@ -22,8 +22,8 @@ from runconf_ui.textual.screens.popup_screens import LoadingScreen
 from runconf_ui.textual.widgets import (
     AdjustableAttributeTabs,
     ConfigTreePanel,
-    IncludeExcludeTabs,
     FileSelect,
+    IncludeExcludeTabs,
     OptionsPanel,
     RichTreeTabbed,
 )

@@ -42,10 +42,10 @@ from runconf_ui.utils import get_logger
 
 from .dataclasses import (
     AdjustableAttributeData,
-    IncludeableSystemData,
     IncludeableAttributeData,
     IncludeableElementData,
     IncludeableRelationshipData,
+    IncludeableSystemData,
 )
 from .factories import (
     AdjustableFactory,

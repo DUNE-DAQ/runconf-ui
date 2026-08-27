@@ -12,8 +12,8 @@ from conffwk import Configuration
 
 from runconf_ui import RunconfUIBackend
 from runconf_ui.state_tree import (
-    IncludeComponent,
     Group,
+    IncludeComponent,
     Leaf,
     State,
     build_index,

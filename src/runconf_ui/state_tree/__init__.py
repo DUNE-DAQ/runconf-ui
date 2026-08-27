@@ -15,10 +15,10 @@ from .traversal import (
 __all__ = [
     # Adapters
     "AdjustableAttribute",
-    "IncludeAttribute",
-    "IncludeComponent",
     # Nodes
     "Group",
+    "IncludeAttribute",
+    "IncludeComponent",
     "Leaf",
     "Node",
     # Traversal

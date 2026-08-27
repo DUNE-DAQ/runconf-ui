@@ -9,8 +9,8 @@ from textual.widgets import Footer, Header, TabbedContent, TabPane
 from ..widgets import (
     AdjustableAttributeTabs,
     ConfigTreePanel,
-    IncludeExcludeTabs,
     FileSelect,
+    IncludeExcludeTabs,
     OptionsPanel,
     RichTreeTabbed,
 )
