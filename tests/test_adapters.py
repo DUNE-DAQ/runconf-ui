@@ -11,8 +11,8 @@ from confmodel_dal import entity_excluded, exclude_entity, include_entity
 
 from runconf_ui.exceptions import AttributeMissingException, IncompatibleDalException
 from runconf_ui.state_tree import (
-    AttributeAdapter,
     AdjustableAttributeAdapter,
+    AttributeAdapter,
     ExcludableEntityAdapter,
 )
 
