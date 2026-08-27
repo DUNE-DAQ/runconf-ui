@@ -7,7 +7,7 @@ from runconf_ui.exceptions import IncompatibleDalException
 from .adapter import Adapter
 
 
-class IncludeComponent(Adapter):
+class ExcludableEntityAdapter(Adapter):
     """Adapter that includes/excludeds Resource DAL objects via component excluded state.
 
     Raises an IncompatibleDalException if the DAL is not a Resource subclass.
@@ -20,7 +20,7 @@ class IncludeComponent(Adapter):
         dal: DalBase,
         label: str = "",
     ):
-        """Initialize a IncludeComponent adapter.
+        """Initialize a ExcludableEntityAdapter adapter.
 
         :param configuration: The Configuration object containing the DAL
         :param session: The session DAL object

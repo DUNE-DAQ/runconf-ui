@@ -381,7 +381,7 @@ class RunconfUIBackend:
             return {}
         return {g: dict(n) for g, n in self._assembled.all_nodes.items()}
 
-    def get_excludableable_values(self) -> dict[str, dict[str, NodeStatus]]:
+    def get_excludable_values(self) -> dict[str, dict[str, NodeStatus]]:
         """Retrieve all disableable configuration nodes organized by group.
 
         :returns: Dictionary mapping group names to disableable node status dictionaries

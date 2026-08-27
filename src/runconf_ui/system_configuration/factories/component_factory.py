@@ -1,6 +1,6 @@
 from runconf_ui.state_tree import IncludeComponent, Leaf
 
-from ..dataclasses import IncludeableElementData
+from ..dataclasses import ExludableElementData
 from .factory_base import FactoryBase
 
 
@@ -11,7 +11,7 @@ class ComponentFactory(FactoryBase["IncludeableElementData", "list[Leaf] | None"
     when each_component_separate=True.
     """
 
-    def create(self, data: IncludeableElementData) -> list[Leaf] | None:
+    def create(self, data: ExludableElementData) -> list[Leaf] | None:
         """Create component leaf nodes from configuration data.
 
         :param data: IncludeableElementData specifying the components to create

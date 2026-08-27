@@ -8,7 +8,7 @@ from runconf_ui.exceptions import AttributeMissingException
 from .adapter import Adapter
 
 
-class IncludeAttribute(Adapter):
+class AttributeAdapter(Adapter):
     """Adapter for toggling DAL objects by enabling/disabling a named attribute.
 
     Also considers the DAL's own resource-excluded state: if the DAL is
@@ -66,7 +66,7 @@ class IncludeAttribute(Adapter):
             self.configuration.update_dal(self.dal)
 
 
-class AdjustableAttribute(Adapter):
+class AdjustableAttributeAdapter(Adapter):
     """Adapter for reading and writing any-valued attributes.
 
     Used for adjustable values like trigger rates, thresholds, or other

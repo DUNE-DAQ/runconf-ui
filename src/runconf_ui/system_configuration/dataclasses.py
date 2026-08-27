@@ -28,7 +28,7 @@ class SystemElementData:
 
 
 @dataclass(kw_only=True)
-class IncludeableElementData(SystemElementData):
+class ExludableElementData(SystemElementData):
     """Anything that can be excluded also has this"""
 
     each_component_separate: bool = False  # Is each component a separate subsystem
@@ -36,7 +36,7 @@ class IncludeableElementData(SystemElementData):
 
 
 @dataclass(kw_only=True)
-class IncludeableAttributeData(IncludeableElementData):
+class ExcludableAttributeData(ExludableElementData):
     """Attributes that can be excluded use this"""
 
     included_state: Any = True  # included value
@@ -45,7 +45,7 @@ class IncludeableAttributeData(IncludeableElementData):
 
 
 @dataclass(kw_only=True)
-class IncludeableRelationshipData(IncludeableAttributeData):
+class ExcludableRelationshipData(ExcludableAttributeData):
     """Relationships also need to know the class of the related object(s)
     For relationships the included/excluded states should be (lists of) dal object ids
     """
@@ -62,21 +62,21 @@ class AdjustableAttributeData(SystemElementData):
 
 
 @dataclass
-class IncludeableSystemData:
+class ExcludableSystemData:
     """Systems of excluded elements"""
 
     subsystem_dependent: bool  # Does this system depend soley on its subsystems
     display_full_system: bool  # Do you want to display the top-level-system?
-    components: list[IncludeableElementData]  # Components in the system
-    attributes: list[IncludeableAttributeData]  # Attributes in the system
-    relationships: list[IncludeableRelationshipData]  # Relationships in the system
+    components: list[ExludableElementData]  # Components in the system
+    attributes: list[ExcludableAttributeData]  # Attributes in the system
+    relationships: list[ExcludableRelationshipData]  # Relationships in the system
 
 
 @dataclass
-class IncludeableGroupData:
+class ExcludableGroupData:
     label: str  # Internal label of the group
     view_panel: str  # Tag for the view panel
-    systems: dict[str, list[IncludeableSystemData]]  # Any internal systems
+    systems: dict[str, list[ExcludableSystemData]]  # Any internal systems
 
 
 @dataclass
@@ -88,7 +88,7 @@ class AdjustableGroupData:
 
 @dataclass
 class PanelOptionsData:
-    panels: dict[str, IncludeableGroupData]
+    panels: dict[str, ExcludableGroupData]
 
 
 @dataclass
@@ -165,7 +165,7 @@ class YamlToSystemData:
     """Converts raw YAML dictionaries into structured dataclasses."""
 
     @classmethod
-    def build_includable_groups(cls, raw: dict) -> dict[str, IncludeableGroupData]:
+    def build_excludable_groups(cls, raw: dict) -> dict[str, ExcludableGroupData]:
         """Build excludeable group dataclass objects from raw YAML data.
 
         :param raw: Raw YAML dictionary containing excludeable group data
@@ -173,10 +173,10 @@ class YamlToSystemData:
         :rtype: dict[str, excludeableGroupData]
         """
         return {
-            name: IncludeableGroupData(
+            name: ExcludableGroupData(
                 label=data.get("label", ""),
                 view_panel=data.get("view_panel", ""),
-                systems=cls._build_includable_systems(data.get("Systems", [])),
+                systems=cls._build_excludable_systems(data.get("Systems", [])),
             )
             for name, data in raw.items()
         }
@@ -212,27 +212,27 @@ class YamlToSystemData:
         )
 
     @classmethod
-    def _build_includable_systems(
+    def _build_excludable_systems(
         cls, raw_systems: list[dict]
-    ) -> dict[str, list[IncludeableSystemData]]:
+    ) -> dict[str, list[ExcludableSystemData]]:
         """Build excludeable system dataclass objects from raw YAML data.
 
         :param raw_systems: List of raw system dictionaries from YAML
         :returns: Dictionary mapping system names to lists of excludeableSystemData
         :rtype: dict[str, list[excludeableSystemData]]
         """
-        systems: dict[str, list[IncludeableSystemData]] = {}
+        systems: dict[str, list[ExcludableSystemData]] = {}
         for entry in raw_systems:
             for name, data in entry.items():
-                system = IncludeableSystemData(
+                system = ExcludableSystemData(
                     subsystem_dependent=data.get("subsystem_dependent", False),
                     display_full_system=data.get("display_full_system", True),
                     components=[
-                        IncludeableElementData(**_base_include_kwargs(i))
+                        ExludableElementData(**_base_include_kwargs(i))
                         for i in data.get("components", [])
                     ],
                     attributes=[
-                        IncludeableAttributeData(**_attribute_kwargs(i))
+                        ExcludableAttributeData(**_attribute_kwargs(i))
                         for i in data.get("attributes", [])
                     ],
                     relationships=cls._build_relationships(
@@ -243,7 +243,7 @@ class YamlToSystemData:
         return systems
 
     @staticmethod
-    def _build_relationships(raw) -> list[IncludeableRelationshipData]:
+    def _build_relationships(raw) -> list[ExcludableRelationshipData]:
         """Build relationship dataclass objects from raw YAML data.
 
         :param raw: Raw relationship data (dict or list of dicts)
@@ -253,7 +253,7 @@ class YamlToSystemData:
         if isinstance(raw, dict):
             raw = [raw]
         return [
-            IncludeableRelationshipData(
+            ExcludableRelationshipData(
                 **_attribute_kwargs(i),
                 relationship_class=i.get("relationship_class", ""),
             )

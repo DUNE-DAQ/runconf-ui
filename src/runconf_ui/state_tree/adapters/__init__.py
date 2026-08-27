@@ -1,4 +1,4 @@
-from .attribute_adapters import AdjustableAttribute, IncludeAttribute
-from .component_adapter import IncludeComponent
+from .attribute_adapters import AdjustableAttributeAdapter, AttributeAdapter
+from .component_adapter import ExcludableEntityAdapter
 
-__all__ = ["AdjustableAttribute", "IncludeAttribute", "IncludeComponent"]
+__all__ = ["AdjustableAttributeAdapter", "AttributeAdapter", "ExcludableEntityAdapter"]

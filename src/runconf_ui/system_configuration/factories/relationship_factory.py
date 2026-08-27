@@ -4,20 +4,20 @@ from conffwk.dal import DalBase
 
 from runconf_ui.state_tree import Group
 
-from ..dataclasses import IncludeableRelationshipData
+from ..dataclasses import ExcludableRelationshipData
 from .attribute_factory import (
     AttributeFactory,
 )
 
 
-class RelationshipFactory(AttributeFactory[IncludeableRelationshipData]):
+class RelationshipFactory(AttributeFactory[ExcludableRelationshipData]):
     """Creates Group nodes for exclude relationships.
 
     Creates the same Group structure as AttributeFactory but first resolves
     enabled_state and excluded_state strings to DAL objects.
     """
 
-    def create(self, data: IncludeableRelationshipData) -> Group | None:
+    def create(self, data: ExcludableRelationshipData) -> Group | None:
         """Create relationship group from configuration data.
 
         :param data: EnableableRelationshipData specifying the relationships

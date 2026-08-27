@@ -7,10 +7,10 @@ from runconf_ui.state_tree import (
 )
 from runconf_ui.utils import get_class_from_segment_list
 
-from ..dataclasses import IncludeableAttributeData
+from ..dataclasses import ExcludableAttributeData
 from .factory_base import FactoryBase
 
-TIncludeableAttributeData = TypeVar("TIncludeableAttributeData", bound=IncludeableAttributeData)
+TIncludeableAttributeData = TypeVar("TIncludeableAttributeData", bound=ExcludableAttributeData)
 
 
 class AttributeFactory(FactoryBase[TIncludeableAttributeData, "Group | None"]):

@@ -42,10 +42,10 @@ from runconf_ui.utils import get_logger
 
 from .dataclasses import (
     AdjustableAttributeData,
-    IncludeableAttributeData,
-    IncludeableElementData,
-    IncludeableRelationshipData,
-    IncludeableSystemData,
+    ExcludableAttributeData,
+    ExludableElementData,
+    ExcludableRelationshipData,
+    ExcludableSystemData,
 )
 from .factories import (
     AdjustableFactory,
@@ -59,9 +59,9 @@ from .factories import (
 # ---------------------------------------------------------------------------
 
 
-class IncludeableSystemBuilder:
+class ExcludableSystemBuilder:
     """
-    Builds a Group tree from a IncludeableSystemBuilder instance.
+    Builds a Group tree from a ExcludableSystemBuilder instance.
 
     When subsystem_dependent=False the root uses AND semantics: the system is
     on iff every voting child is on.
@@ -87,7 +87,7 @@ class IncludeableSystemBuilder:
         self.relationship_factory = RelationshipFactory(*args)
         get_logger().debug("   - relationship_factory intiialised")
 
-    def build(self, system: IncludeableSystemData, label: str) -> Group:
+    def build(self, system: ExcludableSystemData, label: str) -> Group:
         """Build a Group tree from system data.
 
         :param system: The system definition to build from
@@ -123,7 +123,7 @@ class IncludeableSystemBuilder:
     def _add_component(
         self,
         root: Group,
-        comp: IncludeableElementData,
+        comp: ExludableElementData,
         subsystem_dependent: bool,
     ) -> None:
         """Add component nodes to the root group.
@@ -159,7 +159,7 @@ class IncludeableSystemBuilder:
     def _add_attribute(
         self,
         root: Group,
-        attr: IncludeableAttributeData,
+        attr: ExcludableAttributeData,
         subsystem_dependent: bool,
     ) -> None:
         """Add attribute nodes to the root group.
@@ -183,7 +183,7 @@ class IncludeableSystemBuilder:
     def _add_relationship(
         self,
         root: Group,
-        rel: IncludeableRelationshipData,
+        rel: ExcludableRelationshipData,
         subsystem_dependent: bool,
     ) -> None:
         """Add relationship nodes to the root group.

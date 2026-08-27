@@ -20,10 +20,10 @@ from conffwk.dal import DalBase
 from runconf_ui.state_tree import Group, NodeStatus, walk
 from runconf_ui.utils import get_logger
 
-from .builders import AdjustableSystemBuilder, IncludeableSystemBuilder
+from .builders import AdjustableSystemBuilder, ExcludableSystemBuilder
 from .dataclasses import (
     AdjustableGroupData,
-    IncludeableGroupData,
+    ExcludableGroupData,
     YamlToSystemData,
 )
 
@@ -108,8 +108,8 @@ class AssembledGroup:
 
 @dataclass
 class AssembledConfig:
-    """The complete assembled configuration with includeable and adjustable groups.
-    :param includeable: List of includeable groups
+    """The complete assembled configuration with excludable and adjustable groups.
+    :param excludable: List of excludable groups
     :param adjustable: List of adjustable groups
     """
 
@@ -153,7 +153,7 @@ class SystemConfig:
         raw = self._load(path)
 
         self._settings = YamlToSystemData.build_settings(raw)
-        self._includeable = YamlToSystemData.build_includable_groups(
+        self._excludable = YamlToSystemData.build_excludable_groups(
             raw.get("PanelOptions", {})
         )
         self._adjustable = YamlToSystemData.build_adjustable_groups(
@@ -181,13 +181,13 @@ class SystemConfig:
         return self._settings.classes_to_show
 
     @property
-    def includable_skeleton(self) -> dict[str, IncludeableGroupData]:
-        """Get the includeable group structure.
+    def excludable_skeleton(self) -> dict[str, ExcludableGroupData]:
+        """Get the excludable group structure.
 
-        :returns: Dictionary of includeableGroupData objects by name
-        :rtype: dict[str, includeableGroupData]
+        :returns: Dictionary of ExcludableGroupData objects by name
+        :rtype: dict[str, ExcludableGroupData]
         """
-        return self._includeable
+        return self._excludable
 
     @property
     def adjustable_skeleton(self) -> dict[str, AdjustableGroupData]:
@@ -216,17 +216,17 @@ class ConfigAssembler:
         self.configuration = configuration
         self.session = session
 
-    def assemble_includable(
+    def assemble_excludable(
         self,
-        skeleton: dict[str, IncludeableGroupData],
+        skeleton: dict[str, ExcludableGroupData],
     ) -> list[AssembledGroup]:
-        """Assemble includeable groups from skeleton data.
+        """Assemble excludable groups from skeleton data.
 
-        :param skeleton: Dictionary of includeableGroupData objects
-        :returns: List of assembled includeable groups
+        :param skeleton: Dictionary of excludableGroupData objects
+        :returns: List of assembled excludable groups
         :rtype: list[AssembledGroup]
         """
-        builder = IncludeableSystemBuilder(self.configuration, self.session)
+        builder = ExcludableSystemBuilder(self.configuration, self.session)
 
         assembled_groups = []
         for group_name, group_data in skeleton.items():
@@ -342,8 +342,8 @@ class SystemConfigReader:
         assembler = ConfigAssembler(configuration, session)
         get_logger().info(f"Assembling: {session_name} in {configuration!r}")
         return AssembledConfig(
-            excludable=assembler.assemble_includable(
-                self.config.includable_skeleton
+            excludable=assembler.assemble_excludable(
+                self.config.excludable_skeleton
             ),
             adjustable=assembler.assemble_adjustable(self.config.adjustable_skeleton),
         )
