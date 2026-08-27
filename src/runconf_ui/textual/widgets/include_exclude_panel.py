@@ -9,13 +9,11 @@ from ..messages import NodeToggledMessage
 from .dynamic_panel import DynamicTabbedContent, textual_safe_id
 
 
-class IncldueExcludeButtonScroller(ScrollableContainer):
+class IncludeExcludeButtonScroller(ScrollableContainer):
     """Inner scrollable area containing the button groups for an IncludeExcludePanel."""
-    pass
-
 
 class IncludeExcludePanel(Vertical):
-    """Panel widget displaying enable/disable toggle buttons for configuration nodes.
+    """Panel widget displaying include/exclude toggle buttons for configuration nodes.
 
     This widget displays a label above a scrollable container of buttons
     representing nodes that can be included or excluded. Button appearance
@@ -94,7 +92,7 @@ class IncludeExcludePanel(Vertical):
             vtcl.border_title = group_lab
             button_group_widgets.append(vtcl)
 
-        yield IncldueExcludeButtonScroller(*button_group_widgets)
+        yield IncludeExcludeButtonScroller(*button_group_widgets)
 
     @on(Button.Pressed)
     def handle_button_pressed(self, event: Button.Pressed):

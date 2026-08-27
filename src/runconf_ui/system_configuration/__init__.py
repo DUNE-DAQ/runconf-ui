@@ -4,7 +4,7 @@ from .dataclasses import (
     AdjustableAttributeData,
     FilterData,
     ExcludableAttributeData,
-    ExludableElementData,
+    ExcludableElementData,
     ExcludableRelationshipData,
     YamlToSystemData,
 )
@@ -13,7 +13,7 @@ __all__ = [
     "AdjustableAttributeData",
     "FilterData",
     "ExcludableAttributeData",
-    "ExludableElementData",
+    "ExcludableElementData",
     "ExcludableRelationshipData",
     "SystemConfigReader",
     "YamlToSystemData",

@@ -8,7 +8,7 @@ from .adapter import Adapter
 
 
 class ExcludableEntityAdapter(Adapter):
-    """Adapter that includes/excludeds ExcludableEntity DAL objects via component excluded state.
+    """Adapter that includes/excludeds ExcludableEntity DAL objects via ExcludableEntity excluded state.
 
     Raises an IncompatibleDalException if the DAL is not a ExcludableEntity subclass.
     """
@@ -36,17 +36,17 @@ class ExcludableEntityAdapter(Adapter):
         super().__init__(configuration, session, dal)
 
     def get(self) -> bool:
-        """Get the enabled state of the component.
+        """Get the enabled state of the ExcludableEntity.
 
-        :returns: True if the component is enabled as a ExcludableEntity, False otherwise
+        :returns: True if the ExcludableEntity is enabled as a ExcludableEntity, False otherwise
         :rtype: bool
         """
         return self.dal_included()
 
     def set(self, value: bool) -> None:
-        """Set the enabled state of the component.
+        """Set the enabled state of the ExcludableEntity.
 
-        :param value: True to include the component, False to exclue
+        :param value: True to include the ExcludableEntity, False to exclue
         """
         if value:
             include_entity(self.configuration._obj, self.session.id, self.dal.id)

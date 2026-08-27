@@ -1,20 +1,20 @@
 from runconf_ui.state_tree import ExcludableEntityAdapter, Leaf
 
-from ..dataclasses import ExludableElementData
+from ..dataclasses import ExcludableElementData
 from .factory_base import FactoryBase
 
 
 class ExcludableEntityFactory(FactoryBase["ExcludableEntityAdapter", "list[Leaf] | None"]):
-    """Creates Leaf nodes for disable components.
+    """Creates Leaf nodes for ExcludableEntities.
 
-    Returns a list because one config entry can expand to many components
-    when each_component_separate=True.
+    Returns a list because one config entry can expand to many ExcludableEntitys
+    when each_ExcludableEntity_separate=True.
     """
 
-    def create(self, data: ExludableElementData) -> list[Leaf] | None:
-        """Create component leaf nodes from configuration data.
+    def create(self, data: ExcludableElementData) -> list[Leaf] | None:
+        """Create ExcludableEntity leaf nodes from configuration data.
 
-        :param data: IncludeableElementData specifying the components to create
+        :param data: IncludeableElementData specifying the ExcludableEntitys to create
         :returns: List of Leaf nodes, or None if no matching DALs
         :rtype: list[Leaf] | None
         """

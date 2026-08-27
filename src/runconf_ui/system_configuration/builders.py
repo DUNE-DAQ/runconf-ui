@@ -29,7 +29,7 @@ Flag conventions used throughout:
 
 Root strategy:
 
-- ``subsystem_dependent=False`` — ``strategy=all``: system is on iff ALL components are on.
+- ``subsystem_dependent=False`` — ``strategy=all``: system is on iff ALL ExcludableEntitys are on.
 - ``subsystem_dependent=True`` — ``strategy=any``: system is on if ANY subsystem is on
   (equivalently, off only when ALL subsystems are off).
 """
@@ -43,7 +43,7 @@ from runconf_ui.utils import get_logger
 from .dataclasses import (
     AdjustableAttributeData,
     ExcludableAttributeData,
-    ExludableElementData,
+    ExcludableElementData,
     ExcludableRelationshipData,
     ExcludableSystemData,
 )
@@ -69,7 +69,7 @@ class ExcludableSystemBuilder:
     When subsystem_dependent=True the root uses OR semantics: the system is on
     if any named subsystem is on, and goes off only when every subsystem is off.
     Subsystems created via at() always use OR semantics (a subsystem is on if
-    any of its components are on).
+    any of its ExcludableEntitys are on).
     """
 
     def __init__(self, configuration: Configuration, session: DalBase):
@@ -80,8 +80,8 @@ class ExcludableSystemBuilder:
         """
         get_logger().debug("Initialising excludeSystemBuilder")
         args = (configuration, session)
-        self.component_factory = ExcludableEntityFactory(*args)
-        get_logger().debug("   - component_factory intiialised")
+        self.excludable_entity_factory = ExcludableEntityFactory(*args)
+        get_logger().debug("   - ExcludableEntity_factory intiialised")
         self.attribute_factory: AttributeFactory = AttributeFactory(*args)
         get_logger().debug("   - attribute_factory intiialised")
         self.relationship_factory = RelationshipFactory(*args)
@@ -99,8 +99,8 @@ class ExcludableSystemBuilder:
         root = Group(label=label, strategy=root_strategy)
 
         for comp in system.components:
-            get_logger().debug(f"            - adding component: {comp} ")
-            self._add_component(root, comp, system.subsystem_dependent)
+            get_logger().debug(f"            - adding ExcludableEntity: {comp} ")
+            self._add_excludable_entity(root, comp, system.subsystem_dependent)
 
         for attr in system.attributes:
             get_logger().debug(f"            - adding attribute: {attr} ")
@@ -120,19 +120,19 @@ class ExcludableSystemBuilder:
         """
         return not subsystem_dependent or has_own_label
 
-    def _add_component(
+    def _add_excludable_entity(
         self,
         root: Group,
-        comp: ExludableElementData,
+        comp: ExcludableElementData,
         subsystem_dependent: bool,
     ) -> None:
-        """Add component nodes to the root group.
+        """Add ExcludableEntity nodes to the root group.
 
-        :param root: The root group to add components to
-        :param comp: The component element data
+        :param root: The root group to add ExcludableEntities to
+        :param comp: The ExcludableEntity element data
         :param subsystem_dependent: Whether the system is subsystem dependent
         """
-        nodes = self.component_factory.create(comp)
+        nodes = self.excludable_entity_factory.create(comp)
         if not nodes:
             return
 

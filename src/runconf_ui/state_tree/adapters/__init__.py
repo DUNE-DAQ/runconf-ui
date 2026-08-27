@@ -1,4 +1,4 @@
 from .attribute_adapters import AdjustableAttributeAdapter, AttributeAdapter
-from .component_adapter import ExcludableEntityAdapter
+from .excludable_entity_adapter import ExcludableEntityAdapter
 
 __all__ = ["AdjustableAttributeAdapter", "AttributeAdapter", "ExcludableEntityAdapter"]

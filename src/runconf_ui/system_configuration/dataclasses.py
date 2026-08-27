@@ -28,15 +28,15 @@ class SystemElementData:
 
 
 @dataclass(kw_only=True)
-class ExludableElementData(SystemElementData):
+class ExcludableElementData(SystemElementData):
     """Anything that can be excluded also has this"""
 
-    each_component_separate: bool = False  # Is each component a separate subsystem
+    each_component_separate: bool = False  # Is each ExcludableEntity a separate subsystem
     separate_system: bool = False  # Does this by itself comprise a seperate subsystem
 
 
 @dataclass(kw_only=True)
-class ExcludableAttributeData(ExludableElementData):
+class ExcludableAttributeData(ExcludableElementData):
     """Attributes that can be excluded use this"""
 
     included_state: Any = True  # included value
@@ -67,7 +67,7 @@ class ExcludableSystemData:
 
     subsystem_dependent: bool  # Does this system depend soley on its subsystems
     display_full_system: bool  # Do you want to display the top-level-system?
-    components: list[ExludableElementData]  # Components in the system
+    components: list[ExcludableElementData]  # Components in the system
     attributes: list[ExcludableAttributeData]  # Attributes in the system
     relationships: list[ExcludableRelationshipData]  # Relationships in the system
 
@@ -228,7 +228,7 @@ class YamlToSystemData:
                     subsystem_dependent=data.get("subsystem_dependent", False),
                     display_full_system=data.get("display_full_system", True),
                     components=[
-                        ExludableElementData(**_base_include_kwargs(i))
+                        ExcludableElementData(**_base_include_kwargs(i))
                         for i in data.get("components", [])
                     ],
                     attributes=[
