@@ -29,7 +29,7 @@ Flag conventions used throughout:
 
 Root strategy:
 
-- ``subsystem_dependent=False`` — ``strategy=all``: system is on iff ALL ExcludableEntitys are on.
+- ``subsystem_dependent=False`` — ``strategy=all``: system is on iff ALL ExcludableEntities are on.
 - ``subsystem_dependent=True`` — ``strategy=any``: system is on if ANY subsystem is on
   (equivalently, off only when ALL subsystems are off).
 """
@@ -69,7 +69,7 @@ class ExcludableSystemBuilder:
     When subsystem_dependent=True the root uses OR semantics: the system is on
     if any named subsystem is on, and goes off only when every subsystem is off.
     Subsystems created via at() always use OR semantics (a subsystem is on if
-    any of its ExcludableEntitys are on).
+    any of its ExcludableEntities are on).
     """
 
     def __init__(self, configuration: Configuration, session: DalBase):

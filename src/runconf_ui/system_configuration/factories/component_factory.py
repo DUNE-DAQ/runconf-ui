@@ -7,14 +7,14 @@ from .factory_base import FactoryBase
 class ExcludableEntityFactory(FactoryBase["ExcludableEntityAdapter", "list[Leaf] | None"]):
     """Creates Leaf nodes for ExcludableEntities.
 
-    Returns a list because one config entry can expand to many ExcludableEntitys
+    Returns a list because one config entry can expand to many ExcludableEntities
     when each_ExcludableEntity_separate=True.
     """
 
     def create(self, data: ExcludableElementData) -> list[Leaf] | None:
         """Create ExcludableEntity leaf nodes from configuration data.
 
-        :param data: IncludeableElementData specifying the ExcludableEntitys to create
+        :param data: IncludeableElementData specifying the ExcludableEntities to create
         :returns: List of Leaf nodes, or None if no matching DALs
         :rtype: list[Leaf] | None
         """
