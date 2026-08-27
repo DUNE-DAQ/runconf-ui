@@ -14,7 +14,7 @@ from runconf_ui.state_tree import Group, Leaf
 class StubAdapter:
     def __init__(self, value: bool = True):
         self._value = value
-        self._dal_enabled = True
+        self._dal_included = True
 
     def get(self):
         return self._value
@@ -22,8 +22,8 @@ class StubAdapter:
     def set(self, value):
         self._value = value
 
-    def dal_enabled(self):
-        return self._dal_enabled
+    def dal_included(self):
+        return self._dal_included
 
 
 def leaf(value: bool = True, label: str = "") -> Leaf:
@@ -52,22 +52,22 @@ class TestLeaf:
 
 
 class TestGroupGet:
-    def test_all_strategy_true_when_all_enabled(self):
+    def test_all_strategy_true_when_all_included(self):
         g = Group(strategy=all)
         g.add(leaf(True)).add(leaf(True))
         assert g.get() is True
 
-    def test_all_strategy_false_when_any_disabled(self):
+    def test_all_strategy_false_when_any_excluded(self):
         g = Group(strategy=all)
         g.add(leaf(True)).add(leaf(False))
         assert g.get() is False
 
-    def test_any_strategy_true_when_one_enabled(self):
+    def test_any_strategy_true_when_one_included(self):
         g = Group(strategy=any)
         g.add(leaf(False)).add(leaf(True))
         assert g.get() is True
 
-    def test_any_strategy_false_when_all_disabled(self):
+    def test_any_strategy_false_when_all_excluded(self):
         g = Group(strategy=any)
         g.add(leaf(False)).add(leaf(False))
         assert g.get() is False
@@ -124,7 +124,7 @@ class TestGroupSet:
 
 
 class TestGroupGatedGet:
-    def test_returns_false_when_parent_disabled(self):
+    def test_returns_false_when_parent_excluded(self):
         child = leaf(True)
         g = Group(strategy=all)
         g.add(leaf(False))  # forces parent off
@@ -132,7 +132,7 @@ class TestGroupGatedGet:
         assert g.get() is False
         assert g.gated_get(child) is False
 
-    def test_returns_child_state_when_parent_enabled(self):
+    def test_returns_child_state_when_parent_included(self):
         child = leaf(False)
         g = Group(strategy=any)
         g.add(leaf(True)).add(child)

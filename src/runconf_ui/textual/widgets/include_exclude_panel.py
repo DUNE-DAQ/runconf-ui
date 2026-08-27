@@ -9,23 +9,20 @@ from ..messages import NodeToggledMessage
 from .dynamic_panel import DynamicTabbedContent, textual_safe_id
 
 
-class EnableDisableButtonScroller(ScrollableContainer):
-    """Inner scrollable area containing the button groups for an EnableDisablePanel."""
+class IncludeExcludeButtonScroller(ScrollableContainer):
+    """Inner scrollable area containing the button groups for an IncludeExcludePanel."""
 
-    pass
-
-
-class EnableDisablePanel(Vertical):
-    """Panel widget displaying enable/disable toggle buttons for configuration nodes.
+class IncludeExcludePanel(Vertical):
+    """Panel widget displaying include/exclude toggle buttons for configuration nodes.
 
     This widget displays a label above a scrollable container of buttons
-    representing nodes that can be enabled or disabled. Button appearance
-    reflects the current enabled/disabled state, and interactivity is managed
+    representing nodes that can be included or excluded. Button appearance
+    reflects the current included/excluded state, and interactivity is managed
     based on node status.
     """
 
     def __init__(self, group_id: str, nodes: dict[str, NodeStatus], *args, **kwargs):
-        """Initialize EnableDisablePanel.
+        """Initialize IncludeExcludePanel.
 
         :param group_id: The identifier for this panel's node group
         :param nodes: Dictionary mapping node IDs to their current NodeStatus
@@ -33,8 +30,8 @@ class EnableDisablePanel(Vertical):
         :param kwargs: Variable keyword arguments passed to parent Vertical
         """
         super().__init__(*args, **kwargs)
-        get_logger().info(f"Initialising enable/disable panel with id {group_id}")
-        get_logger().debug(f"Initialising enable/disable panel with nodes {nodes}")
+        get_logger().info(f"Initialising include/exclude panel with id {group_id}")
+        get_logger().debug(f"Initialising include/exclude panel with nodes {nodes}")
 
         self._group_id = group_id
         self.border_title = group_id
@@ -48,19 +45,19 @@ class EnableDisablePanel(Vertical):
         # We're gonna structure things into a dict
         button_groups = {}
 
-        get_logger().debug("Composing enable/disable panel")
+        get_logger().debug("Composing include/exclude panel")
 
-        main_node_label = "main_enabled_btn"
-        sub_node_label = "sub_enabled_btn"
+        main_node_label = "main_include_btn"
+        sub_node_label = "sub_include_btn"
 
         for node_id, node in self._runconf_nodes.items():
             get_logger().debug(f"   - {node_id} : {node}")
 
-            enabled_state = "node_enabled" if node.is_enabled else "node_disabled"
+            included_state = "node_included" if node.is_included else "node_excluded"
             is_top = node.parent is None
 
             node_classes = (
-                f"{main_node_label if is_top else sub_node_label} {enabled_state}"
+                f"{main_node_label if is_top else sub_node_label} {included_state}"
             )
 
             btn = Button(
@@ -84,18 +81,18 @@ class EnableDisablePanel(Vertical):
         for group_lab, btns in button_groups.items():
             btns_sorted = [btn for _, btn in sorted(btns, key=lambda x: not x[0])]
 
-            if "main_enabled_btn" not in btns_sorted[0].classes:
+            if "main_include_btn" not in btns_sorted[0].classes:
                 for b in btns_sorted:
                     b_cls = list(b.classes)
-                    b_cls.pop(b_cls.index("sub_enabled_btn"))
-                    b_cls.append("main_enabled_btn")
+                    b_cls.pop(b_cls.index("sub_include_btn"))
+                    b_cls.append("main_include_btn")
                     b.classes = b_cls
 
             vtcl = Vertical(*btns_sorted, classes="en_button_container")
             vtcl.border_title = group_lab
             button_group_widgets.append(vtcl)
 
-        yield EnableDisableButtonScroller(*button_group_widgets)
+        yield IncludeExcludeButtonScroller(*button_group_widgets)
 
     @on(Button.Pressed)
     def handle_button_pressed(self, event: Button.Pressed):
@@ -130,39 +127,39 @@ class EnableDisablePanel(Vertical):
                 continue
             get_logger().debug(f"Node : {node_id} found")
             button = results.first(Button)
-            button.remove_class("node_enabled", "node_disabled")
-            button.add_class("node_enabled" if node.is_enabled else "node_disabled")
+            button.remove_class("node_included", "node_excluded")
+            button.add_class("node_included" if node.is_included else "node_excluded")
             get_logger().debug(f"   - State : {button.classes}")
             button.disabled = not node.is_interactive
-            get_logger().debug(f"   - Enabled : {button.disabled}")
+            get_logger().debug(f"   - Button Enabled : {button.disabled}")
             button.tooltip = node.tooltip or None
             get_logger().debug(f"   - Tooltip : {button.tooltip}")
 
 
-class EnableDisableTabs(DynamicTabbedContent):
-    """Tabbed widget containing enable/disable panels for multiple node groups.
+class IncludeExcludeTabs(DynamicTabbedContent):
+    """Tabbed widget containing include/exclude panels for multiple node groups.
 
-    This widget manages multiple EnableDisablePanel tabs, one for each group
-    of enable/disable nodes in the configuration.
+    This widget manages multiple IncludeExcludePanee tabs, one for each group
+    of include/exclude nodes in the configuration.
     """
 
-    panel_prefix = "enable_disable_panel"
+    panel_prefix = "include_exclude_panel"
 
     def _make_pane_content(
         self, group_id: str, data: dict[str, NodeStatus], panel_id: str
-    ) -> EnableDisablePanel:
-        """Create an EnableDisablePanel for the given group.
+    ) -> IncludeExcludePanel:
+        """Create an IncludeExcludePanel for the given group.
 
         :param group_id: The identifier for this group
         :param data: Dictionary of nodes in this group
         :param panel_id: The widget ID to assign to the panel
-        :returns: A new EnableDisablePanel widget
-        :rtype: EnableDisablePanel
+        :returns: A new IncludeExclude widget
+        :rtype: IncludeExcludePanel
         """
-        return EnableDisablePanel(group_id, data, id=panel_id)
+        return IncludeExcludePanel(group_id, data, id=panel_id)
 
     def _update_panes(self, data: dict) -> None:
-        """Update all enable/disable panes with new node status data.
+        """Update all include/exclude panes with new node status data.
 
         :param data: Dictionary mapping group IDs to node dictionaries
         """
@@ -177,7 +174,7 @@ class EnableDisableTabs(DynamicTabbedContent):
             if not results:
                 get_logger().debug("    Couldn't find panel, continuing")
                 continue
-            panel = results.first(EnableDisablePanel)
+            panel = results.first(IncludeExcludePanel)
             get_logger().debug("    Found panel")
             panel.update_buttons(nodes)
             get_logger().debug("    Panel updated")

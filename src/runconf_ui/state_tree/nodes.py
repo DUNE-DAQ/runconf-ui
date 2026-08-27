@@ -8,8 +8,8 @@ There are two node types:
 
 Parent-child relationships are owned entirely by the parent. Children have
 no reference to their parent. State propagation is top-down only: a Group
-gates its children's visible state — if the group is disabled, all children
-report disabled regardless of their own stored state. This gating is computed
+gates its children's visible state — if the group is excluded, all children
+report excluded regardless of their own stored state. This gating is computed
 in traversal.py, not here.
 
 Every node has:
@@ -27,16 +27,16 @@ Children are stored as _Child entries carrying two flags:
   propagate: bool  — should Group.set() reach this child?
                      False for adjustable nodes, whose values are set directly
                      via their adapter and must not receive a bool from the
-                     enable/disable tree.
-                     True for all disable nodes, voting or not.
+                     include/exclude tree.
+                     True for all exclude nodes, voting or not.
 
 The two flags are independent:
 
-  votes=True,  propagate=True  — normal voting disable child (default)
+  votes=True,  propagate=True  — normal voting exclude child (default)
   votes=False, propagate=True  — gated by parent, doesn't influence it
                                  (replaces the old controlled_objects mechanism)
   votes=False, propagate=False — adjustable child: organisationally grouped
-                                 here but fully independent of enable/disable
+                                 here but fully independent of include/exclude
 """
 
 from abc import ABC, abstractmethod
@@ -147,11 +147,11 @@ class Group(Node):
     Aggregates the state of its children.
 
     strategy is a callable over an iterable of bools:
-      all — enabled iff every voting child is enabled (AND semantics)
-      any — enabled if any voting child is enabled  (OR semantics)
+      all — included iff every voting child is included (AND semantics)
+      any — included if any voting child is included  (OR semantics)
 
     Children added with votes=False do not contribute to the aggregated state
-    but are still gated by it (they appear disabled when the parent is off).
+    but are still gated by it (they appear excluded when the parent is off).
 
     Children added with propagate=False are not reached by set() — used for
     adjustable nodes whose values are managed directly via their adapter.
@@ -161,7 +161,7 @@ class Group(Node):
         group.add(segment_leaf)
         group.add(tpg_leaf, votes=False)
 
-        # Adjustable node — grouped here but independent of enable/disable:
+        # Adjustable node — grouped here but independent of include/exclude:
         group.add(rate_leaf, votes=False, propagate=False)
 
         # Fluent subsystem creation:
@@ -274,7 +274,7 @@ class Group(Node):
     def gated_get(self, child: Node) -> bool:
         """Return the visible state of a direct child, gated by this group.
 
-        If this group is disabled the child reports disabled regardless of
+        If this group is excluded the child reports excluded regardless of
         its own stored state.
 
         :param child: The child node to get the gated state for

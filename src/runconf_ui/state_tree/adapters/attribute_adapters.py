@@ -8,11 +8,11 @@ from runconf_ui.exceptions import AttributeMissingException
 from .adapter import Adapter
 
 
-class DisableAttribute(Adapter):
+class AttributeAdapter(Adapter):
     """Adapter for toggling DAL objects by enabling/disabling a named attribute.
 
-    Also considers the DAL's own resource-disabled state: if the DAL is
-    disabled as a resource, this attribute is considered disabled regardless
+    Also considers the DAL's own ExcludableEntity-excluded state: if the DAL is
+    excluded as a ExcludableEntity, this attribute is considered excluded regardless
     of its stored value.
     """
 
@@ -22,17 +22,17 @@ class DisableAttribute(Adapter):
         session: DalBase,
         dal: DalBase,
         attribute_name: str,
-        enabled_value: Any = True,
-        disabled_value: Any = False,
+        include_value: Any = True,
+        exclude_value: Any = False,
     ):
-        """Initialize a DisableAttribute adapter.
+        """Initialize a IncludeAttribute adapter.
 
         :param configuration: The Configuration object
         :param session: The session DAL
         :param dal: The DAL object to manage
-        :param attribute_name: Name of the attribute that controls enable/disable
-        :param enabled_value: Value that represents enabled state
-        :param disabled_value: Value that represents disabled state
+        :param attribute_name: Name of the attribute that controls include/exclude
+        :param include_value: Value that represents included state
+        :para exclude_value: Value that represents excluded state
         :raises AttributeMissingException: If the attribute does not exist on the DAL
         """
         if not hasattr(dal, attribute_name):
@@ -41,32 +41,32 @@ class DisableAttribute(Adapter):
             )
         super().__init__(configuration, session, dal)
         self.attribute_name = attribute_name
-        self.enabled_value = enabled_value
-        self.disabled_value = disabled_value
+        self.included_value = include_value
+        self.excluded_value = exclude_value
 
     def get(self) -> bool:
         """Get the enabled state of the attribute.
 
-        :returns: True if attribute equals enabled_value and DAL is enabled as resource
+        :returns: True if attribute equals enabled_value and DAL is enabled as ExcludableEntity
         :rtype: bool
         """
         return (
-            getattr(self.dal, self.attribute_name) == self.enabled_value
-            and self.dal_enabled()
+            getattr(self.dal, self.attribute_name) == self.included_value
+            and self.dal_included()
         )
 
     def set(self, value: bool) -> None:
         """Set the enabled state by toggling the attribute value.
 
-        :param value: True to set enabled_value, False to set disabled_value
+        :param value: True to set included_value, False to set excluded_value
         """
-        new_value = self.enabled_value if value else self.disabled_value
+        new_value = self.included_value if value else self.excluded_value
         if getattr(self.dal, self.attribute_name) != new_value:
             setattr(self.dal, self.attribute_name, new_value)
             self.configuration.update_dal(self.dal)
 
 
-class AdjustableAttribute(Adapter):
+class AdjustableAttributeAdapter(Adapter):
     """Adapter for reading and writing any-valued attributes.
 
     Used for adjustable values like trigger rates, thresholds, or other

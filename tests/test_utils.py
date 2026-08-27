@@ -131,15 +131,15 @@ class TestConfigTreeRendererIntegration:
         assert renderer.session.id in tree.label
 
     def test_calc_config_state_real_objects(self, renderer, ru01):
-        state = renderer._calc_config_state(ru01, State.ENABLED)
-        # Should be ENABLED initially if component not disabled
-        assert state in (State.ENABLED, State.DISABLED, State.PARENT_DISABLED)
+        state = renderer._calc_config_state(ru01, State.INCLUDED)
+        # Should be includeD initially if component not excluded
+        assert state in (State.INCLUDED, State.EXCLUDED, State.PARENT_EXCLUDED)
 
     def test_render_config_branch_recurses(self, renderer, ru_segment):
         # Use real DALs
         tree = Tree(f"[bold green]{renderer.session.id}")
         # _render_config_branch should not error
-        renderer._render_config_branch(tree, ru_segment, State.ENABLED)
+        renderer._render_config_branch(tree, ru_segment, State.INCLUDED)
         # At least one child node should be added
         assert len(tree.children) > 0
 
@@ -159,12 +159,12 @@ class TestConfigTreeRendererIntegration:
         assert any("ru-02" in label for label in labels)
         assert any("ru-segment" in label for label in labels)
 
-    def test_disabled_state_propagation(self, renderer, ru01, monkeypatch):
-        # Patch entity_excluded to simulate ru-01 as disabled
+    def test_excluded_state_propagation(self, renderer, ru01, monkeypatch):
+        # Patch entity_excluded to simulate ru-01 as excluded
         monkeypatch.setattr(
             "runconf_ui.utils.rich_utils.entity_excluded",
             lambda obj, session_id, dal_id: dal_id == "ru-01",
         )
 
-        state = renderer._calc_config_state(ru01, State.ENABLED)
-        assert state == State.DISABLED
+        state = renderer._calc_config_state(ru01, State.EXCLUDED)
+        assert state == State.PARENT_EXCLUDED
