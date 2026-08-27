@@ -24,7 +24,7 @@ def backend(tmp_config_path, dummy_context):
 # ---------------------------------------------------------------------------
 
 
-class TestexcludeableBackend:
+class TestExcludeableBackend:
     def test_toggle_top_level_propagates_to_children(self, backend):
         backend.set_value("Detector", "Readout", True)
         assert backend.get_value("Detector", "Readout")
