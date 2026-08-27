@@ -6,14 +6,14 @@ themselves. Call walk() again after any set() to get fresh NodeStatus values.
 
 The three states:
 
-  INCLUDED         — node is on, its DAL is resource-included, and its parent
+  INCLUDED         — node is on, its DAL is ExcludableEntity-included, and its parent
                     (if any) is on.
 
   EXCLUDED        — node is internally off, and its parent (if any) is on.
 
   PARENT_EXCLUDED — the node is considered excluded due to an external
                     condition: either its parent group is off, or its
-                    underlying DAL is resource-excluded in the session.
+                    underlying DAL is ExcludableEntity-excluded in the session.
                     This takes precedence over the node's own internal state —
                     if the parent is off, children always report PARENT_EXCLUDED
                     regardless of their own stored value.
@@ -111,7 +111,7 @@ def compute_state(node: Node, parent: Group | None) -> State:
 
     Precedence (highest first):
       1. Parent gating — if the parent group is off, always PARENT_EXCLUDED.
-      2. DAL resource state — if the underlying DAL is resource-excluded,
+      2. DAL ExcludableEntity state — if the underlying DAL is ExcludableEntity-excluded,
          PARENT_EXCLUDED (only checked for Leaf nodes).
       3. Node internal value — INCLUDED or EXCLUDED.
 
@@ -124,7 +124,7 @@ def compute_state(node: Node, parent: Group | None) -> State:
     if parent is not None and not parent.get():
         return State.PARENT_EXCLUDED
 
-    # 2. Leaf DAL resource state.
+    # 2. Leaf DAL ExcludableEntity state.
     if isinstance(node, Leaf) and not node.adapter.dal_included():
         return State.PARENT_EXCLUDED
 

@@ -11,8 +11,8 @@ from .adapter import Adapter
 class AttributeAdapter(Adapter):
     """Adapter for toggling DAL objects by enabling/disabling a named attribute.
 
-    Also considers the DAL's own resource-excluded state: if the DAL is
-    excluded as a resource, this attribute is considered excluded regardless
+    Also considers the DAL's own ExcludableEntity-excluded state: if the DAL is
+    excluded as a ExcludableEntity, this attribute is considered excluded regardless
     of its stored value.
     """
 
@@ -47,7 +47,7 @@ class AttributeAdapter(Adapter):
     def get(self) -> bool:
         """Get the enabled state of the attribute.
 
-        :returns: True if attribute equals enabled_value and DAL is enabled as resource
+        :returns: True if attribute equals enabled_value and DAL is enabled as ExcludableEntity
         :rtype: bool
         """
         return (

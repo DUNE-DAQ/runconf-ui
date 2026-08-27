@@ -8,9 +8,9 @@ from .adapter import Adapter
 
 
 class ExcludableEntityAdapter(Adapter):
-    """Adapter that includes/excludeds Resource DAL objects via component excluded state.
+    """Adapter that includes/excludeds ExcludableEntity DAL objects via component excluded state.
 
-    Raises an IncompatibleDalException if the DAL is not a Resource subclass.
+    Raises an IncompatibleDalException if the DAL is not a ExcludableEntity subclass.
     """
 
     def __init__(
@@ -38,7 +38,7 @@ class ExcludableEntityAdapter(Adapter):
     def get(self) -> bool:
         """Get the enabled state of the component.
 
-        :returns: True if the component is enabled as a resource, False otherwise
+        :returns: True if the component is enabled as a ExcludableEntity, False otherwise
         :rtype: bool
         """
         return self.dal_included()

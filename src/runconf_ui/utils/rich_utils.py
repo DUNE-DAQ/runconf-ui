@@ -2,10 +2,10 @@
 Rich tree rendering for the state operation tree.
 
 Colour scheme:
-  green  — ENABLED
-  red    — DISABLED
-  grey46 — PARENT_DISABLED (node is internally on but parent group is off,
-           or the underlying DAL is resource-disabled in the session)
+  green  — INCLUDED
+  red    — EXCLUDED
+  grey46 — PARENT_EXCLUDED (node is internally on but parent group is off,
+           or the underlying DAL is ExcludableEntity-excluded in the session)
 """
 
 from confmodel_dal import entity_excluded
@@ -118,7 +118,7 @@ class ConfigTreeRenderer:
         return tree
 
     def _calc_config_state(self, dal, parent_state: State) -> State:
-        """Calculate the state of a DAL object based on parent and resource state.
+        """Calculate the state of a DAL object based on parent and ExcludableEntity state.
 
         :param dal: The DAL object to calculate state for
         :param parent_state: The parent's state
@@ -128,7 +128,7 @@ class ConfigTreeRenderer:
         if parent_state is not State.INCLUDED:
             return State.PARENT_EXCLUDED
 
-        if "Resource" not in self.config.superclasses(dal.className(), all=True):
+        if "ExcludableEntity" not in self.config.superclasses(dal.className(), all=True):
             return parent_state
 
         if entity_excluded(self.config._obj, self.session.id, dal.id):

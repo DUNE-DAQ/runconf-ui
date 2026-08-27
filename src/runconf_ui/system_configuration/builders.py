@@ -218,7 +218,7 @@ class AdjustableSystemBuilder:
     by Group.set() and do not influence any parent's aggregated state.
     Their visible state (INCLUDED / PARENT_EXCLUDED) is computed by
     compute_state() in traversal.py based on parent group state and
-    DAL resource state.
+    DAL ExcludableEntity state.
     """
 
     def __init__(self, configuration: Configuration, session: DalBase):
