@@ -50,7 +50,7 @@ from .dataclasses import (
 from .factories import (
     AdjustableFactory,
     AttributeFactory,
-    ComponentFactory,
+    ExcludableEntityFactory,
     RelationshipFactory,
 )
 
@@ -80,7 +80,7 @@ class ExcludableSystemBuilder:
         """
         get_logger().debug("Initialising excludeSystemBuilder")
         args = (configuration, session)
-        self.component_factory = ComponentFactory(*args)
+        self.component_factory = ExcludableEntityFactory(*args)
         get_logger().debug("   - component_factory intiialised")
         self.attribute_factory: AttributeFactory = AttributeFactory(*args)
         get_logger().debug("   - attribute_factory intiialised")

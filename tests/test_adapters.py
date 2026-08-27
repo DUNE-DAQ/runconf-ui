@@ -11,9 +11,9 @@ from confmodel_dal import entity_excluded, exclude_entity, include_entity
 
 from runconf_ui.exceptions import AttributeMissingException, IncompatibleDalException
 from runconf_ui.state_tree import (
-    AdjustableAttribute,
-    IncludeAttribute,
-    IncludeComponent,
+    AttributeAdapter,
+    AdjustableAttributeAdapter,
+    ExcludableEntityAdapter,
 )
 
 # ---------------------------------------------------------------------------
@@ -48,14 +48,14 @@ class TestexcludeComponent:
         self, consolidated_config, consolidated_session, non_resource_dal
     ):
         with pytest.raises(IncompatibleDalException):
-            IncludeComponent(
+            ExcludableEntityAdapter(
                 consolidated_config, consolidated_session, non_resource_dal
             )
 
     def test_included_by_default(
         self, consolidated_config, consolidated_session, resource_dal
     ):
-        adapter = IncludeComponent(
+        adapter = ExcludableEntityAdapter(
             consolidated_config, consolidated_session, resource_dal
         )
         assert adapter.get() is True
@@ -63,7 +63,7 @@ class TestexcludeComponent:
     def test_set_false_excludes(
         self, consolidated_config, consolidated_session, resource_dal
     ):
-        adapter = IncludeComponent(
+        adapter = ExcludableEntityAdapter(
             consolidated_config, consolidated_session, resource_dal
         )
         adapter.set(False)
@@ -78,7 +78,7 @@ class TestexcludeComponent:
         exclude_entity(
             consolidated_config._obj, consolidated_session.id, resource_dal.id
         )
-        adapter = IncludeComponent(
+        adapter = ExcludableEntityAdapter(
             consolidated_config, consolidated_session, resource_dal
         )
         adapter.set(True)
@@ -96,34 +96,34 @@ class TestexcludeComponent:
 class TestexcludeAttribute:
     @pytest.fixture
     def adapter(self, consolidated_config, consolidated_session, resource_dal):
-        return IncludeAttribute(
+        return AttributeAdapter(
             consolidated_config,
             consolidated_session,
             resource_dal,
-            "tp_generation_included",
+            "tp_generation_enabled",
         )
 
     def test_rejects_missing_attribute(
         self, consolidated_config, consolidated_session, non_resource_dal
     ):
         with pytest.raises(AttributeMissingException):
-            IncludeAttribute(
+            AttributeAdapter(
                 consolidated_config,
                 consolidated_session,
                 non_resource_dal,
-                "tp_generation_included",
+                "tp_generation_enabled",
             )
 
     def test_get_reflects_attribute_value(self, adapter, resource_dal):
-        resource_dal.tp_generation_included = True
+        resource_dal.tp_generation_enabled = True
         assert adapter.get() is True
-        resource_dal.tp_generation_included = False
+        resource_dal.tp_generation_enabled = False
         assert adapter.get() is False
 
     def test_excluded_when_dal_resource_excluded(
         self, adapter, consolidated_config, consolidated_session, resource_dal
     ):
-        resource_dal.tp_generation_included = True
+        resource_dal.tp_generation_enabled = True
         exclude_entity(
             consolidated_config._obj, consolidated_session.id, resource_dal.id
         )
@@ -131,15 +131,15 @@ class TestexcludeAttribute:
 
     def test_set_updates_attribute(self, adapter, resource_dal):
         adapter.set(True)
-        assert resource_dal.tp_generation_included is True
+        assert resource_dal.tp_generation_enabled is True
         adapter.set(False)
-        assert resource_dal.tp_generation_included is False
+        assert resource_dal.tp_generation_enabled is False
 
     def test_custom_included_excluded_values(
         self, consolidated_config, consolidated_session, non_resource_dal
     ):
         non_resource_dal.sid = 1001
-        adapter = IncludeAttribute(
+        adapter = AttributeAdapter(
             consolidated_config,
             consolidated_session,
             non_resource_dal,
@@ -166,7 +166,7 @@ class TestAdjustableAttribute:
 
     @pytest.fixture
     def adapter(self, consolidated_config, consolidated_session, dal):
-        return AdjustableAttribute(
+        return AdjustableAttributeAdapter(
             consolidated_config, consolidated_session, dal, "trigger_rate_hz"
         )
 
@@ -174,7 +174,7 @@ class TestAdjustableAttribute:
         self, consolidated_config, consolidated_session, non_resource_dal
     ):
         with pytest.raises(AttributeMissingException):
-            AdjustableAttribute(
+            AdjustableAttributeAdapter(
                 consolidated_config,
                 consolidated_session,
                 non_resource_dal,

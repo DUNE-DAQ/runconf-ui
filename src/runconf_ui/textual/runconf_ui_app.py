@@ -214,7 +214,7 @@ class RunconfUIApp(App):
 
         get_logger().debug("Refreshing included info")
 
-        dis_info = self.backend.get_excludableable_values()
+        dis_info = self.backend.get_excludable_values()
         adj_info = self.backend.get_adjustable_values()
         tree_views = self.backend.get_tree_views()
         config_tree = self.backend.get_config_tree()

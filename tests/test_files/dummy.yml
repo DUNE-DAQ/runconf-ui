@@ -39,7 +39,7 @@ PanelOptions:
               class: TPStreamWriterApplication
 
           attributes:
-            - id: tp_generation_included
+            - id: tp_generation_enabled
               segments: ["ru-segment"]
               class: ReadoutApplication
               separate_system: True

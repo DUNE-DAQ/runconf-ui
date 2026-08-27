@@ -13,7 +13,7 @@ from conffwk import Configuration
 from runconf_ui import RunconfUIBackend
 from runconf_ui.state_tree import (
     Group,
-    IncludeComponent,
+    ExcludableEntityAdapter,
     Leaf,
     State,
     build_index,
@@ -25,7 +25,7 @@ from runconf_ui.system_configuration import SystemConfigReader
 
 def _leaf(config, session, dal, label=None):
     """Shorthand for building a Leaf wrapping a excludeComponent."""
-    return Leaf(IncludeComponent(config, session, dal), label=label)
+    return Leaf(ExcludableEntityAdapter(config, session, dal), label=label)
 
 
 # ---------------------------------------------------------------------------
@@ -127,12 +127,12 @@ class TestSystemConfigReaderIntegration:
         reader = SystemConfigReader(system_config)
         return reader.assemble_config(consolidated_config, session_name)
 
-    def test_has_excludeable_and_adjustable_groups(self, assembled):
-        assert assembled.excludeable
+    def test_has_excludable_and_adjustable_groups(self, assembled):
+        assert assembled.excludable
         assert assembled.adjustable
 
     def test_detector_group_structure(self, assembled):
-        detector = next(g for g in assembled.excludeable if g.id == "Detector")
+        detector = next(g for g in assembled.excludable if g.id == "Detector")
         assert detector.label == "detector"
         assert detector.view_panel == "Detector View"
         index = build_index(detector.systems[0].root)
@@ -140,7 +140,7 @@ class TestSystemConfigReaderIntegration:
         assert "ru-02" in index
 
     def test_tpg_group_has_readout_subsystem(self, assembled):
-        tpg = next(g for g in assembled.excludeable if g.id == "TPG")
+        tpg = next(g for g in assembled.excludable if g.id == "TPG")
         index = build_index(tpg.systems[0].root)
         assert "Readout" in index
 
@@ -159,9 +159,9 @@ class TestSystemConfigReaderIntegration:
         root.set(False)
         assert rate_node.get() == initial
 
-    def test_excludeable_set_changes_state(self, assembled):
+    def test_excludable_set_changes_state(self, assembled):
         root = (
-            next(g for g in assembled.excludeable if g.id == "Detector").systems[0].root
+            next(g for g in assembled.excludable if g.id == "Detector").systems[0].root
         )
         root.set(False)
         assert root.get() is False
@@ -169,7 +169,7 @@ class TestSystemConfigReaderIntegration:
         assert root.get() is True
 
     def test_non_existent_objects_produce_no_group(self, assembled):
-        assert "NotReal" not in [g.id for g in assembled.excludeable]
+        assert "NotReal" not in [g.id for g in assembled.excludable]
 
 
 # ---------------------------------------------------------------------------
@@ -210,4 +210,4 @@ class TestDalSave:
         toggled_config = Configuration(f"oksconflibs:{backend.final_save_path}")
         ru01_dal = toggled_config.get_dal("ReadoutApplication", "ru-01")
 
-        assert ru01_dal.tp_generation_included is included
+        assert ru01_dal.tp_generation_enabled is included

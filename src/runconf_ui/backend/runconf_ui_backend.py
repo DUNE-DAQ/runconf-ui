@@ -368,7 +368,7 @@ class RunconfUIBackend:
         :param node_id: The unique identifier of the node
         :raises NodeNotFound: If the group or node is not found
         """
-        self._resolve(group, node_id, collection="disableable").toggle()
+        self._resolve(group, node_id, collection="excludable").toggle()
         self._rebuild_indexes()
 
     def get_values(self) -> dict[str, dict[str, NodeStatus]]:
@@ -382,9 +382,9 @@ class RunconfUIBackend:
         return {g: dict(n) for g, n in self._assembled.all_nodes.items()}
 
     def get_excludable_values(self) -> dict[str, dict[str, NodeStatus]]:
-        """Retrieve all disableable configuration nodes organized by group.
+        """Retrieve all excludable configuration nodes organized by group.
 
-        :returns: Dictionary mapping group names to disableable node status dictionaries
+        :returns: Dictionary mapping group names to excludable node status dictionaries
         :rtype: dict[str, dict[str, NodeStatus]]
         """
         if self._assembled is None:
@@ -470,7 +470,7 @@ class RunconfUIBackend:
     def _rebuild_indexes(self) -> None:
         """Rebuild the node indices for all groups and systems.
 
-        Updates the index of nodes in all disableable and adjustable groups,
+        Updates the index of nodes in all excludable and adjustable groups,
         recalculating node paths and updating tree views.
         """
         self._logger.debug("Rebuilding indices")

@@ -83,7 +83,7 @@ def _make_backend(
         Path("/fake/v1/session-b.data.xml"),
     ]
 
-    b.get_disableable_values.return_value = disableable or {}
+    b.get_excludable_values.return_value = disableable or {}
     b.get_adjustable_values.return_value = adjustable or {}
 
     b.get_tree_views.return_value = {}
@@ -382,8 +382,8 @@ async def test_quit_scrap_exits_app(pilot):
 
 @pytest.mark.slow
 async def test_buttons_render_after_load(loaded_pilot):
-    buttons = list(loaded_pilot.app.query(".main_includeed_btn")) + list(
-        loaded_pilot.app.query(".sub_included_btn")
+    buttons = list(loaded_pilot.app.query(".main_include_btn")) + list(
+        loaded_pilot.app.query(".sub_include_btn")
     )
 
     assert len(buttons) > 0
@@ -393,7 +393,7 @@ async def test_buttons_render_after_load(loaded_pilot):
 async def test_enabled_node_has_class(loaded_pilot):
     button = loaded_pilot.app.query_one("#Readout", Button)
 
-    assert "node_enabled" in button.classes
+    assert "node_included" in button.classes
 
 
 @pytest.mark.slow

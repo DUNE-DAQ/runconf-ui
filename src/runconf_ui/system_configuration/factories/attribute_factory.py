@@ -2,7 +2,7 @@ from typing import TypeVar
 
 from runconf_ui.state_tree import (
     Group,
-    IncludeAttribute,
+    AttributeAdapter,
     Leaf,
 )
 from runconf_ui.utils import get_class_from_segment_list
@@ -41,7 +41,7 @@ class AttributeFactory(FactoryBase[TIncludeableAttributeData, "Group | None"]):
             if not self.is_filtered(dal, data.filters):
                 group.add(
                     Leaf(
-                        IncludeAttribute(
+                        AttributeAdapter(
                             self.configuration,
                             self.session,
                             dal,

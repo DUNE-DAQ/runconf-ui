@@ -1,10 +1,10 @@
-from runconf_ui.state_tree import IncludeComponent, Leaf
+from runconf_ui.state_tree import ExcludableEntityAdapter, Leaf
 
 from ..dataclasses import ExludableElementData
 from .factory_base import FactoryBase
 
 
-class ComponentFactory(FactoryBase["IncludeableElementData", "list[Leaf] | None"]):
+class ExcludableEntityFactory(FactoryBase["ExcludableEntityAdapter", "list[Leaf] | None"]):
     """Creates Leaf nodes for disable components.
 
     Returns a list because one config entry can expand to many components
@@ -24,7 +24,7 @@ class ComponentFactory(FactoryBase["IncludeableElementData", "list[Leaf] | None"
 
         return [
             Leaf(
-                IncludeComponent(self.configuration, self.session, dal),
+                ExcludableEntityAdapter(self.configuration, self.session, dal),
                 label=dal.id if data.each_component_separate else "",
                 tooltip=getattr(dal, data.tooltip, dal.id) if data.tooltip else dal.id,
             )
