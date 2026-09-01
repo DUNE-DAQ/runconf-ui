@@ -166,5 +166,5 @@ class TestConfigTreeRendererIntegration:
             lambda obj, session_id, dal_id: dal_id == "ru-01",
         )
 
-        state = renderer._calc_config_state(ru01, State.EXCLUDED)
-        assert state == State.PARENT_EXCLUDED
+        state = renderer._calc_config_state(ru01, State.INCLUDED)
+        assert state == State.EXCLUDED
