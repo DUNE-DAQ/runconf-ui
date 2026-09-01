@@ -12,7 +12,7 @@ class AttributeAdapter(Adapter):
     """Adapter for toggling DAL objects by enabling/disabling a named attribute.
 
     Also considers the DAL's own ExcludableEntity-excluded state: if the DAL is
-    excluded as a ExcludableEntity, this attribute is considered excluded regardless
+    excluded as an ExcludableEntity, this attribute is considered excluded regardless
     of its stored value.
     """
 
@@ -22,8 +22,8 @@ class AttributeAdapter(Adapter):
         session: DalBase,
         dal: DalBase,
         attribute_name: str,
-        include_value: Any = True,
-        exclude_value: Any = False,
+        included_value: Any = True,
+        excluded_value: Any = False,
     ):
         """Initialize a IncludeAttribute adapter.
 
@@ -31,8 +31,8 @@ class AttributeAdapter(Adapter):
         :param session: The session DAL
         :param dal: The DAL object to manage
         :param attribute_name: Name of the attribute that controls include/exclude
-        :param include_value: Value that represents included state
-        :para exclude_value: Value that represents excluded state
+        :param included_value: Value that represents included state
+        :param excluded_value: Value that represents excluded state
         :raises AttributeMissingException: If the attribute does not exist on the DAL
         """
         if not hasattr(dal, attribute_name):
@@ -41,8 +41,8 @@ class AttributeAdapter(Adapter):
             )
         super().__init__(configuration, session, dal)
         self.attribute_name = attribute_name
-        self.included_value = include_value
-        self.excluded_value = exclude_value
+        self.included_value = included_value
+        self.excluded_value = excluded_value
 
     def get(self) -> bool:
         """Get the enabled state of the attribute.
