@@ -144,8 +144,8 @@ class TestexcludeAttribute:
             consolidated_session,
             non_resource_dal,
             "sid",
-            include_value=1001,
-            exclude_value=1002,
+            included_value=1001,
+            excluded_value=1002,
         )
         assert adapter.get() is True
         adapter.set(False)
