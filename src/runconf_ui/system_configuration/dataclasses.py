@@ -123,7 +123,7 @@ def _filters(raw) -> list[FilterData]:
     ]
 
 
-def _base_include_kwargs(item: dict) -> dict:
+def _base_excludable_kwargs(item: dict) -> dict:
     """Extract base exclude element kwargs from a raw dictionary.
 
     :param item: Raw item dictionary from YAML
@@ -151,7 +151,7 @@ def _attribute_kwargs(item: dict) -> dict:
     :rtype: dict
     """
     return dict(
-        **_base_include_kwargs(item),
+        **_base_excludable_kwargs(item),
         included_state=item.get("included_state", True),
         excluded_state=item.get("excluded_state", False),
         segments=item.get("segments", []),
@@ -228,7 +228,7 @@ class YamlToSystemData:
                     subsystem_dependent=data.get("subsystem_dependent", False),
                     display_full_system=data.get("display_full_system", True),
                     components=[
-                        ExcludableElementData(**_base_include_kwargs(i))
+                        ExcludableElementData(**_base_excludable_kwargs(i))
                         for i in data.get("components", [])
                     ],
                     attributes=[
