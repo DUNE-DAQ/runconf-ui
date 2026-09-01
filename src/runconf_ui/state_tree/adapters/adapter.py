@@ -43,10 +43,10 @@ class Adapter(ABC):
         ...
 
     def dal_included(self) -> bool:
-        """Check if the underlying DAL is enabled as a ExcludableEntity in the session.
+        """Check if the underlying DAL is enabled as an ExcludableEntity in the session.
 
-        This is a read-only check available on all adapters. For IncludeComponent
-        this is the primary state. For IncludeAttribute and AdjustableAttribute,
+        This is a read-only check available on all adapters. For ExcludableEntityAdapter
+        this is the primary state. For AttributeAdapter and AdjustableAttribute,
         it is a secondary check — the DAL may be ExcludableEntity-excluded independently
         of the attribute value or the tree structure.
 

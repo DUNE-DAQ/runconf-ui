@@ -61,7 +61,7 @@ from .factories import (
 
 class ExcludableSystemBuilder:
     """
-    Builds a Group tree from a ExcludableSystemBuilder instance.
+    Builds a Group tree from an ExcludableSystemData instance.
 
     When subsystem_dependent=False the root uses AND semantics: the system is
     on iff every voting child is on.
@@ -73,12 +73,12 @@ class ExcludableSystemBuilder:
     """
 
     def __init__(self, configuration: Configuration, session: DalBase):
-        """Initialize excludeSystemBuilder.
+        """Initialize ExcludableSystemBuilder.
 
         :param configuration: The conffwk Configuration object
         :param session: The session DAL object
         """
-        get_logger().debug("Initialising excludeSystemBuilder")
+        get_logger().debug("Initialising ExcludableSystemBuilder")
         args = (configuration, session)
         self.excludable_entity_factory = ExcludableEntityFactory(*args)
         get_logger().debug("   - ExcludableEntity_factory intiialised")

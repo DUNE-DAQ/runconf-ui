@@ -8,9 +8,9 @@ from .adapter import Adapter
 
 
 class ExcludableEntityAdapter(Adapter):
-    """Adapter that includes/excludeds ExcludableEntity DAL objects via ExcludableEntity excluded state.
+    """Adapter that includes/excludes ExcludableEntity DAL objects via ExcludableEntity excluded state.
 
-    Raises an IncompatibleDalException if the DAL is not a ExcludableEntity subclass.
+    Raises an IncompatibleDalException if the DAL is not an ExcludableEntity subclass.
     """
 
     def __init__(
@@ -20,13 +20,13 @@ class ExcludableEntityAdapter(Adapter):
         dal: DalBase,
         label: str = "",
     ):
-        """Initialize a ExcludableEntityAdapter adapter.
+        """Initialize an ExcludableEntityAdapter adapter.
 
         :param configuration: The Configuration object containing the DAL
         :param session: The session DAL object
         :param dal: The ExcludableEntity DAL object to manage
         :param label: Optional label for display purposes
-        :raises IncompatibleDalException: If the DAL is not a ExcludableEntity class
+        :raises IncompatibleDalException: If the DAL is not an ExcludableEntity class
         """
         if "ExcludableEntity" not in configuration.superclasses(dal.className(), all=True):
             raise IncompatibleDalException(
@@ -38,7 +38,7 @@ class ExcludableEntityAdapter(Adapter):
     def get(self) -> bool:
         """Get the enabled state of the ExcludableEntity.
 
-        :returns: True if the ExcludableEntity is enabled as a ExcludableEntity, False otherwise
+        :returns: True if the ExcludableEntity is enabled as an ExcludableEntity, False otherwise
         :rtype: bool
         """
         return self.dal_included()
@@ -46,7 +46,7 @@ class ExcludableEntityAdapter(Adapter):
     def set(self, value: bool) -> None:
         """Set the enabled state of the ExcludableEntity.
 
-        :param value: True to include the ExcludableEntity, False to exclue
+        :param value: True to include the ExcludableEntity, False to exclude
         """
         if value:
             include_entity(self.configuration._obj, self.session.id, self.dal.id)
