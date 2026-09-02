@@ -45,9 +45,9 @@ class AttributeAdapter(Adapter):
         self.excluded_value = excluded_value
 
     def get(self) -> bool:
-        """Get the enabled state of the attribute.
+        """Get the included state of the attribute.
 
-        :returns: True if attribute equals enabled_value and DAL is enabled as ExcludableEntity
+        :returns: True if attribute equals included_value and DAL is included as ExcludableEntity
         :rtype: bool
         """
         return (
@@ -56,7 +56,7 @@ class AttributeAdapter(Adapter):
         )
 
     def set(self, value: bool) -> None:
-        """Set the enabled state by toggling the attribute value.
+        """Set the included state by toggling the attribute value.
 
         :param value: True to set included_value, False to set excluded_value
         """

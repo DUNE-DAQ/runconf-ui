@@ -42,7 +42,7 @@ class RelationshipFactory(AttributeFactory[ExcludableRelationshipData]):
         state_id: str | list[str],
         state_class: str,
     ) -> DalBase | list[DalBase] | None:
-        """Resolve enabled/excluded state identifiers to DAL objects.
+        """Resolve included/excluded state identifiers to DAL objects.
 
         :param state_id: State identifier (string, list of strings, or empty)
         :param state_class: The DAL class to resolve into

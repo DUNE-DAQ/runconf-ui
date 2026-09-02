@@ -36,15 +36,15 @@ class ExcludableEntityAdapter(Adapter):
         super().__init__(configuration, session, dal)
 
     def get(self) -> bool:
-        """Get the enabled state of the ExcludableEntity.
+        """Get the included state of the ExcludableEntity.
 
-        :returns: True if the ExcludableEntity is enabled as an ExcludableEntity, False otherwise
+        :returns: True if the ExcludableEntity is included as an ExcludableEntity, False otherwise
         :rtype: bool
         """
         return self.dal_included()
 
     def set(self, value: bool) -> None:
-        """Set the enabled state of the ExcludableEntity.
+        """Set the included state of the ExcludableEntity.
 
         :param value: True to include the ExcludableEntity, False to exclude
         """

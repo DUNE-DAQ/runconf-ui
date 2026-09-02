@@ -193,7 +193,7 @@ class AdjustableAttributePanel(ScrollableContainer):
     def update_containers(self, nodes: dict[str, NodeStatus]) -> None:
         """Update all attribute containers with new node status data.
 
-        Updates the enabled/disabled state of containers based on node interactivity.
+        Updates the included/excluded state of containers based on node interactivity.
 
         :param nodes: Dictionary mapping node IDs to their current NodeStatus
         """
