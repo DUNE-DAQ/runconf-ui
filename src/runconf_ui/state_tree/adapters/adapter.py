@@ -3,7 +3,7 @@ from typing import Any
 
 from conffwk import Configuration
 from conffwk.dal import DalBase
-from confmodel_dal import component_disabled
+from confmodel_dal import entity_excluded
 
 
 class Adapter(ABC):
@@ -42,17 +42,17 @@ class Adapter(ABC):
         """
         ...
 
-    def dal_enabled(self) -> bool:
-        """Check if the underlying DAL is enabled as a resource in the session.
+    def dal_included(self) -> bool:
+        """Check if the underlying DAL is included as an ExcludableEntity in the session.
 
-        This is a read-only check available on all adapters. For DisableComponent
-        this is the primary state. For DisableAttribute and AdjustableAttribute,
-        it is a secondary check — the DAL may be resource-disabled independently
+        This is a read-only check available on all adapters. For ExcludableEntityAdapter
+        this is the primary state. For AttributeAdapter and AdjustableAttribute,
+        it is a secondary check — the DAL may be ExcludableEntity-excluded independently
         of the attribute value or the tree structure.
 
-        :returns: True if the DAL is enabled, False if disabled
+        :returns: True if the DAL is included, False if excluded
         :rtype: bool
         """
-        return not component_disabled(
+        return not entity_excluded(
             self.configuration._obj, self.session.id, self.dal.id
         )

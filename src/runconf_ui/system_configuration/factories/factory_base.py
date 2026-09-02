@@ -13,7 +13,7 @@ TResult = TypeVar("TResult")
 
 
 class FactoryBase(ABC, Generic[TData, TResult]):
-    """Abstract base class for system component factories.
+    """Abstract base class for system ExcludableEntity factories.
 
     Factories transform configuration dataclass definitions into state tree nodes.
     """

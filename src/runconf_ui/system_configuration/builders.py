@@ -15,7 +15,7 @@ Flag conventions used throughout:
      - Meaning
    * - ``True``
      - ``True``
-     - Normal disable child; influences parent state and is set when parent
+     - Normal exclude child; influences parent state and is set when parent
        is set. (default)
    * - ``False``
      - ``True``
@@ -24,12 +24,12 @@ Flag conventions used throughout:
        ``controlled_objects`` mechanism.
    * - ``False``
      - ``False``
-     - Adjustable child; fully independent of the enable/disable tree. Never
+     - Adjustable child; fully independent of the include/exclude tree. Never
        set via ``Group.set()``.
 
 Root strategy:
 
-- ``subsystem_dependent=False`` — ``strategy=all``: system is on iff ALL components are on.
+- ``subsystem_dependent=False`` — ``strategy=all``: system is on iff ALL ExcludableEntities are on.
 - ``subsystem_dependent=True`` — ``strategy=any``: system is on if ANY subsystem is on
   (equivalently, off only when ALL subsystems are off).
 """
@@ -42,26 +42,26 @@ from runconf_ui.utils import get_logger
 
 from .dataclasses import (
     AdjustableAttributeData,
-    DisableableSystemData,
-    DisableAttributeData,
-    DisableElementData,
-    DisableRelationshipData,
+    ExcludableAttributeData,
+    ExcludableElementData,
+    ExcludableRelationshipData,
+    ExcludableSystemData,
 )
 from .factories import (
     AdjustableFactory,
     AttributeFactory,
-    ComponentFactory,
+    ExcludableEntityFactory,
     RelationshipFactory,
 )
 
 # ---------------------------------------------------------------------------
-# Disable system builder
+# exclude system builder
 # ---------------------------------------------------------------------------
 
 
-class DisableSystemBuilder:
+class ExcludableSystemBuilder:
     """
-    Builds a Group tree from a DisableableSystemData instance.
+    Builds a Group tree from an ExcludableSystemData instance.
 
     When subsystem_dependent=False the root uses AND semantics: the system is
     on iff every voting child is on.
@@ -69,25 +69,25 @@ class DisableSystemBuilder:
     When subsystem_dependent=True the root uses OR semantics: the system is on
     if any named subsystem is on, and goes off only when every subsystem is off.
     Subsystems created via at() always use OR semantics (a subsystem is on if
-    any of its components are on).
+    any of its ExcludableEntities are on).
     """
 
     def __init__(self, configuration: Configuration, session: DalBase):
-        """Initialize DisableSystemBuilder.
+        """Initialize ExcludableSystemBuilder.
 
         :param configuration: The conffwk Configuration object
         :param session: The session DAL object
         """
-        get_logger().debug("Initialising DisableSystemBuilder")
+        get_logger().debug("Initialising ExcludableSystemBuilder")
         args = (configuration, session)
-        self.component_factory = ComponentFactory(*args)
-        get_logger().debug("   - component_factory intiialised")
+        self.excludable_entity_factory = ExcludableEntityFactory(*args)
+        get_logger().debug("   - ExcludableEntity_factory intiialised")
         self.attribute_factory: AttributeFactory = AttributeFactory(*args)
         get_logger().debug("   - attribute_factory intiialised")
         self.relationship_factory = RelationshipFactory(*args)
         get_logger().debug("   - relationship_factory intiialised")
 
-    def build(self, system: DisableableSystemData, label: str) -> Group:
+    def build(self, system: ExcludableSystemData, label: str) -> Group:
         """Build a Group tree from system data.
 
         :param system: The system definition to build from
@@ -99,8 +99,8 @@ class DisableSystemBuilder:
         root = Group(label=label, strategy=root_strategy)
 
         for comp in system.components:
-            get_logger().debug(f"            - adding component: {comp} ")
-            self._add_component(root, comp, system.subsystem_dependent)
+            get_logger().debug(f"            - adding ExcludableEntity: {comp} ")
+            self._add_excludable_entity(root, comp, system.subsystem_dependent)
 
         for attr in system.attributes:
             get_logger().debug(f"            - adding attribute: {attr} ")
@@ -120,19 +120,19 @@ class DisableSystemBuilder:
         """
         return not subsystem_dependent or has_own_label
 
-    def _add_component(
+    def _add_excludable_entity(
         self,
         root: Group,
-        comp: DisableElementData,
+        comp: ExcludableElementData,
         subsystem_dependent: bool,
     ) -> None:
-        """Add component nodes to the root group.
+        """Add ExcludableEntity nodes to the root group.
 
-        :param root: The root group to add components to
-        :param comp: The component element data
+        :param root: The root group to add ExcludableEntities to
+        :param comp: The ExcludableEntity element data
         :param subsystem_dependent: Whether the system is subsystem dependent
         """
-        nodes = self.component_factory.create(comp)
+        nodes = self.excludable_entity_factory.create(comp)
         if not nodes:
             return
 
@@ -159,7 +159,7 @@ class DisableSystemBuilder:
     def _add_attribute(
         self,
         root: Group,
-        attr: DisableAttributeData,
+        attr: ExcludableAttributeData,
         subsystem_dependent: bool,
     ) -> None:
         """Add attribute nodes to the root group.
@@ -183,7 +183,7 @@ class DisableSystemBuilder:
     def _add_relationship(
         self,
         root: Group,
-        rel: DisableRelationshipData,
+        rel: ExcludableRelationshipData,
         subsystem_dependent: bool,
     ) -> None:
         """Add relationship nodes to the root group.
@@ -216,9 +216,9 @@ class AdjustableSystemBuilder:
 
     All children use votes=False, propagate=False — they are never touched
     by Group.set() and do not influence any parent's aggregated state.
-    Their visible state (ENABLED / PARENT_DISABLED) is computed by
+    Their visible state (INCLUDED / PARENT_EXCLUDED) is computed by
     compute_state() in traversal.py based on parent group state and
-    DAL resource state.
+    DAL ExcludableEntity state.
     """
 
     def __init__(self, configuration: Configuration, session: DalBase):

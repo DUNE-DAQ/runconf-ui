@@ -9,8 +9,8 @@ from textual.widgets import Footer, Header, TabbedContent, TabPane
 from ..widgets import (
     AdjustableAttributeTabs,
     ConfigTreePanel,
-    EnableDisableTabs,
     FileSelect,
+    IncludeExcludeTabs,
     OptionsPanel,
     RichTreeTabbed,
 )
@@ -19,7 +19,7 @@ from ..widgets import (
 class MainScreen(Screen):
     """Primary user interface screen for runconf-ui configuration management.
 
-    Displays the main layout with file selection, control panels for enable/disable
+    Displays the main layout with file selection, control panels for include/exclude
     and adjustable attributes, configuration tree views, and application options.
     Provides the central interface for users to browse, select, and modify
     DAQ configurations.
@@ -40,8 +40,8 @@ class MainScreen(Screen):
                 with TabbedContent(
                     "Controls", id="selection_adjust_tabs", classes="content_switcher"
                 ):
-                    with TabPane("Enable/Disable", classes="top_level_tab_pane"):
-                        yield EnableDisableTabs(id="selection_tabs")
+                    with TabPane("Include/Exclude", classes="top_level_tab_pane"):
+                        yield IncludeExcludeTabs(id="selection_tabs")
 
                 with TabbedContent(
                     "Schematic Views",

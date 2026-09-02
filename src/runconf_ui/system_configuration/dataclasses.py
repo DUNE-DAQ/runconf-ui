@@ -28,29 +28,29 @@ class SystemElementData:
 
 
 @dataclass(kw_only=True)
-class DisableElementData(SystemElementData):
-    """Anything that can be disabled also has this"""
+class ExcludableElementData(SystemElementData):
+    """Anything that can be excluded also has this"""
 
-    each_component_separate: bool = False  # Is each component a separate subsystem
+    each_component_separate: bool = False  # Is each ExcludableEntity a separate subsystem
     separate_system: bool = False  # Does this by itself comprise a seperate subsystem
 
 
 @dataclass(kw_only=True)
-class DisableAttributeData(DisableElementData):
-    """Attributes that can be disabled use this"""
+class ExcludableAttributeData(ExcludableElementData):
+    """Attributes that can be excluded use this"""
 
-    enabled_state: Any = True  # Enabled value
-    disabled_state: Any = False  # Disabled value
+    included_state: Any = True  # included value
+    excluded_state: Any = False  # excluded value
     segments: list[str] = field(default_factory=list)  # Segments to search
 
 
 @dataclass(kw_only=True)
-class DisableRelationshipData(DisableAttributeData):
+class ExcludableRelationshipData(ExcludableAttributeData):
     """Relationships also need to know the class of the related object(s)
-    For relationships the enabled/disabled states should be (lists of) dal object ids
+    For relationships the included/excluded states should be (lists of) dal object ids
     """
 
-    relationship_class: str = ""  # Class of disabled/enabled DAL objects
+    relationship_class: str = ""  # Class of excluded/included DAL objects
 
 
 @dataclass(kw_only=True)
@@ -62,21 +62,21 @@ class AdjustableAttributeData(SystemElementData):
 
 
 @dataclass
-class DisableableSystemData:
-    """Systems of disabled elements"""
+class ExcludableSystemData:
+    """Systems of excluded elements"""
 
     subsystem_dependent: bool  # Does this system depend soley on its subsystems
     display_full_system: bool  # Do you want to display the top-level-system?
-    components: list[DisableElementData]  # Components in the system
-    attributes: list[DisableAttributeData]  # Attributes in the system
-    relationships: list[DisableRelationshipData]  # Relationships in the system
+    components: list[ExcludableElementData]  # Components in the system
+    attributes: list[ExcludableAttributeData]  # Attributes in the system
+    relationships: list[ExcludableRelationshipData]  # Relationships in the system
 
 
 @dataclass
-class DisableableGroupData:
+class ExcludableGroupData:
     label: str  # Internal label of the group
     view_panel: str  # Tag for the view panel
-    systems: dict[str, list[DisableableSystemData]]  # Any internal systems
+    systems: dict[str, list[ExcludableSystemData]]  # Any internal systems
 
 
 @dataclass
@@ -88,7 +88,7 @@ class AdjustableGroupData:
 
 @dataclass
 class PanelOptionsData:
-    panels: dict[str, DisableableGroupData]
+    panels: dict[str, ExcludableGroupData]
 
 
 @dataclass
@@ -123,11 +123,11 @@ def _filters(raw) -> list[FilterData]:
     ]
 
 
-def _base_disable_kwargs(item: dict) -> dict:
-    """Extract base disable element kwargs from a raw dictionary.
+def _base_excludable_kwargs(item: dict) -> dict:
+    """Extract base exclude element kwargs from a raw dictionary.
 
     :param item: Raw item dictionary from YAML
-    :returns: Dictionary of keyword arguments for DisableElementData
+    :returns: Dictionary of keyword arguments for excludeElementData
     :rtype: dict
     """
     return dict(
@@ -144,16 +144,16 @@ def _base_disable_kwargs(item: dict) -> dict:
 
 
 def _attribute_kwargs(item: dict) -> dict:
-    """Extract disable attribute kwargs from a raw dictionary.
+    """Extract exclude attribute kwargs from a raw dictionary.
 
     :param item: Raw item dictionary from YAML
-    :returns: Dictionary of keyword arguments for DisableAttributeData
+    :returns: Dictionary of keyword arguments for excludeAttributeData
     :rtype: dict
     """
     return dict(
-        **_base_disable_kwargs(item),
-        enabled_state=item.get("enabled_state", True),
-        disabled_state=item.get("disabled_state", False),
+        **_base_excludable_kwargs(item),
+        included_state=item.get("included_state", True),
+        excluded_state=item.get("excluded_state", False),
         segments=item.get("segments", []),
     )
 
@@ -165,18 +165,18 @@ class YamlToSystemData:
     """Converts raw YAML dictionaries into structured dataclasses."""
 
     @classmethod
-    def build_disableable_groups(cls, raw: dict) -> dict[str, DisableableGroupData]:
-        """Build disableable group dataclass objects from raw YAML data.
+    def build_excludable_groups(cls, raw: dict) -> dict[str, ExcludableGroupData]:
+        """Build excludable group dataclass objects from raw YAML data.
 
-        :param raw: Raw YAML dictionary containing disableable group data
-        :returns: Dictionary mapping group names to DisableableGroupData objects
-        :rtype: dict[str, DisableableGroupData]
+        :param raw: Raw YAML dictionary containing excludable group data
+        :returns: Dictionary mapping group names to excludableGroupData objects
+        :rtype: dict[str, excludableGroupData]
         """
         return {
-            name: DisableableGroupData(
+            name: ExcludableGroupData(
                 label=data.get("label", ""),
                 view_panel=data.get("view_panel", ""),
-                systems=cls._build_disableable_systems(data.get("Systems", [])),
+                systems=cls._build_excludable_systems(data.get("Systems", [])),
             )
             for name, data in raw.items()
         }
@@ -212,27 +212,27 @@ class YamlToSystemData:
         )
 
     @classmethod
-    def _build_disableable_systems(
+    def _build_excludable_systems(
         cls, raw_systems: list[dict]
-    ) -> dict[str, list[DisableableSystemData]]:
-        """Build disableable system dataclass objects from raw YAML data.
+    ) -> dict[str, list[ExcludableSystemData]]:
+        """Build excludable system dataclass objects from raw YAML data.
 
         :param raw_systems: List of raw system dictionaries from YAML
-        :returns: Dictionary mapping system names to lists of DisableableSystemData
-        :rtype: dict[str, list[DisableableSystemData]]
+        :returns: Dictionary mapping system names to lists of excludableSystemData
+        :rtype: dict[str, list[excludableSystemData]]
         """
-        systems: dict[str, list[DisableableSystemData]] = {}
+        systems: dict[str, list[ExcludableSystemData]] = {}
         for entry in raw_systems:
             for name, data in entry.items():
-                system = DisableableSystemData(
+                system = ExcludableSystemData(
                     subsystem_dependent=data.get("subsystem_dependent", False),
                     display_full_system=data.get("display_full_system", True),
                     components=[
-                        DisableElementData(**_base_disable_kwargs(i))
+                        ExcludableElementData(**_base_excludable_kwargs(i))
                         for i in data.get("components", [])
                     ],
                     attributes=[
-                        DisableAttributeData(**_attribute_kwargs(i))
+                        ExcludableAttributeData(**_attribute_kwargs(i))
                         for i in data.get("attributes", [])
                     ],
                     relationships=cls._build_relationships(
@@ -243,17 +243,17 @@ class YamlToSystemData:
         return systems
 
     @staticmethod
-    def _build_relationships(raw) -> list[DisableRelationshipData]:
+    def _build_relationships(raw) -> list[ExcludableRelationshipData]:
         """Build relationship dataclass objects from raw YAML data.
 
         :param raw: Raw relationship data (dict or list of dicts)
-        :returns: List of DisableRelationshipData objects
-        :rtype: list[DisableRelationshipData]
+        :returns: List of excludeRelationshipData objects
+        :rtype: list[excludeRelationshipData]
         """
         if isinstance(raw, dict):
             raw = [raw]
         return [
-            DisableRelationshipData(
+            ExcludableRelationshipData(
                 **_attribute_kwargs(i),
                 relationship_class=i.get("relationship_class", ""),
             )

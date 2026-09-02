@@ -56,9 +56,9 @@ PanelOptions:
               class: MLTApplication
               segments: ['trg-segment']
               relationship_class: RandomTCMakerConf
-              enabled_state: [random-tc-generator]
-              disabled_state: []
-              tooltip: "Enable/Disable random trigger"
+              included_state: [random-tc-generator]
+              excluded_state: []
+              tooltip: "include/exclude random trigger"
 
   NotReal:
     label: 'NotReal'
@@ -78,8 +78,8 @@ PanelOptions:
             - id: not_real
               segments: [not_a_segment]
               class: not_a_class
-              enabled_state: [doesnt_exist]
-              disabled_state: []
+              included_state: [doesnt_exist]
+              excluded_state: []
               relationship_class: not_a_class
 
 

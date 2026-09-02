@@ -60,7 +60,7 @@ def test_main_screen_registered_in_modes():
 
 
 def test_main_screen_not_in_screens():
-    """MainScreen must not also be in SCREENS — that re-enables push_screen('main')
+    """MainScreen must not also be in SCREENS — that re-includes push_screen('main')
     which reverts to the broken _default stacking behaviour."""
     assert "main" not in RunconfUIApp.SCREENS, (
         "MainScreen must not be in SCREENS — push_screen('main') stacks on _default."

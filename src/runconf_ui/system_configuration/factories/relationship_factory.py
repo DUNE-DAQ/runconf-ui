@@ -4,36 +4,36 @@ from conffwk.dal import DalBase
 
 from runconf_ui.state_tree import Group
 
-from ..dataclasses import DisableRelationshipData
+from ..dataclasses import ExcludableRelationshipData
 from .attribute_factory import (
     AttributeFactory,
 )
 
 
-class RelationshipFactory(AttributeFactory[DisableRelationshipData]):
-    """Creates Group nodes for disable relationships.
+class RelationshipFactory(AttributeFactory[ExcludableRelationshipData]):
+    """Creates Group nodes for exclude relationships.
 
     Creates the same Group structure as AttributeFactory but first resolves
-    enabled_state and disabled_state strings to DAL objects.
+    included_state and excluded_state strings to DAL objects.
     """
 
-    def create(self, data: DisableRelationshipData) -> Group | None:
+    def create(self, data: ExcludableRelationshipData) -> Group | None:
         """Create relationship group from configuration data.
 
-        :param data: DisableRelationshipData specifying the relationships
+        :param data: ExcludableRelationshipData specifying the relationships
         :returns: Group containing Leaf nodes, or None if unable to resolve states
         :rtype: Group | None
         """
         data = copy(data)
 
-        enabled = self._resolve_state(data.enabled_state, data.relationship_class)
-        disabled = self._resolve_state(data.disabled_state, data.relationship_class)
+        included = self._resolve_state(data.included_state, data.relationship_class)
+        excluded = self._resolve_state(data.excluded_state, data.relationship_class)
 
-        if enabled is None or disabled is None or enabled == disabled:
+        if included is None or excluded is None or included == excluded:
             return None
 
-        data.enabled_state = enabled
-        data.disabled_state = disabled
+        data.included_state = included
+        data.excluded_state = excluded
 
         return super().create(data)
 
@@ -42,7 +42,7 @@ class RelationshipFactory(AttributeFactory[DisableRelationshipData]):
         state_id: str | list[str],
         state_class: str,
     ) -> DalBase | list[DalBase] | None:
-        """Resolve enabled/disabled state identifiers to DAL objects.
+        """Resolve included/excluded state identifiers to DAL objects.
 
         :param state_id: State identifier (string, list of strings, or empty)
         :param state_class: The DAL class to resolve into

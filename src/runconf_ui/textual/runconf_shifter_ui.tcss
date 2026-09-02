@@ -57,7 +57,7 @@ FilePanelWidget {
 }
 
 /* ============================================================
-   Enable / Disable Panel
+   Include/Exclude Panel
 ============================================================ */
 
 #tabbed_content_container {
@@ -112,13 +112,13 @@ FilePanelWidget {
     align-horizontal: right;
 }
 
-EnableDisablePanel {
+IncludeExcludePanel {
     layout: vertical;
     width: 100%;
     height: 1fr;
 }
 
-EnableDisableButtonScroller {
+IncludeExcludeButtonScroller {
     overflow-y: auto;
     width: 100%;
     height: 1fr;  /* fills remaining space below the Static label */
@@ -136,27 +136,25 @@ EnableDisableButtonScroller {
     margin: 0 1 0 1;
 }
 
-.main_enabled_btn {
+.main_include_btn {
     width: 100%;
     align: center middle;
     margin: 0 1 0 1;
     color: white;
 }
 
-.sub_enabled_btn {
+.sub_include_btn {
     width: 100%;
     align: center middle;
     margin: 0 1 0 5;
     color: white;
 }
 
-.node_enabled,
-.detector_subsystem_button_enabled {
+.node_included {
     background: $success;
 }
 
-.node_disabled,
-.detector_subsystem_button_disabled {
+.node_excluded {
     background: $panel-darken-2;
 }
 
