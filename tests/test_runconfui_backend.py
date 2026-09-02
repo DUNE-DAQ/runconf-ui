@@ -20,7 +20,7 @@ def backend(tmp_config_path, dummy_context):
 
 
 # ---------------------------------------------------------------------------
-# Toggle / get / set on excludeable nodes
+# Toggle / get / set on excludable nodes
 # ---------------------------------------------------------------------------
 
 

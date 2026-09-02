@@ -166,11 +166,11 @@ class YamlToSystemData:
 
     @classmethod
     def build_excludable_groups(cls, raw: dict) -> dict[str, ExcludableGroupData]:
-        """Build excludeable group dataclass objects from raw YAML data.
+        """Build excludable group dataclass objects from raw YAML data.
 
-        :param raw: Raw YAML dictionary containing excludeable group data
-        :returns: Dictionary mapping group names to excludeableGroupData objects
-        :rtype: dict[str, excludeableGroupData]
+        :param raw: Raw YAML dictionary containing excludable group data
+        :returns: Dictionary mapping group names to excludableGroupData objects
+        :rtype: dict[str, excludableGroupData]
         """
         return {
             name: ExcludableGroupData(
@@ -215,11 +215,11 @@ class YamlToSystemData:
     def _build_excludable_systems(
         cls, raw_systems: list[dict]
     ) -> dict[str, list[ExcludableSystemData]]:
-        """Build excludeable system dataclass objects from raw YAML data.
+        """Build excludable system dataclass objects from raw YAML data.
 
         :param raw_systems: List of raw system dictionaries from YAML
-        :returns: Dictionary mapping system names to lists of excludeableSystemData
-        :rtype: dict[str, list[excludeableSystemData]]
+        :returns: Dictionary mapping system names to lists of excludableSystemData
+        :rtype: dict[str, list[excludableSystemData]]
         """
         systems: dict[str, list[ExcludableSystemData]] = {}
         for entry in raw_systems:
