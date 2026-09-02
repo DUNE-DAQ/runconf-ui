@@ -20,7 +20,7 @@ class RelationshipFactory(AttributeFactory[ExcludableRelationshipData]):
     def create(self, data: ExcludableRelationshipData) -> Group | None:
         """Create relationship group from configuration data.
 
-        :param data: EnableableRelationshipData specifying the relationships
+        :param data: ExcludableRelationshipData specifying the relationships
         :returns: Group containing Leaf nodes, or None if unable to resolve states
         :rtype: Group | None
         """
