@@ -60,13 +60,13 @@ All managers expose the same interface: `get_available_daq_versions()`, `get_daq
 
 Once a user has selected a repo and session, the paths for the OKS config and YAML system configuration are passed into `SystemConfigReader`. This is the public facade for the system configuration pipeline, which runs in three stages:
 
-**1. `SystemConfig`** reads the YAML file and converts it into typed dataclass skeletons using `YamlToSystemData`. Nothing from the OKS configuration is touched at this stage. The output is a set of `DisableableGroupData` and `AdjustableGroupData` objects.
+**1. `SystemConfig`** reads the YAML file and converts it into typed dataclass skeletons using `YamlToSystemData`. Nothing from the OKS configuration is touched at this stage. The output is a set of `ExcludableGroupData` and `AdjustableGroupData` objects.
 
 **2. `ConfigAssembler`** takes those skeletons and a live `Configuration` object, and builds Group trees from them using the system builders (see below). The output is a list of `AssembledGroup` objects.
 
 **3. `AssembledConfig`** is the final output, containing:
 
-- `excludable` — list of `AssembledGroup` objects for the enable/disable panels.
+- `excludable` — list of `AssembledGroup` objects for the include/exclude panels.
 - `adjustable` — list of `AssembledGroup` objects for the adjustable attribute panels.
 - `excludable_nodes`, `adjustable_nodes`, `all_nodes` — flat dictionaries mapping node paths to `NodeStatus` objects, used for O(1) lookup by the backend and frontend.
 
@@ -92,9 +92,9 @@ Every child of a `Group` carries two boolean flags:
 
 | `votes` | `propagate` | Meaning |
 |---|---|---|
-| `True` | `True` | Normal disable child. Influences parent state and receives `set()` calls from the parent. Default. |
+| `True` | `True` | Normal excludable child. Influences parent state and receives `set()` calls from the parent. Default. |
 | `False` | `True` | Gated by parent and set when parent is set, but does not influence parent state. Used for controlled-but-non-voting components. |
-| `False` | `False` | Adjustable child. Fully independent of the enable/disable tree. Never receives `set()` from parent. |
+| `False` | `False` | Adjustable child. Fully independent of the include/exclude tree. Never receives `set()` from parent. |
 
 #### Adapters
 
@@ -103,8 +103,8 @@ Leaf nodes wrap one of three `Adapter` subclasses, which provide a uniform `get(
 | Adapter | Used for |
 |---|---|
 | `ExcludableEntityAdapter` | `ExcludableEntity` DAL objects — toggled via `include_entity` / `exclude_entity` from `confmodel_dal`. Raises `IncompatibleDalException` if the DAL is not a `ExcludableEntity` subclass. |
-| `AttributeAdapter` | Named boolean-like attributes on a DAL (e.g. `tp_generation_enabled`). Also checks the DAL's excludeableentity-disabled state: if the DAL itself is disabled as a excludeableentity, the attribute is considered disabled regardless of its stored value. |
-| `AdjustableAttributeAdapter` | Any-valued attributes (trigger rates, thresholds, etc.). Reads and writes the attribute value directly without any excludeableentity-state logic. |
+| `AttributeAdapter` | Named boolean-like attributes on a DAL (e.g. `tp_generation_enabled`). Also checks the DAL's ExcludeableEntity-excluded state: if the DAL itself is excluded as a ExcludeableEntity, the attribute is considered excluded regardless of its stored value. |
+| `AdjustableAttributeAdapter` | Any-valued attributes (trigger rates, thresholds, etc.). Reads and writes the attribute value directly without any ExcludeableEntity-state logic. |
 
 #### State
 
@@ -114,7 +114,7 @@ State is computed lazily by `compute_state(node, parent)` and never cached on no
 |---|---|
 | `INCLUDED` | Node is on, its DAL is ExcludeableEntity-included, and its parent (if any) is on. |
 | `EXCLUDED` | Node is internally off but its parent is on. Renders as an inactive button. |
-| `PARENT_EXCLUDED` | Disabled due to an external condition: the parent group is off, or the DAL is ExcludeableEntity-excluded in the session. Takes precedence over the node's own value. Renders as greyed-out and non-interactive. |
+| `PARENT_EXCLUDED` | Excluded due to an external condition: the parent group is off, or the DAL is ExcludeableEntity-excluded in the session. Takes precedence over the node's own value. Renders as greyed-out and non-interactive. |
 
 `walk(root)` performs a depth-first traversal of the tree, yielding a `NodeStatus` for every node. `NodeStatus` carries the node itself, its computed `State`, and its parent `Group`.
 
@@ -143,9 +143,9 @@ All factories inherit from `FactoryBase`, which provides `resolve_dals()` for lo
 | `set_daq_version()` / `set_daq_session()` | Forward to the repo manager |
 | `open_selected_session()` | Load the selected config, assemble the tree, build indices |
 | `save_config()` | Commit the in-memory config and write a consolidated copy to disk |
-| `toggle(group, node_id)` | Toggle a disableable node, then rebuild all indices |
+| `toggle(group, node_id)` | Toggle a excludeable node, then rebuild all indices |
 | `set_value(group, node_id, value)` | Set an adjustable node's value, then rebuild indices |
-| `get_excludable_values()` | Return all disableable node statuses grouped by panel |
+| `get_excludable_values()` | Return all excludabeable node statuses grouped by panel |
 | `get_adjustable_values()` | Return all adjustable node statuses grouped by group |
 | `get_tree_views()` | Return Rich Tree objects for all system map panels |
 | `get_config_tree()` | Return a Rich Tree of the full OKS configuration |
@@ -176,7 +176,7 @@ The frontend consists of `RunconfUIApp` (the main `App` subclass) and a set of s
 | Widget | Description |
 |---|---|
 | `FileSelect` | Drop-downs for DAQ version and session, plus the Open button and status text. |
-| `IncludeExcludeTabs` | `DynamicTabbedContent` — one `IncludeExcludePanel` tab per disableable group. |
+| `IncludeExcludeTabs` | `DynamicTabbedContent` — one `IncludeExcludePanel` tab per excludable group. |
 | `IncludeExcludePanel` | Scrollable list of toggle buttons, one per node in the group. |
 | `AdjustableAttributeTabs` | `DynamicTabbedContent` — one `AdjustableAttributePanel` tab per adjustable group. |
 | `AdjustableAttributePanel` | Scrollable list of `AdjustableAttributeContainer` widgets. |
@@ -191,7 +191,7 @@ The frontend consists of `RunconfUIApp` (the main `App` subclass) and a set of s
 1. A widget emits a message — e.g. a button in `IncludeExcludePanel` emits `NodeToggledMessage`.
 2. `RunconfUIApp` handles the message and calls the corresponding backend method — e.g. `backend.toggle(group_id, node_id)`.
 3. The backend mutates the OKS configuration, rebuilds its node index, and returns.
-4. `RunconfUIApp` calls `_refresh_enabled_info()`, which pulls fresh state from the backend and calls `update()` on all relevant widgets.
+4. `RunconfUIApp` calls `_refresh_included_info()`, which pulls fresh state from the backend and calls `update()` on all relevant widgets.
 
 When a config is first loaded, `load()` is called instead of `update()` to fully reconstruct the tab structure.
 
