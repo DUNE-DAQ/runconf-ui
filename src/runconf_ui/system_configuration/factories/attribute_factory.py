@@ -14,7 +14,7 @@ TIncludeableAttributeData = TypeVar("TIncludeableAttributeData", bound=Excludabl
 
 
 class AttributeFactory(FactoryBase[TIncludeableAttributeData, "Group | None"]):
-    """Creates a Group node containing Leaf nodes for disable attributes.
+    """Creates a Group node containing Leaf nodes for excludable attributes.
 
     Creates a Group node (strategy=any) containing one Leaf per matching DAL.
     OR semantics: the attribute group is considered included if any DAL has
