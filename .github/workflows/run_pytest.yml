@@ -5,6 +5,7 @@ on:
     branches:
       - develop
       - patch/*
+      - prep-release/*
   schedule:
     - cron: '0 0 * * 0-4'  # Every Sunday at midnight UTC
 
