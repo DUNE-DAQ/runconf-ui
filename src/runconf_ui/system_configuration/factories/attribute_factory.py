@@ -10,10 +10,10 @@ from runconf_ui.utils import get_class_from_segment_list
 from ..dataclasses import ExcludableAttributeData
 from .factory_base import FactoryBase
 
-TIncludeableAttributeData = TypeVar("TIncludeableAttributeData", bound=ExcludableAttributeData)
+TExcludableAttributeData = TypeVar("TExcludableAttributeData", bound=ExcludableAttributeData)
 
 
-class AttributeFactory(FactoryBase[TIncludeableAttributeData, "Group | None"]):
+class AttributeFactory(FactoryBase[TExcludableAttributeData, "Group | None"]):
     """Creates a Group node containing Leaf nodes for excludable attributes.
 
     Creates a Group node (strategy=any) containing one Leaf per matching DAL.
@@ -21,7 +21,7 @@ class AttributeFactory(FactoryBase[TIncludeableAttributeData, "Group | None"]):
     the attribute included.
     """
 
-    def create(self, data: TIncludeableAttributeData) -> Group | None:
+    def create(self, data: TExcludableAttributeData) -> Group | None:
         """Create attribute group from configuration data.
 
         :param data: DisableAttributeData specifying the attributes to create
