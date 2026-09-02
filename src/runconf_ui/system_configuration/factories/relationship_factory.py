@@ -14,7 +14,7 @@ class RelationshipFactory(AttributeFactory[ExcludableRelationshipData]):
     """Creates Group nodes for exclude relationships.
 
     Creates the same Group structure as AttributeFactory but first resolves
-    enabled_state and excluded_state strings to DAL objects.
+    included_state and excluded_state strings to DAL objects.
     """
 
     def create(self, data: ExcludableRelationshipData) -> Group | None:
