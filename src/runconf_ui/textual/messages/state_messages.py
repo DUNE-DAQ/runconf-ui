@@ -32,7 +32,7 @@ class ConfigLoadFailedMessage(StateChangeMessage):
 
 
 class NodeToggledMessage(StateChangeMessage):
-    """Emitted when a EXCLUDABLE node is toggled on or off.
+    """Emitted when a excludable node is toggled on or off.
 
     This message triggers a state update in the backend and cascades to update
     any dependent nodes or attributes.
@@ -50,7 +50,7 @@ class NodeToggledMessage(StateChangeMessage):
 
 
 class ValueChangedMessage(StateChangeMessage):
-    """Emitted when an ADJUSTABLE node's value is changed by the user.
+    """Emitted when an adjustable node's value is changed by the user.
 
     This message triggers a backend update to store the new value and propagate
     any configuration changes.

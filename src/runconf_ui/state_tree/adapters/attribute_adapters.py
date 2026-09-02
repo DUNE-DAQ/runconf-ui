@@ -47,7 +47,7 @@ class AttributeAdapter(Adapter):
     def get(self) -> bool:
         """Get the included state of the attribute.
 
-        :returns: True if attribute equals included_value and DAL is included as ExcludableEntity
+        :returns: True if attribute equals included_value and DAL is included as an ExcludableEntity
         :rtype: bool
         """
         return (

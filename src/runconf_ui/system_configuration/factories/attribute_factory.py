@@ -24,7 +24,7 @@ class AttributeFactory(FactoryBase[TExcludableAttributeData, "Group | None"]):
     def create(self, data: TExcludableAttributeData) -> Group | None:
         """Create attribute group from configuration data.
 
-        :param data: DisableAttributeData specifying the attributes to create
+        :param data: ExcludableAttributeData specifying the attributes to create
         :returns: Group containing Leaf nodes, or None if no matching DALs
         :rtype: Group | None
         """

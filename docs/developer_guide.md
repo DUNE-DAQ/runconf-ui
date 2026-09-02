@@ -143,9 +143,9 @@ All factories inherit from `FactoryBase`, which provides `resolve_dals()` for lo
 | `set_daq_version()` / `set_daq_session()` | Forward to the repo manager |
 | `open_selected_session()` | Load the selected config, assemble the tree, build indices |
 | `save_config()` | Commit the in-memory config and write a consolidated copy to disk |
-| `toggle(group, node_id)` | Toggle an Excludable node, then rebuild all indices |
+| `toggle(group, node_id)` | Toggle an excludable node, then rebuild all indices |
 | `set_value(group, node_id, value)` | Set an adjustable node's value, then rebuild indices |
-| `get_excludable_values()` | Return all excludabeable node statuses grouped by panel |
+| `get_excludable_values()` | Return all excludable node statuses grouped by panel |
 | `get_adjustable_values()` | Return all adjustable node statuses grouped by group |
 | `get_tree_views()` | Return Rich Tree objects for all system map panels |
 | `get_config_tree()` | Return a Rich Tree of the full OKS configuration |
