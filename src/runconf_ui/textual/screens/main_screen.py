@@ -40,7 +40,7 @@ class MainScreen(Screen):
                 with TabbedContent(
                     "Controls", id="selection_adjust_tabs", classes="content_switcher"
                 ):
-                    with TabPane("include/exclude", classes="top_level_tab_pane"):
+                    with TabPane("Include/Exclude", classes="top_level_tab_pane"):
                         yield IncludeExcludeTabs(id="selection_tabs")
 
                 with TabbedContent(
