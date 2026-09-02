@@ -9,7 +9,7 @@ from .adapter import Adapter
 
 
 class AttributeAdapter(Adapter):
-    """Adapter for toggling DAL objects by enabling/disabling a named attribute.
+    """Adapter for toggling DAL objects by including/excluding a named attribute.
 
     Also considers the DAL's own ExcludableEntity-excluded state: if the DAL is
     excluded as an ExcludableEntity, this attribute is considered excluded regardless
