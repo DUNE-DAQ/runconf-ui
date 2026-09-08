@@ -144,7 +144,7 @@ def get_exit_msg(backend: RunconfUIBackend) -> str:
     "--repo-type",
     type=click.Choice(RepoManagerType.values()),
     default="remote",
-    help="Type of repository to use (local, remote or emulation).",
+    help="Type of repository to use (local or remote). Emulation is selected via --apparatus, not here.",
 )
 @click.option(
     "-f",
