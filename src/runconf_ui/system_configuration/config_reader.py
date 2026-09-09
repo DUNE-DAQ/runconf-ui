@@ -20,10 +20,10 @@ from conffwk.dal import DalBase
 from runconf_ui.state_tree import Group, NodeStatus, walk
 from runconf_ui.utils import get_logger
 
-from .builders import AdjustableSystemBuilder, DisableSystemBuilder
+from .builders import AdjustableSystemBuilder, ExcludableSystemBuilder
 from .dataclasses import (
     AdjustableGroupData,
-    DisableableGroupData,
+    ExcludableGroupData,
     YamlToSystemData,
 )
 
@@ -47,7 +47,7 @@ def _natural_key(s: str):
 def _node_sort_key(item: tuple[str, NodeStatus]):
     """Generate a sort key for node items.
 
-    Sorts by enabled state first, then natural order of keys.
+    Sorts by included state first, then natural order of keys.
 
     :param item: Tuple of (key, NodeStatus)
     :returns: Sort key tuple
@@ -55,7 +55,7 @@ def _node_sort_key(item: tuple[str, NodeStatus]):
     """
     key, node = item
     return (
-        0 if node.is_enabled else 1,
+        0 if node.is_included else 1,
         _natural_key(key),
     )
 
@@ -108,26 +108,26 @@ class AssembledGroup:
 
 @dataclass
 class AssembledConfig:
-    """The complete assembled configuration with disableable and adjustable groups.
-    :param disableable: List of disableable groups
+    """The complete assembled configuration with excludable and adjustable groups.
+    :param excludable: List of excludable groups
     :param adjustable: List of adjustable groups
     """
 
-    disableable: list[AssembledGroup]
+    excludable: list[AssembledGroup]
     adjustable: list[AssembledGroup]
 
     def __post_init__(self):
         """Initialize sorted node dictionaries after dataclass initialization."""
-        self.disableable_nodes = {
-            group.id: self._sorted_nodes(group.nodes) for group in self.disableable
+        self.excludable_nodes = {
+            group.id: self._sorted_nodes(group.nodes) for group in self.excludable
         }
         self.adjustable_nodes = {
             group.id: self._sorted_nodes(group.nodes) for group in self.adjustable
         }
-        self.all_nodes = {**self.adjustable_nodes, **self.disableable_nodes}
+        self.all_nodes = {**self.adjustable_nodes, **self.excludable_nodes}
 
     def _sorted_nodes(self, nodes: dict[str, NodeStatus]) -> dict[str, NodeStatus]:
-        """Sort nodes by enable status and natural key order.
+        """Sort nodes by include status and natural key order.
 
         :param nodes: Dictionary of node status objects
         :returns: Sorted dictionary of node status objects
@@ -153,7 +153,7 @@ class SystemConfig:
         raw = self._load(path)
 
         self._settings = YamlToSystemData.build_settings(raw)
-        self._disableable = YamlToSystemData.build_disableable_groups(
+        self._excludable = YamlToSystemData.build_excludable_groups(
             raw.get("PanelOptions", {})
         )
         self._adjustable = YamlToSystemData.build_adjustable_groups(
@@ -181,13 +181,13 @@ class SystemConfig:
         return self._settings.classes_to_show
 
     @property
-    def disableable_skeleton(self) -> dict[str, DisableableGroupData]:
-        """Get the disableable group structure.
+    def excludable_skeleton(self) -> dict[str, ExcludableGroupData]:
+        """Get the excludable group structure.
 
-        :returns: Dictionary of DisableableGroupData objects by name
-        :rtype: dict[str, DisableableGroupData]
+        :returns: Dictionary of ExcludableGroupData objects by name
+        :rtype: dict[str, ExcludableGroupData]
         """
-        return self._disableable
+        return self._excludable
 
     @property
     def adjustable_skeleton(self) -> dict[str, AdjustableGroupData]:
@@ -216,17 +216,17 @@ class ConfigAssembler:
         self.configuration = configuration
         self.session = session
 
-    def assemble_disableable(
+    def assemble_excludable(
         self,
-        skeleton: dict[str, DisableableGroupData],
+        skeleton: dict[str, ExcludableGroupData],
     ) -> list[AssembledGroup]:
-        """Assemble disableable groups from skeleton data.
+        """Assemble excludable groups from skeleton data.
 
-        :param skeleton: Dictionary of DisableableGroupData objects
-        :returns: List of assembled disableable groups
+        :param skeleton: Dictionary of excludableGroupData objects
+        :returns: List of assembled excludable groups
         :rtype: list[AssembledGroup]
         """
-        builder = DisableSystemBuilder(self.configuration, self.session)
+        builder = ExcludableSystemBuilder(self.configuration, self.session)
 
         assembled_groups = []
         for group_name, group_data in skeleton.items():
@@ -342,8 +342,8 @@ class SystemConfigReader:
         assembler = ConfigAssembler(configuration, session)
         get_logger().info(f"Assembling: {session_name} in {configuration!r}")
         return AssembledConfig(
-            disableable=assembler.assemble_disableable(
-                self.config.disableable_skeleton
+            excludable=assembler.assemble_excludable(
+                self.config.excludable_skeleton
             ),
             adjustable=assembler.assemble_adjustable(self.config.adjustable_skeleton),
         )

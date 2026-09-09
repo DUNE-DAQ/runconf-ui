@@ -1,4 +1,4 @@
-from runconf_ui.state_tree import AdjustableAttribute, Leaf
+from runconf_ui.state_tree import AdjustableAttributeAdapter, Leaf
 
 from ..dataclasses import AdjustableAttributeData
 from .factory_base import FactoryBase
@@ -24,7 +24,7 @@ class AdjustableFactory(FactoryBase["AdjustableAttributeData", "list[Leaf] | Non
 
         results = [
             Leaf(
-                AdjustableAttribute(
+                AdjustableAttributeAdapter(
                     self.configuration,
                     self.session,
                     dal,
