@@ -2,13 +2,13 @@
 Rich tree rendering for the state operation tree.
 
 Colour scheme:
-  green  — ENABLED
-  red    — DISABLED
-  grey46 — PARENT_DISABLED (node is internally on but parent group is off,
-           or the underlying DAL is resource-disabled in the session)
+  green  — INCLUDED
+  red    — EXCLUDED
+  grey46 — PARENT_EXCLUDED (node is internally on but parent group is off,
+           or the underlying DAL is ExcludableEntity-excluded in the session)
 """
 
-from confmodel_dal import component_disabled
+from confmodel_dal import entity_excluded
 from rich.tree import Tree
 
 from runconf_ui.state_tree import Group, Node, State, compute_state
@@ -17,9 +17,9 @@ from runconf_ui.state_tree import Group, Node, State, compute_state
 from runconf_ui.system_configuration.config_reader import _natural_key
 
 _COLOURS: dict[State, str] = {
-    State.ENABLED: "green",
-    State.DISABLED: "red",
-    State.PARENT_DISABLED: "grey46",
+    State.INCLUDED: "green",
+    State.EXCLUDED: "red",
+    State.PARENT_EXCLUDED: "grey46",
 }
 
 
@@ -114,27 +114,27 @@ class ConfigTreeRenderer:
         :rtype: Tree
         """
         tree = Tree(f"[bold green]{self.session.id}")
-        self._render_config_branch(tree, self.session, State.ENABLED)
+        self._render_config_branch(tree, self.session, State.INCLUDED)
         return tree
 
     def _calc_config_state(self, dal, parent_state: State) -> State:
-        """Calculate the state of a DAL object based on parent and resource state.
+        """Calculate the state of a DAL object based on parent and ExcludableEntity state.
 
         :param dal: The DAL object to calculate state for
         :param parent_state: The parent's state
         :returns: The calculated state for the DAL
         :rtype: State
         """
-        if parent_state is not State.ENABLED:
-            return State.PARENT_DISABLED
+        if parent_state is not State.INCLUDED:
+            return State.PARENT_EXCLUDED
 
-        if "Resource" not in self.config.superclasses(dal.className(), all=True):
+        if "ExcludableEntity" not in self.config.superclasses(dal.className(), all=True):
             return parent_state
 
-        if component_disabled(self.config._obj, self.session.id, dal.id):
-            return State.DISABLED
+        if entity_excluded(self.config._obj, self.session.id, dal.id):
+            return State.EXCLUDED
 
-        return State.ENABLED
+        return State.INCLUDED
 
     def _render_config_branch(self, branch, dal, parent_state: State) -> None:
         """Recursively render configuration tree branches.

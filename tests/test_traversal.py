@@ -1,7 +1,7 @@
 """
 Unit tests for traversal.py.
 
-Tests cover state computation, walk, labelled, disabled_child_nodes,
+Tests cover state computation, walk, labelled, excluded_child_nodes,
 and build_index. Full-tree scenario tests are handled in test_integration.py.
 """
 
@@ -14,7 +14,7 @@ from runconf_ui.state_tree import (
     State,
     build_index,
     compute_state,
-    disabled_child_nodes,
+    excludable_child_nodes,
     labelled,
     walk,
 )
@@ -25,9 +25,9 @@ from runconf_ui.state_tree import (
 
 
 class StubAdapter:
-    def __init__(self, value: bool = True, dal_enabled: bool = True):
+    def __init__(self, value: bool = True, dal_included: bool = True):
         self._value = value
-        self._dal_enabled = dal_enabled
+        self._dal_included = dal_included
 
     def get(self):
         return self._value
@@ -35,12 +35,12 @@ class StubAdapter:
     def set(self, value):
         self._value = value
 
-    def dal_enabled(self):
-        return self._dal_enabled
+    def dal_included(self):
+        return self._dal_included
 
 
-def leaf(value: bool = True, label: str = "", dal_enabled: bool = True) -> Leaf:
-    return Leaf(StubAdapter(value, dal_enabled=dal_enabled), label=label)  # type: ignore
+def leaf(value: bool = True, label: str = "", dal_included: bool = True) -> Leaf:
+    return Leaf(StubAdapter(value, dal_included=dal_included), label=label)  # type: ignore
 
 
 # ---------------------------------------------------------------------------
@@ -49,47 +49,47 @@ def leaf(value: bool = True, label: str = "", dal_enabled: bool = True) -> Leaf:
 
 
 class TestComputeState:
-    def test_enabled_node_no_parent(self):
-        assert compute_state(leaf(True), None) == State.ENABLED
+    def test_included_node_no_parent(self):
+        assert compute_state(leaf(True), None) == State.INCLUDED
 
-    def test_disabled_node_no_parent(self):
-        assert compute_state(leaf(False), None) == State.DISABLED
+    def test_excluded_node_no_parent(self):
+        assert compute_state(leaf(False), None) == State.EXCLUDED
 
-    def test_enabled_node_with_disabled_parent_returns_parent_disabled(self):
+    def test_included_node_with_excluded_parent_returns_parent_excluded(self):
         child = leaf(True)
         parent = Group(strategy=all)
         parent.add(leaf(False)).add(child)
-        assert compute_state(child, parent) == State.PARENT_DISABLED
+        assert compute_state(child, parent) == State.PARENT_EXCLUDED
 
-    def test_disabled_node_with_disabled_parent_returns_parent_disabled(self):
-        # Parent gating takes precedence — node's own DISABLED is not visible
+    def test_excluded_node_with_excluded_parent_returns_parent_excluded(self):
+        # Parent gating takes precedence — node's own excludeD is not visible
         # when the parent is already off.
         child = leaf(False)
         parent = Group(strategy=all)
         parent.add(leaf(False)).add(child)
-        assert compute_state(child, parent) == State.PARENT_DISABLED
+        assert compute_state(child, parent) == State.PARENT_EXCLUDED
 
-    def test_dal_resource_disabled_returns_parent_disabled(self):
+    def test_dal_resource_excluded_returns_parent_excluded(self):
         assert (
-            compute_state(leaf(True, dal_enabled=False), None) == State.PARENT_DISABLED
+            compute_state(leaf(True, dal_included=False), None) == State.PARENT_EXCLUDED
         )
 
-    def test_group_node_enabled(self):
+    def test_group_node_included(self):
         g = Group(strategy=all)
         g.add(leaf(True))
-        assert compute_state(g, None) == State.ENABLED
+        assert compute_state(g, None) == State.INCLUDED
 
-    def test_group_node_disabled(self):
+    def test_group_node_excluded(self):
         g = Group(strategy=all)
         g.add(leaf(False))
-        assert compute_state(g, None) == State.DISABLED
+        assert compute_state(g, None) == State.EXCLUDED
 
-    def test_group_node_parent_disabled(self):
+    def test_group_node_parent_excluded(self):
         child_group = Group(strategy=all)
         child_group.add(leaf(True))
         parent = Group(strategy=all)
         parent.add(leaf(False)).add(child_group)
-        assert compute_state(child_group, parent) == State.PARENT_DISABLED
+        assert compute_state(child_group, parent) == State.PARENT_EXCLUDED
 
 
 # ---------------------------------------------------------------------------
@@ -98,20 +98,20 @@ class TestComputeState:
 
 
 class TestNodeStatus:
-    def test_is_interactive_for_enabled_and_disabled(self):
+    def test_is_interactive_for_included_and_excluded(self):
         assert (
-            NodeStatus(node=leaf(), state=State.ENABLED, parent=None).is_interactive
+            NodeStatus(node=leaf(), state=State.INCLUDED, parent=None).is_interactive
             is True
         )
         assert (
-            NodeStatus(node=leaf(), state=State.DISABLED, parent=None).is_interactive
+            NodeStatus(node=leaf(), state=State.EXCLUDED, parent=None).is_interactive
             is True
         )
 
-    def test_not_interactive_when_parent_disabled(self):
+    def test_not_interactive_when_parent_excluded(self):
         assert (
             NodeStatus(
-                node=leaf(), state=State.PARENT_DISABLED, parent=None
+                node=leaf(), state=State.PARENT_EXCLUDED, parent=None
             ).is_interactive
             is False
         )
@@ -169,28 +169,28 @@ class TestLabelled:
 
 
 # ---------------------------------------------------------------------------
-# disabled_child_nodes()
+# excluded_child_nodes()
 # ---------------------------------------------------------------------------
 
 
-class TestDisabledChildNodes:
+class TestexcludedChildNodes:
     def test_returns_voting_children_that_are_off(self):
         on = leaf(True, label="on")
         off = leaf(False, label="off")
         g = Group(strategy=all)
         g.add(on).add(off)
-        assert disabled_child_nodes(g) == [off]
+        assert excludable_child_nodes(g) == [off]
 
     def test_ignores_non_voting_children(self):
         g = Group(strategy=all)
         g.add(leaf(True), votes=True)
         g.add(leaf(False), votes=False)
-        assert disabled_child_nodes(g) == []
+        assert excludable_child_nodes(g) == []
 
-    def test_empty_when_all_enabled(self):
+    def test_empty_when_all_included(self):
         g = Group(strategy=all)
         g.add(leaf(True)).add(leaf(True))
-        assert disabled_child_nodes(g) == []
+        assert excludable_child_nodes(g) == []
 
 
 # ---------------------------------------------------------------------------

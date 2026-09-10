@@ -142,7 +142,7 @@ def get_class_from_segment(
 ):
     """Find all instances of a class in a segment.
 
-    Includes all subclasses regardless of enabled status.
+    Includes all subclasses regardless of excluded status.
 
     :param configuration: The Configuration object to search
     :param segment_id: The ID of the segment to search in

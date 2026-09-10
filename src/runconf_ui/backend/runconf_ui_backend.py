@@ -362,13 +362,13 @@ class RunconfUIBackend:
         self._rebuild_indexes()
 
     def toggle(self, group: str, node_id: str) -> None:
-        """Toggle the enabled/disabled state of a configuration node.
+        """Toggle the excluded/included state of a configuration node.
 
         :param group: The configuration group name
         :param node_id: The unique identifier of the node
         :raises NodeNotFound: If the group or node is not found
         """
-        self._resolve(group, node_id, collection="disableable").toggle()
+        self._resolve(group, node_id, collection="excludable").toggle()
         self._rebuild_indexes()
 
     def get_values(self) -> dict[str, dict[str, NodeStatus]]:
@@ -381,15 +381,15 @@ class RunconfUIBackend:
             return {}
         return {g: dict(n) for g, n in self._assembled.all_nodes.items()}
 
-    def get_disableable_values(self) -> dict[str, dict[str, NodeStatus]]:
-        """Retrieve all disableable configuration nodes organized by group.
+    def get_excludable_values(self) -> dict[str, dict[str, NodeStatus]]:
+        """Retrieve all excludable configuration nodes organized by group.
 
-        :returns: Dictionary mapping group names to disableable node status dictionaries
+        :returns: Dictionary mapping group names to excludable node status dictionaries
         :rtype: dict[str, dict[str, NodeStatus]]
         """
         if self._assembled is None:
             return {}
-        return {g: dict(n) for g, n in self._assembled.disableable_nodes.items()}
+        return {g: dict(n) for g, n in self._assembled.excludable_nodes.items()}
 
     def get_adjustable_values(self) -> dict[str, dict[str, NodeStatus]]:
         """Retrieve all adjustable configuration nodes organized by group.
@@ -441,7 +441,7 @@ class RunconfUIBackend:
 
         :param group: The configuration group name
         :param node_id: The unique identifier of the node
-        :param collection: The collection to search from ('all', 'disableable', 'adjustable')
+        :param collection: The collection to search from ('all', 'excludable', 'adjustable')
         :returns: The NodeStatus object containing the resolved node
         :rtype: NodeStatus
         :raises NodeNotFound: If the group or node is not found
@@ -451,7 +451,7 @@ class RunconfUIBackend:
 
         index = {
             "all": self._assembled.all_nodes,
-            "disableable": self._assembled.disableable_nodes,
+            "excludable": self._assembled.excludable_nodes,
             "adjustable": self._assembled.adjustable_nodes,
         }[collection]
 
@@ -470,7 +470,7 @@ class RunconfUIBackend:
     def _rebuild_indexes(self) -> None:
         """Rebuild the node indices for all groups and systems.
 
-        Updates the index of nodes in all disableable and adjustable groups,
+        Updates the index of nodes in all excludable and adjustable groups,
         recalculating node paths and updating tree views.
         """
         self._logger.debug("Rebuilding indices")
@@ -478,7 +478,7 @@ class RunconfUIBackend:
         if a is None:
             return
 
-        for group in (*a.disableable, *a.adjustable):
+        for group in (*a.excludable, *a.adjustable):
             group.nodes = {}
             self._logger.debug(f"Building nodes for {group}")
 
@@ -492,13 +492,13 @@ class RunconfUIBackend:
                 }
                 group.nodes.update(system.nodes)
 
-        a.disableable_nodes = {g.id: a._sorted_nodes(g.nodes) for g in a.disableable}
+        a.excludable_nodes = {g.id: a._sorted_nodes(g.nodes) for g in a.excludable}
         a.adjustable_nodes = {g.id: a._sorted_nodes(g.nodes) for g in a.adjustable}
-        a.all_nodes = {**a.adjustable_nodes, **a.disableable_nodes}
+        a.all_nodes = {**a.adjustable_nodes, **a.excludable_nodes}
 
         self._tree_views = {
             group.id: self._build_panel_tree(group)
-            for group in a.disableable + a.adjustable
+            for group in a.excludable + a.adjustable
             if group.view_panel
         }
 

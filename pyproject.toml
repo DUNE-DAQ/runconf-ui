@@ -4,8 +4,8 @@ requires = ["setuptools>=61.0"]
 
 [project]
 name = "runconf_ui"
-description = "A text user interface (TUI) designed to be used to enable/disable elements of the detector"
-version = "6.1.0"
+description = "A text user interface (TUI) designed to be used to include/exclude elements of the detector"
+version = "6.1.1"
 readme = "docs/README.md"
 requires-python = ">=3.10"
 dependencies = [

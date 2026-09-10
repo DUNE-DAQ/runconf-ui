@@ -22,8 +22,8 @@ from runconf_ui.textual.screens.popup_screens import LoadingScreen
 from runconf_ui.textual.widgets import (
     AdjustableAttributeTabs,
     ConfigTreePanel,
-    EnableDisableTabs,
     FileSelect,
+    IncludeExcludeTabs,
     OptionsPanel,
     RichTreeTabbed,
 )
@@ -37,7 +37,7 @@ class RunconfUIApp(App):
     """Main Textual application for runconf-shifter-ui.
 
     Manages the TUI interface for selecting and configuring DAQ sessions,
-    displaying configuration trees, and managing enable/disable and adjustable
+    displaying configuration trees, and managing include/exclude and adjustable
     attributes through an interactive terminal interface.
     """
 
@@ -143,7 +143,7 @@ class RunconfUIApp(App):
 
     def _on_config_loaded(self) -> None:
         self.pop_screen()
-        self._refresh_enabled_info(load_fresh=True)
+        self._refresh_included_info(load_fresh=True)
         self.refresh()
 
     def _on_config_failed_popup(self, e: Exception) -> None:
@@ -195,7 +195,7 @@ class RunconfUIApp(App):
         get_logger().info(f"Toggled {event.group_id} : {event.widget_id}")
 
         self.backend.toggle(event.group_id, event.widget_id)
-        self._refresh_enabled_info(load_fresh=False)
+        self._refresh_included_info(load_fresh=False)
 
     @on(runconf_msg.ValueChangedMessage)
     def handle_value_changed(self, event: runconf_msg.ValueChangedMessage):
@@ -204,23 +204,23 @@ class RunconfUIApp(App):
         )
 
         self.backend.set_value(event.group_id, event.widget_id, event.new_value)
-        self._refresh_enabled_info(load_fresh=False)
+        self._refresh_included_info(load_fresh=False)
 
     # ------------------------------------------------------------------ #
     # Shared UI refresh                                                    #
     # ------------------------------------------------------------------ #
 
-    def _refresh_enabled_info(self, load_fresh: bool = False) -> None:
+    def _refresh_included_info(self, load_fresh: bool = False) -> None:
 
-        get_logger().debug("Refreshing enabled info")
+        get_logger().debug("Refreshing included info")
 
-        dis_info = self.backend.get_disableable_values()
+        dis_info = self.backend.get_excludable_values()
         adj_info = self.backend.get_adjustable_values()
         tree_views = self.backend.get_tree_views()
         config_tree = self.backend.get_config_tree()
 
         pairs: NodeIterator = [
-            (self.query(EnableDisableTabs), dis_info),
+            (self.query(IncludeExcludeTabs), dis_info),
             (self.query(AdjustableAttributeTabs), adj_info),
             (self.query(RichTreeTabbed), tree_views),
             (self.query(ConfigTreePanel), config_tree),

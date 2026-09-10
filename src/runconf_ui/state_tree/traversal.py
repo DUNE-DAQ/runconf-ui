@@ -6,21 +6,21 @@ themselves. Call walk() again after any set() to get fresh NodeStatus values.
 
 The three states:
 
-  ENABLED         — node is on, its DAL is resource-enabled, and its parent
+  INCLUDED         — node is on, its DAL is ExcludableEntity-included, and its parent
                     (if any) is on.
 
-  DISABLED        — node is internally off, and its parent (if any) is on.
+  EXCLUDED        — node is internally off, and its parent (if any) is on.
 
-  PARENT_DISABLED — the node is considered disabled due to an external
+  PARENT_EXCLUDED — the node is considered excluded due to an external
                     condition: either its parent group is off, or its
-                    underlying DAL is resource-disabled in the session.
+                    underlying DAL is ExcludableEntity-excluded in the session.
                     This takes precedence over the node's own internal state —
-                    if the parent is off, children always report PARENT_DISABLED
+                    if the parent is off, children always report PARENT_EXCLUDED
                     regardless of their own stored value.
                     Renders as greyed-out and non-interactive in the UI.
 
 Parent gating is checked first. A node's own internal state is only
-consulted when its parent (if any) is enabled.
+consulted when its parent (if any) is included.
 """
 
 from collections.abc import Iterator
@@ -39,9 +39,9 @@ from .nodes import Group, Leaf, Node
 class State(Enum):
     """The state of a node."""
 
-    ENABLED = auto()
-    DISABLED = auto()
-    PARENT_DISABLED = auto()
+    INCLUDED = auto()
+    EXCLUDED = auto()
+    PARENT_EXCLUDED = auto()
 
 
 @dataclass
@@ -55,12 +55,12 @@ class NodeStatus:
     @property
     def is_interactive(self) -> bool:
         """False when the node is greyed out due to parent or DAL state."""
-        return self.state != State.PARENT_DISABLED
+        return self.state != State.PARENT_EXCLUDED
 
     @property
-    def is_enabled(self) -> bool:
-        """True only when the node is fully enabled."""
-        return self.state == State.ENABLED
+    def is_included(self) -> bool:
+        """True only when the node is fully included."""
+        return self.state == State.INCLUDED
 
     @property
     def path(self) -> str | None:
@@ -85,7 +85,7 @@ class NodeStatus:
     def toggle(self) -> None:
         """Flip the node's state. No-op if the node is not interactive.
 
-        Only works when is_interactive is True (not PARENT_DISABLED).
+        Only works when is_interactive is True (not PARENT_EXCLUDED).
         """
         self.node.set(not self.node.get())
         get_logger().debug(f"Toggling {self.label}")
@@ -110,10 +110,10 @@ def compute_state(node: Node, parent: Group | None) -> State:
     """Compute the visible state of a node.
 
     Precedence (highest first):
-      1. Parent gating — if the parent group is off, always PARENT_DISABLED.
-      2. DAL resource state — if the underlying DAL is resource-disabled,
-         PARENT_DISABLED (only checked for Leaf nodes).
-      3. Node internal value — ENABLED or DISABLED.
+      1. Parent gating — if the parent group is off, always PARENT_EXCLUDED.
+      2. DAL ExcludableEntity state — if the underlying DAL is ExcludableEntity-excluded,
+         PARENT_EXCLUDED (only checked for Leaf nodes).
+      3. Node internal value — INCLUDED or EXCLUDED.
 
     :param node: The node to compute state for
     :param parent: The parent group, if any
@@ -122,17 +122,17 @@ def compute_state(node: Node, parent: Group | None) -> State:
     """
     # 1. Parent gating takes precedence over everything.
     if parent is not None and not parent.get():
-        return State.PARENT_DISABLED
+        return State.PARENT_EXCLUDED
 
-    # 2. Leaf DAL resource state.
-    if isinstance(node, Leaf) and not node.adapter.dal_enabled():
-        return State.PARENT_DISABLED
+    # 2. Leaf DAL ExcludableEntity state.
+    if isinstance(node, Leaf) and not node.adapter.dal_included():
+        return State.PARENT_EXCLUDED
 
     # 3. Node's own internal value.
     if not node.get():
-        return State.DISABLED
+        return State.EXCLUDED
 
-    return State.ENABLED
+    return State.INCLUDED
 
 
 # ---------------------------------------------------------------------------
@@ -140,31 +140,31 @@ def compute_state(node: Node, parent: Group | None) -> State:
 # ---------------------------------------------------------------------------
 
 
-def walk(root: Node, parent: Group | None = None, _ancestor_disabled: bool = False):
+def walk(root: Node, parent: Group | None = None, _ancestor_excluded: bool = False):
     """Depth-first traversal of the node tree, yielding NodeStatus for every node.
 
     Yields NodeStatus objects containing the state of each node in the tree.
-    _ancestor_disabled is an internal parameter used during recursion to
-    propagate PARENT_DISABLED down through the tree when an ancestor is off.
+    _ancestor_excluded is an internal parameter used during recursion to
+    propagate PARENT_EXCLUDED down through the tree when an ancestor is off.
 
     :param root: The root node to start traversal from
     :param parent: The parent group (internal use)
-    :param _ancestor_disabled: Whether an ancestor is disabled (internal use)
+    :param _ancestor_excluded: Whether an ancestor is excluded (internal use)
     :returns: Iterator of NodeStatus objects
     :rtype: Iterator[NodeStatus]
     """
-    state = compute_state(root, parent if not _ancestor_disabled else None)
-    if _ancestor_disabled:
-        state = State.PARENT_DISABLED
+    state = compute_state(root, parent if not _ancestor_excluded else None)
+    if _ancestor_excluded:
+        state = State.PARENT_EXCLUDED
 
     # We can also set the state here
     yield NodeStatus(root, state, parent)
 
     if isinstance(root, Group):
-        child_ancestor_disabled = _ancestor_disabled or state == State.PARENT_DISABLED
+        child_ancestor_excluded = _ancestor_excluded or state == State.PARENT_EXCLUDED
         for child, _, _ in root:
             yield from walk(
-                child, parent=root, _ancestor_disabled=child_ancestor_disabled
+                child, parent=root, _ancestor_excluded=child_ancestor_excluded
             )
 
 
@@ -185,13 +185,13 @@ def labelled(root: Node) -> Iterator[NodeStatus]:
             yield status
 
 
-def disabled_child_nodes(group: Group) -> list[Node]:
-    """Get voting children that are causing the group to be disabled.
+def excludable_child_nodes(group: Group) -> list[Node]:
+    """Get voting children that are causing the group to be excluded.
 
     Useful for diagnostic tooltips like "TPC is off because CRP4 is off."
 
     :param group: The group to check
-    :returns: List of disabled voting child nodes
+    :returns: List of excluded voting child nodes
     :rtype: list[Node]
     """
     return [n for n in group.voting_children if not n.get()]

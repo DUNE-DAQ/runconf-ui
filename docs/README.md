@@ -2,7 +2,7 @@
 [![Run pytest](https://github.com/DUNE-DAQ/runconf-ui/actions/workflows/run_pytest.yml/badge.svg)](https://github.com/DUNE-DAQ/runconf-ui/actions/workflows/run_pytest.yml)
 
 ## Overview
-Runconf-UI is provides a textual user interface to interact with DAQ configurations before starting a run. It allows for enabling/disabling detector elements as well as adjusting the values for trigger rates, etc.
+Runconf-UI is provides a textual user interface to interact with DAQ configurations before starting a run. It allows for including/excluding detector elements as well as adjusting the values for trigger rates, etc.
 
 The TUI is installable with a daq enviroment through with pip
 
