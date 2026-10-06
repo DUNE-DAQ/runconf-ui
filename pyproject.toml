@@ -5,7 +5,7 @@ requires = ["setuptools>=61.0"]
 [project]
 name = "runconf_ui"
 description = "A text user interface (TUI) designed to be used to include/exclude elements of the detector"
-version = "6.1.3"
+version = "6.1.4"
 readme = "docs/README.md"
 requires-python = ">=3.10"
 dependencies = [
@@ -21,7 +21,8 @@ include-package-data = true
 script-files = ["scripts/runconf_np02_env_setup.sh",
                 "scripts/runconf_np02_emu_env_setup.sh",
                 "scripts/runconf_np04_env_setup.sh",
-                "scripts/runconf_np04_emu_env_setup.sh"]
+                "scripts/runconf_np04_emu_env_setup.sh",
+                "scripts/runconf_vd_coldbox_env_setup.sh"]
 
 [tool.setuptools.packages.find]
 namespaces = true
