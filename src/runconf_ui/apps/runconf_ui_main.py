@@ -12,6 +12,7 @@ import click
 
 from runconf_ui import RepoManagerType, RunconfContext, RunconfUIApp, RunconfUIBackend
 from runconf_ui.utils import LogLevels
+from runconf_ui.api.grpc_service import run_until_quit
 
 
 class ApparatusDefaults(TypedDict):
@@ -171,6 +172,15 @@ def get_exit_msg(backend: RunconfUIBackend) -> str:
     show_default=True,
     help="Debug level (INFO, WARNING, DEBUG)",
 )
+@click.option(
+    "-g",
+    "--grpc-address",
+    default=None,
+    help="Talk to the backend over gRPC. Either host:port of a running "
+    "runconf-ui-server, or 'local' to start one in this process. "
+    "Omit to use the backend directly. Can be read from RUNCONF_GRPC_ADDRESS.",
+    envvar="RUNCONF_GRPC_ADDRESS",
+)
 def cli(
     apparatus: str,
     config_directory: str,
@@ -180,6 +190,7 @@ def cli(
     base_url: str,
     ops_url: str,
     log_level: LogLevels = "INFO",
+    grpc_address: str | None = None,
 ):
     """
     Launches the interactive configuration UI and saves selected configurations
@@ -195,6 +206,7 @@ def cli(
     :param base_url: URL for the BASE repository
     :param ops_url: URL for the operations repository
     :param log_level: Log level (INFO, WARNING, DEBUG)
+    :param grpc_address: host:port of a runconf-ui-server, 'local', or None
 
 
     """
@@ -230,9 +242,49 @@ def cli(
         log_level=log_level,
     )
 
-    backend = RunconfUIBackend(ctx)
-    RunconfUIApp(backend).run()
-    print(get_exit_msg(backend))
+    if grpc_address is None:
+        backend = RunconfUIBackend(ctx)
+        RunconfUIApp(backend).run()
+        print(get_exit_msg(backend))
+        return
+
+    _run_over_grpc(ctx, grpc_address)
+
+
+def _run_over_grpc(ctx: RunconfContext, address: str) -> None:
+    """Run the TUI against a RunconfService instead of an in-process backend."""
+    # Imported here so the plain TUI doesn't need grpc/runconfschema installed
+    from runconf_ui.api.grpc_client import RpcBackend
+    from runconf_ui.api.grpc_service import serve
+
+    server = None
+    if address == "local":
+        server, _, port = serve("127.0.0.1:0")
+        address = f"127.0.0.1:{port}"
+
+    backend = RpcBackend(ctx, address)
+    try:
+        RunconfUIApp(backend).run()  # type: ignore[arg-type]
+        print(get_exit_msg(backend))  # type: ignore[arg-type]
+    finally:
+        backend.close()
+        if server is not None:
+            server.stop(1).wait()
+
+
+@click.command()
+@click.option(
+    "-a",
+    "--address",
+    default="[::]:50051",
+    show_default=True,
+    help="Address to listen on.",
+    envvar="RUNCONF_GRPC_ADDRESS",
+)
+def server_cli(address: str):
+    """Run the runconf-ui gRPC backend until a client sends QUIT or CREATE_QUIT."""
+
+    run_until_quit(address)
 
 
 if __name__ == "__main__":
