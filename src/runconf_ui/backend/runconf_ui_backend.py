@@ -55,6 +55,7 @@ class RunconfContext:
     ops_url: str | None = None
     output_directory: Path = Path("shifter-configs")
     log_level: LogLevels = "INFO"
+    log_to_terminal: bool = False
 
 
 TreeViews = dict[str, Tree]
@@ -206,7 +207,7 @@ class RunconfUIBackend:
         )
 
         log_path = self.current_save_dir / f"{context.apparatus}_{creation_time}.log"
-        init_logger(log_path, context.log_level)
+        init_logger(log_path, context.log_level, context.log_to_terminal)
         self._save_path = (
             self.current_save_dir / f"{context.apparatus}_{creation_time}.data.xml"
         )

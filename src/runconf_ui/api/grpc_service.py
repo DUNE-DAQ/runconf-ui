@@ -274,6 +274,8 @@ class RunconfService(runconf_services_pb2_grpc.RunconfServiceServicer):
                 base_url=opt("base_url"),
                 ops_url=opt("ops_url"),
                 output_directory=Path(request.output_directory or "shifter-configs"),
+                log_to_terminal=True
+                
             )
             self._backend = RunconfUIBackend(ctx)
             dropdowns = self._dropdowns()
