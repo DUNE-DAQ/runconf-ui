@@ -19,16 +19,33 @@ from rich.tree import Tree
 from runconfschema import runconf_services_pb2_grpc
 from runconfschema.bootstrap_pb2 import BootRequest
 from runconfschema.common_pb2 import OutcomeFlag
-from runconfschema.configuration_access_pb2 import DropDownSelection, Open
-from runconfschema.display_pb2 import DisplayTree, DisplayViews, RequestViews
+from runconfschema.configuration_access_pb2 import (
+    ConfigurationInfo,
+    DropDownSelection,
+    Open,
+    RequestConfigurationInfo,
+)
 from runconfschema.main_controls_pb2 import RunconfCommand, RunconfCommandRequest
-from runconfschema.state_pb2 import NodeGroup, NodeStatusInfo, RequestSetNodeValue
+from runconfschema.state_pb2 import (
+    GroupNodes,
+    NodeGroup,
+    NodeStatusInfo,
+    RequestNodeGroups,
+    RequestSetNodeValue,
+)
 from runconfschema.state_pb2 import NodeStatus as NodeStatusRpc
 
 from runconf_ui.backend import RunconfContext
 from runconf_ui.exceptions import LoggerNotFound, _RunconfUIException
 from runconf_ui.state_tree import NodeStatus, State
 from runconf_ui.utils import get_logger, init_logger
+from runconf_ui.utils.rendering import (
+    ConfigInfo,
+    DrawItem,
+    format_info_text,
+    render_config_tree,
+    render_panel_tree,
+)
 
 _STATE_FROM_RPC = {
     NodeStatusRpc.INCLUDED: State.INCLUDED,
@@ -86,11 +103,31 @@ def node_from_rpc(info: NodeStatusInfo) -> tuple[str, str, NodeStatus]:
     return group_id, "__".join(rest), status
 
 
-def tree_from_rpc(tree: DisplayTree) -> Tree:
-    out = Tree(tree.label)
-    for child in tree.children:
-        out.children.append(tree_from_rpc(child))
-    return out
+def node_tree_from_rpc(info: NodeStatusInfo) -> DrawItem:
+    """Nested NodeStatusInfo (a system hierarchy) -> DrawItem tree for rendering."""
+    return DrawItem(
+        label=info.label,
+        state=_STATE_FROM_RPC[info.node_state],
+        children=[node_tree_from_rpc(c) for c in info.children],
+        source=info,
+    )
+
+
+def config_tree_from_rpc(nodes) -> list[DrawItem]:
+    """ConfigTreeNodes -> DrawItems (relationship entries have no state)."""
+    return [
+        DrawItem(
+            label=n.label,
+            state=_STATE_FROM_RPC[n.state] if n.HasField("state") else None,
+            children=config_tree_from_rpc(n.children),
+            source=n,
+        )
+        for n in nodes
+    ]
+
+
+def _optional(msg, field: str) -> str | None:
+    return getattr(msg, field) if msg.HasField(field) else None
 
 
 def _ensure_logger(context: RunconfContext) -> None:
@@ -133,7 +170,9 @@ class RpcBackend:
         self._dropdowns: dict[str, list[str]] = {}
         self._toggles: NodeMap = {}
         self._adjustables: NodeMap = {}
-        self._views: DisplayViews | None = None
+        # Full node state and configuration summary, refetched lazily after changes
+        self._groups: list[GroupNodes] | None = None
+        self._info: ConfigurationInfo | None = None
         self._session_name: str | None = None
         self._open = False
         self._final_save_path: Path | None = None
@@ -174,12 +213,23 @@ class RpcBackend:
         for key, content in update.items():
             self._dropdowns[key] = list(content.values)
 
-    def _load_trees(self, roots) -> None:
+    def _apply_groups(self, groups) -> None:
+        """Replace the cached node state with a full set of groups from the server."""
+        self._groups = list(groups)
         self._toggles, self._adjustables = {}, {}
-        for root in roots:
-            self._merge_nodes(root.children)
+        for group in self._groups:
+            target = (
+                self._adjustables
+                if group.node_group == NodeGroup.ADJUSTABLE
+                else self._toggles
+            )
+            nodes = target.setdefault(group.group_id, {})
+            for info in group.nodes:
+                _, node_id, status = node_from_rpc(info)
+                nodes[node_id] = status
 
     def _merge_nodes(self, infos) -> None:
+        """Apply changed nodes to the flat cache; hierarchies are refetched lazily."""
         for info in infos:
             target = (
                 self._adjustables
@@ -188,14 +238,25 @@ class RpcBackend:
             )
             group_id, node_id, status = node_from_rpc(info)
             target.setdefault(group_id, {})[node_id] = status
-        self._views = None
+        self._groups = None
+        self._info = None
 
-    def _get_views(self) -> DisplayViews:
-        if self._views is None:
-            self._views = self._call(self._stub.get_views, RequestViews())
-            if self._views.HasField("session_name"):
-                self._session_name = self._views.session_name
-        return self._views
+    def _get_groups(self) -> list[GroupNodes]:
+        if self._groups is None:
+            if not self._open:
+                return []
+            self._apply_groups(
+                self._call(self._stub.get_node_groups, RequestNodeGroups()).groups
+            )
+        return self._groups  # type: ignore[return-value]
+
+    def _get_info(self) -> ConfigurationInfo:
+        if self._info is None:
+            self._info = self._call(
+                self._stub.get_configuration_info, RequestConfigurationInfo()
+            )
+            self._session_name = _optional(self._info, "session_name")
+        return self._info
 
     def _set(self, group: NodeGroup, group_id: str, node_id: str, **value) -> None:
         request = RequestSetNodeValue(
@@ -244,10 +305,10 @@ class RpcBackend:
 
     def open_selected_session(self) -> None:
         reply = self._call(self._stub.open_configuration, Open())
-        self._load_trees(reply.config_trees)
+        self._apply_groups(reply.groups)
         self._open = True
-        self._session_name = None
-        self._get_views()  # caches session_name for after the server has gone
+        self._info = None
+        self._get_info()  # caches session_name for after the server has gone
 
     def save_config(self) -> None:
         """Save on the server. The service shuts down afterwards (CREATE_QUIT)."""
@@ -310,20 +371,39 @@ class RpcBackend:
         self._set(NodeGroup.ADJUSTABLE, group, node_id, **kw)
 
     # ------------------------------------------------------------------ #
-    # Display                                                              #
+    # Display: rendered locally from structured data                       #
     # ------------------------------------------------------------------ #
 
     def get_tree_views(self) -> dict[str, Tree]:
         return {
-            g.group_id: tree_from_rpc(g.tree) for g in self._get_views().group_trees
+            g.group_id: render_panel_tree(
+                g.view_panel, [node_tree_from_rpc(s) for s in g.systems]
+            )
+            for g in self._get_groups()
+            if g.HasField("view_panel")
         }
 
     def get_config_tree(self) -> Tree:
-        views = self._get_views()
-        if not views.HasField("config_tree"):
-            return Tree("No Config Loaded")
-        return tree_from_rpc(views.config_tree)
+        if not self._open:
+            return render_config_tree(None, [])
+        info = self._get_info()
+        return render_config_tree(
+            _optional(info, "session_name"), config_tree_from_rpc(info.config_tree)
+        )
+
+    @property
+    def config_info(self) -> ConfigInfo | None:
+        if not self._open:
+            return None
+        info = self._get_info()
+        return ConfigInfo(
+            daq_version=_optional(info, "daq_version"),
+            apparatus=info.apparatus,
+            config_file=_optional(info, "config_file"),
+            current_file=_optional(info, "current_file"),
+            session_name=_optional(info, "session_name"),
+        )
 
     @property
     def info_text(self) -> str:
-        return self._get_views().info_text
+        return format_info_text(self.config_info)

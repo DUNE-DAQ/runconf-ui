@@ -12,31 +12,34 @@ from typing import Any
 
 import grpc
 from google.protobuf.wrappers_pb2 import StringValue
-from rich.text import Text
-from rich.tree import Tree
 from runconfschema import runconf_services_pb2_grpc
 from runconfschema.bootstrap_pb2 import BootRequest
 from runconfschema.common_pb2 import Error, OutcomeFlag, Response
 from runconfschema.configuration_access_pb2 import (
+    ConfigTreeNode,
+    ConfigurationInfo,
     ConfigurationOutcome,
     DropDownContent,
     DropDownSelection,
     DropDownUpdate,
     Initialisation,
     Open,
+    RequestConfigurationInfo,
 )
-from runconfschema.display_pb2 import DisplayTree, DisplayViews, GroupTree, RequestViews
 from runconfschema.main_controls_pb2 import (
     RunconfCommand,
     RunconfCommandRequest,
     RunconfCommandResponse,
 )
 from runconfschema.state_pb2 import (
+    GroupNodes,
     NodeGroup,
     NodeStatusInfo,
+    RequestNodeGroups,
     RequestNodeStatus,
     RequestReset,
     RequestSetNodeValue,
+    ResponseNodeGroups,
     ResponseNodeStatus,
 )
 from runconfschema.state_pb2 import NodeStatus as NodeStatusRpc
@@ -45,6 +48,7 @@ from runconf_ui.backend import RunconfContext, RunconfUIBackend
 from runconf_ui.exceptions import _RunconfUIException
 from runconf_ui.repo_manager import RepoManagerType
 from runconf_ui.state_tree import NodeStatus, State
+from runconf_ui.utils.rendering import DrawItem
 
 # Exceptions we turn into a FAIL Response rather than a gRPC error.
 _EXPECTED_ERRORS = (_RunconfUIException, KeyError, ValueError, OSError)
@@ -94,16 +98,43 @@ def node_to_rpc(group_id: str, status: NodeStatus, node_group: int) -> NodeStatu
         node_path=[group_id, *(status.path or "").split("__")],
         tooltip=status.node.tooltip,
         node_group=node_group,
+        label=status.node.label,
     )
     set_typed_value(info, status.node.get())
     return info
 
 
-def tree_to_rpc(tree: Tree) -> DisplayTree:
-    """Rich Tree -> DisplayTree. Labels are kept as Rich markup."""
-    label = tree.label
-    label = label.markup if isinstance(label, Text) else str(label)
-    return DisplayTree(label=label, children=[tree_to_rpc(c) for c in tree.children])
+def system_tree_to_rpc(
+    item: DrawItem, group_id: str, node_group: int, index: dict
+) -> NodeStatusInfo:
+    """System hierarchy (DrawItems built from NodeStatus) -> nested NodeStatusInfo.
+    Only nodes present in the group's index get a node_path."""
+    status: NodeStatus = item.source
+    info = NodeStatusInfo(
+        node_state=_STATE_TO_RPC[item.state],
+        label=item.label,
+        tooltip=status.node.tooltip,
+        node_group=node_group,
+        children=[
+            system_tree_to_rpc(c, group_id, node_group, index) for c in item.children
+        ],
+    )
+    if status.path in index:
+        info.node_path.extend([group_id, *status.path.split("__")])
+    set_typed_value(info, status.node.get())
+    return info
+
+
+def config_items_to_rpc(items: list[DrawItem]) -> list[ConfigTreeNode]:
+    out = []
+    for item in items:
+        node = ConfigTreeNode(
+            label=item.label, children=config_items_to_rpc(item.children)
+        )
+        if item.state is not None:
+            node.state = _STATE_TO_RPC[item.state]
+        out.append(node)
+    return out
 
 
 def _split_path(path) -> tuple[str, str]:
@@ -175,17 +206,37 @@ class RunconfService(runconf_services_pb2_grpc.RunconfServiceServicer):
                     out[(str(node_group), *info.node_path)] = info
         return out
 
-    def _trees(self) -> list[NodeStatusInfo]:
-        """One root per (node group, config group) whose children are its nodes."""
-        roots: dict[tuple[int, str], NodeStatusInfo] = {}
-        for info in self._snapshot().values():
-            key = (info.node_group, info.node_path[0])
-            if key not in roots:
-                roots[key] = NodeStatusInfo(
-                    node_path=[info.node_path[0]], node_group=info.node_group
+    def _groups(self) -> list[GroupNodes]:
+        """Full node state: toggle groups, then adjustable groups."""
+        excludable, adjustable = self._backend.get_groups()
+        kinds = (
+            (NodeGroup.TOGGLES, excludable, self._backend.get_excludable_values()),
+            (NodeGroup.ADJUSTABLE, adjustable, self._backend.get_adjustable_values()),
+        )
+        out = []
+        for node_group, groups, flat in kinds:
+            for group in groups:
+                index = flat.get(group.id, {})
+                msg = GroupNodes(
+                    group_id=group.id,
+                    node_group=node_group,
+                    nodes=[
+                        node_to_rpc(group.id, s, node_group) for s in index.values()
+                    ],
+                    systems=[
+                        system_tree_to_rpc(
+                            self._backend.get_system_tree(system),
+                            group.id,
+                            node_group,
+                            index,
+                        )
+                        for system in group.systems
+                    ],
                 )
-            roots[key].children.append(info)
-        return list(roots.values())
+                if group.view_panel:
+                    msg.view_panel = group.view_panel
+                out.append(msg)
+        return out
 
     @staticmethod
     def _diff(before, after) -> list[NodeStatusInfo]:
@@ -274,7 +325,7 @@ class RunconfService(runconf_services_pb2_grpc.RunconfServiceServicer):
                 response=fail("Failed to open configuration", e)
             )
         return ConfigurationOutcome(
-            response=ok("Opened configuration"), config_trees=self._trees()
+            response=ok("Opened configuration"), groups=self._groups()
         )
 
     @requires_open
@@ -346,28 +397,36 @@ class RunconfService(runconf_services_pb2_grpc.RunconfServiceServicer):
             response=ok("Reset"), nodes=list(self._snapshot().values())
         )
 
-    @requires_boot
-    def get_views(
-        self, request: RequestViews, context: grpc.ServicerContext
-    ) -> DisplayViews:
-        b = self._backend
-        views = DisplayViews(
-            response=ok("Views"),
-            config_open=b.configuration is not None,
-            info_text=b.info_text,
-        )
+    @requires_open
+    def get_node_groups(
+        self, request: RequestNodeGroups, context: grpc.ServicerContext
+    ) -> ResponseNodeGroups:
         try:
-            if b.configuration is not None:
-                views.config_tree.CopyFrom(tree_to_rpc(b.get_config_tree()))
-            for group_id, tree in b.get_tree_views().items():
-                views.group_trees.append(
-                    GroupTree(group_id=group_id, tree=tree_to_rpc(tree))
-                )
-            if b.config_session is not None:
-                views.session_name = b.config_session.id
+            return ResponseNodeGroups(response=ok("Node groups"), groups=self._groups())
         except _EXPECTED_ERRORS as e:
-            return DisplayViews(response=fail("Failed to render views", e))
-        return views
+            return ResponseNodeGroups(response=fail("Failed to read node groups", e))
+
+    @requires_boot
+    def get_configuration_info(
+        self, request: RequestConfigurationInfo, context: grpc.ServicerContext
+    ) -> ConfigurationInfo:
+        b = self._backend
+        out = ConfigurationInfo(
+            response=ok("Configuration info"),
+            config_open=b.configuration is not None,
+            apparatus=b.apparatus,
+        )
+        info = b.config_info
+        if info is not None:
+            for name in ("daq_version", "config_file", "current_file", "session_name"):
+                value = getattr(info, name)
+                if value is not None:
+                    setattr(out, name, str(value))
+        try:
+            out.config_tree.extend(config_items_to_rpc(b.get_config_tree_items()))
+        except _EXPECTED_ERRORS as e:
+            return ConfigurationInfo(response=fail("Failed to read configuration", e))
+        return out
 
     def runconf_command(
         self, request: RunconfCommandRequest, context: grpc.ServicerContext
@@ -402,7 +461,7 @@ class RunconfService(runconf_services_pb2_grpc.RunconfServiceServicer):
             # RESET
             self._backend.open_selected_session()
             return _command_response(
-                cmd, ok("Reset"), ConfigurationOutcome(config_trees=self._trees())
+                cmd, ok("Reset"), ConfigurationOutcome(groups=self._groups())
             )
         except _EXPECTED_ERRORS as e:
             return _command_response(cmd, fail(f"{RunconfCommand.Name(cmd)} failed", e))
@@ -413,7 +472,7 @@ HELP_TEXT = """runconf-ui gRPC service
   2. select_dropdown    - pick 'version', then 'session'
   3. open_configuration - load the selected session, returns the node trees
   4. get/set_node_state - inspect or change toggles and adjustable values
-  5. get_views          - pre-rendered trees and info text for display
+  5. get_node_groups / get_configuration_info - full state for drawing
   runconf_command: QUIT (no save), CREATE_QUIT (save then quit), RESET, HELP
 """
 

@@ -14,7 +14,10 @@ from runconf_ui.exceptions import NodeNotFound, RunConfToolsRepoException
 from runconf_ui.repo_manager import RepoManagerInterface, RepoManagerType, repo_factory
 from runconf_ui.state_tree import NodeStatus, walk
 from runconf_ui.system_configuration import SystemConfigReader
-from runconf_ui.system_configuration.config_reader import AssembledConfig
+from runconf_ui.system_configuration.config_reader import (
+    AssembledConfig,
+    AssembledGroup,
+)
 from runconf_ui.utils import (
     LogLevels,
     copy_and_open_config,
@@ -22,7 +25,13 @@ from runconf_ui.utils import (
     init_logger,
     setup_working_directory,
 )
-from runconf_ui.utils.rich_utils import ConfigTreeRenderer, draw_node_tree
+from runconf_ui.utils.rendering import (
+    ConfigInfo,
+    DrawItem,
+    format_info_text,
+    render_panel_tree,
+)
+from runconf_ui.utils.rich_utils import ConfigTreeRenderer, node_tree_items
 
 
 @dataclass
@@ -214,7 +223,8 @@ class RunconfUIBackend:
         self.configuration: Configuration | None = None
         self.config_tree_renderer = None
         self.config_session = None
-        self.info_text = "No Config Selected"
+        self.config_info: ConfigInfo | None = None
+        self.info_text = format_info_text(None)
 
         self._logger.debug("Backend instantiated")
 
@@ -409,6 +419,26 @@ class RunconfUIBackend:
         """
         return self._tree_views
 
+    def get_groups(self) -> tuple[list[AssembledGroup], list[AssembledGroup]]:
+        """The assembled (excludable, adjustable) groups; empty until a config is open.
+
+        Each group carries its systems (``system.root``) and its index (``group.nodes``).
+        """
+        if self._assembled is None:
+            return [], []
+        return list(self._assembled.excludable), list(self._assembled.adjustable)
+
+    @staticmethod
+    def get_system_tree(system) -> DrawItem:
+        """One system's node hierarchy as plain DrawItem data."""
+        return node_tree_items(system.root.label, system.root)
+
+    def get_config_tree_items(self) -> list[DrawItem]:
+        """Entries below the session in the configuration tree, as plain data."""
+        if self.config_tree_renderer is None:
+            return []
+        return self.config_tree_renderer.config_tree_items()
+
     def get_config_tree(self) -> Tree:
         """Get the current configuration tree representation.
 
@@ -428,13 +458,16 @@ class RunconfUIBackend:
 
         :param init_config_path: Path to the initial configuration file
         """
-        self.info_text = (
-            f"      [bold green]DAQ Version[/bold green]:  [deep_pink4]{self.get_current_version()}[/deep_pink4]\n"
-            f"      [bold green]Apparatus[/bold green]:  [deep_pink4]{self.apparatus}[/deep_pink4]\n"
-            f"      [bold green]DAQ Config[/bold green]: [deep_pink4]{init_config_path}[/deep_pink4]\n"
-            f"      [bold green]Current Config File[/bold green]:  [deep_pink4]{self.configuration.active_database if self.configuration else None}[/deep_pink4]\n"
-            f"      [bold green]Session in Config[/bold green]:  [deep_pink4]{self.config_session.id if self.config_session else None}[/deep_pink4]\n"
+        self.config_info = ConfigInfo(
+            daq_version=self.get_current_version(),
+            apparatus=self.apparatus,
+            config_file=str(init_config_path),
+            current_file=self.configuration.active_database
+            if self.configuration
+            else None,
+            session_name=self.config_session.id if self.config_session else None,
         )
+        self.info_text = format_info_text(self.config_info)
 
     def _resolve(self, group: str, node_id: str, collection: str = "all") -> NodeStatus:
         """Resolve a configuration node from the specified collection.
@@ -510,10 +543,10 @@ class RunconfUIBackend:
         :returns: Rich Tree object representing the group structure
         :rtype: Tree
         """
-        tree = Tree(group.view_panel)
-        for system in group.systems:
-            tree.children.append(draw_node_tree(system.root.label, system.root))
-        return tree
+        return render_panel_tree(
+            group.view_panel,
+            [RunconfUIBackend.get_system_tree(s) for s in group.systems],
+        )
 
     def print_trees_to_file(self, text_file: TextIO) -> None:
         """Print all tree views to a text file.
