@@ -13,6 +13,8 @@ import click
 from runconf_ui import RepoManagerType, RunconfContext, RunconfUIApp, RunconfUIBackend
 from runconf_ui.utils import LogLevels
 from runconf_ui.api.grpc_service import run_until_quit
+from runconf_ui.api.grpc_client import RpcBackend
+from runconf_ui.api.grpc_service import serve
 
 
 class ApparatusDefaults(TypedDict):
@@ -254,8 +256,6 @@ def cli(
 def _run_over_grpc(ctx: RunconfContext, address: str) -> None:
     """Run the TUI against a RunconfService instead of an in-process backend."""
     # Imported here so the plain TUI doesn't need grpc/runconfschema installed
-    from runconf_ui.api.grpc_client import RpcBackend
-    from runconf_ui.api.grpc_service import serve
 
     server = None
     if address == "local":
@@ -285,7 +285,6 @@ def server_cli(address: str):
     """Run the runconf-ui gRPC backend until a client sends QUIT or CREATE_QUIT."""
 
     run_until_quit(address)
-
 
 if __name__ == "__main__":
     # FOR TESTING ONLY
