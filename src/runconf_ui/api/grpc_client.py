@@ -17,13 +17,13 @@ import grpc
 from google.protobuf.wrappers_pb2 import StringValue
 from rich.tree import Tree
 from runconfschema import runconf_services_pb2_grpc
-from runconfschema.bootstrap_pb2 import BootRequest
 from runconfschema.common_pb2 import OutcomeFlag
 from runconfschema.configuration_access_pb2 import (
     ConfigurationInfo,
     DropDownSelection,
     Open,
     RequestConfigurationInfo,
+    RequestInitialisation,
 )
 from runconfschema.main_controls_pb2 import RunconfCommand, RunconfCommandRequest
 from runconfschema.state_pb2 import (
@@ -35,10 +35,9 @@ from runconfschema.state_pb2 import (
 )
 from runconfschema.state_pb2 import NodeStatus as NodeStatusRpc
 
-from runconf_ui.backend import RunconfContext
 from runconf_ui.exceptions import LoggerNotFound, _RunconfUIException
 from runconf_ui.state_tree import NodeStatus, State
-from runconf_ui.utils import get_logger, init_logger
+from runconf_ui.utils import LogLevels, get_logger, init_logger
 from runconf_ui.utils.rendering import (
     ConfigInfo,
     DrawItem,
@@ -130,15 +129,14 @@ def _optional(msg, field: str) -> str | None:
     return getattr(msg, field) if msg.HasField(field) else None
 
 
-def _ensure_logger(context: RunconfContext) -> None:
+def _ensure_logger(log_file: Path, log_level: LogLevels) -> None:
     """The TUI logs via the global runconf-ui logger, which RunconfUIBackend normally
     creates. When the server runs in another process nobody has, so make a
     frontend log. (In-process servers have already created one during boot.)"""
     try:
         get_logger()
     except LoggerNotFound:
-        log_file = context.output_directory / f"{context.apparatus}_frontend.log"
-        init_logger(log_file, context.log_level)
+        init_logger(log_file, log_level)
 
 
 def _session_from_wire(s: str) -> str | Path:
@@ -151,22 +149,25 @@ class RpcBackend:
 
     def __init__(
         self,
-        context: RunconfContext,
         address: str,
         timeout: float | None = None,
-        frontend_endpoint: str = "",
+        log_dir: Path = Path("shifter-configs"),
+        log_level: LogLevels = "INFO",
     ):
-        """Connect to the service at ``address`` and boot it with ``context``.
+        """Connect to an already-booted service at ``address``.
+
+        The server owns the context (apparatus, repositories, output directory);
+        the frontend only needs to know where to find it.
 
         :param timeout: per-call deadline in seconds (None = wait forever, since
             opening a config or listing remote sessions can be slow)
+        :param log_dir: where to write the frontend log if this process has none yet
         """
         self._channel = grpc.insecure_channel(address)
         self._stub = runconf_services_pb2_grpc.RunconfServiceStub(self._channel)
         self._timeout = timeout
         self._lock = threading.Lock()  # TUI workers call in from threads
 
-        self.apparatus = context.apparatus
         self._dropdowns: dict[str, list[str]] = {}
         self._toggles: NodeMap = {}
         self._adjustables: NodeMap = {}
@@ -178,20 +179,9 @@ class RpcBackend:
         self._final_save_path: Path | None = None
         self._closed = False
 
-        boot = BootRequest(
-            apparatus=context.apparatus,
-            manager_type=context.repo_type.value,
-            conf_directory=str(context.conf_directory),
-            output_directory=str(context.output_directory),
-        )
-        boot.frontend_endpoint.url = frontend_endpoint
-        for field in ("config_file_name", "base_url", "ops_url"):
-            value = getattr(context, field)
-            if value:
-                setattr(boot, field, value)
-
-        init = self._call(self._stub.boot, boot)
-        _ensure_logger(context)
+        init = self._call(self._stub.initialise, RequestInitialisation())
+        self.apparatus = init.apparatus
+        _ensure_logger(log_dir / f"{init.apparatus}_frontend.log", log_level)
         self._current_version = init.daq_version or None
         self._default_version = init.structure.get("version") or None
         self._update_dropdowns(init.dropdowns)

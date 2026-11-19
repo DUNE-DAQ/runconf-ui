@@ -118,99 +118,82 @@ def get_exit_msg(backend: RunconfUIBackend) -> str:
     return os.getenv("EHN1_RC_LAUNCH", run_cmd)
 
 
-@click.command()
-@click.option(
-    "-c",
-    "--config-directory",
-    type=click.Path(),
-    help="Path to your local config directory. This should contain your configs. Can be read from the CONFIG_DIR environment variable.",
-    envvar="CONFIG_DIR",
-    default=Path("base-configs"),
-)
-@click.option(
-    "-a",
-    "--apparatus",
-    required=True,
-    help="DAQ apparatus to use (e.g. NP02, NP04, NP02_EMU). Can be read from the APPARATUS environment variable.",
-    envvar="APPARATUS",
-)
-@click.option(
-    "-o",
-    "--output-directory",
-    type=click.Path(),
-    default=Path("shifter-configs"),
-    show_default=True,
-    help="Directory to save run configs to.",
-)
-@click.option(
-    "-t",
-    "--repo-type",
-    type=click.Choice(RepoManagerType.values()),
-    default="remote",
-    help="Type of repository to use (local or remote). Emulation is selected via --apparatus, not here.",
-)
-@click.option(
-    "-f",
-    "--config-file-name",
-    help="Config file to find in the ops repo (e.g. <X>.data.xml). Can be read from the SESSION_FILE environment variable.",
-    envvar="SESSION_FILE",
-)
-@click.option(
-    "-b",
-    "--base-url",
-    help="URL for the BASE repository. Can be read from the BASE_URL environment variable.",
-    envvar="BASE_URL",
-)
-@click.option(
-    "-r",
-    "--ops-url",
-    help="URL for the operations repository. Can be read from the OPERATION_URL environment variable.",
-    envvar="OPERATION_URL",
-)
-@click.option(
-    "-d",
-    "--log-level",
-    default="INFO",
-    show_default=True,
-    help="Debug level (INFO, WARNING, DEBUG)",
-)
-@click.option(
-    "-g",
-    "--grpc-address",
-    default=None,
-    help="Talk to the backend over gRPC. Either host:port of a running "
-    "runconf-ui-server, or 'local' to start one in this process. "
-    "Omit to use the backend directly. Can be read from RUNCONF_GRPC_ADDRESS.",
-    envvar="RUNCONF_GRPC_ADDRESS",
-)
-def cli(
-    apparatus: str,
+def context_options(func):
+    """Click options describing the RunconfContext (shared by the TUI and the server)."""
+    options = [
+        click.option(
+            "-c",
+            "--config-directory",
+            type=click.Path(),
+            help="Path to your local config directory. This should contain your configs. Can be read from the CONFIG_DIR environment variable.",
+            envvar="CONFIG_DIR",
+            default=Path("base-configs"),
+        ),
+        click.option(
+            "-a",
+            "--apparatus",
+            help="DAQ apparatus to use (e.g. NP02, NP04, NP02_EMU). Can be read from the APPARATUS environment variable.",
+            envvar="APPARATUS",
+        ),
+        click.option(
+            "-o",
+            "--output-directory",
+            type=click.Path(),
+            default=Path("shifter-configs"),
+            show_default=True,
+            help="Directory to save run configs to.",
+        ),
+        click.option(
+            "-t",
+            "--repo-type",
+            type=click.Choice(RepoManagerType.values()),
+            default="remote",
+            help="Type of repository to use (local or remote). Emulation is selected via --apparatus, not here.",
+        ),
+        click.option(
+            "-f",
+            "--config-file-name",
+            help="Config file to find in the ops repo (e.g. <X>.data.xml). Can be read from the SESSION_FILE environment variable.",
+            envvar="SESSION_FILE",
+        ),
+        click.option(
+            "-b",
+            "--base-url",
+            help="URL for the BASE repository. Can be read from the BASE_URL environment variable.",
+            envvar="BASE_URL",
+        ),
+        click.option(
+            "-r",
+            "--ops-url",
+            help="URL for the operations repository. Can be read from the OPERATION_URL environment variable.",
+            envvar="OPERATION_URL",
+        ),
+        click.option(
+            "-d",
+            "--log-level",
+            default="INFO",
+            show_default=True,
+            help="Debug level (INFO, WARNING, DEBUG)",
+        ),
+    ]
+    for option in reversed(options):
+        func = option(func)
+    return func
+
+
+def build_context(
+    apparatus: str | None,
     config_directory: str,
     output_directory: str,
     repo_type: str,
-    config_file_name: str,
-    base_url: str,
-    ops_url: str,
+    config_file_name: str | None,
+    base_url: str | None,
+    ops_url: str | None,
     log_level: LogLevels = "INFO",
-    grpc_address: str | None = None,
-):
-    """
-    Launches the interactive configuration UI and saves selected configurations
-    to the specified output directory. Invoked with the runconf-shifter-ui command.
+) -> RunconfContext:
+    """Turn the context options into a RunconfContext, filling apparatus defaults.
 
-    \f
-
-    :param apparatus: DAQ apparatus name (e.g., NP02, NP04)
-    :param config_directory: Path to configuration directory
-    :param output_directory: Directory to save run configs to
-    :param repo_type: Type of repository to use (local or remote)
-    :param config_file_name: Config file(s) to find in the ops repo
-    :param base_url: URL for the BASE repository
-    :param ops_url: URL for the operations repository
-    :param log_level: Log level (INFO, WARNING, DEBUG)
-    :param grpc_address: host:port of a runconf-ui-server, 'local', or None
-
-
+    :raises click.UsageError: apparatus missing, or remote URLs only partly given
     """
     if apparatus is None:
         raise click.UsageError(
@@ -218,9 +201,9 @@ def cli(
         )
 
     repo_type_enum = RepoManagerType.from_string(repo_type)
-    
+
     # When we JUST provide the apparatus
-    if repo_type_enum != RepoManagerType.LOCAL :
+    if repo_type_enum != RepoManagerType.LOCAL:
         apparatus_vars = (base_url, ops_url, config_file_name)
         if all(v is None for v in apparatus_vars):
             apparatus_defaults = get_apparatus_defaults(apparatus)
@@ -233,7 +216,7 @@ def cli(
                 "Specify all of --base-url, --ops-url, and --config-file-name together, or omit all three to use apparatus defaults."
             )
 
-    ctx = RunconfContext(
+    return RunconfContext(
         apparatus=apparatus,
         conf_directory=Path(config_directory),
         repo_type=repo_type_enum,
@@ -244,25 +227,55 @@ def cli(
         log_level=log_level,
     )
 
+
+@click.command()
+@context_options
+@click.option(
+    "-g",
+    "--grpc-address",
+    default=None,
+    help="Talk to the backend over gRPC. Either host:port of a running "
+    "runconf-ui-server (which owns the context, so the options above are ignored), "
+    "or 'local' to start one in this process. Omit to use the backend directly. "
+    "Can be read from RUNCONF_GRPC_ADDRESS.",
+    envvar="RUNCONF_GRPC_ADDRESS",
+)
+def cli(grpc_address: str | None = None, **context_args):
+    """
+    Launches the interactive configuration UI and saves selected configurations
+    to the specified output directory. Invoked with the runconf-shifter-ui command.
+
+    \f
+
+    :param grpc_address: host:port of a runconf-ui-server, 'local', or None
+    :param context_args: the context options (see ``context_options``)
+    """
     if grpc_address is None:
-        backend = RunconfUIBackend(ctx)
+        backend = RunconfUIBackend(build_context(**context_args))
         RunconfUIApp(backend).run()
         print(get_exit_msg(backend))
         return
 
-    _run_over_grpc(ctx, grpc_address)
+    _run_over_grpc(grpc_address, **context_args)
 
 
-def _run_over_grpc(ctx: RunconfContext, address: str) -> None:
+def _run_over_grpc(address: str, **context_args) -> None:
     """Run the TUI against a RunconfService instead of an in-process backend."""
     # Imported here so the plain TUI doesn't need grpc/runconfschema installed
 
     server = None
     if address == "local":
-        server, _, port = serve("127.0.0.1:0")
+        # The server shares this process with the TUI: keep its logs off the terminal
+        server, _, port = serve(
+            "127.0.0.1:0", build_context(**context_args), log_to_terminal=False
+        )
         address = f"127.0.0.1:{port}"
 
-    backend = RpcBackend(ctx, address)
+    backend = RpcBackend(
+        address,
+        log_dir=Path(context_args["output_directory"]),
+        log_level=context_args["log_level"],
+    )
     try:
         RunconfUIApp(backend).run()  # type: ignore[arg-type]
         print(get_exit_msg(backend))  # type: ignore[arg-type]
@@ -274,17 +287,29 @@ def _run_over_grpc(ctx: RunconfContext, address: str) -> None:
 
 @click.command()
 @click.option(
-    "-a",
-    "--address",
+    "-g",
+    "--grpc-address",
     default="[::]:50051",
     show_default=True,
-    help="Address to listen on.",
+    help="Address to listen on. Can be read from RUNCONF_GRPC_ADDRESS.",
     envvar="RUNCONF_GRPC_ADDRESS",
 )
-def server_cli(address: str):
-    """Run the runconf-ui gRPC backend until a client sends QUIT or CREATE_QUIT."""
+@context_options
+def server_cli(grpc_address: str, **context_args):
+    """Run the runconf-ui gRPC backend until a client sends QUIT or CREATE_QUIT.
 
-    run_until_quit(address)
+    With --apparatus (or APPARATUS) the server boots itself with that context.
+    Without it, the server waits for a single boot RPC from whoever launched it.
+    Frontends then connect with ``runconf-shifter-ui --grpc-address <host:port>``.
+    """
+    context = None
+    if context_args["apparatus"] is not None:
+        context = build_context(**context_args)
+        print(f"Booted runconf-ui server for {context.apparatus} on {grpc_address}", flush=True)
+    else:
+        print(f"runconf-ui server on {grpc_address}: waiting for a boot request", flush=True)
+
+    run_until_quit(grpc_address, context)
 
 if __name__ == "__main__":
     # FOR TESTING ONLY
