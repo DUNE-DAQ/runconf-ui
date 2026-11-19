@@ -4,6 +4,7 @@ gRPC service exposing RunconfUIBackend via the runconfschema protobufs.
 
 from __future__ import annotations
 
+import dataclasses
 import functools
 import threading
 from concurrent import futures
@@ -25,6 +26,7 @@ from runconfschema.configuration_access_pb2 import (
     Initialisation,
     Open,
     RequestConfigurationInfo,
+    RequestInitialisation,
 )
 from runconfschema.main_controls_pb2 import (
     RunconfCommand,
@@ -137,6 +139,38 @@ def config_items_to_rpc(items: list[DrawItem]) -> list[ConfigTreeNode]:
     return out
 
 
+def context_from_boot_request(request: BootRequest) -> RunconfContext:
+    """BootRequest -> RunconfContext (unset optional fields become None)."""
+
+    def opt(field: str) -> str | None:
+        return getattr(request, field) if request.HasField(field) else None
+
+    return RunconfContext(
+        apparatus=request.apparatus,
+        conf_directory=Path(request.conf_directory),
+        repo_type=RepoManagerType.from_string(request.manager_type),
+        config_file_name=opt("config_file_name"),
+        base_url=opt("base_url"),
+        ops_url=opt("ops_url"),
+        output_directory=Path(request.output_directory or "shifter-configs"),
+    )
+
+
+def boot_request_from_context(ctx: RunconfContext) -> BootRequest:
+    """RunconfContext -> BootRequest, for launchers that boot a server remotely."""
+    request = BootRequest(
+        apparatus=ctx.apparatus,
+        manager_type=ctx.repo_type.value,
+        conf_directory=str(ctx.conf_directory),
+        output_directory=str(ctx.output_directory),
+    )
+    for field in ("config_file_name", "base_url", "ops_url"):
+        value = getattr(ctx, field)
+        if value:
+            setattr(request, field, value)
+    return request
+
+
 def _split_path(path) -> tuple[str, str]:
     """[group_id, parent, label] -> ("group_id", "parent__label") as the backend expects."""
     if len(path) < 2:
@@ -181,7 +215,26 @@ def requires_open(method):
 
 
 class RunconfService(runconf_services_pb2_grpc.RunconfServiceServicer):
-    def __init__(self) -> None:
+    """One backend, booted once with a context shared by every frontend.
+
+    Boot either by passing ``context`` here (the server's own CLI does this) or
+    with a single ``boot`` RPC from whoever launches the server. Frontends then
+    connect with ``initialise``.
+
+    For now we run one server per user. Nothing below is per-frontend state, so
+    several frontends could already share a server; they would see (and change)
+    the same selections and configuration.
+    """
+
+    def __init__(
+        self, context: RunconfContext | None = None, log_to_terminal: bool = True
+    ) -> None:
+        """
+        :param context: boot straight away with this context (None = wait for boot RPC)
+        :param log_to_terminal: also log to the terminal. Turn off when the server
+            shares a process with the TUI, or the logs draw over it.
+        """
+        self._log_to_terminal = log_to_terminal
         self._backend: RunconfUIBackend | None = None
         self._frontend_endpoint: str | None = None
         # Dropdown values go over the wire as strings, but the backend may hand out
@@ -189,8 +242,24 @@ class RunconfService(runconf_services_pb2_grpc.RunconfServiceServicer):
         self._choices: dict[str, dict[str, Any]] = {}
         # Set by QUIT / CREATE_QUIT; run_until_quit() waits on it and stops the server.
         self.quit_requested = threading.Event()
+        if context is not None:
+            self._boot_backend(context)
 
     # ---- helpers ----
+
+    def _boot_backend(self, ctx: RunconfContext) -> None:
+        ctx = dataclasses.replace(ctx, log_to_terminal=self._log_to_terminal)
+        self._backend = RunconfUIBackend(ctx)
+        self._dropdowns()
+
+    def _initialisation(self) -> Initialisation:
+        return Initialisation(
+            daq_version=str(self._backend.get_current_version() or ""),
+            apparatus=self._backend.apparatus,
+            # structure holds the initial value for each dropdown
+            structure={"version": str(self._backend.get_default_version() or "")},
+            dropdowns=self._dropdowns(),
+        )
 
     def _snapshot(self) -> dict[PathKey, NodeStatusInfo]:
         """Flat view of every toggle/adjustable node, keyed by full path."""
@@ -262,35 +331,29 @@ class RunconfService(runconf_services_pb2_grpc.RunconfServiceServicer):
     def boot(
         self, request: BootRequest, context: grpc.ServicerContext
     ) -> Initialisation:
-        def opt(field: str) -> str | None:
-            return getattr(request, field) if request.HasField(field) else None
-
-        try:
-            ctx = RunconfContext(
-                apparatus=request.apparatus,
-                conf_directory=Path(request.conf_directory),
-                repo_type=RepoManagerType.from_string(request.manager_type),
-                config_file_name=opt("config_file_name"),
-                base_url=opt("base_url"),
-                ops_url=opt("ops_url"),
-                output_directory=Path(request.output_directory or "shifter-configs"),
-                log_to_terminal=True
-                
+        if self._backend is not None:
+            context.abort(
+                grpc.StatusCode.ALREADY_EXISTS,
+                f"Server already booted for {self._backend.apparatus}; "
+                "frontends should call initialise",
             )
-            self._backend = RunconfUIBackend(ctx)
-            dropdowns = self._dropdowns()
-            default_version = self._backend.get_default_version()
+        try:
+            self._boot_backend(context_from_boot_request(request))
+            init = self._initialisation()
         except _EXPECTED_ERRORS as e:
+            self._backend = None
             context.abort(grpc.StatusCode.INVALID_ARGUMENT, f"Boot failed: {e}")
-
         self._frontend_endpoint = request.frontend_endpoint.url
-        return Initialisation(
-            daq_version=str(self._backend.get_current_version() or ""),
-            apparatus=self._backend.apparatus,
-            # structure holds the initial value for each dropdown
-            structure={"version": str(default_version or "")},
-            dropdowns=dropdowns,
-        )
+        return init
+
+    @requires_boot
+    def initialise(
+        self, request: RequestInitialisation, context: grpc.ServicerContext
+    ) -> Initialisation:
+        try:
+            return self._initialisation()
+        except _EXPECTED_ERRORS as e:
+            context.abort(grpc.StatusCode.INTERNAL, f"Cannot read server state: {e}")
 
     @requires_boot
     def select_dropdown(
@@ -470,7 +533,8 @@ class RunconfService(runconf_services_pb2_grpc.RunconfServiceServicer):
 
 
 HELP_TEXT = """runconf-ui gRPC service
-  1. boot               - initialise the backend, returns dropdown contents
+  0. boot               - (once, by the launcher) boot the backend with the shared context
+  1. initialise         - (each frontend) current dropdown contents and versions
   2. select_dropdown    - pick 'version', then 'session'
   3. open_configuration - load the selected session, returns the node trees
   4. get/set_node_state - inspect or change toggles and adjustable values
@@ -486,21 +550,30 @@ def _command_response(cmd, response: Response, details=None) -> RunconfCommandRe
     return out
 
 
-def serve(address: str = "[::]:50051") -> tuple[grpc.Server, RunconfService, int]:
+def serve(
+    address: str = "[::]:50051",
+    context: RunconfContext | None = None,
+    log_to_terminal: bool = True,
+) -> tuple[grpc.Server, RunconfService, int]:
     """Start the service. One worker because the backend is not thread-safe.
 
+    :param context: boot with this context straight away (None = wait for a boot RPC)
     :returns: (server, service, bound port). Pass port 0 in ``address`` to pick a free one.
     """
+    service = RunconfService(context, log_to_terminal=log_to_terminal)
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=1))
-    service = RunconfService()
     runconf_services_pb2_grpc.add_RunconfServiceServicer_to_server(service, server)
     port = server.add_insecure_port(address)
     server.start()
     return server, service, port
 
 
-def run_until_quit(address: str = "[::]:50051", grace: float = 1.0) -> None:
+def run_until_quit(
+    address: str = "[::]:50051",
+    context: RunconfContext | None = None,
+    grace: float = 1.0,
+) -> None:
     """Serve until a QUIT/CREATE_QUIT command arrives, then shut down."""
-    server, service, _ = serve(address)
+    server, service, _ = serve(address, context)
     service.quit_requested.wait()
     server.stop(grace).wait()
