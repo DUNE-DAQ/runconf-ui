@@ -13,7 +13,7 @@ _LOGGER_NAME = "runconf_ui_logger"
 _LOGGER = None
 
 
-def init_logger(log_file: Path, log_level: LogLevels = "INFO"):
+def init_logger(log_file: Path, log_level: LogLevels = "INFO", use_stream_handlers: bool=False):
     global _LOGGER
     if _LOGGER is not None:
         return
@@ -24,7 +24,7 @@ def init_logger(log_file: Path, log_level: LogLevels = "INFO"):
         log_level=log_level,
         use_parent_handlers=False,  # was True
         rich_handler=False,
-        stream_handlers=False,
+        stream_handlers=use_stream_handlers,
         file_handler_path=str(log_file),
     )
     _LOGGER.propagate = False  # belt-and-braces
