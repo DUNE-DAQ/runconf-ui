@@ -17,6 +17,7 @@ from .state_messages import (
     DaqSessionSelectedMessage,
     DaqVersionSelectedMessage,
     NodeToggledMessage,
+    SharedStateChangedMessage,
     StateChangeMessage,
     ValueChangedMessage,
 )
@@ -39,6 +40,7 @@ __all__ = [
     "QuitMessage",
     "RefreshMessage",
     "SaveConfigMessage",
+    "SharedStateChangedMessage",
     # State change messages
     "StateChangeMessage",
     "ValueChangedMessage",

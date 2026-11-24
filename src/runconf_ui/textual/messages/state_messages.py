@@ -98,3 +98,16 @@ class DaqSessionSelectedMessage(StateChangeMessage):
         """
         self.daq_session = daq_session
         super().__init__()  # type: ignore
+
+
+class SharedStateChangedMessage(StateChangeMessage):
+    """Message emitted when the shared server state changed, by this frontend or
+    another one connected to the same server. Posted from the backend's stream
+    thread; the backend's cache already holds the new state.
+
+    :param change: what changed (a grpc_client.StateChange: kind, revision, message)
+    """
+
+    def __init__(self, change) -> None:
+        super().__init__()
+        self.change = change

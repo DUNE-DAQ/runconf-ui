@@ -66,6 +66,12 @@ class RunconfUIApp(App):
         """
         super().__init__(*args, **kwargs)
         self.backend = backend
+        # Backends shared with other frontends (RpcBackend) report every change
+        # to the shared state; the in-process backend does not.
+        self._shared = callable(getattr(backend, "add_listener", None))
+        self._shown_revision = -1  # shared-state revision the panels show
+        self._loaded_snapshot: int | None = None  # snapshot the panels were built from
+        self._quitting = False
         get_logger().debug("Initialised application")
 
     def on_mount(self) -> None:
@@ -79,6 +85,13 @@ class RunconfUIApp(App):
         self.switch_mode("main")
         self.push_screen(LoadingScreen("Initialising..."))
         self.call_after_refresh(self._init_file_selects)
+        if self._shared:
+            # Called on the backend's stream thread; post_message is thread-safe
+            self.backend.add_listener(
+                lambda change: self.post_message(
+                    runconf_msg.SharedStateChangedMessage(change)
+                )
+            )
         get_logger().debug("Mounted")
 
     # ------------------------------------------------------------------ #
@@ -164,6 +177,7 @@ class RunconfUIApp(App):
 
     @on(runconf_msg.QuitAndSaveMessage)
     def handle_quit_save(self):
+        self._quitting = True
         try:
             self.backend.save_config()
         except Exception as e:
@@ -172,6 +186,7 @@ class RunconfUIApp(App):
 
     @on(runconf_msg.QuitAndScrapMessage)
     def handle_quit_scrap(self):
+        self._quitting = True
         self.exit()
 
     @on(runconf_msg.CancelQuitMessage)
@@ -207,6 +222,48 @@ class RunconfUIApp(App):
         self._refresh_included_info(load_fresh=False)
 
     # ------------------------------------------------------------------ #
+    # Changes from other frontends sharing the server                      #
+    # ------------------------------------------------------------------ #
+
+    @on(runconf_msg.SharedStateChangedMessage)
+    def handle_shared_state_changed(
+        self, event: runconf_msg.SharedStateChangedMessage
+    ) -> None:
+        change = event.change
+        get_logger().debug(f"Shared state changed: {change}")
+        if change.kind == "shutdown":
+            if self._quitting:
+                return  # our own quit; already exiting
+            self.exit(message=f"The runconf-ui server shut down: {change.message}")
+            return
+        if change.kind == "disconnected":
+            self.handle_exception_popup(
+                RuntimeError(f"Lost the connection to the server: {change.message}")
+            )
+            return
+        if change.kind == "snapshot":
+            self._sync_file_selects()
+        # Our own changes were drawn when they returned; skip what is shown already
+        if change.revision > self._shown_revision and (
+            self.backend.configuration is not None
+        ):
+            self._refresh_included_info(load_fresh=False)
+
+    def _sync_file_selects(self) -> None:
+        """Show the server's dropdown selection (made by any frontend)."""
+        for file_select in self._main_screen().query(FileSelect):
+            file_select.show_selection(
+                self.backend.get_daq_versions(),
+                self.backend.get_current_version(),
+                self.backend.get_sessions(),
+                self.backend.get_current_session(),
+            )
+
+    def _main_screen(self):
+        """The base screen holding the panels, even while a popup is on top."""
+        return self.screen_stack[0] if self.screen_stack else self.screen
+
+    # ------------------------------------------------------------------ #
     # Shared UI refresh                                                    #
     # ------------------------------------------------------------------ #
 
@@ -214,16 +271,25 @@ class RunconfUIApp(App):
 
         get_logger().debug("Refreshing included info")
 
+        if self._shared:
+            # Read the revision first: the cache only moves forward from here
+            self._shown_revision = self.backend.revision
+            snapshot = self.backend.snapshot_revision
+            # A new snapshot (open/reset) may bring different nodes: rebuild panels
+            load_fresh = load_fresh or snapshot != self._loaded_snapshot
+            self._loaded_snapshot = snapshot
+
         dis_info = self.backend.get_excludable_values()
         adj_info = self.backend.get_adjustable_values()
         tree_views = self.backend.get_tree_views()
         config_tree = self.backend.get_config_tree()
 
+        screen = self._main_screen()
         pairs: NodeIterator = [
-            (self.query(IncludeExcludeTabs), dis_info),
-            (self.query(AdjustableAttributeTabs), adj_info),
-            (self.query(RichTreeTabbed), tree_views),
-            (self.query(ConfigTreePanel), config_tree),
+            (screen.query(IncludeExcludeTabs), dis_info),
+            (screen.query(AdjustableAttributeTabs), adj_info),
+            (screen.query(RichTreeTabbed), tree_views),
+            (screen.query(ConfigTreePanel), config_tree),
         ]
         for widgets, data in pairs:
             if not widgets:
@@ -233,7 +299,7 @@ class RunconfUIApp(App):
                 widget.load(data) if load_fresh else widget.update(data)
                 get_logger().debug("Loading %s to %s", data, widget.id)
 
-        opts_panel = self.query(OptionsPanel)
+        opts_panel = screen.query(OptionsPanel)
         if opts_panel:
             get_logger().debug("Loading options")
             if self.backend.configuration is None:
@@ -243,13 +309,18 @@ class RunconfUIApp(App):
                 opts_panel.first().enable_all()
                 get_logger().debug("Enabling Opts")
 
-        file_select = self.query(FileSelect)
+        file_select = screen.query(FileSelect)
         if file_select:
             file_select.first().update_text(self.backend.info_text)
 
         self.refresh()
 
     def _init_file_selects(self) -> None:
+        if self._shared and self.backend.get_current_version() is not None:
+            # Joining a server another frontend already set up: show its state
+            # rather than picking defaults, which would reset its selection
+            self._join_shared_state()
+            return
         try:
             versions = self.backend.get_daq_versions()
             get_logger().debug(f"Initialising file selects with {versions}")
@@ -263,4 +334,15 @@ class RunconfUIApp(App):
             get_logger().exception(e)
             if isinstance(self.screen, LoadingScreen):
                 self.pop_screen()
+            self.handle_exception_popup(e)
+
+    def _join_shared_state(self) -> None:
+        if isinstance(self.screen, LoadingScreen):
+            self.pop_screen()
+        try:
+            self._sync_file_selects()
+            if self.backend.configuration is not None:
+                self._refresh_included_info(load_fresh=True)
+        except Exception as e:
+            get_logger().exception(e)
             self.handle_exception_popup(e)

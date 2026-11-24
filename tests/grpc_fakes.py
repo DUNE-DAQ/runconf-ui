@@ -137,6 +137,9 @@ class FakeBackend(RunconfUIBackend):
         # Local repos hand out Paths; make sure those survive the round trip.
         return [Path(CONFIG_FILE)] if self.version else []
 
+    def get_current_session(self):
+        return self.session
+
     def set_daq_version(self, version):
         self.version = version
 

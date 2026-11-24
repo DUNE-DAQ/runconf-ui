@@ -135,6 +135,49 @@ class FileSelect(Static):
         if len(opts) == 1:
             session_select.value = opts[0][1]
 
+    def show_selection(
+        self,
+        versions: list[str],
+        version: str | None,
+        sessions: list[str] | list[Path],
+        session: str | Path | None,
+    ) -> None:
+        """Show a selection made elsewhere (e.g. by another frontend sharing the
+        server). Unlike a user's pick, this does not post selection messages, so
+        it neither echoes back to the server nor auto-opens a configuration.
+
+        :param versions: available DAQ versions
+        :param version: the selected version, or None
+        :param sessions: available sessions for that version
+        :param session: the selected session, or None to keep this frontend's
+            pending pick (if the version and session list are unchanged)
+        """
+        version_select = self.query_one(VersionSelect)
+        session_select = self.query_one(SessionSelect)
+        version_opts = [(str(v), v) for v in versions]
+        session_opts = [(s.name if isinstance(s, Path) else s, s) for s in sessions]
+
+        with self.app.prevent(Select.Changed):
+            if version_select._options[1:] != version_opts:
+                version_select.set_options(version_opts)
+            version_changed = version_select.value != (version or Select.NULL)
+            if version is None or version not in version_select._legal_values:
+                version_select.clear()
+            elif version_changed:
+                version_select.value = version
+
+            if session_select._options[1:] != session_opts:
+                session_select.set_options(session_opts)  # type: ignore[arg-type]
+            if session is not None and session in session_select._legal_values:
+                session_select.value = session
+            elif session is not None or version_changed:
+                session_select.clear()
+
+        session_select.disabled = not self._select_enabled(version_select)
+        self.query_one("#open_file_button", Button).disabled = not self._select_enabled(
+            session_select
+        )
+
     def enable_session_select(self):
         """Enable or disable the session selector based on version selection.
 

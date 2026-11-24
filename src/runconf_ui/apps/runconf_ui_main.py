@@ -12,9 +12,8 @@ import click
 
 from runconf_ui import RepoManagerType, RunconfContext, RunconfUIApp, RunconfUIBackend
 from runconf_ui.utils import LogLevels
-from runconf_ui.api.grpc_service import run_until_quit
-from runconf_ui.api.grpc_client import RpcBackend
-from runconf_ui.api.grpc_service import serve
+from runconf_ui.api.grpc_client import RpcBackend, RpcBackendError
+from runconf_ui.api.grpc_service import run_until_quit, serve
 
 
 class ApparatusDefaults(TypedDict):
@@ -271,11 +270,17 @@ def _run_over_grpc(address: str, **context_args) -> None:
         )
         address = f"127.0.0.1:{port}"
 
-    backend = RpcBackend(
-        address,
-        log_dir=Path(context_args["output_directory"]),
-        log_level=context_args["log_level"],
-    )
+    try:
+        backend = RpcBackend(
+            address,
+            log_dir=Path(context_args["output_directory"]),
+            log_level=context_args["log_level"],
+        )
+    except RpcBackendError as e:
+        if server is not None:
+            server.stop(0)
+        raise click.ClickException(str(e)) from e
+
     try:
         RunconfUIApp(backend).run()  # type: ignore[arg-type]
         print(get_exit_msg(backend))  # type: ignore[arg-type]
@@ -294,22 +299,37 @@ def _run_over_grpc(address: str, **context_args) -> None:
     help="Address to listen on. Can be read from RUNCONF_GRPC_ADDRESS.",
     envvar="RUNCONF_GRPC_ADDRESS",
 )
+@click.option(
+    "--wait-for-boot",
+    is_flag=True,
+    help="Don't boot from the options above; wait for a single boot RPC from a "
+    "launcher instead.",
+)
 @context_options
-def server_cli(grpc_address: str, **context_args):
+def server_cli(grpc_address: str, wait_for_boot: bool, **context_args):
     """Run the runconf-ui gRPC backend until a client sends QUIT or CREATE_QUIT.
 
-    With --apparatus (or APPARATUS) the server boots itself with that context.
-    Without it, the server waits for a single boot RPC from whoever launched it.
+    Any number of frontends can connect; they share the one backend and each
+    sees the changes the others make. A frontend closing does not stop the server.
+
+    The server boots itself with the context given by the options (--apparatus,
+    or APPARATUS, is required). With --wait-for-boot it instead waits for a
+    single boot RPC from whoever launched it.
     Frontends then connect with ``runconf-shifter-ui --grpc-address <host:port>``.
     """
-    context = None
-    if context_args["apparatus"] is not None:
-        context = build_context(**context_args)
-        print(f"Booted runconf-ui server for {context.apparatus} on {grpc_address}", flush=True)
-    else:
-        print(f"runconf-ui server on {grpc_address}: waiting for a boot request", flush=True)
+    context = None if wait_for_boot else build_context(**context_args)
 
-    run_until_quit(grpc_address, context)
+    # Announce only once bound and listening, so a frontend that connects as
+    # soon as it sees the message finds the server.
+    def announce(_port: int) -> None:
+        if context is None:
+            print(f"runconf-ui server on {grpc_address}: waiting for a boot request", flush=True)
+        else:
+            print(f"Booted runconf-ui server for {context.apparatus} on {grpc_address}", flush=True)
+
+    # The server runs on an asyncio event loop until a frontend quits it
+    run_until_quit(grpc_address, context, grace=1.0, on_started=announce)
+
 
 if __name__ == "__main__":
     # FOR TESTING ONLY

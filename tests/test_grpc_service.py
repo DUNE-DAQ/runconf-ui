@@ -23,7 +23,7 @@ from runconfschema.common_pb2 import OutcomeFlag  # noqa: E402
 
 from runconf_ui import RepoManagerType, RunconfContext  # noqa: E402
 from runconf_ui.api import grpc_service  # noqa: E402
-from runconf_ui.api.grpc_client import RpcBackend  # noqa: E402
+from runconf_ui.api.grpc_client import RpcBackend, RpcBackendError  # noqa: E402
 
 APA = ["det", "crp4", "apa1"]
 THRESH = ["triggers", "crp4", "thresh"]
@@ -301,8 +301,7 @@ def test_frontends_share_the_server_context(self_booted, tmp_path):
         assert [str(s) for s in late.get_sessions()] == [CONFIG_FILE]
     finally:
         for c in clients:
-            c._closed = True  # don't send QUIT: that would stop the shared server
-            c.close()
+            c.close()  # disconnects only: the shared server keeps running
 
 
 def test_client_rendering_matches_backend(self_booted, tmp_path):
@@ -344,3 +343,33 @@ def test_client_rendering_matches_backend(self_booted, tmp_path):
         assert "excluded" in _text(client.get_tree_views()["det"])
     finally:
         client.close()
+
+
+# ---------------------------------------------------------------------------
+# Connecting and starting
+# ---------------------------------------------------------------------------
+
+
+def test_client_explains_unbooted_server(served, tmp_path):
+    _, address = served  # no context, no boot RPC
+    with pytest.raises(RpcBackendError, match="not been booted"):
+        RpcBackend(address, timeout=10, log_dir=tmp_path)
+
+
+def test_client_explains_missing_server(tmp_path):
+    server, _, port = grpc_service.serve("127.0.0.1:0")
+    server.stop(0).wait()  # nothing listening on this port any more
+    with pytest.raises(RpcBackendError, match="No runconf-ui server is reachable"):
+        RpcBackend(f"127.0.0.1:{port}", timeout=10, log_dir=tmp_path)
+
+
+def test_server_cli_requires_an_apparatus():
+    from click.testing import CliRunner
+
+    from runconf_ui.apps.runconf_ui_main import server_cli
+
+    result = CliRunner().invoke(
+        server_cli, ["-g", "127.0.0.1:0"], env={"APPARATUS": None}
+    )
+    assert result.exit_code == 2  # click usage error, not a server waiting forever
+    assert "Apparatus must be specified" in result.output
